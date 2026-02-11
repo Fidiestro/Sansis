@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanse Capital - Fondo de Inversión</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo">SANSE <span>CAPITAL</span></div>
+            <nav>
+                <a href="#inicio">Inicio</a>
+                <a href="#servicios">Servicios</a>
+                <a href="#contacto">Contacto</a>
+            </nav>
+            <button class="cta-btn" onclick="openConstructionModal()">Comenzar</button>
+            <button class="menu-toggle">☰</button>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Tu Futuro Financiero Empieza Aquí</h1>
+        <p>Inversiones inteligentes con rendimientos del 13.5% al 42% anual. Únete a nuestra comunidad de inversionistas exitosos.</p>
+        <button class="cta-btn" onclick="openConstructionModal()">Comenzar Ahora</button>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="stat-card">
+            <div class="stat-value">20+</div>
+            <div class="stat-label">Clientes Activos</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">13.5-42%</div>
+            <div class="stat-label">Rentabilidad Anual</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">100%</div>
+            <div class="stat-label">Transparencia</div>
+        </div>
+    </section>
+
+    <!-- Investment Model Section -->
+    <section class="investment-model">
+        <h2>Nuestro Modelo de Inversión</h2>
+        <p class="section-subtitle">Así generamos rentabilidad para nuestros inversionistas</p>
+        <div class="model-container">
+            <div class="model-intro">
+                <p>En Sanse Capital, implementamos una estrategia diversificada que nos permite ofrecer rendimientos competitivos mientras gestionamos el riesgo de manera profesional.</p>
+            </div>
+            
+            <div class="revenue-streams">
+                <div class="stream-card primary-stream">
+                    <div class="stream-icon">💰</div>
+                    <h3>Préstamos con Intereses</h3>
+                    <p>Otorgamos préstamos a miembros (4% mensual) y no socios (5-6% mensual). Del total de intereses recaudados, <strong>50% se distribuye entre los inversionistas</strong> y el <strong>50% restante financia la operación</strong> y expansión del fondo.</p>
+                    <div class="stream-stats">
+                        <span>📊 Principal fuente de ingresos</span>
+                    </div>
+                </div>
+
+                <div class="stream-card">
+                    <div class="stream-icon">₿</div>
+                    <h3>Inversión en Criptoactivos</h3>
+                    <p>Nuestra fortaleza está en la <strong>inversión estratégica en cripto</strong>. Operamos principalmente con Bitcoin y Ethereum, aprovechando momentos específicos del mercado para maximizar retornos.</p>
+                    <div class="stream-stats">
+                        <span>🎯 Alto potencial de rentabilidad</span>
+                    </div>
+                </div>
+
+                <div class="stream-card">
+                    <div class="stream-icon">🔄</div>
+                    <h3>DeFi (Finanzas Descentralizadas)</h3>
+                    <p>Participamos en protocolos DeFi seleccionados cuidadosamente, generando rendimientos adicionales a través de staking, yield farming y liquidez.</p>
+                    <div class="stream-stats">
+                        <span>💎 Innovación financiera</span>
+                    </div>
+                </div>
+
+                <div class="stream-card">
+                    <div class="stream-icon">🏗️</div>
+                    <h3>Financiación de Proyectos</h3>
+                    <p>Estamos incursionando en el financiamiento de proyectos empresariales, una nueva línea de negocio que diversifica nuestras fuentes de ingreso.</p>
+                    <div class="stream-stats">
+                        <span>🚀 En expansión</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="distribution-info">
+                <h3>Distribución de Ganancias</h3>
+                <div class="distribution-chart">
+                    <div class="distribution-item">
+                        <div class="percentage">50%</div>
+                        <p>Para inversionistas</p>
+                    </div>
+                    <div class="distribution-divider">+</div>
+                    <div class="distribution-item">
+                        <div class="percentage">50%</div>
+                        <p>Operación y crecimiento</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works">
+        <h2>¿Cómo Funciona?</h2>
+        <p class="section-subtitle">Empieza a invertir en 3 simples pasos</p>
+        <div class="steps-container">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Solicita Entrar</h3>
+                    <p>Contacta con nosotros vía WhatsApp para iniciar tu proceso. Te guiaremos en todo el proceso de vinculación.</p>
+                    <a href="https://wa.me/573194552890?text=Quiero%20entrar%20a%20SanseCapital" target="_blank" class="whatsapp-btn">
+                        📱 Enviar WhatsApp
+                    </a>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Deposita tu Capital</h3>
+                    <p>Realiza tu depósito inicial y elige la modalidad que mejor se adapte a tus necesidades financieras.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Elige tu Opción</h3>
+                    <p><strong>Ahorro Cadena:</strong> Ahorra de forma disciplinada con compromisos mensuales.<br>
+                    <strong>Préstamo:</strong> Accede a financiamiento con tasas del 4-6% mensual.<br>
+                    <strong>Inversión:</strong> Haz crecer tu capital con rentabilidad del 13.5% al 42% anual.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Investment Calculator Section -->
+    <section class="calculator-section">
+        <h2>Calcula tus Ganancias</h2>
+        <p class="section-subtitle">Descubre cuánto puedes ganar con tu inversión</p>
+        <div class="calculator-card">
+            <div class="calculator-input-group">
+                <label for="investAmount">Monto a Invertir (COP)</label>
+                <input type="number" id="investAmount" value="1000000" min="100000" step="100000">
+            </div>
+            <div class="calculator-input-group">
+                <label for="investPeriod">Período (meses)</label>
+                <input type="number" id="investPeriod" value="12" min="1" max="60">
+            </div>
+            <div class="calculator-input-group">
+                <label for="investRate">Tipo de Inversión</label>
+                <select id="investRate">
+                    <option value="13.5">Inversión Conservadora - 13.5% anual</option>
+                    <option value="22">Inversión Moderada - 22% anual</option>
+                    <option value="42">Inversión Agresiva - 42% anual</option>
+                </select>
+            </div>
+            <button class="cta-btn" onclick="calculateReturn()" style="width: 100%; margin-top: 1rem;">Calcular</button>
+            <div class="calculator-result" id="calculatorResult">
+                <div class="result-item">
+                    <span>Ganancias estimadas:</span>
+                    <strong id="totalEarnings">$0</strong>
+                </div>
+                <div class="result-item">
+                    <span>Total a recibir:</span>
+                    <strong id="totalAmount">$0</strong>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 1rem; text-align: center;">
+                    * La rentabilidad puede variar según el tipo de inversión y condiciones del mercado.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="servicios">
+        <h2>¿Por Qué Sanse Capital?</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">💰</div>
+                <h3>Inversiones Seguras</h3>
+                <p>Tu dinero trabajando para ti con seguridad y transparencia absoluta en cada operación.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📈</div>
+                <h3>Rendimientos Atractivos</h3>
+                <p>Obtén ganancias competitivas con rentabilidad del 13.5% al 42% anual según tu perfil de riesgo.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Atención Personalizada</h3>
+                <p>Soporte directo vía WhatsApp para resolver tus dudas en cualquier momento.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Transparencia Total</h3>
+                <p>Términos y condiciones claros. Sabes exactamente cómo funciona tu inversión.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💼</div>
+                <h3>Diversificación</h3>
+                <p>Múltiples fuentes de ingreso: préstamos, cripto, DeFi y financiación de proyectos.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>Flexibilidad</h3>
+                <p>Elige entre Ahorro Cadena, Préstamos o Inversión según tus necesidades.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <h2>Lo que Dicen Nuestros Clientes</h2>
+        <p class="section-subtitle">Historias reales de inversionistas satisfechos</p>
+        <div class="testimonial-grid">
+            <div class="testimonial-card">
+                <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
+                <p class="testimonial-text">"Llevo más de 6 meses invirtiendo con Sanse Capital y las ganancias han sido consistentes. La plataforma es súper fácil de usar y el equipo siempre está disponible."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">SR</div>
+                    <div class="author-info">
+                        <strong>Santiago R.</strong>
+                        <span>Cliente desde 2024</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
+                <p class="testimonial-text">"Lo mejor es la transparencia. Puedo ver cada movimiento de mi inversión en tiempo real. Me siento segura y he recomendado Sanse Capital a toda mi familia."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">LC</div>
+                    <div class="author-info">
+                        <strong>Lina C.</strong>
+                        <span>Cliente desde 2024</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
+                <p class="testimonial-text">"Excelente servicio. Las tasas son competitivas y el proceso de retiro es rápido. Definitivamente la mejor decisión financiera que he tomado este año."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">JM</div>
+                    <div class="author-info">
+                        <strong>Jaime M.</strong>
+                        <span>Cliente desde 2025</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <h2>Preguntas Frecuentes</h2>
+        <p class="section-subtitle">Todo lo que necesitas saber sobre tu inversión</p>
+        <div class="faq-container">
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>¿Cuándo puedo retirar mi dinero?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Los retiros de capital se realizan únicamente al cierre de cada mes calendario. No se permiten retiros parciales o totales fuera de estas fechas bajo ninguna circunstancia.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>¿Existe un límite de retiro mensual?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>El monto máximo permitido para retiro mensual sin previo aviso es de hasta $2.000.000 COP. Si deseas retirar un monto superior, deberás notificarlo con un mínimo de 30 días calendario de anticipación.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>¿Qué es la modalidad de Ahorro Cadena?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Los participantes en la cadena de ahorro se comprometen a cumplir puntualmente con los aportes establecidos. En caso de incumplimiento, el capital acumulado será utilizado como colateral y se aplicará una sanción fija de $5.000 COP, descontada automáticamente del saldo.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>¿Cómo funcionan los préstamos?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Todo participante en modalidad de préstamo deberá realizar un abono obligatorio a capital cada mes, además del pago de intereses. Las tasas son: 4% mensual para socios del fondo y 6% mensual para no socios. En caso de incumplimiento, se podrá utilizar el capital ahorrado como garantía.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>¿La rentabilidad está garantizada?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>El participante entiende que el interés generado por el fondo no es fijo ni garantizado. La rentabilidad puede variar entre 13.5% y 42% anual (casos excepcionales) debido a que los recursos se invierten en diferentes instrumentos y tipos de inversión.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>¿Cómo empiezo a invertir con Sanse Capital?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Para iniciar, contáctanos vía WhatsApp al 319 455 2890 con el mensaje "Quiero entrar a SanseCapital". Te guiaremos en el proceso de vinculación y firma de términos y condiciones.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section" id="contacto">
+        <h2>Empieza a Invertir Hoy</h2>
+        <p>Únete a nuestros inversionistas y comienza a hacer crecer tu patrimonio.</p>
+        <a href="https://wa.me/573194552890?text=Quiero%20entrar%20a%20SanseCapital" target="_blank" class="btn-white">Contactar por WhatsApp</a>
+    </section>
+
+    <!-- Construction Modal -->
+    <div id="constructionModal" class="construction-modal">
+        <div class="construction-content">
+            <button class="construction-close" onclick="closeConstructionModal()">×</button>
+            <div class="construction-icon">🚧</div>
+            <h2>¡Estamos Construyendo!</h2>
+            <p>Nuestra plataforma de registro online estará disponible muy pronto. Mientras tanto, puedes iniciar tu inversión contactándonos directamente por WhatsApp.</p>
+            <a href="https://wa.me/573194552890?text=Quiero%20entrar%20a%20SanseCapital" target="_blank" class="construction-whatsapp">
+                📱 Contactar por WhatsApp
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Sanse Capital. Todos los derechos reservados.</p>
+        <p>Inversiones inteligentes para un futuro próspero</p>
+        <p style="margin-top: 1rem; font-size: 0.9rem;">
+            📱 WhatsApp: <a href="https://wa.me/573194552890" target="_blank" style="color: var(--gold); text-decoration: none;">319 455 2890</a>
+        </p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">
+            <a href="terminos.html" style="color: var(--white); text-decoration: underline;">Términos y Condiciones</a>
+        </p>
+    </footer>
+
+    <script src="/index.js" >
+        
+    </script>
+</body>
+</html>
