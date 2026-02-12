@@ -1089,7 +1089,7 @@
             <div>
                 <div class="section-label">Transparencia en Vivo</div>
                 <h2 style="font-family:'Syne',sans-serif;font-size:clamp(1.6rem,3vw,2.4rem);font-weight:800;letter-spacing:-0.02em;margin-bottom:8px;">Activos del Fondo</h2>
-                <p style="color:var(--muted);font-size:0.9rem;max-width:420px;">Balance en tiempo real de nuestra wallet ETH. Verificable públicamente en Arbiscan (Arbitrum).</p>
+                <p style="color:var(--muted);font-size:0.9rem;max-width:420px;">Balance en tiempo real de nuestra wallet ETH en Arbitrum. Verificable públicamente.</p>
             </div>
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                 <div class="wallet-address-badge" onclick="copyAddress()" title="Copiar dirección">
@@ -1106,60 +1106,24 @@
             </div>
         </div>
 
-        <!-- Main balance card -->
-        <div class="wallet-main-grid">
-            <div class="wallet-balance-card">
-                <div>
-                    <div class="wallet-balance-label">Balance Total ETH</div>
-                    <div class="wallet-balance-eth" id="balanceEth">
-                        <span class="wallet-skeleton" style="display:inline-block;width:160px;height:2.5rem;">&nbsp;</span>
-                    </div>
-                    <div class="wallet-balance-usd" id="balanceUsd" style="margin-top:10px;">
-                        <span class="wallet-skeleton" style="display:inline-block;width:120px;height:1.2rem;">&nbsp;</span>
-                    </div>
-                    <div class="updated-label" id="lastUpdated" style="margin-top:10px;">—</div>
+        <!-- Balance card — solo lo que funciona -->
+        <div class="wallet-balance-card" style="border-radius:var(--r);">
+            <div>
+                <div class="wallet-balance-label">Balance Total ETH</div>
+                <div class="wallet-balance-eth" id="balanceEth">
+                    <span class="wallet-skeleton" style="display:inline-block;width:180px;height:2.8rem;">&nbsp;</span>
                 </div>
-                <div class="wallet-eth-price">
-                    <div class="label">Precio ETH</div>
-                    <div class="price" id="ethPrice">—</div>
-                    <div class="change" id="ethChange">—</div>
+                <div class="wallet-balance-usd" id="balanceUsd" style="margin-top:12px;">
+                    <span class="wallet-skeleton" style="display:inline-block;width:130px;height:1.3rem;">&nbsp;</span>
                 </div>
+                <div class="updated-label" id="lastUpdated" style="margin-top:10px;"></div>
             </div>
-
-            <div class="wallet-stat-card">
-                <div class="ws-label">Total Transacciones</div>
-                <div class="ws-value" id="txCount">—</div>
-                <div class="ws-sub">Transacciones en la red</div>
-            </div>
-
-            <div class="wallet-stat-card">
-                <div class="ws-label">Valor de Mercado</div>
-                <div class="ws-value" id="marketCap">—</div>
-                <div class="ws-sub">ETH × Precio actual</div>
-            </div>
-        </div>
-
-        <!-- Error placeholder -->
-        <div id="walletError" style="display:none;" class="wallet-error">
-            ⚠️ No se pudo cargar la información. Verifica tu conexión o intenta más tarde. Los datos pueden verse en <a href="https://arbiscan.io/address/0x25E6997CD1037E03662996E63875C99704f8F38D" target="_blank" style="color:var(--gold)">Arbiscan</a>.
-        </div>
-
-        <!-- Tokens section -->
-        <div id="tokensSection" style="margin-top:32px;display:none;">
-            <h3 style="font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:700;margin-bottom:16px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Tokens ERC-20</h3>
-            <div class="tokens-grid" id="tokensGrid"></div>
-        </div>
-
-        <!-- Transactions -->
-        <div style="margin-top:36px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-                <h3 style="font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Últimas Transacciones</h3>
-                <a href="https://arbiscan.io/address/0x25E6997CD1037E03662996E63875C99704f8F38D" target="_blank" class="etherscan-link" style="font-size:0.75rem;">Ver todas ↗</a>
-            </div>
-            <div class="txn-list" id="txnList">
-                <div class="txn-item"><div class="wallet-skeleton" style="width:36px;height:36px;border-radius:50%;">&nbsp;</div><div><div class="wallet-skeleton" style="width:200px;height:0.9rem;margin-bottom:6px;">&nbsp;</div><div class="wallet-skeleton" style="width:120px;height:0.7rem;">&nbsp;</div></div><div class="wallet-skeleton" style="width:80px;height:0.9rem;">&nbsp;</div></div>
-                <div class="txn-item"><div class="wallet-skeleton" style="width:36px;height:36px;border-radius:50%;">&nbsp;</div><div><div class="wallet-skeleton" style="width:180px;height:0.9rem;margin-bottom:6px;">&nbsp;</div><div class="wallet-skeleton" style="width:100px;height:0.7rem;">&nbsp;</div></div><div class="wallet-skeleton" style="width:80px;height:0.9rem;">&nbsp;</div></div>
-                <div class="txn-item"><div class="wallet-skeleton" style="width:36px;height:36px;border-radius:50%;">&nbsp;</div><div><div class="wallet-skeleton" style="width:220px;height:0.9rem;margin-bottom:6px;">&nbsp;</div><div class="wallet-skeleton" style="width:90px;height:0.7rem;">&nbsp;</div></div><div class="wallet-skeleton" style="width:80px;height:0.9rem;">&nbsp;</div></div>
+            <div class="wallet-eth-price">
+                <div class="label">Precio ETH</div>
+                <div class="price" id="ethPrice">
+                    <span class="wallet-skeleton" style="display:inline-block;width:90px;height:1.4rem;">&nbsp;</span>
+                </div>
+                <div class="change" id="ethChange"></div>
             </div>
         </div>
     </div>
@@ -1596,23 +1560,10 @@
     }
 
     // ================================================================
-    // WALLET TRACKER — Arbitrum One  (multi-source with fallbacks)
-    // ================================================================
-    const WALLET       = '0x25E6997CD1037E03662996E63875C99704f8F38D';
-    const ARB_EXPLORER = 'https://arbiscan.io';
+    // WALLET TRACKER — simplified, only confirmed-working APIs
+    // Balance: arb1.arbitrum.io RPC  |  Price: Binance + CoinGecko fallback
+    const WALLET = '0x25E6997CD1037E03662996E63875C99704f8F38D';
 
-    // 5 public Arbitrum RPCs tried in order until one responds
-    const RPCS = [
-        'https://arb1.arbitrum.io/rpc',
-        'https://arbitrum-one.public.blastapi.io',
-        'https://rpc.ankr.com/arbitrum',
-        'https://arbitrum.llamarpc.com',
-        'https://endpoints.omniatech.io/v1/arbitrum/one/public'
-    ];
-
-    let ethPriceUSD = 0;
-
-    // ── helpers ──────────────────────────────────────────────────────
     function copyAddress() {
         navigator.clipboard.writeText(WALLET).then(() => {
             const el = document.getElementById('addrShort');
@@ -1621,254 +1572,75 @@
         });
     }
 
-    const fmtUSD = v => new Intl.NumberFormat('en-US', {
-        style: 'currency', currency: 'USD',
-        minimumFractionDigits: 2, maximumFractionDigits: 2
-    }).format(v);
-
-    const fmtETH = v => parseFloat(v).toLocaleString('en-US', {
-        minimumFractionDigits: 4, maximumFractionDigits: 6
-    });
-
-    function timeAgo(ts) {
-        const sec = isNaN(ts)
-            ? Math.floor((Date.now() - new Date(ts).getTime()) / 1000)
-            : Math.floor(Date.now() / 1000) - parseInt(ts);
-        if (sec < 60)    return 'hace ' + sec + 's';
-        if (sec < 3600)  return 'hace ' + Math.floor(sec / 60) + 'm';
-        if (sec < 86400) return 'hace ' + Math.floor(sec / 3600) + 'h';
-        return 'hace ' + Math.floor(sec / 86400) + 'd';
-    }
-
-    const shortAddr = a => a ? a.slice(0, 6) + '...' + a.slice(-4) : '—';
-
-    // ── ETH price: Binance first (no CORS issues), CoinGecko fallback ─
-    async function fetchEthPrice() {
-        // Source 1: Binance — no key, no CORS
-        try {
-            const r = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT');
-            const d = await r.json();
-            ethPriceUSD       = parseFloat(d.lastPrice);
-            const changePct   = parseFloat(d.priceChangePercent);
-            const sign        = changePct >= 0 ? '+' : '';
-            document.getElementById('ethPrice').textContent    = fmtUSD(ethPriceUSD);
-            const chEl = document.getElementById('ethChange');
-            chEl.textContent = sign + changePct.toFixed(2) + '% (24h)';
-            chEl.className   = 'change ' + (changePct >= 0 ? 'up' : 'down');
-            return ethPriceUSD;
-        } catch(e1) {}
-
-        // Source 2: CoinGecko
-        try {
-            const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd&include_24hr_change=true');
-            const d = await r.json();
-            ethPriceUSD      = d.ethereum.usd;
-            const change     = d.ethereum.usd_24h_change;
-            const sign       = change >= 0 ? '+' : '';
-            document.getElementById('ethPrice').textContent   = fmtUSD(ethPriceUSD);
-            const chEl = document.getElementById('ethChange');
-            chEl.textContent = sign + change.toFixed(2) + '% (24h)';
-            chEl.className   = 'change ' + (change >= 0 ? 'up' : 'down');
-            return ethPriceUSD;
-        } catch(e2) {}
-
-        // Source 3: Kraken public API
-        try {
-            const r = await fetch('https://api.kraken.com/0/public/Ticker?pair=ETHUSD');
-            const d = await r.json();
-            ethPriceUSD = parseFloat(d.result.XETHZUSD?.c?.[0] || 0);
-            document.getElementById('ethPrice').textContent = fmtUSD(ethPriceUSD);
-            document.getElementById('ethChange').textContent = '';
-            return ethPriceUSD;
-        } catch(e3) {
-            document.getElementById('ethPrice').textContent = 'N/D';
-            return 0;
-        }
-    }
-
-    // ── ETH balance: try each RPC until one works ────────────────────
-    async function fetchBalance() {
-        const body = JSON.stringify({
-            jsonrpc: '2.0', method: 'eth_getBalance',
-            params: [WALLET, 'latest'], id: 1
-        });
-        for (const rpc of RPCS) {
-            try {
-                const r = await fetch(rpc, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body,
-                    signal: AbortSignal.timeout(5000) // 5s timeout per RPC
-                });
-                const d = await r.json();
-                if (d.result) return parseInt(d.result, 16) / 1e18;
-            } catch(e) { /* try next */ }
-        }
-        throw new Error('All RPCs failed');
-    }
-
-    // ── Transactions: Blockscout first, Arbiscan public as fallback ───
-    async function fetchTxList() {
-        // Source 1: Blockscout Arbitrum (no key, CORS enabled)
-        try {
-            const r = await fetch(
-                `https://arbitrum.blockscout.com/api/v2/addresses/${WALLET}/transactions?filter=to%20%7C%20from&limit=10`,
-                { signal: AbortSignal.timeout(6000) }
-            );
-            const d = await r.json();
-            if (Array.isArray(d.items) && d.items.length > 0) {
-                return d.items.map(tx => ({
-                    hash:      tx.hash,
-                    from:      tx.from?.hash || tx.from,
-                    to:        tx.to?.hash   || tx.to,
-                    value:     tx.value,
-                    timestamp: tx.timestamp,
-                    source:    'blockscout'
-                }));
-            }
-        } catch(e) {}
-
-        // Source 2: Arbiscan public (no key needed for basic queries)
-        try {
-            const r = await fetch(
-                `https://api.arbiscan.io/api?module=account&action=txlist&address=${WALLET}&startblock=0&endblock=99999999&page=1&offset=10&sort=desc`,
-                { signal: AbortSignal.timeout(6000) }
-            );
-            const d = await r.json();
-            if (Array.isArray(d.result)) return d.result.map(tx => ({
-                hash:      tx.hash,
-                from:      tx.from,
-                to:        tx.to,
-                value:     tx.value,
-                timestamp: tx.timeStamp,
-                source:    'arbiscan'
-            }));
-        } catch(e) {}
-
-        return [];
-    }
-
-    // ── Token balances: Blockscout ────────────────────────────────────
-    async function fetchTokenBalances() {
-        try {
-            const r = await fetch(
-                `https://arbitrum.blockscout.com/api/v2/addresses/${WALLET}/token-balances`,
-                { signal: AbortSignal.timeout(6000) }
-            );
-            const d = await r.json();
-            return Array.isArray(d) ? d : [];
-        } catch(e) { return []; }
-    }
-
-    // ── Render transactions ───────────────────────────────────────────
-    function renderTransactions(txs) {
-        const el = document.getElementById('txnList');
-        if (!txs.length) {
-            el.innerHTML = `<p style="color:var(--muted);font-size:0.875rem;padding:16px 0;">
-                No hay transacciones recientes. <a href="${ARB_EXPLORER}/address/${WALLET}" target="_blank" style="color:var(--gold)">Ver en Arbiscan ↗</a></p>`;
-            return;
-        }
-        el.innerHTML = txs.map(tx => {
-            const to     = (tx.to  || '').toLowerCase();
-            const from   = (tx.from || '').toLowerCase();
-            const isIn   = to === WALLET.toLowerCase();
-            const isSelf = from === to;
-            const type   = isSelf ? 'self' : isIn ? 'in' : 'out';
-            const icon   = type === 'in' ? '↓' : type === 'out' ? '↑' : '⇄';
-            const ethVal = parseFloat(tx.value || 0) / 1e18;
-            const usdStr = ethPriceUSD > 0 ? fmtUSD(ethVal * ethPriceUSD) : '';
-            const sign   = type === 'in' ? '+' : type === 'out' ? '-' : '';
-            const label  = type === 'in'  ? 'Recibido de ' + shortAddr(from)
-                         : type === 'out' ? 'Enviado a '   + shortAddr(to)
-                         : 'Transferencia interna';
-            return `
-            <div class="txn-item">
-                <div class="txn-icon ${type}">${icon}</div>
-                <div>
-                    <div class="txn-desc">${label}</div>
-                    <div class="txn-hash">
-                        <a href="${ARB_EXPLORER}/tx/${tx.hash}" target="_blank">${shortAddr(tx.hash)}</a>
-                        &nbsp;·&nbsp;<span class="txn-time">${tx.timestamp ? timeAgo(tx.timestamp) : ''}</span>
-                    </div>
-                </div>
-                <div class="txn-amount ${type === 'in' ? 'in' : type === 'out' ? 'out' : ''}">
-                    ${sign}${fmtETH(ethVal)} ETH
-                    ${usdStr ? '<span class="txn-usd">' + sign + usdStr + '</span>' : ''}
-                </div>
-            </div>`;
-        }).join('');
-    }
-
-    // ── Render token balances ─────────────────────────────────────────
-    function renderTokens(tokenBalances) {
-        const active = tokenBalances.filter(t => parseFloat(t.value || 0) > 0);
-        if (!active.length) return;
-        const section = document.getElementById('tokensSection');
-        const grid    = document.getElementById('tokensGrid');
-        section.style.display = 'block';
-        grid.innerHTML = active.slice(0, 8).map(t => {
-            const tok  = t.token || {};
-            const sym  = tok.symbol || '???';
-            const name = tok.name   || sym;
-            const dec  = parseInt(tok.decimals || 18);
-            const bal  = parseFloat(t.value || 0) / Math.pow(10, dec);
-            const init = sym.slice(0, 3).toUpperCase();
-            const usd  = tok.exchange_rate
-                ? fmtUSD(bal * parseFloat(tok.exchange_rate)) : '';
-            return `
-            <div class="token-card">
-                <div class="token-top">
-                    <div class="token-icon">${init}</div>
-                    <div>
-                        <div class="token-name">${name.length > 18 ? name.slice(0,18)+'…' : name}</div>
-                        <div class="token-symbol">${sym}</div>
-                    </div>
-                </div>
-                <div class="token-balance">${bal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:4})} ${sym}</div>
-                ${usd ? '<div class="token-usd">≈ '+usd+'</div>' : ''}
-            </div>`;
-        }).join('');
-    }
-
-    // ── Main loader ───────────────────────────────────────────────────
     async function loadWalletData() {
         const btn = document.getElementById('refreshBtn');
-        btn.classList.add('spinning');
-        document.getElementById('walletError').style.display = 'none';
+        if (btn) btn.classList.add('spinning');
 
         try {
-            // Price + Balance in parallel
-            const [price, balance] = await Promise.all([fetchEthPrice(), fetchBalance()]);
+            // 1. ETH Balance via Arbitrum public RPC
+            const rpcRes = await fetch('https://arb1.arbitrum.io/rpc', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ jsonrpc:'2.0', method:'eth_getBalance', params:[WALLET,'latest'], id:1 }),
+                signal: AbortSignal.timeout(8000)
+            });
+            const rpcData = await rpcRes.json();
+            const balanceETH = parseInt(rpcData.result, 16) / 1e18;
 
-            document.getElementById('balanceEth').innerHTML = `${fmtETH(balance)} <span>ETH</span>`;
+            // 2. ETH Price via Binance
+            let priceUSD = 0;
+            let changePct = null;
+            try {
+                const priceRes = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT', { signal: AbortSignal.timeout(5000) });
+                const priceData = await priceRes.json();
+                priceUSD  = parseFloat(priceData.lastPrice);
+                changePct = parseFloat(priceData.priceChangePercent);
+            } catch(e) {
+                // CoinGecko fallback
+                const r2 = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd&include_24hr_change=true', { signal: AbortSignal.timeout(5000) });
+                const d2 = await r2.json();
+                priceUSD  = d2.ethereum.usd;
+                changePct = d2.ethereum.usd_24h_change;
+            }
 
-            const usdVal = balance * price;
-            document.getElementById('balanceUsd').textContent  = price > 0 ? '≈ ' + fmtUSD(usdVal) + ' USD' : '';
-            document.getElementById('marketCap').textContent   = price > 0 ? fmtUSD(usdVal) : '—';
+            // Format helpers
+            const fmtUSD = v => new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', minimumFractionDigits:2 }).format(v);
+            const fmtETH = v => v.toLocaleString('en-US', { minimumFractionDigits:4, maximumFractionDigits:6 });
+
+            // Render balance
+            document.getElementById('balanceEth').innerHTML = fmtETH(balanceETH) + ' <span>ETH</span>';
+
+            // Render USD value
+            const usdVal = balanceETH * priceUSD;
+            document.getElementById('balanceUsd').textContent = priceUSD > 0 ? '≈ ' + fmtUSD(usdVal) + ' USD' : '';
+
+            // Render ETH price
+            document.getElementById('ethPrice').textContent = priceUSD > 0 ? fmtUSD(priceUSD) : '—';
+
+            // Render 24h change
+            if (changePct !== null) {
+                const sign = changePct >= 0 ? '+' : '';
+                const chEl = document.getElementById('ethChange');
+                chEl.textContent = sign + changePct.toFixed(2) + '% (24h)';
+                chEl.className = 'change ' + (changePct >= 0 ? 'up' : 'down');
+            }
+
+            // Timestamp
             document.getElementById('lastUpdated').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-CO');
 
-            // Transactions
-            const txs = await fetchTxList();
-            document.getElementById('txCount').textContent = txs.length ? (txs.length >= 10 ? '10+' : String(txs.length)) : '0';
-            renderTransactions(txs);
-
-            // Tokens non-blocking
-            fetchTokenBalances().then(renderTokens).catch(() => {});
-
         } catch(e) {
-            document.getElementById('walletError').style.display = 'block';
-            document.getElementById('balanceEth').innerHTML  = '<span style="font-size:1rem;color:var(--muted)">Error al cargar — <a href="' + ARB_EXPLORER + '/address/' + WALLET + '" target="_blank" style="color:var(--gold)">Ver en Arbiscan ↗</a></span>';
+            document.getElementById('balanceEth').innerHTML = '<span style="font-size:0.9rem;color:var(--muted)">Error — <a href="https://arbiscan.io/address/' + WALLET + '" target="_blank" style="color:var(--gold)">Ver en Arbiscan ↗</a></span>';
             document.getElementById('balanceUsd').textContent = '';
+            document.getElementById('ethPrice').textContent = '—';
         } finally {
-            btn.classList.remove('spinning');
+            if (btn) btn.classList.remove('spinning');
         }
     }
 
     window.addEventListener('load', loadWalletData);
     setInterval(loadWalletData, 120000);
 
-
-        a.addEventListener('click', function(e) {
+                a.addEventListener('click', function(e) {
             e.preventDefault();
             const t = document.querySelector(this.getAttribute('href'));
             if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
