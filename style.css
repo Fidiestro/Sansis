@@ -1,4 +1,4 @@
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
             --bg:         #07090f;
@@ -1219,5 +1219,3 @@
             color: #fca5a5;
             margin-top: 8px;
         }
-
-        /* wallet mobile handled above */

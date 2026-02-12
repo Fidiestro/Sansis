@@ -1,5 +1,4 @@
 
-    // Modal
     function openModal() {
         document.getElementById('modal').classList.add('active');
         document.body.style.overflow = 'hidden';
