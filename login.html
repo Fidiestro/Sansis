@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanse Capital — Acceso</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #111118;
+            --bg-card: #16161f;
+            --bg-input: #1c1c28;
+            --gold: #d4a843;
+            --gold-light: #e8c56d;
+            --gold-dark: #b8922e;
+            --text-primary: #f0ede6;
+            --text-secondary: #8a8a9a;
+            --text-muted: #55556a;
+            --border: #2a2a3a;
+            --danger: #e74c5e;
+            --success: #4ecb8d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .bg-gradient {
+            position: fixed; inset: 0; z-index: 0;
+            background:
+                radial-gradient(ellipse 600px 400px at 20% 30%, rgba(212,168,67,0.06) 0%, transparent 70%),
+                radial-gradient(ellipse 500px 500px at 80% 70%, rgba(212,168,67,0.04) 0%, transparent 70%),
+                var(--bg-primary);
+        }
+
+        .bg-grid {
+            position: fixed; inset: 0; z-index: 0;
+            background-image:
+                linear-gradient(rgba(212,168,67,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(212,168,67,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 70%);
+        }
+
+        .floating-orb {
+            position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.4;
+            animation: float 20s ease-in-out infinite; z-index: 0;
+        }
+        .floating-orb:nth-child(1) { width:300px;height:300px;background:rgba(212,168,67,0.08);top:-100px;left:-100px; }
+        .floating-orb:nth-child(2) { width:200px;height:200px;background:rgba(212,168,67,0.06);bottom:-50px;right:-50px;animation-delay:-7s; }
+
+        @keyframes float {
+            0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,-30px) scale(1.05)} 66%{transform:translate(-20px,20px) scale(0.95)}
+        }
+
+        .login-container {
+            position: relative; z-index: 10; width: 100%; max-width: 420px; padding: 20px;
+            animation: fadeUp 0.8s ease-out;
+        }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+        .login-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px;
+            padding: 48px 36px; backdrop-filter: blur(20px); position: relative; overflow: hidden;
+        }
+        .login-card::before {
+            content:''; position:absolute; top:0;left:0;right:0; height:2px;
+            background:linear-gradient(90deg,transparent,var(--gold),transparent); opacity:0.6;
+        }
+
+        .logo { text-align: center; margin-bottom: 36px; }
+        .logo-text {
+            font-family:'Playfair Display',serif; font-size:28px; font-weight:700; letter-spacing:2px;
+            background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        }
+        .logo-sub { font-size:11px; color:var(--text-muted); letter-spacing:4px; text-transform:uppercase; margin-top:6px; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-label { display:block; font-size:12px; font-weight:500; color:var(--text-secondary); margin-bottom:8px; letter-spacing:0.5px; text-transform:uppercase; }
+        .form-input-wrap { position: relative; }
+        .form-input-wrap .icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:16px; opacity:0.4; pointer-events:none; transition:opacity 0.3s; }
+
+        .form-input {
+            width:100%; padding:14px 16px 14px 42px; background:var(--bg-input); border:1px solid var(--border);
+            border-radius:12px; color:var(--text-primary); font-family:'DM Sans',sans-serif; font-size:15px;
+            transition:all 0.3s ease; outline:none;
+        }
+        .form-input:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(212,168,67,0.1); }
+        .form-input::placeholder { color:var(--text-muted); }
+
+        .toggle-password {
+            position:absolute; right:14px; top:50%; transform:translateY(-50%);
+            background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px; padding:4px;
+        }
+        .toggle-password:hover { color:var(--text-secondary); }
+
+        .remember-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
+        .remember-check { display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; color:var(--text-secondary); }
+        .remember-check input { accent-color:var(--gold); width:16px; height:16px; }
+        .forgot-link { font-size:13px; color:var(--gold); text-decoration:none; opacity:0.8; }
+        .forgot-link:hover { opacity:1; }
+
+        .btn-submit {
+            width:100%; padding:16px;
+            background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+            border:none; border-radius:12px; color:#0a0a0f; font-family:'DM Sans',sans-serif;
+            font-size:15px; font-weight:600; cursor:pointer; transition:all 0.3s ease; letter-spacing:0.5px;
+        }
+        .btn-submit:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(212,168,67,0.3); }
+        .btn-submit:disabled { opacity:0.6; cursor:not-allowed; transform:none; box-shadow:none; }
+        .btn-submit.loading .btn-text{display:none} .btn-submit.loading .spinner{display:inline-block}
+        .btn-submit .spinner { display:none; width:20px; height:20px; border:2px solid rgba(10,10,15,0.3); border-top-color:#0a0a0f; border-radius:50%; animation:spin 0.6s linear infinite; margin:0 auto; }
+        @keyframes spin{to{transform:rotate(360deg)}}
+
+        .error-msg {
+            background:rgba(231,76,94,0.1); border:1px solid rgba(231,76,94,0.2); border-radius:10px;
+            padding:12px 16px; margin-bottom:20px; font-size:13px; color:var(--danger); display:none; animation:shake 0.4s ease;
+        }
+        .error-msg.show { display:flex; align-items:center; gap:8px; }
+        @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+        .login-footer { text-align:center; margin-top:28px; padding-top:24px; border-top:1px solid var(--border); }
+        .login-footer p { font-size:13px; color:var(--text-muted); }
+        .login-footer a { color:var(--gold); text-decoration:none; font-weight:500; }
+
+        .back-home { display:inline-flex; align-items:center; gap:6px; color:var(--text-muted); text-decoration:none; font-size:13px; margin-top:24px; transition:color 0.3s; position:relative; z-index:10; }
+        .back-home:hover { color:var(--gold); }
+
+        @media(max-width:480px) { .login-card{padding:36px 24px;} }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+    <div class="floating-orb"></div>
+    <div class="floating-orb"></div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo">
+                <div class="logo-text">SANSE CAPITAL</div>
+                <div class="logo-sub">Fondo de Inversión</div>
+            </div>
+
+            <div class="error-msg" id="login-error">
+                <span>⚠</span>
+                <span id="login-error-text">Credenciales incorrectas</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Correo electrónico</label>
+                <div class="form-input-wrap">
+                    <input type="email" class="form-input" id="login-email" placeholder="tu@correo.com" autocomplete="email">
+                    <span class="icon">✉</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Contraseña</label>
+                <div class="form-input-wrap">
+                    <input type="password" class="form-input" id="login-password" placeholder="••••••••" autocomplete="current-password">
+                    <span class="icon">🔒</span>
+                    <button type="button" class="toggle-password" onclick="togglePass()">👁</button>
+                </div>
+            </div>
+
+            <div class="remember-row">
+                <label class="remember-check">
+                    <input type="checkbox" checked>
+                    Recordarme
+                </label>
+                <a href="#" class="forgot-link" onclick="alert('Contacta vía WhatsApp para recuperar tu contraseña.'); return false;">¿Olvidaste tu clave?</a>
+            </div>
+
+            <button class="btn-submit" id="btn-login" onclick="handleLogin()">
+                <span class="btn-text">Iniciar Sesión →</span>
+                <div class="spinner"></div>
+            </button>
+
+            <div class="login-footer">
+                <p>¿Necesitas ayuda? <a href="https://wa.me/573194552890" target="_blank">Escríbenos →</a></p>
+            </div>
+        </div>
+
+        <div style="text-align:center;">
+            <a href="index.html" class="back-home">← Volver al inicio</a>
+        </div>
+    </div>
+
+    <script>
+        // ====== DEFAULT USERS (editable) ======
+        const DEFAULT_USERS = [
+            {
+                email: 'admin@sansecapital.co',
+                password: 'sanse2025',
+                name: 'Sanse Admin',
+                balance: 15000000,
+                monthlyGoal: 20000000,
+                investments: [
+                    { type: 'Ahorro Cadena', amount: 5000000, date: '2024-06-15', rate: '13.5%', status: 'active' },
+                    { type: 'Inversión Moderada', amount: 7000000, date: '2024-09-01', rate: '22%', status: 'active' },
+                    { type: 'Inversión Agresiva', amount: 3000000, date: '2025-01-10', rate: '42%', status: 'active' },
+                ],
+                transactions: [
+                    { date: '2025-02-01', type: 'deposit', amount: 2000000, desc: 'Aporte mensual' },
+                    { date: '2025-01-15', type: 'profit', amount: 350000, desc: 'Rendimiento enero' },
+                    { date: '2025-01-01', type: 'deposit', amount: 1500000, desc: 'Aporte mensual' },
+                    { date: '2024-12-15', type: 'profit', amount: 320000, desc: 'Rendimiento diciembre' },
+                    { date: '2024-12-01', type: 'deposit', amount: 1500000, desc: 'Aporte mensual' },
+                    { date: '2024-11-15', type: 'profit', amount: 290000, desc: 'Rendimiento noviembre' },
+                    { date: '2024-11-01', type: 'deposit', amount: 1000000, desc: 'Aporte mensual' },
+                    { date: '2024-10-15', type: 'profit', amount: 250000, desc: 'Rendimiento octubre' },
+                ],
+                balanceHistory: [
+                    { month: 'Sep 2024', amount: 8000000 },
+                    { month: 'Oct 2024', amount: 9250000 },
+                    { month: 'Nov 2024', amount: 10540000 },
+                    { month: 'Dic 2024', amount: 12360000 },
+                    { month: 'Ene 2025', amount: 14210000 },
+                    { month: 'Feb 2025', amount: 15000000 },
+                ]
+            }
+        ];
+
+        function initUsers() {
+            if (!localStorage.getItem('sanse_users')) {
+                localStorage.setItem('sanse_users', JSON.stringify(DEFAULT_USERS));
+            }
+        }
+
+        function getUsers() {
+            return JSON.parse(localStorage.getItem('sanse_users') || '[]');
+        }
+
+        function togglePass() {
+            const input = document.getElementById('login-password');
+            const btn = document.querySelector('.toggle-password');
+            if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+            else { input.type = 'password'; btn.textContent = '👁'; }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const errorEl = document.getElementById('login-error');
+            const errorText = document.getElementById('login-error-text');
+            const btn = document.getElementById('btn-login');
+
+            errorEl.classList.remove('show');
+
+            if (!email || !password) {
+                errorText.textContent = 'Por favor completa todos los campos.';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            await new Promise(r => setTimeout(r, 1200));
+
+            const users = getUsers();
+            const user = users.find(u => u.email === email && u.password === password);
+
+            if (user) {
+                localStorage.setItem('sanse_session', JSON.stringify({
+                    email: user.email, name: user.name, loggedIn: true, loginTime: new Date().toISOString()
+                }));
+                window.location.href = 'dashboard.html';
+            } else {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+                errorText.textContent = 'Correo o contraseña incorrectos.';
+                errorEl.classList.add('show');
+            }
+        }
+
+        document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') handleLogin(); });
+        document.getElementById('login-email').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-password').focus(); });
+
+        initUsers();
+        const session = JSON.parse(localStorage.getItem('sanse_session') || '{}');
+        if (session.loggedIn) window.location.href = 'dashboard.html';
+    </script>
+</body>
+</html>
