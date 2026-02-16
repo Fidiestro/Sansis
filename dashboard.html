@@ -226,6 +226,26 @@
         .inv-meta { display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); }
         .inv-rate { color:var(--gold); font-weight:600; }
 
+        /* ===== LOADING STATE ===== */
+        .loading-state {
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            padding:60px 20px; color:var(--text-muted);
+        }
+        .loading-spinner {
+            width:40px; height:40px; border:3px solid var(--border); border-top-color:var(--gold);
+            border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:16px;
+        }
+        @keyframes spin{to{transform:rotate(360deg)}}
+
+        .error-state {
+            background:var(--red-bg); border:1px solid rgba(231,76,94,0.2); border-radius:16px;
+            padding:32px; text-align:center; color:var(--red);
+        }
+        .error-state button {
+            margin-top:16px; padding:10px 24px; background:var(--red); color:white; border:none;
+            border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:600;
+        }
+
         /* ===== MOBILE OVERLAY ===== */
         .sidebar-overlay {
             display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
@@ -306,7 +326,7 @@
 
         <div class="sidebar-footer">
             <div class="user-info">
-                <div class="user-avatar" id="user-avatar">SA</div>
+                <div class="user-avatar" id="user-avatar">--</div>
                 <div>
                     <div class="user-name" id="user-name">Cargando...</div>
                     <div class="user-email" id="user-email">...</div>
@@ -324,7 +344,7 @@
             <div style="display:flex;align-items:center;gap:16px;">
                 <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
                 <div class="topbar-left">
-                    <h2 id="greeting">Buenos días</h2>
+                    <h2 id="greeting">Cargando...</h2>
                     <p id="date-display"></p>
                 </div>
             </div>
@@ -333,121 +353,202 @@
             </div>
         </div>
 
-        <div class="content">
-            <!-- Balance Hero -->
-            <div class="balance-hero animate-in">
-                <div class="balance-label">💰 Tu Ahorro Total</div>
-                <div class="balance-amount" id="balance-display">$0</div>
-                <div class="balance-currency">Pesos Colombianos (COP)</div>
-
-                <div class="balance-meta">
-                    <div class="meta-item">
-                        <div class="meta-value green" id="total-profit">+$0</div>
-                        <div class="meta-label">Ganancias totales</div>
-                    </div>
-                    <div class="meta-item">
-                        <div class="meta-value blue" id="total-invested">$0</div>
-                        <div class="meta-label">Total invertido</div>
-                    </div>
-                    <div class="meta-item">
-                        <div class="meta-value" id="active-count" style="color:var(--purple)">0</div>
-                        <div class="meta-label">Inversiones activas</div>
-                    </div>
-                </div>
-
-                <div class="goal-section">
-                    <div class="goal-header">
-                        <span>Meta de ahorro</span>
-                        <span id="goal-text">0% completado</span>
-                    </div>
-                    <div class="goal-bar">
-                        <div class="goal-fill" id="goal-fill" style="width:0%"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stat Cards -->
-            <div class="grid-3 animate-in delay-1">
-                <div class="stat-card">
-                    <div class="stat-icon">📈</div>
-                    <div class="stat-value" id="stat-rendimiento">0%</div>
-                    <div class="stat-label">Rendimiento Promedio</div>
-                    <div class="stat-change up">↑ anualizado</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">📅</div>
-                    <div class="stat-value" id="stat-months">0</div>
-                    <div class="stat-label">Meses Invirtiendo</div>
-                    <div class="stat-change up">↑ activo</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">💎</div>
-                    <div class="stat-value" id="stat-last-profit">$0</div>
-                    <div class="stat-label">Último Rendimiento</div>
-                    <div class="stat-change up" id="stat-last-month">↑ este mes</div>
-                </div>
-            </div>
-
-            <!-- Chart + Investments -->
-            <div class="grid-2 animate-in delay-2">
-                <!-- Chart -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <div>
-                            <div class="chart-title">Crecimiento del Ahorro</div>
-                            <div class="chart-subtitle">Últimos 6 meses</div>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <svg class="chart-svg" id="chart-svg" viewBox="0 0 500 200" preserveAspectRatio="none"></svg>
-                    </div>
-                </div>
-
-                <!-- Active Investments -->
-                <div class="table-card">
-                    <div class="table-header">
-                        <span class="table-title">Inversiones Activas</span>
-                    </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr><th>Tipo</th><th>Monto</th><th>Tasa</th></tr>
-                        </thead>
-                        <tbody id="investments-tbody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Transactions -->
-            <div class="table-card animate-in delay-3">
-                <div class="table-header">
-                    <span class="table-title">Últimos Movimientos</span>
-                </div>
-                <table class="data-table">
-                    <thead>
-                        <tr><th>Fecha</th><th>Descripción</th><th>Tipo</th><th style="text-align:right">Monto</th></tr>
-                    </thead>
-                    <tbody id="transactions-tbody"></tbody>
-                </table>
+        <div class="content" id="dashboard-content">
+            <!-- Loading state -->
+            <div class="loading-state" id="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Cargando tu información...</p>
             </div>
         </div>
     </main>
 
+    <!-- Template del dashboard (se inyecta después de cargar datos) -->
+    <template id="dashboard-template">
+        <!-- Balance Hero -->
+        <div class="balance-hero animate-in">
+            <div class="balance-label">💰 Tu Ahorro Total</div>
+            <div class="balance-amount" id="balance-display">$0</div>
+            <div class="balance-currency">Pesos Colombianos (COP)</div>
+
+            <div class="balance-meta">
+                <div class="meta-item">
+                    <div class="meta-value green" id="total-profit">+$0</div>
+                    <div class="meta-label">Ganancias totales</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-value blue" id="total-invested">$0</div>
+                    <div class="meta-label">Total invertido</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-value" id="active-count" style="color:var(--purple)">0</div>
+                    <div class="meta-label">Inversiones activas</div>
+                </div>
+            </div>
+
+            <div class="goal-section">
+                <div class="goal-header">
+                    <span>Meta de ahorro</span>
+                    <span id="goal-text">0% completado</span>
+                </div>
+                <div class="goal-bar">
+                    <div class="goal-fill" id="goal-fill" style="width:0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="grid-3 animate-in delay-1">
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-value" id="stat-rendimiento">0%</div>
+                <div class="stat-label">Rendimiento Promedio</div>
+                <div class="stat-change up">↑ anualizado</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-value" id="stat-months">0</div>
+                <div class="stat-label">Meses Invirtiendo</div>
+                <div class="stat-change up">↑ activo</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💎</div>
+                <div class="stat-value" id="stat-last-profit">$0</div>
+                <div class="stat-label">Último Rendimiento</div>
+                <div class="stat-change up">↑ este mes</div>
+            </div>
+        </div>
+
+        <!-- Chart + Investments -->
+        <div class="grid-2 animate-in delay-2">
+            <!-- Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Crecimiento del Ahorro</div>
+                        <div class="chart-subtitle">Historial</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <svg class="chart-svg" id="chart-svg" viewBox="0 0 500 200" preserveAspectRatio="none"></svg>
+                </div>
+            </div>
+
+            <!-- Active Investments -->
+            <div class="table-card">
+                <div class="table-header">
+                    <span class="table-title">Inversiones Activas</span>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Tipo</th><th>Monto</th><th>Tasa</th></tr>
+                    </thead>
+                    <tbody id="investments-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Transactions -->
+        <div class="table-card animate-in delay-3">
+            <div class="table-header">
+                <span class="table-title">Últimos Movimientos</span>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr><th>Fecha</th><th>Descripción</th><th>Tipo</th><th style="text-align:right">Monto</th></tr>
+                </thead>
+                <tbody id="transactions-tbody"></tbody>
+            </table>
+        </div>
+    </template>
+
     <script>
-        // ====== AUTH CHECK ======
-        const session = JSON.parse(localStorage.getItem('sanse_session') || '{}');
-        if (!session.loggedIn) {
+        // ====== CONFIGURACIÓN API ======
+        const API_URL = 'https://sanse-backend-production.up.railway.app/api';
+
+        // ====== AUTH ======
+        function getToken() {
+            return localStorage.getItem('sanse_access_token') || sessionStorage.getItem('sanse_access_token');
+        }
+        function getRefreshToken() {
+            return localStorage.getItem('sanse_refresh_token') || sessionStorage.getItem('sanse_refresh_token');
+        }
+        function getUserData() {
+            const data = localStorage.getItem('sanse_user') || sessionStorage.getItem('sanse_user');
+            return data ? JSON.parse(data) : null;
+        }
+        function getStorage() {
+            return localStorage.getItem('sanse_access_token') ? localStorage : sessionStorage;
+        }
+
+        // Verificar autenticación
+        if (!getToken()) {
             window.location.href = 'login.html';
         }
 
-        function getUsers() { return JSON.parse(localStorage.getItem('sanse_users') || '[]'); }
-        function getCurrentUser() { return getUsers().find(u => u.email === session.email); }
+        // ====== API HELPER con auto-refresh de token ======
+        async function apiFetch(endpoint, options = {}) {
+            const token = getToken();
+            const config = {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    ...options.headers,
+                },
+            };
 
+            let response = await fetch(`${API_URL}${endpoint}`, config);
+
+            // Si el token expiró, intentar refresh
+            if (response.status === 401) {
+                const refreshed = await refreshAccessToken();
+                if (refreshed) {
+                    config.headers['Authorization'] = `Bearer ${getToken()}`;
+                    response = await fetch(`${API_URL}${endpoint}`, config);
+                } else {
+                    logout();
+                    return null;
+                }
+            }
+
+            return response;
+        }
+
+        async function refreshAccessToken() {
+            try {
+                const refreshToken = getRefreshToken();
+                if (!refreshToken) return false;
+
+                const response = await fetch(`${API_URL}/auth/refresh`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken }),
+                });
+
+                if (!response.ok) return false;
+
+                const data = await response.json();
+                const storage = getStorage();
+                storage.setItem('sanse_access_token', data.accessToken);
+                storage.setItem('sanse_refresh_token', data.refreshToken);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        // ====== UTILS ======
         function formatCOP(n) {
             return '$' + Math.round(n).toLocaleString('es-CO');
         }
 
         function logout() {
-            localStorage.removeItem('sanse_session');
+            localStorage.removeItem('sanse_access_token');
+            localStorage.removeItem('sanse_refresh_token');
+            localStorage.removeItem('sanse_user');
+            sessionStorage.removeItem('sanse_access_token');
+            sessionStorage.removeItem('sanse_refresh_token');
+            sessionStorage.removeItem('sanse_user');
             window.location.href = 'login.html';
         }
 
@@ -456,110 +557,24 @@
             document.getElementById('sidebar-overlay').classList.toggle('show');
         }
 
-        // ====== GREETING ======
-        function setGreeting() {
+        // ====== SET GREETING ======
+        function setGreeting(userName) {
             const h = new Date().getHours();
             let g = 'Buenas noches';
             if (h >= 5 && h < 12) g = 'Buenos días';
             else if (h >= 12 && h < 19) g = 'Buenas tardes';
 
-            const user = getCurrentUser();
-            const firstName = user ? user.name.split(' ')[0] : '';
+            const firstName = userName ? userName.split(' ')[0] : '';
             document.getElementById('greeting').textContent = `${g}, ${firstName} 👋`;
 
             const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
             document.getElementById('date-display').textContent = new Date().toLocaleDateString('es-CO', opts);
         }
 
-        // ====== POPULATE DATA ======
-        function populateDashboard() {
-            const user = getCurrentUser();
-            if (!user) return;
-
-            // User info
-            const initials = user.name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
-            document.getElementById('user-avatar').textContent = initials;
-            document.getElementById('user-name').textContent = user.name;
-            document.getElementById('user-email').textContent = user.email;
-
-            // Balance
-            animateNumber('balance-display', user.balance, true);
-
-            // Totals
-            const totalProfit = user.transactions
-                .filter(t => t.type === 'profit')
-                .reduce((sum, t) => sum + t.amount, 0);
-            const totalInvested = user.investments.reduce((sum, i) => sum + i.amount, 0);
-
-            document.getElementById('total-profit').textContent = '+' + formatCOP(totalProfit);
-            document.getElementById('total-invested').textContent = formatCOP(totalInvested);
-            document.getElementById('active-count').textContent = user.investments.filter(i => i.status === 'active').length;
-
-            // Goal
-            const goal = user.monthlyGoal || 20000000;
-            const pct = Math.min(100, Math.round((user.balance / goal) * 100));
-            document.getElementById('goal-text').textContent = `${pct}% — Meta: ${formatCOP(goal)}`;
-            setTimeout(() => {
-                document.getElementById('goal-fill').style.width = pct + '%';
-            }, 500);
-
-            // Stats
-            const rates = user.investments.map(i => parseFloat(i.rate));
-            const avgRate = rates.length ? (rates.reduce((a,b)=>a+b,0)/rates.length).toFixed(1) : 0;
-            document.getElementById('stat-rendimiento').textContent = avgRate + '%';
-
-            const firstTx = user.transactions[user.transactions.length - 1];
-            if (firstTx) {
-                const months = Math.max(1, Math.round((new Date() - new Date(firstTx.date)) / (1000*60*60*24*30)));
-                document.getElementById('stat-months').textContent = months;
-            }
-
-            const lastProfit = user.transactions.find(t => t.type === 'profit');
-            if (lastProfit) {
-                document.getElementById('stat-last-profit').textContent = formatCOP(lastProfit.amount);
-            }
-
-            // Investments table
-            const invBody = document.getElementById('investments-tbody');
-            invBody.innerHTML = '';
-            user.investments.forEach(inv => {
-                invBody.innerHTML += `
-                    <tr>
-                        <td>${inv.type}</td>
-                        <td class="amount-neutral">${formatCOP(inv.amount)}</td>
-                        <td><span class="inv-rate">${inv.rate} anual</span></td>
-                    </tr>
-                `;
-            });
-
-            // Transactions table
-            const txBody = document.getElementById('transactions-tbody');
-            txBody.innerHTML = '';
-            user.transactions.forEach(tx => {
-                const typeLabels = { deposit:'Depósito', profit:'Rendimiento', withdraw:'Retiro' };
-                const badgeClass = { deposit:'badge-deposit', profit:'badge-profit', withdraw:'badge-withdraw' };
-                const amountClass = tx.type === 'withdraw' ? 'amount-negative' : 'amount-positive';
-                const prefix = tx.type === 'withdraw' ? '-' : '+';
-
-                const dateStr = new Date(tx.date).toLocaleDateString('es-CO', { day:'numeric', month:'short', year:'numeric' });
-
-                txBody.innerHTML += `
-                    <tr>
-                        <td style="color:var(--text-secondary)">${dateStr}</td>
-                        <td>${tx.desc}</td>
-                        <td><span class="badge ${badgeClass[tx.type]}">${typeLabels[tx.type]}</span></td>
-                        <td class="${amountClass}" style="text-align:right">${prefix}${formatCOP(tx.amount)}</td>
-                    </tr>
-                `;
-            });
-
-            // Chart
-            drawChart(user.balanceHistory || []);
-        }
-
         // ====== ANIMATED NUMBER ======
         function animateNumber(elId, target, isCurrency) {
             const el = document.getElementById(elId);
+            if (!el) return;
             const duration = 1500;
             const start = 0;
             const startTime = performance.now();
@@ -577,17 +592,22 @@
 
         // ====== CHART ======
         function drawChart(history) {
-            if (!history.length) return;
+            if (!history || !history.length) return;
             const svg = document.getElementById('chart-svg');
+            if (!svg) return;
             const w = 500, h = 200, pad = 30;
             const vals = history.map(h => h.amount);
             const min = Math.min(...vals) * 0.9;
             const max = Math.max(...vals) * 1.05;
 
+            const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
             const points = history.map((item, i) => {
-                const x = pad + (i / (history.length - 1)) * (w - pad * 2);
-                const y = h - pad - ((item.amount - min) / (max - min)) * (h - pad * 2);
-                return { x, y, ...item };
+                const x = pad + (i / Math.max(history.length - 1, 1)) * (w - pad * 2);
+                const y = h - pad - ((item.amount - min) / (max - min || 1)) * (h - pad * 2);
+                const d = new Date(item.date);
+                const label = months[d.getMonth()] + ' ' + d.getFullYear();
+                return { x, y, label, ...item };
             });
 
             const pathD = points.map((p, i) => {
@@ -613,28 +633,154 @@
                 </defs>
             `;
 
-            // Grid lines
             for (let i = 0; i < 4; i++) {
                 const y = pad + (i / 3) * (h - pad * 2);
                 svgContent += `<line x1="${pad}" y1="${y}" x2="${w-pad}" y2="${y}" stroke="rgba(42,42,58,0.5)" stroke-width="1" stroke-dasharray="4"/>`;
             }
 
-            // Area + Line
             svgContent += `<path d="${areaD}" fill="url(#areaGrad)"/>`;
             svgContent += `<path d="${pathD}" fill="none" stroke="url(#lineGrad)" stroke-width="2.5" stroke-linecap="round"/>`;
 
-            // Dots + Labels
-            points.forEach((p, i) => {
+            points.forEach((p) => {
                 svgContent += `<circle cx="${p.x}" cy="${p.y}" r="4" fill="var(--bg-primary)" stroke="var(--gold)" stroke-width="2"/>`;
-                svgContent += `<text x="${p.x}" y="${h - 8}" text-anchor="middle" fill="var(--text-muted)" font-size="10" font-family="DM Sans">${p.month}</text>`;
+                svgContent += `<text x="${p.x}" y="${h - 8}" text-anchor="middle" fill="var(--text-muted)" font-size="10" font-family="DM Sans">${p.label}</text>`;
             });
 
             svg.innerHTML = svgContent;
         }
 
+        // ====== POPULATE DASHBOARD ======
+        function populateDashboard(data, user) {
+            // Inject template
+            const template = document.getElementById('dashboard-template');
+            const content = document.getElementById('dashboard-content');
+            content.innerHTML = '';
+            content.appendChild(template.content.cloneNode(true));
+
+            // User info sidebar
+            const initials = (user.fullName || user.email).split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+            document.getElementById('user-avatar').textContent = initials;
+            document.getElementById('user-name').textContent = user.fullName || user.email;
+            document.getElementById('user-email').textContent = user.email;
+
+            // Balance
+            animateNumber('balance-display', data.balance, true);
+
+            // Totals
+            document.getElementById('total-profit').textContent = '+' + formatCOP(data.totalProfit);
+            document.getElementById('total-invested').textContent = formatCOP(data.totalInvested);
+            document.getElementById('active-count').textContent = data.activeInvestments;
+
+            // Goal
+            const goal = data.monthlyGoal || 20000000;
+            const pct = Math.min(100, Math.round((data.balance / goal) * 100));
+            document.getElementById('goal-text').textContent = `${pct}% — Meta: ${formatCOP(goal)}`;
+            setTimeout(() => {
+                document.getElementById('goal-fill').style.width = pct + '%';
+            }, 500);
+
+            // Stats
+            document.getElementById('stat-rendimiento').textContent = data.avgRate + '%';
+            document.getElementById('stat-months').textContent = data.monthsInvesting;
+            document.getElementById('stat-last-profit').textContent = formatCOP(data.lastProfit);
+
+            // Investments table
+            const invBody = document.getElementById('investments-tbody');
+            if (data.investments.length === 0) {
+                invBody.innerHTML = '<tr><td colspan="3" style="color:var(--text-muted);text-align:center;padding:24px;">Sin inversiones activas</td></tr>';
+            } else {
+                data.investments.forEach(inv => {
+                    invBody.innerHTML += `
+                        <tr>
+                            <td>${inv.type}</td>
+                            <td class="amount-neutral">${formatCOP(inv.amount)}</td>
+                            <td><span class="inv-rate">${inv.rate}% anual</span></td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Transactions table
+            const txBody = document.getElementById('transactions-tbody');
+            if (data.transactions.length === 0) {
+                txBody.innerHTML = '<tr><td colspan="4" style="color:var(--text-muted);text-align:center;padding:24px;">Sin movimientos</td></tr>';
+            } else {
+                data.transactions.forEach(tx => {
+                    const typeLabels = { deposit:'Depósito', profit:'Rendimiento', withdraw:'Retiro' };
+                    const badgeClass = { deposit:'badge-deposit', profit:'badge-profit', withdraw:'badge-withdraw' };
+                    const amountClass = tx.type === 'withdraw' ? 'amount-negative' : 'amount-positive';
+                    const prefix = tx.type === 'withdraw' ? '-' : '+';
+                    const dateStr = new Date(tx.date).toLocaleDateString('es-CO', { day:'numeric', month:'short', year:'numeric' });
+
+                    txBody.innerHTML += `
+                        <tr>
+                            <td style="color:var(--text-secondary)">${dateStr}</td>
+                            <td>${tx.description || '-'}</td>
+                            <td><span class="badge ${badgeClass[tx.type] || ''}">${typeLabels[tx.type] || tx.type}</span></td>
+                            <td class="${amountClass}" style="text-align:right">${prefix}${formatCOP(tx.amount)}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Chart
+            drawChart(data.balanceHistory);
+        }
+
+        // ====== SHOW ERROR STATE ======
+        function showError(message) {
+            const content = document.getElementById('dashboard-content');
+            content.innerHTML = `
+                <div class="error-state">
+                    <p>⚠️ ${message}</p>
+                    <button onclick="loadDashboard()">Reintentar</button>
+                    <button onclick="logout()" style="background:transparent;border:1px solid var(--red);color:var(--red);margin-left:8px;">Cerrar sesión</button>
+                </div>
+            `;
+        }
+
+        // ====== LOAD DASHBOARD DATA ======
+        async function loadDashboard() {
+            const content = document.getElementById('dashboard-content');
+            content.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Cargando tu información...</p></div>';
+
+            try {
+                const user = getUserData();
+                if (user) {
+                    setGreeting(user.fullName || user.email);
+                }
+
+                const response = await apiFetch('/dashboard/summary');
+                if (!response) return; // logout ya fue llamado
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || 'Error cargando datos');
+                }
+
+                const data = await response.json();
+                populateDashboard(data, user || { email: 'Usuario', fullName: 'Usuario' });
+
+            } catch (error) {
+                console.error('Error cargando dashboard:', error);
+                showError(error.message || 'No se pudo conectar con el servidor.');
+            }
+        }
+
+        // ====== SET DATE ======
+        const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+        document.getElementById('date-display').textContent = new Date().toLocaleDateString('es-CO', opts);
+
         // ====== INIT ======
-        setGreeting();
-        populateDashboard();
+        const userData = getUserData();
+        if (userData) {
+            setGreeting(userData.fullName || userData.email);
+            const initials = (userData.fullName || userData.email).split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+            document.getElementById('user-avatar').textContent = initials;
+            document.getElementById('user-name').textContent = userData.fullName || userData.email;
+            document.getElementById('user-email').textContent = userData.email;
+        }
+        loadDashboard();
     </script>
 </body>
 </html>

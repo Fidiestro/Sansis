@@ -178,7 +178,7 @@
 
             <div class="remember-row">
                 <label class="remember-check">
-                    <input type="checkbox" checked>
+                    <input type="checkbox" id="remember-me" checked>
                     Recordarme
                 </label>
                 <a href="#" class="forgot-link" onclick="alert('Contacta vía WhatsApp para recuperar tu contraseña.'); return false;">¿Olvidaste tu clave?</a>
@@ -200,49 +200,8 @@
     </div>
 
     <script>
-        // ====== DEFAULT USERS (editable) ======
-        const DEFAULT_USERS = [
-            {
-                email: 'admin@sansecapital.co',
-                password: 'sanse2025',
-                name: 'Sanse Admin',
-                balance: 15000000,
-                monthlyGoal: 20000000,
-                investments: [
-                    { type: 'Ahorro Cadena', amount: 5000000, date: '2024-06-15', rate: '13.5%', status: 'active' },
-                    { type: 'Inversión Moderada', amount: 7000000, date: '2024-09-01', rate: '22%', status: 'active' },
-                    { type: 'Inversión Agresiva', amount: 3000000, date: '2025-01-10', rate: '42%', status: 'active' },
-                ],
-                transactions: [
-                    { date: '2025-02-01', type: 'deposit', amount: 2000000, desc: 'Aporte mensual' },
-                    { date: '2025-01-15', type: 'profit', amount: 350000, desc: 'Rendimiento enero' },
-                    { date: '2025-01-01', type: 'deposit', amount: 1500000, desc: 'Aporte mensual' },
-                    { date: '2024-12-15', type: 'profit', amount: 320000, desc: 'Rendimiento diciembre' },
-                    { date: '2024-12-01', type: 'deposit', amount: 1500000, desc: 'Aporte mensual' },
-                    { date: '2024-11-15', type: 'profit', amount: 290000, desc: 'Rendimiento noviembre' },
-                    { date: '2024-11-01', type: 'deposit', amount: 1000000, desc: 'Aporte mensual' },
-                    { date: '2024-10-15', type: 'profit', amount: 250000, desc: 'Rendimiento octubre' },
-                ],
-                balanceHistory: [
-                    { month: 'Sep 2024', amount: 8000000 },
-                    { month: 'Oct 2024', amount: 9250000 },
-                    { month: 'Nov 2024', amount: 10540000 },
-                    { month: 'Dic 2024', amount: 12360000 },
-                    { month: 'Ene 2025', amount: 14210000 },
-                    { month: 'Feb 2025', amount: 15000000 },
-                ]
-            }
-        ];
-
-        function initUsers() {
-            if (!localStorage.getItem('sanse_users')) {
-                localStorage.setItem('sanse_users', JSON.stringify(DEFAULT_USERS));
-            }
-        }
-
-        function getUsers() {
-            return JSON.parse(localStorage.getItem('sanse_users') || '[]');
-        }
+        // ====== CONFIGURACIÓN API ======
+        const API_URL = 'https://sanse-backend-production.up.railway.app/api';
 
         function togglePass() {
             const input = document.getElementById('login-password');
@@ -269,30 +228,43 @@
             btn.classList.add('loading');
             btn.disabled = true;
 
-            await new Promise(r => setTimeout(r, 1200));
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
 
-            const users = getUsers();
-            const user = users.find(u => u.email === email && u.password === password);
+                const data = await response.json();
 
-            if (user) {
-                localStorage.setItem('sanse_session', JSON.stringify({
-                    email: user.email, name: user.name, loggedIn: true, loginTime: new Date().toISOString()
-                }));
+                if (!response.ok) {
+                    throw new Error(data.error || 'Error al iniciar sesión');
+                }
+
+                // Guardar tokens y datos del usuario
+                const storage = document.getElementById('remember-me').checked ? localStorage : sessionStorage;
+                storage.setItem('sanse_access_token', data.accessToken);
+                storage.setItem('sanse_refresh_token', data.refreshToken);
+                storage.setItem('sanse_user', JSON.stringify(data.user));
+
+                // Redirigir al dashboard
                 window.location.href = 'dashboard.html';
-            } else {
+
+            } catch (error) {
                 btn.classList.remove('loading');
                 btn.disabled = false;
-                errorText.textContent = 'Correo o contraseña incorrectos.';
+                errorText.textContent = error.message || 'Error de conexión con el servidor.';
                 errorEl.classList.add('show');
             }
         }
 
+        // Enter para submit
         document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') handleLogin(); });
         document.getElementById('login-email').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-password').focus(); });
 
-        initUsers();
-        const session = JSON.parse(localStorage.getItem('sanse_session') || '{}');
-        if (session.loggedIn) window.location.href = 'dashboard.html';
+        // Si ya tiene sesión activa, redirigir
+        const existingToken = localStorage.getItem('sanse_access_token') || sessionStorage.getItem('sanse_access_token');
+        if (existingToken) window.location.href = 'dashboard.html';
     </script>
 </body>
 </html>
