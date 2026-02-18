@@ -308,13 +308,13 @@ function openModal() {
             document.getElementById('allTotal').textContent = fmtUSD(grandTotal);
 
             // Convertir crypto a COP y calcular Total de Manejo
-            const PRESTAMOS_COP = 35048666;
+            const PRESTAMOS_COP = 36670233;
             let cryptoCOP = 0;
             try {
                 // Tasa USD/COP desde Frankfurter API (gratis, sin key)
-                const fxRes = await fetch('https://open.er-api.com/v6/latest/USD', { signal: AbortSignal.timeout(6000) });
+                const fxRes = await fetch('https://api.frankfurter.app/latest?from=USD&to=COP', { signal: AbortSignal.timeout(6000) });
                 const fxData = await fxRes.json();
-                const usdToCOP = fxData.rates?.COP || 4200; // open.er-api: { rates: { COP: 4xxx } }
+                const usdToCOP = fxData.rates?.COP || 4200;
                 cryptoCOP = grandTotal * usdToCOP;
                 const fmtCOP = v => '$' + Math.round(v).toLocaleString('es-CO');
                 document.getElementById('cryptoCOP').textContent = '≈ ' + fmtCOP(cryptoCOP) + ' COP · TRM $' + Math.round(usdToCOP).toLocaleString('es-CO');
