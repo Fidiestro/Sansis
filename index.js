@@ -58,12 +58,18 @@ function openModal() {
 
     // Chains config: rpc, nativeSymbol, nativeCoinId (CoinGecko), explorer
     const CHAINS = {
-        eth:   { name:'Ethereum',   rpc:'https://eth.llamarpc.com',              nativeSym:'ETH',   coinId:'ethereum',     explorer:'https://etherscan.io',    panel:'panelEth',   nativeEl:'ethNativeBal',   totalEl:'ethChainTotal',   listEl:'ethTokensList',   tabEl:'tab-usd-eth' },
-        arb:   { name:'Arbitrum',   rpc:'https://arb1.arbitrum.io/rpc',          nativeSym:'ETH',   coinId:'ethereum',     explorer:'https://arbiscan.io',     panel:'panelArb',   nativeEl:'arbNativeBal',   totalEl:'arbChainTotal',   listEl:'arbTokensList',   tabEl:'tab-usd-arb' },
-        bsc:   { name:'BNB Chain',  rpc:'https://bsc-dataseed.binance.org/',     nativeSym:'BNB',   coinId:'binancecoin',  explorer:'https://bscscan.com',     panel:'panelBsc',   nativeEl:'bscNativeBal',   totalEl:'bscChainTotal',   listEl:'bscTokensList',   tabEl:'tab-usd-bsc' },
-        matic: { name:'Polygon',    rpc:'https://polygon-rpc.com',              nativeSym:'MATIC',  coinId:'matic-network',explorer:'https://polygonscan.com', panel:'panelMatic', nativeEl:'maticNativeBal', totalEl:'maticChainTotal', listEl:'maticTokensList', tabEl:'tab-usd-matic' },
-        op:    { name:'Optimism',   rpc:'https://mainnet.optimism.io',           nativeSym:'ETH',   coinId:'ethereum',     explorer:'https://optimistic.etherscan.io', panel:'panelOp', nativeEl:'opNativeBal', totalEl:'opChainTotal', listEl:'opTokensList',   tabEl:'tab-usd-op' },
-        base:  { name:'Base',       rpc:'https://mainnet.base.org',              nativeSym:'ETH',   coinId:'ethereum',     explorer:'https://basescan.org',    panel:'panelBase',  nativeEl:'baseNativeBal',  totalEl:'baseChainTotal',  listEl:'baseTokensList',  tabEl:'tab-usd-base' },
+        eth:   { name:'Ethereum',  nativeSym:'ETH',  coinId:'ethereum',      explorer:'https://etherscan.io',           panel:'panelEth',   nativeEl:'ethNativeBal',   totalEl:'ethChainTotal',   listEl:'ethTokensList',   tabEl:'tab-usd-eth',
+                 rpcs:['https://rpc.ankr.com/eth','https://ethereum.publicnode.com','https://cloudflare-eth.com','https://1rpc.io/eth'] },
+        arb:   { name:'Arbitrum', nativeSym:'ETH',  coinId:'ethereum',      explorer:'https://arbiscan.io',            panel:'panelArb',   nativeEl:'arbNativeBal',   totalEl:'arbChainTotal',   listEl:'arbTokensList',   tabEl:'tab-usd-arb',
+                 rpcs:['https://arb1.arbitrum.io/rpc','https://arbitrum-one.publicnode.com','https://rpc.ankr.com/arbitrum','https://1rpc.io/arb'] },
+        bsc:   { name:'BNB Chain',nativeSym:'BNB',  coinId:'binancecoin',   explorer:'https://bscscan.com',            panel:'panelBsc',   nativeEl:'bscNativeBal',   totalEl:'bscChainTotal',   listEl:'bscTokensList',   tabEl:'tab-usd-bsc',
+                 rpcs:['https://rpc.ankr.com/bsc','https://bsc.publicnode.com','https://bsc-dataseed1.defibit.io','https://bsc-dataseed2.defibit.io'] },
+        matic: { name:'Polygon',  nativeSym:'MATIC',coinId:'matic-network', explorer:'https://polygonscan.com',        panel:'panelMatic', nativeEl:'maticNativeBal', totalEl:'maticChainTotal', listEl:'maticTokensList', tabEl:'tab-usd-matic',
+                 rpcs:['https://rpc.ankr.com/polygon','https://polygon.publicnode.com','https://polygon-bor-rpc.publicnode.com','https://1rpc.io/matic'] },
+        op:    { name:'Optimism', nativeSym:'ETH',  coinId:'ethereum',      explorer:'https://optimistic.etherscan.io',panel:'panelOp',   nativeEl:'opNativeBal',   totalEl:'opChainTotal',   listEl:'opTokensList',   tabEl:'tab-usd-op',
+                 rpcs:['https://mainnet.optimism.io','https://optimism.publicnode.com','https://rpc.ankr.com/optimism','https://1rpc.io/op'] },
+        base:  { name:'Base',     nativeSym:'ETH',  coinId:'ethereum',      explorer:'https://basescan.org',           panel:'panelBase',  nativeEl:'baseNativeBal',  totalEl:'baseChainTotal',  listEl:'baseTokensList',  tabEl:'tab-usd-base',
+                 rpcs:['https://mainnet.base.org','https://base.publicnode.com','https://rpc.ankr.com/base','https://1rpc.io/base'] },
     };
 
     // Well-known ERC-20 tokens to check per chain (address, symbol, decimals, coinId)
@@ -126,28 +132,40 @@ function openModal() {
         return sig + padded;
     }
 
-    async function rpcCall(rpcUrl, method, params) {
-        const res = await fetch(rpcUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ jsonrpc:'2.0', method, params, id:1 }),
-            signal: AbortSignal.timeout(9000)
-        });
-        const data = await res.json();
-        return data.result;
+    async function rpcCall(rpcUrls, method, params) {
+        const urls = Array.isArray(rpcUrls) ? rpcUrls : [rpcUrls];
+        let lastErr;
+        for (const url of urls) {
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ jsonrpc:'2.0', method, params, id:1 }),
+                    signal: AbortSignal.timeout(7000)
+                });
+                if (!res.ok) { lastErr = new Error('HTTP ' + res.status); continue; }
+                const data = await res.json();
+                if (data.result !== undefined && data.result !== null) return data.result;
+                if (data.error) { lastErr = new Error(data.error.message); continue; }
+            } catch(e) { lastErr = e; }
+        }
+        throw lastErr || new Error('Todos los RPCs fallaron');
     }
 
-    async function getNativeBalance(rpcUrl, walletAddr) {
-        const result = await rpcCall(rpcUrl, 'eth_getBalance', [walletAddr, 'latest']);
-        return parseInt(result, 16) / 1e18;
+    async function getNativeBalance(rpcUrls, walletAddr) {
+        const result = await rpcCall(rpcUrls, 'eth_getBalance', [walletAddr, 'latest']);
+        if (!result || result === '0x') return 0;
+        const val = parseInt(result, 16);
+        return isNaN(val) ? 0 : val / 1e18;
     }
 
-    async function getTokenBalance(rpcUrl, tokenAddr, walletAddr, decimals) {
+    async function getTokenBalance(rpcUrls, tokenAddr, walletAddr, decimals) {
         try {
             const data = encodeBalanceOf(walletAddr);
-            const result = await rpcCall(rpcUrl, 'eth_call', [{ to: tokenAddr, data }, 'latest']);
+            const result = await rpcCall(rpcUrls, 'eth_call', [{ to: tokenAddr, data }, 'latest']);
             if (!result || result === '0x') return 0;
-            return parseInt(result, 16) / Math.pow(10, decimals);
+            const val = parseInt(result, 16);
+            return isNaN(val) ? 0 : val / Math.pow(10, decimals);
         } catch(e) { return 0; }
     }
 
@@ -166,7 +184,10 @@ function openModal() {
         }
     }
 
-    const fmtUSD = v => '$' + v.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+    const fmtUSD = v => {
+        if (typeof v !== 'number' || isNaN(v)) return '$0.00';
+        return '$' + v.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+    };
     const fmtToken = (v, sym) => {
         if (v >= 1000000) return (v/1000000).toFixed(2) + 'M ' + sym;
         if (v >= 1000) return (v/1000).toFixed(2) + 'K ' + sym;
@@ -214,7 +235,7 @@ function openModal() {
 
         try {
             // Native balance
-            const nativeBal = await getNativeBalance(cfg.rpc, WALLET);
+            const nativeBal = await getNativeBalance(cfg.rpcs, WALLET);
             const nativePrice = prices[cfg.coinId]?.usd || 0;
             const nativeUSD = nativeBal * nativePrice;
             chainTotal += nativeUSD;
@@ -227,7 +248,7 @@ function openModal() {
 
             // ERC-20 tokens
             const tokens = TOKENS_PER_CHAIN[chainId] || [];
-            const tokenPromises = tokens.map(t => getTokenBalance(cfg.rpc, t.addr, WALLET, t.dec).then(bal => ({ ...t, balance: bal })));
+            const tokenPromises = tokens.map(t => getTokenBalance(cfg.rpcs, t.addr, WALLET, t.dec).then(bal => ({ ...t, balance: bal })));
             const tokenResults = await Promise.allSettled(tokenPromises);
 
             for (const res of tokenResults) {
@@ -302,7 +323,7 @@ function openModal() {
             );
 
             // 5. Calculate grand total
-            const grandTotal = chainResults.reduce((sum, r) => sum + r.chainTotal, 0);
+            const grandTotal = chainResults.reduce((sum, r) => sum + (isNaN(r.chainTotal) ? 0 : r.chainTotal), 0);
             document.getElementById('totalUSD').textContent = fmtUSD(grandTotal);
             document.getElementById('tab-usd-all').textContent = grandTotal > 0.01 ? fmtUSD(grandTotal) : '';
             document.getElementById('allTotal').textContent = fmtUSD(grandTotal);
@@ -312,7 +333,7 @@ function openModal() {
             let cryptoCOP = 0;
             try {
                 // Tasa USD/COP desde Frankfurter API (gratis, sin key)
-                const fxRes = await fetch('https://api.frankfurter.app/latest?from=USD&to=COP', { signal: AbortSignal.timeout(6000) });
+                const fxRes = await fetch('https://open.er-api.com/v6/latest/USD', { signal: AbortSignal.timeout(6000) });
                 const fxData = await fxRes.json();
                 const usdToCOP = fxData.rates?.COP || 4200;
                 cryptoCOP = grandTotal * usdToCOP;
