@@ -15,6 +15,7 @@
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 
+        /* Topbar */
         .topbar {
             background:var(--bg2); border-bottom:1px solid var(--border); padding:16px 32px;
             display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:50;
@@ -26,22 +27,35 @@
         }
         .topbar-sub { font-size:11px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; }
         .topbar-right { display:flex; gap:12px; align-items:center; }
-        .topbar-right a { color:var(--text2); text-decoration:none; font-size:13px; padding:8px 16px; border:1px solid var(--border); border-radius:8px; }
+        .topbar-right a { color:var(--text2); text-decoration:none; font-size:13px; padding:8px 16px; border:1px solid var(--border); border-radius:8px; transition:all 0.2s; }
         .topbar-right a:hover { border-color:var(--gold); color:var(--gold); }
 
         .container { max-width:1100px; margin:0 auto; padding:32px 24px; }
 
+        /* Stats */
+        .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+        .stat-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:22px; text-align:center; }
+        .stat-card .val { font-size:22px; font-weight:700; font-family:'JetBrains Mono',monospace; }
+        .stat-card .val.green { color:var(--green); }
+        .stat-card .val.red { color:var(--red); }
+        .stat-card .val.blue { color:var(--blue); }
+        .stat-card .val.gold { color:var(--gold); }
+        .stat-card .lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:6px; }
+
         /* Tabs */
         .tabs { display:flex; gap:4px; margin-bottom:28px; background:var(--bg2); border-radius:12px; padding:4px; border:1px solid var(--border); }
-        .tab { flex:1; padding:12px; text-align:center; border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; color:var(--text2); transition:all 0.2s; }
+        .tab { flex:1; padding:12px; text-align:center; border-radius:10px; cursor:pointer; font-size:14px; font-weight:600; color:var(--text2); transition:all 0.2s; }
         .tab:hover { color:var(--text); }
         .tab.active { background:var(--gold); color:#0a0a0f; }
 
-        /* Cards */
+        /* Sections */
         .section { display:none; }
         .section.active { display:block; }
+
+        /* Cards */
         .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; margin-bottom:24px; }
         .card-title { font-size:18px; font-weight:700; margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+        .card-desc { color:var(--text2); font-size:13px; margin-bottom:20px; line-height:1.5; }
 
         /* Forms */
         .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
@@ -55,22 +69,26 @@
         }
         input:focus, select:focus { border-color:var(--gold); }
         select { cursor:pointer; }
+        input::placeholder { color:var(--muted); }
 
+        /* Buttons */
         .btn {
-            padding:12px 24px; border:none; border-radius:10px; font-family:'DM Sans',sans-serif;
-            font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s;
+            padding:12px 28px; border:none; border-radius:10px; font-family:'DM Sans',sans-serif;
+            font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; display:inline-flex; align-items:center; gap:8px;
         }
         .btn-gold { background:linear-gradient(135deg,var(--gold),var(--gold-dark)); color:#0a0a0f; }
         .btn-gold:hover { box-shadow:0 4px 20px rgba(212,168,67,0.3); transform:translateY(-1px); }
-        .btn-red { background:rgba(231,76,94,0.15); color:var(--red); border:1px solid rgba(231,76,94,0.3); }
-        .btn-red:hover { background:rgba(231,76,94,0.25); }
+        .btn-gold:disabled { opacity:0.5; cursor:not-allowed; transform:none; box-shadow:none; }
+        .btn-outline { background:transparent; color:var(--text2); border:1px solid var(--border); }
+        .btn-outline:hover { border-color:var(--gold); color:var(--gold); }
         .btn-sm { padding:6px 14px; font-size:12px; border-radius:8px; }
+        .btn-red { background:rgba(231,76,94,0.12); color:var(--red); border:1px solid rgba(231,76,94,0.25); }
 
         /* Table */
-        .table-wrap { overflow-x:auto; }
+        .table-wrap { overflow-x:auto; margin-top:16px; }
         table { width:100%; border-collapse:collapse; }
-        th { text-align:left; padding:10px 16px; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border); }
-        td { padding:14px 16px; font-size:13px; border-bottom:1px solid var(--border); }
+        th { text-align:left; padding:10px 14px; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border); }
+        td { padding:12px 14px; font-size:13px; border-bottom:1px solid rgba(34,34,51,0.5); }
         tr:hover td { background:rgba(212,168,67,0.02); }
         .mono { font-family:'JetBrains Mono',monospace; font-weight:500; }
         .badge { display:inline-block; padding:3px 10px; border-radius:100px; font-size:11px; font-weight:600; }
@@ -78,6 +96,7 @@
         .badge-gold { color:var(--gold); background:rgba(212,168,67,0.1); }
         .badge-red { color:var(--red); background:rgba(231,76,94,0.1); }
         .badge-blue { color:var(--blue); background:rgba(91,141,239,0.1); }
+        .badge-purple { color:var(--purple); background:rgba(167,139,250,0.1); }
 
         /* Toast */
         .toast { position:fixed; bottom:24px; right:24px; padding:14px 24px; border-radius:12px; font-size:13px; font-weight:600; z-index:999; transform:translateY(100px); opacity:0; transition:all 0.3s; }
@@ -85,21 +104,28 @@
         .toast-success { background:var(--green); color:#0a0a0f; }
         .toast-error { background:var(--red); color:white; }
 
-        /* User select */
-        .user-select-info { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--input); border-radius:10px; margin-bottom:16px; }
-        .user-select-info .avatar { width:36px; height:36px; border-radius:8px; background:linear-gradient(135deg,var(--gold),var(--gold-dark)); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; color:#0a0a0f; }
-
-        /* Stats row */
-        .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
-        .stat-mini { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; text-align:center; }
-        .stat-mini .val { font-size:24px; font-weight:700; font-family:'JetBrains Mono',monospace; }
-        .stat-mini .lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+        /* Users list in tab */
+        .user-list { display:grid; gap:8px; margin-top:16px; }
+        .user-row {
+            display:flex; align-items:center; justify-content:space-between; padding:14px 18px;
+            background:var(--input); border-radius:12px; border:1px solid transparent; transition:all 0.2s;
+        }
+        .user-row:hover { border-color:var(--border); }
+        .user-row-left { display:flex; align-items:center; gap:14px; }
+        .user-avatar-sm {
+            width:36px; height:36px; border-radius:8px; background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+            display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; color:#0a0a0f;
+        }
+        .user-row-name { font-size:14px; font-weight:600; }
+        .user-row-email { font-size:12px; color:var(--text2); }
+        .user-row-right { display:flex; align-items:center; gap:12px; }
 
         @media(max-width:768px) {
             .form-row, .form-row.cols-3 { grid-template-columns:1fr; }
             .stats-row { grid-template-columns:1fr 1fr; }
             .tabs { flex-wrap:wrap; }
             .container { padding:16px; }
+            .topbar { padding:12px 16px; }
         }
     </style>
 </head>
@@ -111,115 +137,107 @@
         </div>
         <div class="topbar-right">
             <a href="dashboard.html">← Dashboard</a>
-            <a href="index.html">🏠 Home</a>
-            <a href="#" onclick="logout()">Salir</a>
+            <a href="#" onclick="logout()">Cerrar Sesión</a>
         </div>
     </div>
 
     <div class="container">
-        <!-- Stats -->
-        <div class="stats-row" id="stats-row">
-            <div class="stat-mini"><div class="val" id="stat-users">-</div><div class="lbl">Usuarios</div></div>
-            <div class="stat-mini"><div class="val" id="stat-inv">-</div><div class="lbl">Inversiones</div></div>
-            <div class="stat-mini"><div class="val" id="stat-tx">-</div><div class="lbl">Transacciones</div></div>
-            <div class="stat-mini"><div class="val" id="stat-balance">-</div><div class="lbl">Balance Total</div></div>
+        <!-- STATS -->
+        <div class="stats-row">
+            <div class="stat-card"><div class="val gold" id="st-users">0</div><div class="lbl">Total Usuarios</div></div>
+            <div class="stat-card"><div class="val green" id="st-balance">$0</div><div class="lbl">Balance en Ahorro</div></div>
+            <div class="stat-card"><div class="val blue" id="st-loans">$0</div><div class="lbl">Préstamos Total</div></div>
+            <div class="stat-card"><div class="val red" id="st-withdrawals">$0</div><div class="lbl">Retiros Total</div></div>
         </div>
 
-        <!-- Tabs -->
+        <!-- TABS -->
         <div class="tabs">
-            <div class="tab active" onclick="switchTab('users')">👥 Usuarios</div>
-            <div class="tab" onclick="switchTab('investments')">💰 Inversiones</div>
-            <div class="tab" onclick="switchTab('transactions')">📋 Transacciones</div>
-            <div class="tab" onclick="switchTab('balance')">📊 Balances</div>
+            <div class="tab active" onclick="switchTab('register',this)">👤 Registrar Usuario</div>
+            <div class="tab" onclick="switchTab('transactions',this)">💸 Registrar Transacción</div>
+            <div class="tab" onclick="switchTab('users',this)">📋 Ver Usuarios</div>
         </div>
 
-        <!-- USERS SECTION -->
-        <div class="section active" id="sec-users">
+        <!-- ====== REGISTRAR USUARIO ====== -->
+        <div class="section active" id="sec-register">
             <div class="card">
-                <div class="card-title">➕ Crear Nuevo Usuario</div>
+                <div class="card-title">👤 Nuevo Usuario</div>
+                <div class="card-desc">Registra un nuevo cliente, administrador o institución en la plataforma.</div>
+
                 <div class="form-row">
-                    <div class="form-group"><label>Nombre Completo *</label><input id="u-name" placeholder="Juan Pérez"></div>
-                    <div class="form-group"><label>Email *</label><input id="u-email" type="email" placeholder="juan@email.com"></div>
+                    <div class="form-group"><label>Nombre Completo *</label><input id="u-name" placeholder="Santiago Rubiano"></div>
+                    <div class="form-group"><label>Correo Electrónico *</label><input id="u-email" type="email" placeholder="santiago@email.com"></div>
                 </div>
                 <div class="form-row cols-3">
-                    <div class="form-group"><label>Contraseña *</label><input id="u-pass" type="password" placeholder="Mín 8 chars, 1 mayúscula, 1 número"></div>
-                    <div class="form-group"><label>Teléfono</label><input id="u-phone" placeholder="3001234567"></div>
-                    <div class="form-group"><label>Rol</label>
-                        <select id="u-role"><option value="client">Cliente</option><option value="admin">Admin</option></select>
-                    </div>
-                </div>
-                <button class="btn btn-gold" onclick="createUser()">Crear Usuario</button>
-            </div>
-
-            <div class="card">
-                <div class="card-title">📋 Usuarios Registrados</div>
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Creado</th><th>Acciones</th></tr></thead>
-                        <tbody id="users-table"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- INVESTMENTS SECTION -->
-        <div class="section" id="sec-investments">
-            <div class="card">
-                <div class="card-title">➕ Crear Inversión</div>
-                <div class="form-row">
-                    <div class="form-group"><label>Usuario *</label><select id="i-user"></select></div>
-                    <div class="form-group"><label>Tipo *</label>
-                        <select id="i-type">
-                            <option value="Ahorro Cadena">Ahorro Cadena</option>
-                            <option value="Inversión Conservadora">Inversión Conservadora</option>
-                            <option value="Inversión Moderada">Inversión Moderada</option>
-                            <option value="Inversión Agresiva">Inversión Agresiva</option>
+                    <div class="form-group"><label>Cédula (CC)</label><input id="u-cc" placeholder="1234567890"></div>
+                    <div class="form-group"><label>Teléfono</label><input id="u-phone" placeholder="3194101127"></div>
+                    <div class="form-group"><label>Rol *</label>
+                        <select id="u-role">
+                            <option value="client">Cliente</option>
+                            <option value="admin">Administrador</option>
+                            <option value="institution">Institución</option>
                         </select>
                     </div>
                 </div>
-                <div class="form-row cols-3">
-                    <div class="form-group"><label>Monto (COP) *</label><input id="i-amount" type="number" placeholder="5000000"></div>
-                    <div class="form-group"><label>Tasa Anual (%) *</label><input id="i-rate" type="number" step="0.1" placeholder="22"></div>
-                    <div class="form-group"><label>Fecha Inicio</label><input id="i-date" type="date"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Contraseña *</label><input id="u-pass" type="password" placeholder="Mín 8 chars, 1 mayúscula, 1 número"></div>
+                    <div class="form-group"><label>Balance Inicial (COP)</label><input id="u-balance" type="number" placeholder="0" value="0"></div>
                 </div>
-                <button class="btn btn-gold" onclick="createInvestment()">Crear Inversión</button>
+                <button class="btn btn-gold" onclick="createUser()" id="btn-create-user">👤 Crear Usuario</button>
             </div>
         </div>
 
-        <!-- TRANSACTIONS SECTION -->
+        <!-- ====== REGISTRAR TRANSACCIÓN ====== -->
         <div class="section" id="sec-transactions">
             <div class="card">
-                <div class="card-title">➕ Registrar Transacción</div>
+                <div class="card-title">💸 Nueva Transacción</div>
+                <div class="card-desc">Registra depósitos, retiros, intereses, ganancias, abonos o préstamos para un usuario.</div>
+
                 <div class="form-row">
-                    <div class="form-group"><label>Usuario *</label><select id="t-user"></select></div>
-                    <div class="form-group"><label>Tipo *</label>
+                    <div class="form-group"><label>Usuario *</label><select id="t-user"><option value="">Seleccionar usuario...</option></select></div>
+                    <div class="form-group"><label>Tipo de Transacción *</label>
                         <select id="t-type">
-                            <option value="deposit">Depósito</option>
-                            <option value="profit">Rendimiento</option>
-                            <option value="withdraw">Retiro</option>
+                            <option value="deposit">💰 Depósito</option>
+                            <option value="withdraw">📤 Retiro</option>
+                            <option value="payment">💳 Abono</option>
+                            <option value="interest">📈 Intereses</option>
+                            <option value="profit">🏆 Ganancias</option>
+                            <option value="loan">🏦 Préstamo</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-row cols-3">
                     <div class="form-group"><label>Monto (COP) *</label><input id="t-amount" type="number" placeholder="2000000"></div>
-                    <div class="form-group"><label>Descripción</label><input id="t-desc" placeholder="Aporte mensual"></div>
                     <div class="form-group"><label>Fecha</label><input id="t-date" type="date"></div>
+                    <div class="form-group"><label>ID Transacción</label><input id="t-ref" placeholder="Auto" disabled style="opacity:0.5"></div>
                 </div>
-                <button class="btn btn-gold" onclick="createTransaction()">Registrar Transacción</button>
+                <div class="form-row">
+                    <div class="form-group full"><label>Descripción (opcional)</label><input id="t-desc" placeholder="Ej: Aporte mensual enero 2026"></div>
+                </div>
+                <button class="btn btn-gold" onclick="createTransaction()" id="btn-create-tx">💸 Registrar Transacción</button>
+            </div>
+
+            <!-- Últimas transacciones -->
+            <div class="card">
+                <div class="card-title">📋 Últimas Transacciones</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>ID</th><th>Usuario</th><th>Tipo</th><th>Monto</th><th>Descripción</th><th>Fecha</th></tr></thead>
+                        <tbody id="tx-table"><tr><td colspan="6" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- BALANCE SECTION -->
-        <div class="section" id="sec-balance">
+        <!-- ====== VER USUARIOS ====== -->
+        <div class="section" id="sec-users">
             <div class="card">
-                <div class="card-title">➕ Registrar Balance</div>
-                <p style="color:var(--text2);font-size:13px;margin-bottom:16px;">Registra el balance actual de un usuario. Esto se usa para el gráfico de crecimiento en el dashboard.</p>
-                <div class="form-row cols-3">
-                    <div class="form-group"><label>Usuario *</label><select id="b-user"></select></div>
-                    <div class="form-group"><label>Balance (COP) *</label><input id="b-amount" type="number" placeholder="15000000"></div>
-                    <div class="form-group"><label>Fecha</label><input id="b-date" type="date"></div>
+                <div class="card-title">📋 Usuarios Registrados</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>CC</th><th>Rol</th><th>Creado</th></tr></thead>
+                        <tbody id="users-table"><tr><td colspan="6" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
+                    </table>
                 </div>
-                <button class="btn btn-gold" onclick="recordBalance()">Registrar Balance</button>
             </div>
         </div>
     </div>
@@ -231,23 +249,13 @@
         const API_URL = 'https://sanse-backend-production.up.railway.app/api';
 
         // ====== AUTH ======
-        function getToken() {
-            return localStorage.getItem('sanse_access_token') || sessionStorage.getItem('sanse_access_token');
-        }
-        function getStorage() {
-            return localStorage.getItem('sanse_access_token') ? localStorage : sessionStorage;
-        }
-        function getUserData() {
-            const d = localStorage.getItem('sanse_user') || sessionStorage.getItem('sanse_user');
-            return d ? JSON.parse(d) : null;
-        }
+        function getToken() { return localStorage.getItem('sanse_access_token') || sessionStorage.getItem('sanse_access_token'); }
+        function getStorage() { return localStorage.getItem('sanse_access_token') ? localStorage : sessionStorage; }
+        function getUserData() { const d = localStorage.getItem('sanse_user') || sessionStorage.getItem('sanse_user'); return d ? JSON.parse(d) : null; }
 
         if (!getToken()) window.location.href = 'login.html';
         const userData = getUserData();
-        if (userData && userData.role !== 'admin') {
-            alert('Acceso denegado. Solo administradores.');
-            window.location.href = 'dashboard.html';
-        }
+        if (userData && userData.role !== 'admin') { alert('Acceso denegado. Solo administradores.'); window.location.href = 'dashboard.html'; }
 
         function logout() {
             ['sanse_access_token','sanse_refresh_token','sanse_user'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
@@ -256,19 +264,17 @@
 
         async function apiFetch(endpoint, options = {}) {
             const token = getToken();
-            const config = { ...options, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...options.headers } };
+            const config = { ...options, headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}`, ...options.headers } };
             let res = await fetch(`${API_URL}${endpoint}`, config);
             if (res.status === 401) {
-                const refreshed = await refreshToken();
-                if (refreshed) {
-                    config.headers['Authorization'] = `Bearer ${getToken()}`;
-                    res = await fetch(`${API_URL}${endpoint}`, config);
-                } else { logout(); return null; }
+                const ok = await refreshTokenFn();
+                if (ok) { config.headers['Authorization'] = `Bearer ${getToken()}`; res = await fetch(`${API_URL}${endpoint}`, config); }
+                else { logout(); return null; }
             }
             return res;
         }
 
-        async function refreshToken() {
+        async function refreshTokenFn() {
             try {
                 const rt = localStorage.getItem('sanse_refresh_token') || sessionStorage.getItem('sanse_refresh_token');
                 if (!rt) return false;
@@ -283,155 +289,184 @@
         }
 
         // ====== TOAST ======
-        function toast(msg, type = 'success') {
+        function toast(msg, type='success') {
             const el = document.getElementById('toast');
-            el.textContent = msg;
-            el.className = `toast toast-${type} show`;
-            setTimeout(() => el.classList.remove('show'), 3000);
+            el.textContent = msg; el.className = `toast toast-${type} show`;
+            setTimeout(() => el.classList.remove('show'), 3500);
         }
 
         // ====== TABS ======
-        function switchTab(tab) {
+        function switchTab(tab, el) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            event.target.classList.add('active');
+            el.classList.add('active');
             document.getElementById(`sec-${tab}`).classList.add('active');
         }
 
+        // ====== FORMAT ======
+        function formatCOP(n) { return '$' + Math.round(Number(n)).toLocaleString('es-CO'); }
+        function formatDate(d) { return new Date(d).toLocaleDateString('es-CO', {day:'numeric',month:'short',year:'numeric'}); }
+
         // ====== DATA ======
         let allUsers = [];
+        let txCounter = 1;
 
-        async function loadUsers() {
-            const res = await apiFetch('/auth/users');
-            if (!res) return;
-            const data = await res.json();
-            allUsers = data.users || [];
-
-            // Stats
-            document.getElementById('stat-users').textContent = allUsers.length;
-
-            // Table
-            const tbody = document.getElementById('users-table');
-            if (!allUsers.length) {
-                tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">No hay usuarios</td></tr>';
-                return;
-            }
-            tbody.innerHTML = allUsers.map(u => `
-                <tr>
-                    <td class="mono">${u.id}</td>
-                    <td>${u.full_name}</td>
-                    <td style="color:var(--text2)">${u.email}</td>
-                    <td><span class="badge ${u.role==='admin'?'badge-gold':'badge-blue'}">${u.role}</span></td>
-                    <td style="color:var(--muted)">${new Date(u.created_at).toLocaleDateString('es-CO')}</td>
-                    <td><button class="btn btn-sm btn-red" onclick="viewUser(${u.id})">Ver</button></td>
-                </tr>
-            `).join('');
-
-            // Populate user selects
-            const selects = ['i-user','t-user','b-user'];
-            selects.forEach(id => {
-                const sel = document.getElementById(id);
-                sel.innerHTML = '<option value="">Seleccionar usuario...</option>' +
-                    allUsers.map(u => `<option value="${u.id}">${u.full_name} (${u.email})</option>`).join('');
-            });
+        async function loadData() {
+            await loadUsers();
+            await loadStats();
+            loadRecentTransactions();
         }
 
-        async function viewUser(id) {
-            const res = await apiFetch(`/admin/users/${id}/details`);
-            if (!res) return;
-            const data = await res.json();
-            const u = data.user;
-            const invCount = data.investments.length;
-            const txCount = data.transactions.length;
-            const lastBalance = data.balanceHistory.length > 0 ? data.balanceHistory[data.balanceHistory.length-1].balance : 0;
+        async function loadUsers() {
+            try {
+                const res = await apiFetch('/auth/users');
+                if (!res || !res.ok) { console.error('Error loading users'); return; }
+                const data = await res.json();
+                allUsers = data.users || [];
 
-            alert(`👤 ${u.full_name}\n📧 ${u.email}\n💰 Inversiones: ${invCount}\n📋 Transacciones: ${txCount}\n💵 Balance: $${Number(lastBalance).toLocaleString('es-CO')}`);
+                // Users table
+                const tbody = document.getElementById('users-table');
+                if (!allUsers.length) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">No hay usuarios</td></tr>';
+                } else {
+                    tbody.innerHTML = allUsers.map(u => `
+                        <tr>
+                            <td class="mono">${u.id}</td>
+                            <td style="font-weight:600">${u.full_name}</td>
+                            <td style="color:var(--text2)">${u.email}</td>
+                            <td class="mono">${u.document_number || '—'}</td>
+                            <td><span class="badge ${u.role==='admin'?'badge-gold':u.role==='institution'?'badge-purple':'badge-blue'}">${u.role}</span></td>
+                            <td style="color:var(--muted)">${formatDate(u.created_at)}</td>
+                        </tr>
+                    `).join('');
+                }
+
+                // Populate user select for transactions
+                const sel = document.getElementById('t-user');
+                sel.innerHTML = '<option value="">Seleccionar usuario...</option>' +
+                    allUsers.map(u => `<option value="${u.id}">${u.full_name} — ${u.email}</option>`).join('');
+
+                document.getElementById('st-users').textContent = allUsers.length;
+            } catch(e) { console.error('loadUsers error:', e); }
+        }
+
+        async function loadStats() {
+            // Para stats necesitamos un endpoint nuevo, por ahora calculamos con lo que hay
+            try {
+                const res = await apiFetch('/admin/stats');
+                if (res && res.ok) {
+                    const data = await res.json();
+                    document.getElementById('st-balance').textContent = formatCOP(data.totalBalance || 0);
+                    document.getElementById('st-loans').textContent = formatCOP(data.totalLoans || 0);
+                    document.getElementById('st-withdrawals').textContent = formatCOP(data.totalWithdrawals || 0);
+                }
+            } catch(e) { console.log('Stats no disponibles aún'); }
+        }
+
+        async function loadRecentTransactions() {
+            try {
+                const res = await apiFetch('/admin/transactions/recent');
+                if (!res || !res.ok) return;
+                const data = await res.json();
+                const tbody = document.getElementById('tx-table');
+                if (!data.length) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">No hay transacciones</td></tr>';
+                    return;
+                }
+                const typeLabels = {deposit:'Depósito',withdraw:'Retiro',payment:'Abono',interest:'Intereses',profit:'Ganancias',loan:'Préstamo'};
+                const typeBadge = {deposit:'badge-green',withdraw:'badge-red',payment:'badge-blue',interest:'badge-gold',profit:'badge-green',loan:'badge-purple'};
+                tbody.innerHTML = data.map(tx => `
+                    <tr>
+                        <td class="mono">${tx.ref_id || tx.id}</td>
+                        <td>${tx.user_name || 'ID: '+tx.user_id}</td>
+                        <td><span class="badge ${typeBadge[tx.type]||'badge-blue'}">${typeLabels[tx.type]||tx.type}</span></td>
+                        <td class="mono" style="color:${['withdraw'].includes(tx.type)?'var(--red)':'var(--green)'}">${['withdraw'].includes(tx.type)?'-':'+'} ${formatCOP(tx.amount)}</td>
+                        <td style="color:var(--text2)">${tx.description||'—'}</td>
+                        <td style="color:var(--muted)">${formatDate(tx.created_at)}</td>
+                    </tr>
+                `).join('');
+            } catch(e) { document.getElementById('tx-table').innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">Sin datos</td></tr>'; }
         }
 
         // ====== CREATE USER ======
         async function createUser() {
+            const btn = document.getElementById('btn-create-user');
             const body = {
-                email: document.getElementById('u-email').value,
+                email: document.getElementById('u-email').value.trim(),
                 password: document.getElementById('u-pass').value,
-                fullName: document.getElementById('u-name').value,
-                phone: document.getElementById('u-phone').value || undefined,
+                fullName: document.getElementById('u-name').value.trim(),
+                phone: document.getElementById('u-phone').value.trim() || undefined,
+                documentNumber: document.getElementById('u-cc').value.trim() || undefined,
                 role: document.getElementById('u-role').value,
             };
-            if (!body.email || !body.password || !body.fullName) return toast('Completa los campos obligatorios', 'error');
+            const initialBalance = parseFloat(document.getElementById('u-balance').value) || 0;
 
-            const res = await apiFetch('/auth/users', { method:'POST', body:JSON.stringify(body) });
-            if (!res) return;
-            const data = await res.json();
-            if (!res.ok) return toast(data.error, 'error');
+            if (!body.email || !body.password || !body.fullName) return toast('Completa nombre, email y contraseña', 'error');
 
-            toast(`✅ Usuario ${body.fullName} creado`);
-            ['u-name','u-email','u-pass','u-phone'].forEach(id => document.getElementById(id).value = '');
-            loadUsers();
-        }
+            btn.disabled = true; btn.textContent = 'Creando...';
+            try {
+                const res = await apiFetch('/auth/users', { method:'POST', body:JSON.stringify(body) });
+                if (!res) return;
+                const data = await res.json();
+                if (!res.ok) return toast(data.error, 'error');
 
-        // ====== CREATE INVESTMENT ======
-        async function createInvestment() {
-            const body = {
-                userId: parseInt(document.getElementById('i-user').value),
-                type: document.getElementById('i-type').value,
-                amount: parseFloat(document.getElementById('i-amount').value),
-                annualRate: parseFloat(document.getElementById('i-rate').value),
-                startDate: document.getElementById('i-date').value || undefined,
-            };
-            if (!body.userId || !body.amount || !body.annualRate) return toast('Completa los campos obligatorios', 'error');
+                // Si hay balance inicial, registrarlo
+                if (initialBalance > 0) {
+                    await apiFetch('/admin/balance', {
+                        method:'POST',
+                        body: JSON.stringify({ userId: data.userId, balance: initialBalance })
+                    });
+                    await apiFetch('/admin/transactions', {
+                        method:'POST',
+                        body: JSON.stringify({ userId: data.userId, type:'deposit', amount:initialBalance, description:'Balance inicial' })
+                    });
+                }
 
-            const res = await apiFetch('/admin/investments', { method:'POST', body:JSON.stringify(body) });
-            if (!res) return;
-            const data = await res.json();
-            if (!res.ok) return toast(data.error, 'error');
-
-            toast('✅ Inversión creada');
-            ['i-amount','i-rate'].forEach(id => document.getElementById(id).value = '');
+                toast(`✅ ${body.fullName} creado exitosamente`);
+                ['u-name','u-email','u-pass','u-phone','u-cc'].forEach(id => document.getElementById(id).value = '');
+                document.getElementById('u-balance').value = '0';
+                loadData();
+            } catch(e) { toast('Error: ' + e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = '👤 Crear Usuario'; }
         }
 
         // ====== CREATE TRANSACTION ======
         async function createTransaction() {
-            const body = {
-                userId: parseInt(document.getElementById('t-user').value),
-                type: document.getElementById('t-type').value,
-                amount: parseFloat(document.getElementById('t-amount').value),
-                description: document.getElementById('t-desc').value || undefined,
-                date: document.getElementById('t-date').value ? new Date(document.getElementById('t-date').value).toISOString() : undefined,
-            };
-            if (!body.userId || !body.amount) return toast('Completa los campos obligatorios', 'error');
+            const btn = document.getElementById('btn-create-tx');
+            const userId = parseInt(document.getElementById('t-user').value);
+            const type = document.getElementById('t-type').value;
+            const amount = parseFloat(document.getElementById('t-amount').value);
+            const date = document.getElementById('t-date').value;
+            const desc = document.getElementById('t-desc').value.trim();
 
-            const res = await apiFetch('/admin/transactions', { method:'POST', body:JSON.stringify(body) });
-            if (!res) return;
-            const data = await res.json();
-            if (!res.ok) return toast(data.error, 'error');
+            if (!userId) return toast('Selecciona un usuario', 'error');
+            if (!amount || amount <= 0) return toast('Ingresa un monto válido', 'error');
 
-            toast('✅ Transacción registrada');
-            ['t-amount','t-desc'].forEach(id => document.getElementById(id).value = '');
-        }
+            btn.disabled = true; btn.textContent = 'Registrando...';
+            try {
+                const body = {
+                    userId, type, amount,
+                    description: desc || undefined,
+                    date: date ? new Date(date).toISOString() : undefined,
+                };
 
-        // ====== RECORD BALANCE ======
-        async function recordBalance() {
-            const body = {
-                userId: parseInt(document.getElementById('b-user').value),
-                balance: parseFloat(document.getElementById('b-amount').value),
-                date: document.getElementById('b-date').value ? new Date(document.getElementById('b-date').value).toISOString() : undefined,
-            };
-            if (!body.userId || isNaN(body.balance)) return toast('Completa los campos obligatorios', 'error');
+                const res = await apiFetch('/admin/transactions', { method:'POST', body:JSON.stringify(body) });
+                if (!res) return;
+                const data = await res.json();
+                if (!res.ok) return toast(data.error, 'error');
 
-            const res = await apiFetch('/admin/balance', { method:'POST', body:JSON.stringify(body) });
-            if (!res) return;
-            const data = await res.json();
-            if (!res.ok) return toast(data.error, 'error');
-
-            toast('✅ Balance registrado');
-            document.getElementById('b-amount').value = '';
+                const typeLabels = {deposit:'Depósito',withdraw:'Retiro',payment:'Abono',interest:'Intereses',profit:'Ganancias',loan:'Préstamo'};
+                toast(`✅ ${typeLabels[type]} de ${formatCOP(amount)} registrado`);
+                ['t-amount','t-desc'].forEach(id => document.getElementById(id).value = '');
+                loadRecentTransactions();
+                loadStats();
+            } catch(e) { toast('Error: ' + e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = '💸 Registrar Transacción'; }
         }
 
         // ====== INIT ======
-        document.getElementById('i-date').valueAsDate = new Date();
         document.getElementById('t-date').valueAsDate = new Date();
-        document.getElementById('b-date').valueAsDate = new Date();
-        loadUsers();
+        loadData();
     </script>
 </body>
 </html>
