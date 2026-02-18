@@ -57,18 +57,17 @@ function openModal() {
     const WALLET = '0x25E6997CD1037E03662996E63875C99704f8F38D';
 
     // Chains config: rpc, nativeSymbol, nativeCoinId (CoinGecko), explorer
-    // Chains config con múltiples RPCs de fallback por cadena
-    // Si el primario falla, rpcCall() prueba el siguiente automáticamente
+    // Múltiples RPCs de fallback — si el primero falla, rpcCall prueba el siguiente
     const CHAINS = {
         eth: {
             name:'Ethereum', nativeSym:'ETH', coinId:'ethereum', explorer:'https://etherscan.io',
             panel:'panelEth', nativeEl:'ethNativeBal', totalEl:'ethChainTotal', listEl:'ethTokensList', tabEl:'tab-usd-eth',
             rpcs: [
-                'https://eth.llamarpc.com',
-                'https://endpoints.omniatech.io/v1/eth/mainnet/public',
-                'https://ethereum.publicnode.com',
                 'https://rpc.ankr.com/eth',
+                'https://ethereum.publicnode.com',
+                'https://endpoints.omniatech.io/v1/eth/mainnet/public',
                 'https://cloudflare-eth.com',
+                'https://1rpc.io/eth',
             ]
         },
         arb: {
@@ -76,32 +75,32 @@ function openModal() {
             panel:'panelArb', nativeEl:'arbNativeBal', totalEl:'arbChainTotal', listEl:'arbTokensList', tabEl:'tab-usd-arb',
             rpcs: [
                 'https://arb1.arbitrum.io/rpc',
-                'https://endpoints.omniatech.io/v1/arbitrum/one/public',
                 'https://arbitrum-one.publicnode.com',
                 'https://rpc.ankr.com/arbitrum',
-                'https://arbitrum.llamarpc.com',
+                'https://endpoints.omniatech.io/v1/arbitrum/one/public',
+                'https://1rpc.io/arb',
             ]
         },
         bsc: {
             name:'BNB Chain', nativeSym:'BNB', coinId:'binancecoin', explorer:'https://bscscan.com',
             panel:'panelBsc', nativeEl:'bscNativeBal', totalEl:'bscChainTotal', listEl:'bscTokensList', tabEl:'tab-usd-bsc',
             rpcs: [
-                'https://bsc-dataseed.binance.org/',
-                'https://endpoints.omniatech.io/v1/bsc/mainnet/public',
-                'https://bsc.publicnode.com',
                 'https://rpc.ankr.com/bsc',
+                'https://bsc.publicnode.com',
                 'https://bsc-dataseed1.defibit.io',
+                'https://bsc-dataseed2.defibit.io',
+                'https://endpoints.omniatech.io/v1/bsc/mainnet/public',
             ]
         },
         matic: {
             name:'Polygon', nativeSym:'MATIC', coinId:'matic-network', explorer:'https://polygonscan.com',
             panel:'panelMatic', nativeEl:'maticNativeBal', totalEl:'maticChainTotal', listEl:'maticTokensList', tabEl:'tab-usd-matic',
             rpcs: [
-                'https://polygon-rpc.com',
-                'https://endpoints.omniatech.io/v1/matic/mainnet/public',
-                'https://polygon.publicnode.com',
                 'https://rpc.ankr.com/polygon',
+                'https://polygon.publicnode.com',
                 'https://polygon-bor-rpc.publicnode.com',
+                'https://endpoints.omniatech.io/v1/matic/mainnet/public',
+                'https://1rpc.io/matic',
             ]
         },
         op: {
@@ -109,10 +108,10 @@ function openModal() {
             panel:'panelOp', nativeEl:'opNativeBal', totalEl:'opChainTotal', listEl:'opTokensList', tabEl:'tab-usd-op',
             rpcs: [
                 'https://mainnet.optimism.io',
-                'https://endpoints.omniatech.io/v1/op/mainnet/public',
                 'https://optimism.publicnode.com',
                 'https://rpc.ankr.com/optimism',
-                'https://optimism.llamarpc.com',
+                'https://endpoints.omniatech.io/v1/op/mainnet/public',
+                'https://1rpc.io/op',
             ]
         },
         base: {
@@ -120,10 +119,10 @@ function openModal() {
             panel:'panelBase', nativeEl:'baseNativeBal', totalEl:'baseChainTotal', listEl:'baseTokensList', tabEl:'tab-usd-base',
             rpcs: [
                 'https://mainnet.base.org',
-                'https://endpoints.omniatech.io/v1/base/mainnet/public',
                 'https://base.publicnode.com',
                 'https://rpc.ankr.com/base',
-                'https://base.llamarpc.com',
+                'https://endpoints.omniatech.io/v1/base/mainnet/public',
+                'https://1rpc.io/base',
             ]
         },
     };
@@ -188,10 +187,9 @@ function openModal() {
         return sig + padded;
     }
 
-    // rpcCall con fallback automático: prueba cada RPC en orden hasta que uno responda bien
     async function rpcCall(rpcUrls, method, params) {
         const urls = Array.isArray(rpcUrls) ? rpcUrls : [rpcUrls];
-        let lastError;
+        let lastErr;
         for (const url of urls) {
             try {
                 const res = await fetch(url, {
@@ -200,15 +198,13 @@ function openModal() {
                     body: JSON.stringify({ jsonrpc:'2.0', method, params, id:1 }),
                     signal: AbortSignal.timeout(7000)
                 });
+                if (!res.ok) { lastErr = new Error('HTTP ' + res.status); continue; }
                 const data = await res.json();
                 if (data.result !== undefined && data.result !== null) return data.result;
-                if (data.error) throw new Error(data.error.message || 'RPC error');
-            } catch(e) {
-                lastError = e;
-                // Intenta el siguiente RPC
-            }
+                if (data.error) { lastErr = new Error(data.error.message); continue; }
+            } catch(e) { lastErr = e; }
         }
-        throw lastError || new Error('Todos los RPCs fallaron');
+        throw lastErr || new Error('Todos los RPCs fallaron');
     }
 
     async function getNativeBalance(rpcUrls, walletAddr) {
@@ -392,9 +388,9 @@ function openModal() {
             let cryptoCOP = 0;
             try {
                 // Tasa USD/COP desde Frankfurter API (gratis, sin key)
-                const fxRes = await fetch('https://api.frankfurter.app/latest?from=USD&to=COP', { signal: AbortSignal.timeout(6000) });
+                const fxRes = await fetch('https://open.er-api.com/v6/latest/USD', { signal: AbortSignal.timeout(6000) });
                 const fxData = await fxRes.json();
-                const usdToCOP = fxData.rates?.COP || 4200;
+                const usdToCOP = fxData.rates?.COP || fxData.conversion_rates?.COP || 4200;
                 cryptoCOP = grandTotal * usdToCOP;
                 const fmtCOP = v => '$' + Math.round(v).toLocaleString('es-CO');
                 document.getElementById('cryptoCOP').textContent = '≈ ' + fmtCOP(cryptoCOP) + ' COP · TRM $' + Math.round(usdToCOP).toLocaleString('es-CO');
