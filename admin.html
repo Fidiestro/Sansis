@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanse Capital — Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f; --bg2: #111118; --card: #14141d; --input: #1c1c28;
+            --gold: #d4a843; --gold-light: #e8c56d; --gold-dark: #b8922e;
+            --text: #f0ede6; --text2: #8a8a9a; --muted: #55556a; --border: #222233;
+            --green: #4ecb8d; --red: #e74c5e; --blue: #5b8def; --purple: #a78bfa;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+        .topbar {
+            background:var(--bg2); border-bottom:1px solid var(--border); padding:16px 32px;
+            display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:50;
+        }
+        .topbar h1 {
+            font-family:'Playfair Display',serif; font-size:20px;
+            background:linear-gradient(135deg,var(--gold-light),var(--gold));
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+        }
+        .topbar-sub { font-size:11px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; }
+        .topbar-right { display:flex; gap:12px; align-items:center; }
+        .topbar-right a { color:var(--text2); text-decoration:none; font-size:13px; padding:8px 16px; border:1px solid var(--border); border-radius:8px; }
+        .topbar-right a:hover { border-color:var(--gold); color:var(--gold); }
+
+        .container { max-width:1100px; margin:0 auto; padding:32px 24px; }
+
+        /* Tabs */
+        .tabs { display:flex; gap:4px; margin-bottom:28px; background:var(--bg2); border-radius:12px; padding:4px; border:1px solid var(--border); }
+        .tab { flex:1; padding:12px; text-align:center; border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; color:var(--text2); transition:all 0.2s; }
+        .tab:hover { color:var(--text); }
+        .tab.active { background:var(--gold); color:#0a0a0f; }
+
+        /* Cards */
+        .section { display:none; }
+        .section.active { display:block; }
+        .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; margin-bottom:24px; }
+        .card-title { font-size:18px; font-weight:700; margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+
+        /* Forms */
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+        .form-row.cols-3 { grid-template-columns:1fr 1fr 1fr; }
+        .form-group { display:flex; flex-direction:column; gap:6px; }
+        .form-group.full { grid-column:1/-1; }
+        label { font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; }
+        input, select, textarea {
+            padding:12px 14px; background:var(--input); border:1px solid var(--border); border-radius:10px;
+            color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; outline:none; transition:border 0.2s;
+        }
+        input:focus, select:focus { border-color:var(--gold); }
+        select { cursor:pointer; }
+
+        .btn {
+            padding:12px 24px; border:none; border-radius:10px; font-family:'DM Sans',sans-serif;
+            font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s;
+        }
+        .btn-gold { background:linear-gradient(135deg,var(--gold),var(--gold-dark)); color:#0a0a0f; }
+        .btn-gold:hover { box-shadow:0 4px 20px rgba(212,168,67,0.3); transform:translateY(-1px); }
+        .btn-red { background:rgba(231,76,94,0.15); color:var(--red); border:1px solid rgba(231,76,94,0.3); }
+        .btn-red:hover { background:rgba(231,76,94,0.25); }
+        .btn-sm { padding:6px 14px; font-size:12px; border-radius:8px; }
+
+        /* Table */
+        .table-wrap { overflow-x:auto; }
+        table { width:100%; border-collapse:collapse; }
+        th { text-align:left; padding:10px 16px; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border); }
+        td { padding:14px 16px; font-size:13px; border-bottom:1px solid var(--border); }
+        tr:hover td { background:rgba(212,168,67,0.02); }
+        .mono { font-family:'JetBrains Mono',monospace; font-weight:500; }
+        .badge { display:inline-block; padding:3px 10px; border-radius:100px; font-size:11px; font-weight:600; }
+        .badge-green { color:var(--green); background:rgba(78,203,141,0.1); }
+        .badge-gold { color:var(--gold); background:rgba(212,168,67,0.1); }
+        .badge-red { color:var(--red); background:rgba(231,76,94,0.1); }
+        .badge-blue { color:var(--blue); background:rgba(91,141,239,0.1); }
+
+        /* Toast */
+        .toast { position:fixed; bottom:24px; right:24px; padding:14px 24px; border-radius:12px; font-size:13px; font-weight:600; z-index:999; transform:translateY(100px); opacity:0; transition:all 0.3s; }
+        .toast.show { transform:translateY(0); opacity:1; }
+        .toast-success { background:var(--green); color:#0a0a0f; }
+        .toast-error { background:var(--red); color:white; }
+
+        /* User select */
+        .user-select-info { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--input); border-radius:10px; margin-bottom:16px; }
+        .user-select-info .avatar { width:36px; height:36px; border-radius:8px; background:linear-gradient(135deg,var(--gold),var(--gold-dark)); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; color:#0a0a0f; }
+
+        /* Stats row */
+        .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
+        .stat-mini { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; text-align:center; }
+        .stat-mini .val { font-size:24px; font-weight:700; font-family:'JetBrains Mono',monospace; }
+        .stat-mini .lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+
+        @media(max-width:768px) {
+            .form-row, .form-row.cols-3 { grid-template-columns:1fr; }
+            .stats-row { grid-template-columns:1fr 1fr; }
+            .tabs { flex-wrap:wrap; }
+            .container { padding:16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <div>
+            <h1>SANSE CAPITAL</h1>
+            <div class="topbar-sub">Panel de Administración</div>
+        </div>
+        <div class="topbar-right">
+            <a href="dashboard.html">← Dashboard</a>
+            <a href="index.html">🏠 Home</a>
+            <a href="#" onclick="logout()">Salir</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats-row" id="stats-row">
+            <div class="stat-mini"><div class="val" id="stat-users">-</div><div class="lbl">Usuarios</div></div>
+            <div class="stat-mini"><div class="val" id="stat-inv">-</div><div class="lbl">Inversiones</div></div>
+            <div class="stat-mini"><div class="val" id="stat-tx">-</div><div class="lbl">Transacciones</div></div>
+            <div class="stat-mini"><div class="val" id="stat-balance">-</div><div class="lbl">Balance Total</div></div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('users')">👥 Usuarios</div>
+            <div class="tab" onclick="switchTab('investments')">💰 Inversiones</div>
+            <div class="tab" onclick="switchTab('transactions')">📋 Transacciones</div>
+            <div class="tab" onclick="switchTab('balance')">📊 Balances</div>
+        </div>
+
+        <!-- USERS SECTION -->
+        <div class="section active" id="sec-users">
+            <div class="card">
+                <div class="card-title">➕ Crear Nuevo Usuario</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Nombre Completo *</label><input id="u-name" placeholder="Juan Pérez"></div>
+                    <div class="form-group"><label>Email *</label><input id="u-email" type="email" placeholder="juan@email.com"></div>
+                </div>
+                <div class="form-row cols-3">
+                    <div class="form-group"><label>Contraseña *</label><input id="u-pass" type="password" placeholder="Mín 8 chars, 1 mayúscula, 1 número"></div>
+                    <div class="form-group"><label>Teléfono</label><input id="u-phone" placeholder="3001234567"></div>
+                    <div class="form-group"><label>Rol</label>
+                        <select id="u-role"><option value="client">Cliente</option><option value="admin">Admin</option></select>
+                    </div>
+                </div>
+                <button class="btn btn-gold" onclick="createUser()">Crear Usuario</button>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📋 Usuarios Registrados</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Creado</th><th>Acciones</th></tr></thead>
+                        <tbody id="users-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- INVESTMENTS SECTION -->
+        <div class="section" id="sec-investments">
+            <div class="card">
+                <div class="card-title">➕ Crear Inversión</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Usuario *</label><select id="i-user"></select></div>
+                    <div class="form-group"><label>Tipo *</label>
+                        <select id="i-type">
+                            <option value="Ahorro Cadena">Ahorro Cadena</option>
+                            <option value="Inversión Conservadora">Inversión Conservadora</option>
+                            <option value="Inversión Moderada">Inversión Moderada</option>
+                            <option value="Inversión Agresiva">Inversión Agresiva</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row cols-3">
+                    <div class="form-group"><label>Monto (COP) *</label><input id="i-amount" type="number" placeholder="5000000"></div>
+                    <div class="form-group"><label>Tasa Anual (%) *</label><input id="i-rate" type="number" step="0.1" placeholder="22"></div>
+                    <div class="form-group"><label>Fecha Inicio</label><input id="i-date" type="date"></div>
+                </div>
+                <button class="btn btn-gold" onclick="createInvestment()">Crear Inversión</button>
+            </div>
+        </div>
+
+        <!-- TRANSACTIONS SECTION -->
+        <div class="section" id="sec-transactions">
+            <div class="card">
+                <div class="card-title">➕ Registrar Transacción</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Usuario *</label><select id="t-user"></select></div>
+                    <div class="form-group"><label>Tipo *</label>
+                        <select id="t-type">
+                            <option value="deposit">Depósito</option>
+                            <option value="profit">Rendimiento</option>
+                            <option value="withdraw">Retiro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row cols-3">
+                    <div class="form-group"><label>Monto (COP) *</label><input id="t-amount" type="number" placeholder="2000000"></div>
+                    <div class="form-group"><label>Descripción</label><input id="t-desc" placeholder="Aporte mensual"></div>
+                    <div class="form-group"><label>Fecha</label><input id="t-date" type="date"></div>
+                </div>
+                <button class="btn btn-gold" onclick="createTransaction()">Registrar Transacción</button>
+            </div>
+        </div>
+
+        <!-- BALANCE SECTION -->
+        <div class="section" id="sec-balance">
+            <div class="card">
+                <div class="card-title">➕ Registrar Balance</div>
+                <p style="color:var(--text2);font-size:13px;margin-bottom:16px;">Registra el balance actual de un usuario. Esto se usa para el gráfico de crecimiento en el dashboard.</p>
+                <div class="form-row cols-3">
+                    <div class="form-group"><label>Usuario *</label><select id="b-user"></select></div>
+                    <div class="form-group"><label>Balance (COP) *</label><input id="b-amount" type="number" placeholder="15000000"></div>
+                    <div class="form-group"><label>Fecha</label><input id="b-date" type="date"></div>
+                </div>
+                <button class="btn btn-gold" onclick="recordBalance()">Registrar Balance</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const API_URL = 'https://sanse-backend-production.up.railway.app/api';
+
+        // ====== AUTH ======
+        function getToken() {
+            return localStorage.getItem('sanse_access_token') || sessionStorage.getItem('sanse_access_token');
+        }
+        function getStorage() {
+            return localStorage.getItem('sanse_access_token') ? localStorage : sessionStorage;
+        }
+        function getUserData() {
+            const d = localStorage.getItem('sanse_user') || sessionStorage.getItem('sanse_user');
+            return d ? JSON.parse(d) : null;
+        }
+
+        if (!getToken()) window.location.href = 'login.html';
+        const userData = getUserData();
+        if (userData && userData.role !== 'admin') {
+            alert('Acceso denegado. Solo administradores.');
+            window.location.href = 'dashboard.html';
+        }
+
+        function logout() {
+            ['sanse_access_token','sanse_refresh_token','sanse_user'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+            window.location.href = 'login.html';
+        }
+
+        async function apiFetch(endpoint, options = {}) {
+            const token = getToken();
+            const config = { ...options, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...options.headers } };
+            let res = await fetch(`${API_URL}${endpoint}`, config);
+            if (res.status === 401) {
+                const refreshed = await refreshToken();
+                if (refreshed) {
+                    config.headers['Authorization'] = `Bearer ${getToken()}`;
+                    res = await fetch(`${API_URL}${endpoint}`, config);
+                } else { logout(); return null; }
+            }
+            return res;
+        }
+
+        async function refreshToken() {
+            try {
+                const rt = localStorage.getItem('sanse_refresh_token') || sessionStorage.getItem('sanse_refresh_token');
+                if (!rt) return false;
+                const res = await fetch(`${API_URL}/auth/refresh`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({refreshToken:rt}) });
+                if (!res.ok) return false;
+                const data = await res.json();
+                const s = getStorage();
+                s.setItem('sanse_access_token', data.accessToken);
+                s.setItem('sanse_refresh_token', data.refreshToken);
+                return true;
+            } catch { return false; }
+        }
+
+        // ====== TOAST ======
+        function toast(msg, type = 'success') {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.className = `toast toast-${type} show`;
+            setTimeout(() => el.classList.remove('show'), 3000);
+        }
+
+        // ====== TABS ======
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(`sec-${tab}`).classList.add('active');
+        }
+
+        // ====== DATA ======
+        let allUsers = [];
+
+        async function loadUsers() {
+            const res = await apiFetch('/auth/users');
+            if (!res) return;
+            const data = await res.json();
+            allUsers = data.users || [];
+
+            // Stats
+            document.getElementById('stat-users').textContent = allUsers.length;
+
+            // Table
+            const tbody = document.getElementById('users-table');
+            if (!allUsers.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">No hay usuarios</td></tr>';
+                return;
+            }
+            tbody.innerHTML = allUsers.map(u => `
+                <tr>
+                    <td class="mono">${u.id}</td>
+                    <td>${u.full_name}</td>
+                    <td style="color:var(--text2)">${u.email}</td>
+                    <td><span class="badge ${u.role==='admin'?'badge-gold':'badge-blue'}">${u.role}</span></td>
+                    <td style="color:var(--muted)">${new Date(u.created_at).toLocaleDateString('es-CO')}</td>
+                    <td><button class="btn btn-sm btn-red" onclick="viewUser(${u.id})">Ver</button></td>
+                </tr>
+            `).join('');
+
+            // Populate user selects
+            const selects = ['i-user','t-user','b-user'];
+            selects.forEach(id => {
+                const sel = document.getElementById(id);
+                sel.innerHTML = '<option value="">Seleccionar usuario...</option>' +
+                    allUsers.map(u => `<option value="${u.id}">${u.full_name} (${u.email})</option>`).join('');
+            });
+        }
+
+        async function viewUser(id) {
+            const res = await apiFetch(`/admin/users/${id}/details`);
+            if (!res) return;
+            const data = await res.json();
+            const u = data.user;
+            const invCount = data.investments.length;
+            const txCount = data.transactions.length;
+            const lastBalance = data.balanceHistory.length > 0 ? data.balanceHistory[data.balanceHistory.length-1].balance : 0;
+
+            alert(`👤 ${u.full_name}\n📧 ${u.email}\n💰 Inversiones: ${invCount}\n📋 Transacciones: ${txCount}\n💵 Balance: $${Number(lastBalance).toLocaleString('es-CO')}`);
+        }
+
+        // ====== CREATE USER ======
+        async function createUser() {
+            const body = {
+                email: document.getElementById('u-email').value,
+                password: document.getElementById('u-pass').value,
+                fullName: document.getElementById('u-name').value,
+                phone: document.getElementById('u-phone').value || undefined,
+                role: document.getElementById('u-role').value,
+            };
+            if (!body.email || !body.password || !body.fullName) return toast('Completa los campos obligatorios', 'error');
+
+            const res = await apiFetch('/auth/users', { method:'POST', body:JSON.stringify(body) });
+            if (!res) return;
+            const data = await res.json();
+            if (!res.ok) return toast(data.error, 'error');
+
+            toast(`✅ Usuario ${body.fullName} creado`);
+            ['u-name','u-email','u-pass','u-phone'].forEach(id => document.getElementById(id).value = '');
+            loadUsers();
+        }
+
+        // ====== CREATE INVESTMENT ======
+        async function createInvestment() {
+            const body = {
+                userId: parseInt(document.getElementById('i-user').value),
+                type: document.getElementById('i-type').value,
+                amount: parseFloat(document.getElementById('i-amount').value),
+                annualRate: parseFloat(document.getElementById('i-rate').value),
+                startDate: document.getElementById('i-date').value || undefined,
+            };
+            if (!body.userId || !body.amount || !body.annualRate) return toast('Completa los campos obligatorios', 'error');
+
+            const res = await apiFetch('/admin/investments', { method:'POST', body:JSON.stringify(body) });
+            if (!res) return;
+            const data = await res.json();
+            if (!res.ok) return toast(data.error, 'error');
+
+            toast('✅ Inversión creada');
+            ['i-amount','i-rate'].forEach(id => document.getElementById(id).value = '');
+        }
+
+        // ====== CREATE TRANSACTION ======
+        async function createTransaction() {
+            const body = {
+                userId: parseInt(document.getElementById('t-user').value),
+                type: document.getElementById('t-type').value,
+                amount: parseFloat(document.getElementById('t-amount').value),
+                description: document.getElementById('t-desc').value || undefined,
+                date: document.getElementById('t-date').value ? new Date(document.getElementById('t-date').value).toISOString() : undefined,
+            };
+            if (!body.userId || !body.amount) return toast('Completa los campos obligatorios', 'error');
+
+            const res = await apiFetch('/admin/transactions', { method:'POST', body:JSON.stringify(body) });
+            if (!res) return;
+            const data = await res.json();
+            if (!res.ok) return toast(data.error, 'error');
+
+            toast('✅ Transacción registrada');
+            ['t-amount','t-desc'].forEach(id => document.getElementById(id).value = '');
+        }
+
+        // ====== RECORD BALANCE ======
+        async function recordBalance() {
+            const body = {
+                userId: parseInt(document.getElementById('b-user').value),
+                balance: parseFloat(document.getElementById('b-amount').value),
+                date: document.getElementById('b-date').value ? new Date(document.getElementById('b-date').value).toISOString() : undefined,
+            };
+            if (!body.userId || isNaN(body.balance)) return toast('Completa los campos obligatorios', 'error');
+
+            const res = await apiFetch('/admin/balance', { method:'POST', body:JSON.stringify(body) });
+            if (!res) return;
+            const data = await res.json();
+            if (!res.ok) return toast(data.error, 'error');
+
+            toast('✅ Balance registrado');
+            document.getElementById('b-amount').value = '';
+        }
+
+        // ====== INIT ======
+        document.getElementById('i-date').valueAsDate = new Date();
+        document.getElementById('t-date').valueAsDate = new Date();
+        document.getElementById('b-date').valueAsDate = new Date();
+        loadUsers();
+    </script>
+</body>
+</html>
