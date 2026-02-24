@@ -8,314 +8,385 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg:     #07090f;
-            --bg2:    #0c0f1a;
-            --bg3:    #111827;
-            --surface: rgba(255,255,255,0.04);
-            --border: rgba(255,255,255,0.08);
-            --gold:   #f5c542;
-            --gold2:  #e0a800;
-            --text:   #e8eaf0;
-            --muted:  #8892a4;
-            --white:  #ffffff;
-            --r:      14px;
+            --gold: #C9A84C;
+            --gold-light: #E8C96A;
+            --gold-dim: rgba(201,168,76,0.15);
+            --dark: #090909;
+            --dark-2: #111111;
+            --dark-3: #181818;
+            --text: #E8E4DC;
+            --text-muted: #7A7670;
+            --border: rgba(201,168,76,0.12);
+            --border-hover: rgba(201,168,76,0.35);
         }
 
         html { scroll-behavior: smooth; }
 
         body {
-            background: var(--bg);
-            color: var(--text);
             font-family: 'DM Sans', sans-serif;
-            line-height: 1.65;
+            background: var(--dark);
+            color: var(--text);
+            line-height: 1.7;
         }
 
+        /* Noise texture */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-            opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
             pointer-events: none;
-            z-index: 9999;
+            z-index: 0;
+            opacity: 0.4;
         }
 
-        .container { max-width: 820px; margin: 0 auto; padding: 0 24px; }
-
-        h1, h2, h3 { font-family: 'Syne', sans-serif; line-height: 1.15; }
-
-        /* Header */
-        header {
-            background: rgba(7,9,15,0.9);
-            backdrop-filter: blur(20px);
+        /* ══════ NAV ══════ */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px;
+            height: 64px;
+            background: rgba(9,9,9,0.9);
+            backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border);
-            padding: 16px 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
         }
-
-        .nav-inner {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .logo {
+        .nav-logo {
             font-family: 'Syne', sans-serif;
             font-weight: 800;
-            font-size: 1.2rem;
-            letter-spacing: -0.02em;
-            color: var(--white);
+            font-size: 16px;
+            letter-spacing: 0.08em;
+            color: var(--text);
             text-decoration: none;
         }
-        .logo span { color: var(--gold); }
-
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text);
-            font-family: 'Syne', sans-serif;
-            font-weight: 600;
-            font-size: 0.875rem;
-            padding: 10px 20px;
-            border-radius: 100px;
+        .nav-logo span { color: var(--gold); }
+        .nav-back {
+            font-size: 12px;
+            color: var(--text-muted);
             text-decoration: none;
+            padding: 8px 16px;
+            border: 1px solid var(--border);
             transition: all 0.2s;
         }
-        .back-btn:hover { border-color: rgba(245,197,66,0.4); color: var(--gold); }
+        .nav-back:hover { 
+            color: var(--gold); 
+            border-color: var(--gold);
+        }
 
-        /* Hero */
-        .page-hero {
-            padding: 72px 0 56px;
+        /* ══════ CONTAINER ══════ */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
             position: relative;
-            overflow: hidden;
+            z-index: 1;
+        }
+
+        /* ══════ HERO ══════ */
+        .page-hero {
+            padding: 100px 0 48px;
+            position: relative;
             border-bottom: 1px solid var(--border);
         }
         .page-hero::before {
             content: '';
             position: absolute;
             inset: 0;
-            background: radial-gradient(ellipse 60% 80% at 50% 0%, rgba(245,197,66,0.05), transparent);
+            background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.06), transparent);
             pointer-events: none;
         }
-        .page-hero-content { position: relative; z-index: 2; }
-
-        .page-label {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.15em;
+        .hero-label {
+            font-size: 10px;
+            letter-spacing: 0.25em;
             text-transform: uppercase;
             color: var(--gold);
-            background: rgba(245,197,66,0.1);
-            border: 1px solid rgba(245,197,66,0.2);
-            padding: 6px 14px;
-            border-radius: 100px;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-
+        .hero-label::before {
+            content: '';
+            width: 24px;
+            height: 1px;
+            background: var(--gold);
+        }
         .page-hero h1 {
-            font-size: clamp(2rem, 4.5vw, 3.2rem);
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(28px, 6vw, 42px);
             font-weight: 800;
-            letter-spacing: -0.03em;
-            margin-bottom: 14px;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            margin-bottom: 12px;
         }
-        .page-hero p { color: var(--muted); font-size: 1rem; }
+        .page-hero p {
+            font-size: 14px;
+            color: var(--text-muted);
+            max-width: 500px;
+        }
 
-        /* Legal info bar */
+        /* ══════ LEGAL BAR ══════ */
         .legal-bar {
-            background: var(--bg2);
+            background: var(--dark-2);
             border: 1px solid var(--border);
-            border-radius: var(--r);
-            padding: 24px 28px;
-            margin: 48px 0 32px;
+            padding: 20px;
+            margin: 32px 0;
             border-left: 3px solid var(--gold);
         }
         .legal-bar-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            grid-template-columns: 1fr;
+            gap: 16px;
         }
-        .legal-bar-item { font-size: 0.875rem; }
-        .legal-bar-item .lbl { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px; }
-        .legal-bar-item .val { color: var(--white); font-weight: 600; }
+        .legal-bar-item .lbl {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 4px;
+        }
+        .legal-bar-item .val {
+            font-size: 14px;
+            color: var(--text);
+            font-weight: 500;
+        }
 
-        /* Sections */
+        /* ══════ SECTIONS ══════ */
         .terms-section {
-            padding: 32px 0;
+            padding: 28px 0;
             border-bottom: 1px solid var(--border);
         }
         .terms-section:last-of-type { border-bottom: none; }
 
         .section-head {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 14px;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
-
         .section-num {
-            width: 34px; height: 34px;
-            background: linear-gradient(135deg, var(--gold), var(--gold2));
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px;
+            background: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-family: 'Syne', sans-serif;
-            font-size: 0.8rem;
+            font-size: 13px;
             font-weight: 800;
-            color: #07090f;
+            color: var(--dark);
             flex-shrink: 0;
         }
-
         .section-title {
             font-family: 'Syne', sans-serif;
-            font-size: 1.15rem;
+            font-size: 16px;
             font-weight: 700;
+            line-height: 1.3;
+            padding-top: 4px;
         }
 
         .terms-section p {
-            color: var(--muted);
-            font-size: 0.9rem;
-            line-height: 1.75;
+            font-size: 14px;
+            color: var(--text-muted);
             margin-bottom: 12px;
+            line-height: 1.8;
         }
         .terms-section p:last-child { margin-bottom: 0; }
-
         .terms-section strong { color: var(--text); font-weight: 600; }
 
+        /* Alert box */
         .alert-box {
-            background: rgba(245,197,66,0.06);
-            border: 1px solid rgba(245,197,66,0.2);
-            border-radius: 10px;
-            padding: 16px 20px;
+            background: var(--gold-dim);
+            border: 1px solid rgba(201,168,76,0.25);
+            padding: 16px;
             margin: 16px 0;
-            font-size: 0.875rem;
+            font-size: 13px;
             color: var(--text);
+            line-height: 1.7;
         }
-        .alert-box .alert-title { color: var(--gold); font-weight: 700; margin-bottom: 6px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; }
+        .alert-title {
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-        .bullet-list { list-style: none; padding-left: 0; margin: 12px 0; }
+        /* Bullet list */
+        .bullet-list {
+            list-style: none;
+            margin: 12px 0;
+        }
         .bullet-list li {
-            font-size: 0.9rem;
-            color: var(--muted);
-            padding: 8px 0 8px 24px;
+            font-size: 14px;
+            color: var(--text-muted);
+            padding: 10px 0 10px 24px;
             position: relative;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
+            border-bottom: 1px solid var(--border);
             line-height: 1.6;
         }
         .bullet-list li:last-child { border-bottom: none; }
         .bullet-list li::before {
             content: '';
             position: absolute;
-            left: 0; top: 16px;
-            width: 8px; height: 8px;
-            border-radius: 50%;
+            left: 0;
+            top: 18px;
+            width: 8px;
+            height: 8px;
             background: var(--gold);
-            opacity: 0.7;
         }
 
+        /* Rates */
         .rates-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 12px;
             margin-top: 16px;
         }
         .rate-pill {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 16px 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-        .rate-pill .name { font-size: 0.875rem; color: var(--text); }
-        .rate-pill .rate { font-family: 'Syne', sans-serif; font-weight: 800; color: var(--gold); }
-
-        /* CTA block */
-        .cta-block {
-            background: var(--bg2);
+            padding: 16px;
+            background: var(--dark-2);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 48px 40px;
+        }
+        .rate-pill .name {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .rate-pill .rate {
+            font-family: 'Syne', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gold);
+        }
+
+        /* ══════ CTA ══════ */
+        .cta-block {
+            background: var(--dark-2);
+            border: 1px solid var(--border);
+            padding: 32px 24px;
             text-align: center;
-            margin: 48px 0;
+            margin: 40px 0;
             position: relative;
             overflow: hidden;
         }
         .cta-block::before {
             content: '';
             position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse 70% 70% at 50% 0%, rgba(245,197,66,0.06), transparent);
-            pointer-events: none;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
         }
-        .cta-block h2 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px; position: relative; }
-        .cta-block p { color: var(--muted); font-size: 0.9rem; margin-bottom: 28px; position: relative; }
-        .btn-wa {
+        .cta-block h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+        .cta-block h2 em {
+            font-style: normal;
+            color: var(--gold);
+        }
+        .cta-block p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .btn-whatsapp {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             background: #25D366;
             color: #fff;
             font-family: 'Syne', sans-serif;
+            font-size: 13px;
             font-weight: 700;
-            font-size: 0.9rem;
-            padding: 14px 30px;
-            border-radius: 100px;
+            letter-spacing: 0.05em;
+            padding: 14px 28px;
             text-decoration: none;
-            transition: all 0.25s;
-            position: relative;
+            transition: all 0.2s;
         }
-        .btn-wa:hover { background: #1ebe5d; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(37,211,102,0.3); }
+        .btn-whatsapp:hover {
+            background: #1ebe5d;
+            transform: translateY(-2px);
+        }
 
-        /* Footer */
+        /* ══════ FOOTER ══════ */
         footer {
-            background: var(--bg2);
+            background: var(--dark-2);
             border-top: 1px solid var(--border);
-            padding: 28px 0;
+            padding: 24px 0;
             margin-top: 0;
         }
         .footer-row {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
+            flex-direction: column;
             gap: 12px;
+            align-items: center;
+            text-align: center;
         }
-        .footer-row p { font-size: 0.8rem; color: var(--muted); }
-        .footer-row a { font-size: 0.8rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
-        .footer-row a:hover { color: var(--gold); }
+        .footer-row p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .footer-row a {
+            font-size: 12px;
+            color: var(--gold);
+            text-decoration: none;
+        }
 
-        @media(max-width: 640px) {
-            .legal-bar-grid { grid-template-columns: 1fr; }
-            .rates-row { grid-template-columns: 1fr; }
-            .cta-block { padding: 32px 24px; }
+        /* ══════ RESPONSIVE ══════ */
+        @media (min-width: 480px) {
+            nav { padding: 0 32px; }
+            .container { padding: 0 32px; }
+            .legal-bar { padding: 24px; }
+            .legal-bar-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .rates-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            .cta-block {
+                padding: 48px 40px;
+            }
+            .footer-row {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+        }
+
+        @media (min-width: 768px) {
+            nav { padding: 0 48px; }
+            .container { padding: 0 48px; }
+            .page-hero {
+                padding: 120px 0 56px;
+            }
+            .section-title {
+                font-size: 18px;
+            }
         }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="container">
-        <div class="nav-inner">
-            <a href="index.html" class="logo">SANSE <span>CAPITAL</span></a>
-            <a href="index.html" class="back-btn">← Volver</a>
-        </div>
-    </div>
-</header>
+<nav>
+    <a href="index.html" class="nav-logo">SANSE <span>CAPITAL</span></a>
+    <a href="index.html" class="nav-back">← Volver</a>
+</nav>
 
 <div class="page-hero">
-    <div class="container page-hero-content">
-        <div class="page-label">Documento Legal</div>
+    <div class="container">
+        <div class="hero-label">Documento Legal</div>
         <h1>Términos y Condiciones</h1>
         <p>Fondo de Inversión Sanse Capital — Fondo privado de inversión y préstamos entre particulares</p>
     </div>
@@ -331,7 +402,7 @@
             </div>
             <div class="legal-bar-item">
                 <div class="lbl">Tipo</div>
-                <div class="val">Fondo privado de inversión y préstamos</div>
+                <div class="val">Fondo privado de inversión</div>
             </div>
             <div class="legal-bar-item">
                 <div class="lbl">Responsable</div>
@@ -384,7 +455,7 @@
     <div class="terms-section">
         <div class="section-head">
             <div class="section-num">4</div>
-            <div class="section-title">Modalidad de Préstamo — Condiciones Generales</div>
+            <div class="section-title">Modalidad de Préstamo</div>
         </div>
         <p>Todo participante en modalidad de préstamo deberá realizar un <strong>abono obligatorio a capital cada mes</strong>, además del pago de intereses.</p>
         <p>En caso de incumplimiento:</p>
@@ -403,20 +474,21 @@
         <div class="rates-row">
             <div class="rate-pill">
                 <span class="name">Socios del fondo</span>
-                <span class="rate">4% mensual</span>
+                <span class="rate">4%</span>
             </div>
             <div class="rate-pill">
                 <span class="name">No socios</span>
-                <span class="rate">6% mensual</span>
+                <span class="rate">6%</span>
             </div>
         </div>
+        <p style="margin-top:12px;font-size:12px;">* Tasas mensuales sobre el capital prestado</p>
     </div>
 
     <!-- 6 -->
     <div class="terms-section">
         <div class="section-head">
             <div class="section-num">6</div>
-            <div class="section-title">Variación de Intereses del Fondo</div>
+            <div class="section-title">Variación de Intereses</div>
         </div>
         <div class="alert-box">
             <div class="alert-title">⚠️ Aviso importante</div>
@@ -437,9 +509,9 @@
 
     <!-- CTA -->
     <div class="cta-block">
-        <h2>¿Listo para Participar?</h2>
+        <h2>¿Listo para <em>Participar</em>?</h2>
         <p>Para aceptar estos términos e iniciar tu proceso de inversión, contáctanos directamente por WhatsApp.</p>
-        <a href="https://wa.me/573194552890?text=Acepto%20los%20términos%20y%20quiero%20entrar%20a%20SanseCapital" target="_blank" class="btn-wa">
+        <a href="https://wa.me/573194552890?text=Acepto%20los%20términos%20y%20quiero%20entrar%20a%20SanseCapital" target="_blank" class="btn-whatsapp">
             📱 WhatsApp: 319 455 2890
         </a>
     </div>

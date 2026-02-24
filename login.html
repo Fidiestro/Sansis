@@ -3,268 +3,591 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sanse Capital — Acceso</title>
+    <title>Acceso — Sanse Capital</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #111118;
-            --bg-card: #16161f;
-            --bg-input: #1c1c28;
-            --gold: #d4a843;
-            --gold-light: #e8c56d;
-            --gold-dark: #b8922e;
-            --text-primary: #f0ede6;
-            --text-secondary: #8a8a9a;
-            --text-muted: #55556a;
-            --border: #2a2a3a;
+            --gold: #C9A84C;
+            --gold-light: #E8C96A;
+            --gold-dim: rgba(201,168,76,0.15);
+            --dark: #090909;
+            --dark-2: #111111;
+            --dark-3: #181818;
+            --text: #E8E4DC;
+            --text-muted: #7A7670;
+            --border: rgba(201,168,76,0.12);
+            --border-hover: rgba(201,168,76,0.35);
             --danger: #e74c5e;
             --success: #4ecb8d;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
 
         body {
             font-family: 'DM Sans', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            background: var(--dark);
+            color: var(--text);
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Noise texture */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        /* ══════ NAV ══════ */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px;
+            height: 64px;
+            background: rgba(9,9,9,0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 17px;
+            letter-spacing: 0.08em;
+            color: var(--text);
+            text-decoration: none;
+        }
+        .nav-logo span { color: var(--gold); }
+        .nav-back {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .nav-back:hover { color: var(--gold); }
+
+        /* ══════ MAIN CONTAINER ══════ */
+        .login-wrapper {
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            padding: 80px 20px 40px;
+            position: relative;
+            z-index: 1;
         }
 
-        .bg-gradient {
-            position: fixed; inset: 0; z-index: 0;
-            background:
-                radial-gradient(ellipse 600px 400px at 20% 30%, rgba(212,168,67,0.06) 0%, transparent 70%),
-                radial-gradient(ellipse 500px 500px at 80% 70%, rgba(212,168,67,0.04) 0%, transparent 70%),
-                var(--bg-primary);
-        }
-
-        .bg-grid {
-            position: fixed; inset: 0; z-index: 0;
-            background-image:
-                linear-gradient(rgba(212,168,67,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(212,168,67,0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 70%);
-        }
-
-        .floating-orb {
-            position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.4;
-            animation: float 20s ease-in-out infinite; z-index: 0;
-        }
-        .floating-orb:nth-child(1) { width:300px;height:300px;background:rgba(212,168,67,0.08);top:-100px;left:-100px; }
-        .floating-orb:nth-child(2) { width:200px;height:200px;background:rgba(212,168,67,0.06);bottom:-50px;right:-50px;animation-delay:-7s; }
-
-        @keyframes float {
-            0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,-30px) scale(1.05)} 66%{transform:translate(-20px,20px) scale(0.95)}
+        /* Glow effect */
+        .login-wrapper::before {
+            content: '';
+            position: absolute;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            pointer-events: none;
         }
 
         .login-container {
-            position: relative; z-index: 10; width: 100%; max-width: 420px; padding: 20px;
-            animation: fadeUp 0.8s ease-out;
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            z-index: 2;
         }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
 
+        /* ══════ CARD ══════ */
         .login-card {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px;
-            padding: 48px 36px; backdrop-filter: blur(20px); position: relative; overflow: hidden;
+            background: var(--dark-2);
+            border: 1px solid var(--border);
+            padding: 32px 24px;
+            position: relative;
         }
         .login-card::before {
-            content:''; position:absolute; top:0;left:0;right:0; height:2px;
-            background:linear-gradient(90deg,transparent,var(--gold),transparent); opacity:0.6;
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
         }
 
-        .logo { text-align: center; margin-bottom: 36px; }
-        .logo-text {
-            font-family:'Playfair Display',serif; font-size:28px; font-weight:700; letter-spacing:2px;
-            background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));
-            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        /* Logo */
+        .login-logo {
+            text-align: center;
+            margin-bottom: 32px;
         }
-        .logo-sub { font-size:11px; color:var(--text-muted); letter-spacing:4px; text-transform:uppercase; margin-top:6px; }
+        .login-logo-text {
+            font-family: 'Syne', sans-serif;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+        }
+        .login-logo-text span { color: var(--gold); }
+        .login-logo-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-top: 6px;
+        }
 
-        .form-group { margin-bottom: 20px; }
-        .form-label { display:block; font-size:12px; font-weight:500; color:var(--text-secondary); margin-bottom:8px; letter-spacing:0.5px; text-transform:uppercase; }
-        .form-input-wrap { position: relative; }
-        .form-input-wrap .icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:16px; opacity:0.4; pointer-events:none; transition:opacity 0.3s; }
+        /* Tabs */
+        .login-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 28px;
+        }
+        .login-tab {
+            flex: 1;
+            padding: 14px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .login-tab.active {
+            color: var(--gold);
+        }
+        .login-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0; right: 0;
+            height: 2px;
+            background: var(--gold);
+        }
+        .login-tab:hover:not(.active) { color: var(--text); }
 
+        /* Error message */
+        .error-msg {
+            background: rgba(231,76,94,0.1);
+            border: 1px solid rgba(231,76,94,0.2);
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: var(--danger);
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+        .error-msg.show { display: flex; }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .form-input-wrap {
+            position: relative;
+        }
+        .form-input-wrap .icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.4;
+            pointer-events: none;
+        }
         .form-input {
-            width:100%; padding:14px 16px 14px 42px; background:var(--bg-input); border:1px solid var(--border);
-            border-radius:12px; color:var(--text-primary); font-family:'DM Sans',sans-serif; font-size:15px;
-            transition:all 0.3s ease; outline:none;
+            width: 100%;
+            padding: 14px 16px 14px 42px;
+            background: var(--dark-3);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            transition: all 0.2s;
+            outline: none;
         }
-        .form-input:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(212,168,67,0.1); }
-        .form-input::placeholder { color:var(--text-muted); }
+        .form-input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-dim);
+        }
+        .form-input::placeholder { color: var(--text-muted); }
 
         .toggle-password {
-            position:absolute; right:14px; top:50%; transform:translateY(-50%);
-            background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px; padding:4px;
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px;
         }
-        .toggle-password:hover { color:var(--text-secondary); }
+        .toggle-password:hover { color: var(--gold); }
 
-        .remember-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
-        .remember-check { display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; color:var(--text-secondary); }
-        .remember-check input { accent-color:var(--gold); width:16px; height:16px; }
-        .forgot-link { font-size:13px; color:var(--gold); text-decoration:none; opacity:0.8; }
-        .forgot-link:hover { opacity:1; }
+        /* Remember row */
+        .remember-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .remember-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .remember-check input {
+            accent-color: var(--gold);
+            width: 16px;
+            height: 16px;
+        }
+        .forgot-link {
+            font-size: 12px;
+            color: var(--gold);
+            text-decoration: none;
+            opacity: 0.8;
+        }
+        .forgot-link:hover { opacity: 1; }
 
+        /* Submit button */
         .btn-submit {
-            width:100%; padding:16px;
-            background:linear-gradient(135deg,var(--gold),var(--gold-dark));
-            border:none; border-radius:12px; color:#0a0a0f; font-family:'DM Sans',sans-serif;
-            font-size:15px; font-weight:600; cursor:pointer; transition:all 0.3s ease; letter-spacing:0.5px;
+            width: 100%;
+            padding: 16px;
+            background: var(--gold);
+            border: none;
+            color: var(--dark);
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .btn-submit:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(212,168,67,0.3); }
-        .btn-submit:disabled { opacity:0.6; cursor:not-allowed; transform:none; box-shadow:none; }
-        .btn-submit.loading .btn-text{display:none} .btn-submit.loading .spinner{display:inline-block}
-        .btn-submit .spinner { display:none; width:20px; height:20px; border:2px solid rgba(10,10,15,0.3); border-top-color:#0a0a0f; border-radius:50%; animation:spin 0.6s linear infinite; margin:0 auto; }
-        @keyframes spin{to{transform:rotate(360deg)}}
-
-        .error-msg {
-            background:rgba(231,76,94,0.1); border:1px solid rgba(231,76,94,0.2); border-radius:10px;
-            padding:12px 16px; margin-bottom:20px; font-size:13px; color:var(--danger); display:none; animation:shake 0.4s ease;
+        .btn-submit:hover {
+            background: var(--gold-light);
+            transform: translateY(-2px);
         }
-        .error-msg.show { display:flex; align-items:center; gap:8px; }
-        @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-submit.loading .btn-text { display: none; }
+        .btn-submit.loading .spinner { display: inline-block; }
+        .btn-submit .spinner {
+            display: none;
+            width: 20px; height: 20px;
+            border: 2px solid rgba(9,9,9,0.3);
+            border-top-color: var(--dark);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .login-footer { text-align:center; margin-top:28px; padding-top:24px; border-top:1px solid var(--border); }
-        .login-footer p { font-size:13px; color:var(--text-muted); }
-        .login-footer a { color:var(--gold); text-decoration:none; font-weight:500; }
+        /* WhatsApp register */
+        .register-panel {
+            display: none;
+            text-align: center;
+            padding: 20px 0;
+        }
+        .register-panel.active { display: block; }
+        .register-panel p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+        .btn-whatsapp {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 16px;
+            background: #25D366;
+            color: #fff;
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-whatsapp:hover {
+            background: #1ebe5d;
+            transform: translateY(-2px);
+        }
+        .register-info {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+        .register-info h4 {
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--gold);
+        }
+        .register-info ul {
+            list-style: none;
+            text-align: left;
+        }
+        .register-info li {
+            font-size: 13px;
+            color: var(--text-muted);
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .register-info li:last-child { border-bottom: none; }
+        .register-info li span { font-size: 16px; }
 
-        .back-home { display:inline-flex; align-items:center; gap:6px; color:var(--text-muted); text-decoration:none; font-size:13px; margin-top:24px; transition:color 0.3s; position:relative; z-index:10; }
-        .back-home:hover { color:var(--gold); }
+        /* Login form panel */
+        .login-panel { display: none; }
+        .login-panel.active { display: block; }
 
-        @media(max-width:480px) { .login-card{padding:36px 24px;} }
+        /* Footer */
+        .login-footer {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+        .login-footer p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .login-footer a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+
+        /* Legal note */
+        .legal-note {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 20px;
+            line-height: 1.6;
+            opacity: 0.7;
+        }
+        .legal-note a { color: var(--gold); text-decoration: none; }
+
+        /* ══════ RESPONSIVE ══════ */
+        @media (min-width: 480px) {
+            .login-card {
+                padding: 40px 36px;
+            }
+            nav {
+                padding: 0 48px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="bg-gradient"></div>
-    <div class="bg-grid"></div>
-    <div class="floating-orb"></div>
-    <div class="floating-orb"></div>
 
+<nav>
+    <a class="nav-logo" href="index.html">SANSE <span>CAPITAL</span></a>
+    <a class="nav-back" href="index.html">← Volver</a>
+</nav>
+
+<div class="login-wrapper">
     <div class="login-container">
         <div class="login-card">
-            <div class="logo">
-                <div class="logo-text">SANSE CAPITAL</div>
-                <div class="logo-sub">Fondo de Inversión</div>
+            <div class="login-logo">
+                <div class="login-logo-text">SANSE <span>CAPITAL</span></div>
+                <div class="login-logo-sub">Fondo de Inversión</div>
             </div>
 
-            <div class="error-msg" id="login-error">
-                <span>⚠</span>
-                <span id="login-error-text">Credenciales incorrectas</span>
+            <!-- Tabs -->
+            <div class="login-tabs">
+                <button class="login-tab active" onclick="showPanel('login')">Iniciar Sesión</button>
+                <button class="login-tab" onclick="showPanel('register')">Registrarse</button>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Correo electrónico</label>
-                <div class="form-input-wrap">
-                    <input type="email" class="form-input" id="login-email" placeholder="tu@correo.com" autocomplete="email">
-                    <span class="icon">✉</span>
+            <!-- Login Panel -->
+            <div class="login-panel active" id="panel-login">
+                <div class="error-msg" id="login-error">
+                    <span>⚠</span>
+                    <span id="login-error-text">Credenciales incorrectas</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Correo electrónico</label>
+                    <div class="form-input-wrap">
+                        <span class="icon">✉</span>
+                        <input type="email" class="form-input" id="login-email" placeholder="tu@correo.com" autocomplete="email">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Contraseña</label>
+                    <div class="form-input-wrap">
+                        <span class="icon">🔒</span>
+                        <input type="password" class="form-input" id="login-password" placeholder="••••••••" autocomplete="current-password">
+                        <button type="button" class="toggle-password" onclick="togglePass()">👁</button>
+                    </div>
+                </div>
+
+                <div class="remember-row">
+                    <label class="remember-check">
+                        <input type="checkbox" id="remember-me" checked>
+                        Recordarme
+                    </label>
+                    <a href="#" class="forgot-link" onclick="alert('Contacta vía WhatsApp para recuperar tu contraseña.'); return false;">¿Olvidaste tu clave?</a>
+                </div>
+
+                <button class="btn-submit" id="btn-login" onclick="handleLogin()">
+                    <span class="btn-text">Iniciar Sesión →</span>
+                    <div class="spinner"></div>
+                </button>
+            </div>
+
+            <!-- Register Panel -->
+            <div class="register-panel" id="panel-register">
+                <p>Para crear tu cuenta y empezar a invertir, contáctanos directamente por WhatsApp. Te guiaremos en todo el proceso.</p>
+                
+                <a href="https://wa.me/573194552890?text=Hola%2C%20quiero%20registrarme%20en%20Sanse%20Capital" target="_blank" class="btn-whatsapp">
+                    📱 Registrarme por WhatsApp
+                </a>
+
+                <div class="register-info">
+                    <h4>¿Qué necesitas?</h4>
+                    <ul>
+                        <li><span>📄</span> Cédula de ciudadanía</li>
+                        <li><span>📱</span> Número de celular</li>
+                        <li><span>🏦</span> Cuenta bancaria a tu nombre</li>
+                        <li><span>💰</span> Inversión mínima: $100.000 COP</li>
+                    </ul>
                 </div>
             </div>
-
-            <div class="form-group">
-                <label class="form-label">Contraseña</label>
-                <div class="form-input-wrap">
-                    <input type="password" class="form-input" id="login-password" placeholder="••••••••" autocomplete="current-password">
-                    <span class="icon">🔒</span>
-                    <button type="button" class="toggle-password" onclick="togglePass()">👁</button>
-                </div>
-            </div>
-
-            <div class="remember-row">
-                <label class="remember-check">
-                    <input type="checkbox" id="remember-me" checked>
-                    Recordarme
-                </label>
-                <a href="#" class="forgot-link" onclick="alert('Contacta vía WhatsApp para recuperar tu contraseña.'); return false;">¿Olvidaste tu clave?</a>
-            </div>
-
-            <button class="btn-submit" id="btn-login" onclick="handleLogin()">
-                <span class="btn-text">Iniciar Sesión →</span>
-                <div class="spinner"></div>
-            </button>
 
             <div class="login-footer">
                 <p>¿Necesitas ayuda? <a href="https://wa.me/573194552890" target="_blank">Escríbenos →</a></p>
             </div>
         </div>
 
-        <div style="text-align:center;">
-            <a href="index.html" class="back-home">← Volver al inicio</a>
-        </div>
+        <p class="legal-note">
+            Al iniciar sesión aceptas nuestros <a href="terminos.html">Términos y Condiciones</a>. 
+            Sanse Capital es un fondo privado entre particulares no vigilado por la SFC.
+        </p>
     </div>
+</div>
 
-    <script>
-        // ====== CONFIGURACIÓN API ======
-        const API_URL = 'https://sanse-backend-production.up.railway.app/api';
+<script>
+    const API_URL = 'https://sanse-backend-production.up.railway.app/api';
 
-        function togglePass() {
-            const input = document.getElementById('login-password');
-            const btn = document.querySelector('.toggle-password');
-            if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
-            else { input.type = 'password'; btn.textContent = '👁'; }
+    function showPanel(panel) {
+        document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.login-panel, .register-panel').forEach(p => p.classList.remove('active'));
+        
+        if (panel === 'login') {
+            document.querySelector('.login-tab:first-child').classList.add('active');
+            document.getElementById('panel-login').classList.add('active');
+        } else {
+            document.querySelector('.login-tab:last-child').classList.add('active');
+            document.getElementById('panel-register').classList.add('active');
+        }
+    }
+
+    function togglePass() {
+        const input = document.getElementById('login-password');
+        const btn = document.querySelector('.toggle-password');
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            btn.textContent = '👁';
+        }
+    }
+
+    async function handleLogin() {
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+        const errorEl = document.getElementById('login-error');
+        const errorText = document.getElementById('login-error-text');
+        const btn = document.getElementById('btn-login');
+
+        errorEl.classList.remove('show');
+
+        if (!email || !password) {
+            errorText.textContent = 'Por favor completa todos los campos.';
+            errorEl.classList.add('show');
+            return;
         }
 
-        async function handleLogin() {
-            const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value;
-            const errorEl = document.getElementById('login-error');
-            const errorText = document.getElementById('login-error-text');
-            const btn = document.getElementById('btn-login');
+        btn.classList.add('loading');
+        btn.disabled = true;
 
-            errorEl.classList.remove('show');
+        try {
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
 
-            if (!email || !password) {
-                errorText.textContent = 'Por favor completa todos los campos.';
-                errorEl.classList.add('show');
-                return;
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Error al iniciar sesión');
             }
 
-            btn.classList.add('loading');
-            btn.disabled = true;
+            const storage = document.getElementById('remember-me').checked ? localStorage : sessionStorage;
+            storage.setItem('sanse_access_token', data.accessToken);
+            storage.setItem('sanse_refresh_token', data.refreshToken);
+            storage.setItem('sanse_user', JSON.stringify(data.user));
 
-            try {
-                const response = await fetch(`${API_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password }),
-                });
+            window.location.href = 'dashboard.html';
 
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Error al iniciar sesión');
-                }
-
-                // Guardar tokens y datos del usuario
-                const storage = document.getElementById('remember-me').checked ? localStorage : sessionStorage;
-                storage.setItem('sanse_access_token', data.accessToken);
-                storage.setItem('sanse_refresh_token', data.refreshToken);
-                storage.setItem('sanse_user', JSON.stringify(data.user));
-
-                // Redirigir al dashboard
-                window.location.href = 'dashboard.html';
-
-            } catch (error) {
-                btn.classList.remove('loading');
-                btn.disabled = false;
-                errorText.textContent = error.message || 'Error de conexión con el servidor.';
-                errorEl.classList.add('show');
-            }
+        } catch (error) {
+            btn.classList.remove('loading');
+            btn.disabled = false;
+            errorText.textContent = error.message || 'Error de conexión con el servidor.';
+            errorEl.classList.add('show');
         }
+    }
 
-        // Enter para submit
-        document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') handleLogin(); });
-        document.getElementById('login-email').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-password').focus(); });
+    document.getElementById('login-password').addEventListener('keydown', e => {
+        if (e.key === 'Enter') handleLogin();
+    });
+    document.getElementById('login-email').addEventListener('keydown', e => {
+        if (e.key === 'Enter') document.getElementById('login-password').focus();
+    });
 
-        // Si ya tiene sesión activa, redirigir
-        const existingToken = localStorage.getItem('sanse_access_token') || sessionStorage.getItem('sanse_access_token');
-        if (existingToken) window.location.href = 'dashboard.html';
-    </script>
+    // Si ya tiene sesión, redirigir
+    const existingToken = localStorage.getItem('sanse_access_token') || sessionStorage.getItem('sanse_access_token');
+    if (existingToken) window.location.href = 'dashboard.html';
+</script>
 </body>
 </html>
