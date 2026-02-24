@@ -258,26 +258,511 @@
     }
 
     /* ════════════════════════════════
-       WALLET / ACTIVOS
+       WALLET / ACTIVOS - VERSIÓN MEJORADA
     ════════════════════════════════ */
     #wallet { background: var(--dark-2); }
 
+    /* Header nuevo */
+    .wallet-header-new {
+      display: flex; justify-content: space-between;
+      align-items: center; flex-wrap: wrap; gap: 20px;
+      margin-bottom: 32px;
+      padding: 20px 24px;
+      background: var(--dark-3);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+    }
+    .wallet-address-box {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .wallet-address {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px; letter-spacing: 0.08em;
+      color: var(--text);
+      background: var(--dark);
+      border: 1px solid var(--border);
+      padding: 10px 16px; cursor: pointer;
+      transition: all 0.3s;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .wallet-address:hover { 
+      border-color: var(--gold); 
+      background: var(--gold-dim);
+    }
+    .address-icon { font-size: 14px; }
+    .address-text { font-family: 'DM Sans', monospace; }
+    .copy-icon { 
+      opacity: 0.5; 
+      transition: opacity 0.2s;
+      font-size: 12px;
+    }
+    .wallet-address:hover .copy-icon { opacity: 1; }
+    .copy-success {
+      color: var(--gold);
+      font-size: 12px;
+    }
+    .exchange-rate {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+    .wallet-actions {
+      display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    }
+    .last-update {
+      font-size: 11px;
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+    .refresh-btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px; padding: 10px 18px;
+      border: 1px solid var(--border); 
+      background: transparent;
+      color: var(--text); 
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .refresh-btn:hover {
+      border-color: var(--gold); 
+      color: var(--gold); 
+      background: var(--gold-dim);
+    }
+    .refresh-btn.spinning .refresh-icon {
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .debank-link-new {
+      font-size: 12px; 
+      color: var(--gold); 
+      text-decoration: none;
+      padding: 10px 18px;
+      border: 1px solid var(--gold);
+      transition: all 0.3s;
+      letter-spacing: 0.05em;
+    }
+    .debank-link-new:hover { 
+      background: var(--gold); 
+      color: var(--dark); 
+    }
+
+    /* Tarjetas de resumen nuevas */
+    .wallet-summary-new {
+      display: grid; 
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    .wallet-card-new {
+      background: var(--dark-3);
+      border: 1px solid var(--border);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    .wallet-card-new:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+    .wallet-card-new::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+    .crypto-card::before { background: linear-gradient(90deg, #627EEA, #28A0F0, transparent); }
+    .loans-card::before { background: linear-gradient(90deg, #4CAF50, transparent); }
+    .total-card::before { background: linear-gradient(90deg, var(--gold), var(--gold-light), transparent); }
+    
+    .card-header {
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .card-icon { font-size: 24px; }
+    .card-badge {
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      background: rgba(98, 126, 234, 0.15);
+      color: #627EEA;
+      border-radius: 2px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .card-badge.fixed {
+      background: rgba(76, 175, 80, 0.15);
+      color: #4CAF50;
+      animation: none;
+    }
+    .card-badge.total {
+      background: var(--gold-dim);
+      color: var(--gold);
+      animation: none;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    .card-values {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+    .value-primary {
+      font-family: 'Syne', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.1;
+    }
+    .value-primary.value-gold { color: var(--gold); }
+    .value-secondary {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+    .card-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .shimmer {
+      background: linear-gradient(90deg, var(--text-muted) 25%, var(--gold-dim) 50%, var(--text-muted) 75%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Panel de distribución por cadena */
+    .chain-distribution-panel {
+      background: var(--dark-3);
+      border: 1px solid var(--border);
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    .distribution-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+    .chain-distribution {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .distribution-loading {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      padding: 20px;
+    }
+    .chain-bar-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .chain-bar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chain-bar-name {
+      font-size: 12px;
+      color: var(--text);
+      font-weight: 500;
+    }
+    .chain-bar-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .chain-bar-track {
+      height: 6px;
+      background: var(--dark);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .chain-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.8s ease-out;
+    }
+
+    /* Controles de filtro */
+    .wallet-controls-new {
+      display: flex; 
+      gap: 10px; 
+      flex-wrap: wrap; 
+      margin-bottom: 24px;
+      padding: 16px;
+      background: var(--dark-3);
+      border: 1px solid var(--border);
+    }
+    .chain-btn {
+      font-size: 11px; 
+      padding: 8px 14px;
+      border: 1px solid var(--border); 
+      background: transparent;
+      color: var(--text-muted); 
+      cursor: pointer;
+      transition: all 0.2s; 
+      font-family: 'DM Sans', sans-serif;
+      letter-spacing: 0.05em;
+    }
+    .chain-btn.active, .chain-btn:hover {
+      border-color: var(--gold); 
+      color: var(--gold); 
+      background: var(--gold-dim);
+    }
+
+    /* Tabla de activos mejorada */
+    .assets-table-container {
+      background: var(--dark-3);
+      border: 1px solid var(--border);
+      overflow-x: auto;
+    }
+    .assets-table-new {
+      width: 100%; 
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+    .assets-table-new th {
+      text-align: left; 
+      font-size: 10px; 
+      letter-spacing: 0.15em;
+      text-transform: uppercase; 
+      color: var(--text-muted);
+      padding: 16px 20px; 
+      border-bottom: 1px solid var(--border);
+      background: var(--dark);
+      position: sticky;
+      top: 0;
+    }
+    .assets-table-new td {
+      padding: 16px 20px; 
+      font-size: 14px;
+      border-bottom: 1px solid rgba(201,168,76,0.06);
+      vertical-align: middle;
+    }
+    .asset-row {
+      animation: fadeInRow 0.4s ease-out forwards;
+      opacity: 0;
+    }
+    @keyframes fadeInRow {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .assets-table-new tr:hover td { 
+      background: var(--gold-dim); 
+    }
+
+    /* Celdas de token */
+    .token-cell { min-width: 180px; }
+    .token-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .token-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--border);
+    }
+    .token-logo-fallback {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--gold-dim);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .token-details {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .token-symbol {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .token-name {
+      font-size: 11px;
+      color: var(--text-muted);
+      max-width: 120px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Celda de cadena */
+    .chain-cell { min-width: 120px; }
+    .chain-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      padding: 5px 10px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--chain-color, var(--gold));
+      color: var(--text-muted);
+      letter-spacing: 0.03em;
+    }
+
+    /* Celda de balance */
+    .balance-cell { min-width: 140px; }
+    .balance-amount {
+      font-family: 'DM Sans', monospace;
+      font-size: 14px;
+      color: var(--text);
+      display: block;
+    }
+    .token-price {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2px;
+    }
+    .price-change {
+      font-size: 10px;
+      padding: 2px 5px;
+      border-radius: 2px;
+    }
+    .price-change.positive {
+      background: rgba(76, 175, 80, 0.15);
+      color: #4CAF50;
+    }
+    .price-change.negative {
+      background: rgba(244, 67, 54, 0.15);
+      color: #F44336;
+    }
+
+    /* Celdas de valor */
+    .value-usd-cell { min-width: 100px; }
+    .value-usd {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .value-cop-cell { min-width: 120px; }
+    .value-cop {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    /* Estados de carga y error */
+    .loading-row td,
+    .error-cell,
+    .empty-cell {
+      text-align: center;
+      padding: 48px 20px !important;
+    }
+    .loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    .error-message {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .error-icon { font-size: 32px; }
+    .error-message p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .debank-fallback {
+      color: var(--gold);
+      text-decoration: none;
+      font-size: 13px;
+      padding: 10px 20px;
+      border: 1px solid var(--gold);
+      transition: all 0.3s;
+    }
+    .debank-fallback:hover {
+      background: var(--gold);
+      color: var(--dark);
+    }
+    .empty-message {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+    }
+    .empty-message span { font-size: 32px; }
+    .empty-message p { font-size: 14px; }
+
+    /* Nota de transparencia */
+    .transparency-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px 20px;
+      background: rgba(201,168,76,0.05);
+      border: 1px solid var(--border);
+      margin-top: 24px;
+    }
+    .note-icon { font-size: 16px; flex-shrink: 0; }
+    .transparency-note p {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Compatibilidad con estilos anteriores */
     .wallet-header {
       display: flex; justify-content: space-between;
       align-items: flex-start; flex-wrap: wrap; gap: 24px;
       margin-bottom: 40px;
     }
-    .wallet-address {
-      font-family: 'Syne', sans-serif;
-      font-size: 12px; letter-spacing: 0.1em;
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      padding: 8px 16px; cursor: pointer;
-      transition: border-color 0.2s;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .wallet-address:hover { border-color: var(--gold); color: var(--gold); }
-
     .wallet-summary {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
       margin-bottom: 40px;
@@ -294,20 +779,9 @@
       color: var(--gold); display: block; margin-bottom: 6px;
     }
     .wallet-card-label { font-size: 12px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
-
     .wallet-controls {
       display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;
     }
-    .chain-btn {
-      font-size: 12px; padding: 7px 14px;
-      border: 1px solid var(--border); background: transparent;
-      color: var(--text-muted); cursor: pointer;
-      transition: all 0.2s; font-family: 'DM Sans', sans-serif;
-    }
-    .chain-btn.active, .chain-btn:hover {
-      border-color: var(--gold); color: var(--gold); background: var(--gold-dim);
-    }
-
     .assets-table {
       width: 100%; border-collapse: collapse;
     }
@@ -321,7 +795,6 @@
       border-bottom: 1px solid rgba(201,168,76,0.05);
     }
     .assets-table tr:hover td { background: var(--gold-dim); }
-
     .debank-link {
       display: inline-flex; align-items: center; gap: 8px;
       font-size: 12px; color: var(--gold); text-decoration: none;

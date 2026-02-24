@@ -1,104 +1,314 @@
 // ── NAV MOBILE
-  function toggleMenu() {
-    document.getElementById('navMobile').classList.toggle('open');
-  }
+function toggleMenu() {
+  document.getElementById('navMobile').classList.toggle('open');
+}
 
-  // ── FAQ
-  function toggleFaq(btn) {
-    const item = btn.parentElement;
-    const isOpen = item.classList.contains('open');
-    document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
-    if (!isOpen) item.classList.add('open');
-  }
+// ── FAQ
+function toggleFaq(btn) {
+  const item = btn.parentElement;
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
 
-  // ── CALCULADORA
-  function formatCOP(n) {
-    return '$' + Math.round(n).toLocaleString('es-CO');
-  }
-  function calcular() {
-    const monto = parseFloat(document.getElementById('calcMonto').value) || 0;
-    const meses = parseInt(document.getElementById('calcMeses').value) || 0;
-    const tasa = parseFloat(document.getElementById('calcTipo').value) || 0;
-    const ganancia = monto * tasa * (meses / 12);
-    const total = monto + ganancia;
-    document.getElementById('calcGanancias').textContent = formatCOP(ganancia);
-    document.getElementById('calcTotal').textContent = 'Total a recibir: ' + formatCOP(total);
-  }
+// ── CALCULADORA
+function formatCOP(n) {
+  return '$' + Math.round(n).toLocaleString('es-CO');
+}
 
-  // ── WALLET / DEBANK
-  const WALLET = '0x25E6997CD1037E03662996E63875C99704f8F38D';
-  let allAssets = [];
-  let currentChain = 'all';
+function calcular() {
+  const monto = parseFloat(document.getElementById('calcMonto').value) || 0;
+  const meses = parseInt(document.getElementById('calcMeses').value) || 0;
+  const tasa = parseFloat(document.getElementById('calcTipo').value) || 0;
+  const ganancia = monto * tasa * (meses / 12);
+  const total = monto + ganancia;
+  document.getElementById('calcGanancias').textContent = formatCOP(ganancia);
+  document.getElementById('calcTotal').textContent = 'Total a recibir: ' + formatCOP(total);
+}
 
-  const chainNames = {
-    eth: { label: 'Ethereum', key: 'ethereum' },
-    arb: { label: 'Arbitrum', key: 'arbitrum' },
-    bsc: { label: 'BNB Chain', key: 'bsc' },
-    matic: { label: 'Polygon', key: 'polygon' },
-    op:  { label: 'Optimism', key: 'optimism' },
-    base: { label: 'Base', key: 'base' },
-  };
+// ── WALLET / DEBANK - VERSIÓN MEJORADA
+const WALLET = '0x25E6997CD1037E03662996E63875C99704f8F38D';
+let allAssets = [];
+let currentChain = 'all';
+let USD_TO_COP = 4200; // Tasa por defecto
 
-  async function fetchAssets() {
-    const tbody = document.getElementById('assetsBody');
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:32px;">⟳ Cargando activos...</td></tr>';
-    try {
-      const res = await fetch(`https://api.debank.com/user/all_token_list?id=${WALLET.toLowerCase()}&is_all=false`);
-      const data = await res.json();
-      if (data.data) {
-        allAssets = data.data.filter(t => t.amount > 0);
-        let totalUSD = allAssets.reduce((s, t) => s + (t.amount * (t.price || 0)), 0);
-        document.getElementById('cryptoTotal').textContent = '$' + totalUSD.toLocaleString('en-US', {maximumFractionDigits:0});
-        const totalCOP = 36670233 + totalUSD * 4200;
-        document.getElementById('totalManejo').textContent = '$' + Math.round(totalCOP/1e6).toLocaleString('es-CO') + 'M COP';
-        renderAssets(allAssets);
-      } else { throw new Error(); }
-    } catch(e) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:32px;">No se pudo cargar. <a href="https://debank.com/profile/' + WALLET + '" target="_blank" style="color:var(--gold);">Ver en DeBank →</a></td></tr>';
-      document.getElementById('cryptoTotal').textContent = 'Ver DeBank';
+const chainNames = {
+  eth: { label: 'Ethereum', key: 'ethereum', icon: '⟠', color: '#627EEA' },
+  arb: { label: 'Arbitrum', key: 'arbitrum', icon: '🔵', color: '#28A0F0' },
+  bsc: { label: 'BNB Chain', key: 'bsc', icon: '🟡', color: '#F3BA2F' },
+  matic: { label: 'Polygon', key: 'polygon', icon: '🟣', color: '#8247E5' },
+  op: { label: 'Optimism', key: 'optimism', icon: '🔴', color: '#FF0420' },
+  base: { label: 'Base', key: 'base', icon: '🔷', color: '#0052FF' },
+  avax: { label: 'Avalanche', key: 'avalanche', icon: '🔺', color: '#E84142' },
+  ftm: { label: 'Fantom', key: 'fantom', icon: '👻', color: '#1969FF' },
+};
+
+// Obtener tasa USD/COP actualizada
+async function fetchExchangeRate() {
+  try {
+    const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+    const data = await res.json();
+    if (data.rates && data.rates.COP) {
+      USD_TO_COP = data.rates.COP;
+      document.getElementById('exchangeRate').textContent = `1 USD = ${formatCOP(USD_TO_COP)}`;
     }
+  } catch(e) {
+    console.log('Usando tasa por defecto USD/COP');
+    document.getElementById('exchangeRate').textContent = `1 USD ≈ ${formatCOP(USD_TO_COP)}`;
   }
+}
 
-  function renderAssets(assets) {
-    const tbody = document.getElementById('assetsBody');
-    const filtered = currentChain === 'all' ? assets : assets.filter(a => chainNames[a.chain]?.key === currentChain);
-    if (!filtered.length) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:32px;">Sin activos en esta red.</td></tr>';
-      return;
+async function fetchAssets() {
+  const tbody = document.getElementById('assetsBody');
+  const loadingHTML = `
+    <tr class="loading-row">
+      <td colspan="5">
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+          <span>Conectando con blockchain...</span>
+        </div>
+      </td>
+    </tr>
+  `;
+  tbody.innerHTML = loadingHTML;
+  
+  // Animación de los totales
+  document.getElementById('cryptoTotalUSD').innerHTML = '<span class="shimmer">Cargando...</span>';
+  document.getElementById('cryptoTotalCOP').innerHTML = '<span class="shimmer">Cargando...</span>';
+  document.getElementById('totalManejo').innerHTML = '<span class="shimmer">Calculando...</span>';
+  
+  try {
+    const res = await fetch(`https://api.debank.com/user/all_token_list?id=${WALLET.toLowerCase()}&is_all=false`);
+    const data = await res.json();
+    
+    if (data.data) {
+      allAssets = data.data.filter(t => t.amount > 0);
+      
+      // Calcular totales
+      const totalUSD = allAssets.reduce((s, t) => s + (t.amount * (t.price || 0)), 0);
+      const totalCryptoCOP = totalUSD * USD_TO_COP;
+      const prestamosVigentes = 36670233; // COP
+      const totalBajoGestion = totalCryptoCOP + prestamosVigentes;
+      
+      // Actualizar UI con animación
+      animateValue('cryptoTotalUSD', totalUSD, true);
+      animateValue('cryptoTotalCOP', totalCryptoCOP, false);
+      animateValue('totalManejo', totalBajoGestion, false, true);
+      
+      // Calcular distribución por red
+      updateChainDistribution(allAssets);
+      
+      // Renderizar tabla
+      renderAssets(allAssets);
+      
+      // Mostrar timestamp
+      const now = new Date();
+      document.getElementById('lastUpdate').textContent = 
+        `Última actualización: ${now.toLocaleTimeString('es-CO')}`;
+        
+    } else { 
+      throw new Error('Sin datos'); 
     }
-    tbody.innerHTML = filtered.sort((a,b) => (b.amount*(b.price||0)) - (a.amount*(a.price||0))).map(t => {
-      const usd = (t.amount * (t.price || 0)).toFixed(2);
-      const chainLabel = chainNames[t.chain]?.label || t.chain;
-      return `<tr>
-        <td style="font-weight:500;">${t.symbol}</td>
-        <td style="color:var(--text-muted);font-size:13px;">${chainLabel}</td>
-        <td>${parseFloat(t.amount.toFixed(6)).toLocaleString()}</td>
-        <td style="color:var(--gold);">$${parseFloat(usd).toLocaleString()}</td>
-      </tr>`;
-    }).join('');
+  } catch(e) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="error-cell">
+          <div class="error-message">
+            <span class="error-icon">⚠️</span>
+            <p>No se pudo cargar los datos en tiempo real</p>
+            <a href="https://debank.com/profile/${WALLET}" target="_blank" class="debank-fallback">
+              Ver balance actual en DeBank →
+            </a>
+          </div>
+        </td>
+      </tr>
+    `;
+    document.getElementById('cryptoTotalUSD').textContent = '—';
+    document.getElementById('cryptoTotalCOP').textContent = '—';
+    document.getElementById('totalManejo').textContent = 'Ver DeBank';
   }
+}
 
-  function filterChain(chain, btn) {
-    currentChain = chain;
-    document.querySelectorAll('.chain-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderAssets(allAssets);
-  }
+// Animación de números
+function animateValue(elementId, finalValue, isUSD = false, isMillions = false) {
+  const el = document.getElementById(elementId);
+  const duration = 1200;
+  const steps = 30;
+  const increment = finalValue / steps;
+  let current = 0;
+  let step = 0;
+  
+  const timer = setInterval(() => {
+    step++;
+    current += increment;
+    
+    if (step >= steps) {
+      current = finalValue;
+      clearInterval(timer);
+    }
+    
+    if (isUSD) {
+      el.textContent = '$' + Math.round(current).toLocaleString('en-US');
+    } else if (isMillions) {
+      el.textContent = '$' + (current / 1e6).toFixed(1).toLocaleString('es-CO') + 'M';
+    } else {
+      el.textContent = formatCOP(current);
+    }
+  }, duration / steps);
+}
 
-  function refreshAssets() { fetchAssets(); }
-
-  function copyAddress() {
-    navigator.clipboard.writeText(WALLET).then(() => {
-      const el = document.querySelector('.wallet-address');
-      el.innerHTML = '✓ Copiado';
-      setTimeout(() => { el.innerHTML = '0x25E6...8F38D <span>⧉</span>'; }, 2000);
-    });
-  }
-
-  // ── MODAL
-  function closeModal() { document.getElementById('modalConstruccion').classList.remove('open'); }
-
-  // ── INIT
-  document.addEventListener('DOMContentLoaded', () => {
-    fetchAssets();
+// Distribución por cadena
+function updateChainDistribution(assets) {
+  const distribution = {};
+  let totalValue = 0;
+  
+  assets.forEach(token => {
+    const value = token.amount * (token.price || 0);
+    const chain = chainNames[token.chain]?.key || token.chain;
+    distribution[chain] = (distribution[chain] || 0) + value;
+    totalValue += value;
   });
+  
+  const container = document.getElementById('chainDistribution');
+  if (!container) return;
+  
+  const sortedChains = Object.entries(distribution)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+  
+  container.innerHTML = sortedChains.map(([chain, value]) => {
+    const percentage = ((value / totalValue) * 100).toFixed(1);
+    const chainInfo = Object.values(chainNames).find(c => c.key === chain) || { label: chain, color: '#C9A84C' };
+    
+    return `
+      <div class="chain-bar-item">
+        <div class="chain-bar-header">
+          <span class="chain-bar-name">${chainInfo.label}</span>
+          <span class="chain-bar-value">${percentage}%</span>
+        </div>
+        <div class="chain-bar-track">
+          <div class="chain-bar-fill" style="width: ${percentage}%; background: ${chainInfo.color};"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderAssets(assets) {
+  const tbody = document.getElementById('assetsBody');
+  const filtered = currentChain === 'all' 
+    ? assets 
+    : assets.filter(a => chainNames[a.chain]?.key === currentChain);
+  
+  if (!filtered.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="empty-cell">
+          <div class="empty-message">
+            <span>📭</span>
+            <p>Sin activos en esta red</p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+  
+  // Ordenar por valor USD descendente
+  const sorted = filtered.sort((a, b) => (b.amount * (b.price || 0)) - (a.amount * (a.price || 0)));
+  
+  tbody.innerHTML = sorted.map((token, index) => {
+    const valueUSD = token.amount * (token.price || 0);
+    const valueCOP = valueUSD * USD_TO_COP;
+    const chainInfo = chainNames[token.chain] || { label: token.chain, icon: '🔗', color: '#888' };
+    const priceChange = token.price_24h_change || 0;
+    const changeClass = priceChange >= 0 ? 'positive' : 'negative';
+    const changeIcon = priceChange >= 0 ? '↑' : '↓';
+    
+    return `
+      <tr class="asset-row" style="animation-delay: ${index * 50}ms;">
+        <td class="token-cell">
+          <div class="token-info">
+            ${token.logo_url 
+              ? `<img src="${token.logo_url}" alt="${token.symbol}" class="token-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                 <div class="token-logo-fallback" style="display:none;">${token.symbol.charAt(0)}</div>`
+              : `<div class="token-logo-fallback">${token.symbol.charAt(0)}</div>`
+            }
+            <div class="token-details">
+              <span class="token-symbol">${token.symbol}</span>
+              ${token.name ? `<span class="token-name">${token.name}</span>` : ''}
+            </div>
+          </div>
+        </td>
+        <td class="chain-cell">
+          <span class="chain-badge" style="--chain-color: ${chainInfo.color};">
+            ${chainInfo.icon} ${chainInfo.label}
+          </span>
+        </td>
+        <td class="balance-cell">
+          <span class="balance-amount">${formatTokenAmount(token.amount)}</span>
+          ${token.price ? `
+            <span class="token-price">
+              @$${token.price < 0.01 ? token.price.toFixed(6) : token.price.toFixed(2)}
+              ${priceChange !== 0 ? `<span class="price-change ${changeClass}">${changeIcon}${Math.abs(priceChange * 100).toFixed(1)}%</span>` : ''}
+            </span>
+          ` : ''}
+        </td>
+        <td class="value-usd-cell">
+          <span class="value-usd">$${valueUSD.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+        </td>
+        <td class="value-cop-cell">
+          <span class="value-cop">${formatCOP(valueCOP)}</span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// Formatear cantidad de tokens
+function formatTokenAmount(amount) {
+  if (amount >= 1000000) {
+    return (amount / 1000000).toFixed(2) + 'M';
+  } else if (amount >= 1000) {
+    return (amount / 1000).toFixed(2) + 'K';
+  } else if (amount >= 1) {
+    return amount.toFixed(4);
+  } else {
+    return amount.toFixed(6);
+  }
+}
+
+function filterChain(chain, btn) {
+  currentChain = chain;
+  document.querySelectorAll('.chain-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAssets(allAssets);
+}
+
+function refreshAssets() {
+  const btn = document.querySelector('.refresh-btn');
+  btn.classList.add('spinning');
+  fetchAssets().finally(() => {
+    setTimeout(() => btn.classList.remove('spinning'), 500);
+  });
+}
+
+function copyAddress() {
+  navigator.clipboard.writeText(WALLET).then(() => {
+    const el = document.querySelector('.wallet-address');
+    const original = el.innerHTML;
+    el.innerHTML = '<span class="copy-success">✓ Copiado al portapapeles</span>';
+    setTimeout(() => { el.innerHTML = original; }, 2000);
+  });
+}
+
+// ── MODAL
+function closeModal() { 
+  document.getElementById('modalConstruccion').classList.remove('open'); 
+}
+
+// ── INIT
+document.addEventListener('DOMContentLoaded', () => {
+  fetchExchangeRate();
+  fetchAssets();
+});

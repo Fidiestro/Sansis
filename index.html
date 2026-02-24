@@ -92,59 +92,115 @@
     <h2 class="section-title">Activos del <em>Fondo</em></h2>
     <p class="section-intro">Balance multi-chain en tiempo real. ETH, Arbitrum, BSC, Polygon y más — verificable públicamente por cualquier persona.</p>
 
-    <div class="wallet-header">
-      <div>
-        <div class="wallet-address" onclick="copyAddress()" title="Copiar dirección">
-          <span>0x25E6...8F38D</span> <span>⧉</span>
+    <!-- Header con wallet y controles -->
+    <div class="wallet-header-new">
+      <div class="wallet-address-box">
+        <div class="wallet-address" onclick="copyAddress()" title="Copiar dirección completa">
+          <span class="address-icon">🔐</span>
+          <span class="address-text">0x25E6...8F38D</span>
+          <span class="copy-icon">⧉</span>
         </div>
+        <span class="exchange-rate" id="exchangeRate">Cargando tasa...</span>
       </div>
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-        <button class="chain-btn" onclick="refreshAssets()">↻ Actualizar</button>
-        <a class="debank-link" href="https://debank.com/profile/0x25E6997CD1037E03662996E63875C99704f8F38D" target="_blank" rel="noopener">🔍 Ver en DeBank ↗</a>
-      </div>
-    </div>
-
-    <div class="wallet-summary">
-      <div class="wallet-card">
-        <span class="wallet-card-icon">⟠</span>
-        <span class="wallet-card-val" id="cryptoTotal">Cargando...</span>
-        <span class="wallet-card-label">Activos Crypto (USD)</span>
-      </div>
-      <div class="wallet-card">
-        <span class="wallet-card-icon">💼</span>
-        <span class="wallet-card-val">$36.670.233</span>
-        <span class="wallet-card-label">Préstamos Vigentes (COP)</span>
-      </div>
-      <div class="wallet-card">
-        <span class="wallet-card-icon">📊</span>
-        <span class="wallet-card-val" id="totalManejo">Calculando...</span>
-        <span class="wallet-card-label">Total Bajo Gestión</span>
+      <div class="wallet-actions">
+        <span class="last-update" id="lastUpdate"></span>
+        <button class="refresh-btn" onclick="refreshAssets()" title="Actualizar datos">
+          <span class="refresh-icon">↻</span> Actualizar
+        </button>
+        <a class="debank-link-new" href="https://debank.com/profile/0x25E6997CD1037E03662996E63875C99704f8F38D" target="_blank" rel="noopener">
+          Verificar en DeBank ↗
+        </a>
       </div>
     </div>
 
-    <div class="wallet-controls" id="chainControls">
-      <button class="chain-btn active" onclick="filterChain('all', this)">🌐 Todas las redes</button>
-      <button class="chain-btn" onclick="filterChain('ethereum', this)">⟠ Ethereum</button>
-      <button class="chain-btn" onclick="filterChain('arbitrum', this)">🔵 Arbitrum</button>
-      <button class="chain-btn" onclick="filterChain('bsc', this)">🟡 BNB Chain</button>
-      <button class="chain-btn" onclick="filterChain('polygon', this)">🟣 Polygon</button>
-      <button class="chain-btn" onclick="filterChain('optimism', this)">🔴 Optimism</button>
-      <button class="chain-btn" onclick="filterChain('base', this)">🔷 Base</button>
+    <!-- Tarjetas de resumen mejoradas -->
+    <div class="wallet-summary-new">
+      <div class="wallet-card-new crypto-card">
+        <div class="card-header">
+          <span class="card-icon">⟠</span>
+          <span class="card-badge">En vivo</span>
+        </div>
+        <div class="card-values">
+          <span class="value-primary" id="cryptoTotalUSD">Cargando...</span>
+          <span class="value-secondary" id="cryptoTotalCOP">—</span>
+        </div>
+        <span class="card-label">Activos Crypto</span>
+      </div>
+      
+      <div class="wallet-card-new loans-card">
+        <div class="card-header">
+          <span class="card-icon">💼</span>
+          <span class="card-badge fixed">Fijo</span>
+        </div>
+        <div class="card-values">
+          <span class="value-primary">$36.670.233</span>
+          <span class="value-secondary">≈ $8,731 USD</span>
+        </div>
+        <span class="card-label">Préstamos Vigentes (COP)</span>
+      </div>
+      
+      <div class="wallet-card-new total-card">
+        <div class="card-header">
+          <span class="card-icon">📊</span>
+          <span class="card-badge total">Total</span>
+        </div>
+        <div class="card-values">
+          <span class="value-primary value-gold" id="totalManejo">Calculando...</span>
+          <span class="value-secondary">COP</span>
+        </div>
+        <span class="card-label">Total Bajo Gestión</span>
+      </div>
     </div>
 
-    <table class="assets-table">
-      <thead>
-        <tr>
-          <th>Token</th>
-          <th>Red</th>
-          <th>Balance</th>
-          <th>Valor USD</th>
-        </tr>
-      </thead>
-      <tbody id="assetsBody">
-        <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:32px;">⟳ Cargando activos multi-chain...</td></tr>
-      </tbody>
-    </table>
+    <!-- Distribución por cadena -->
+    <div class="chain-distribution-panel">
+      <h4 class="distribution-title">📊 Distribución por Red</h4>
+      <div class="chain-distribution" id="chainDistribution">
+        <div class="distribution-loading">Calculando distribución...</div>
+      </div>
+    </div>
+
+    <!-- Filtros de cadena -->
+    <div class="wallet-controls-new" id="chainControls">
+      <button class="chain-btn active" onclick="filterChain('all', this)">🌐 Todas</button>
+      <button class="chain-btn" onclick="filterChain('ethereum', this)">⟠ ETH</button>
+      <button class="chain-btn" onclick="filterChain('arbitrum', this)">🔵 ARB</button>
+      <button class="chain-btn" onclick="filterChain('bsc', this)">🟡 BSC</button>
+      <button class="chain-btn" onclick="filterChain('polygon', this)">🟣 MATIC</button>
+      <button class="chain-btn" onclick="filterChain('optimism', this)">🔴 OP</button>
+      <button class="chain-btn" onclick="filterChain('base', this)">🔷 BASE</button>
+    </div>
+
+    <!-- Tabla de activos mejorada -->
+    <div class="assets-table-container">
+      <table class="assets-table-new">
+        <thead>
+          <tr>
+            <th class="th-token">Token</th>
+            <th class="th-chain">Red</th>
+            <th class="th-balance">Balance</th>
+            <th class="th-usd">Valor USD</th>
+            <th class="th-cop">Valor COP</th>
+          </tr>
+        </thead>
+        <tbody id="assetsBody">
+          <tr class="loading-row">
+            <td colspan="5">
+              <div class="loading-spinner">
+                <div class="spinner"></div>
+                <span>Conectando con blockchain...</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Nota de transparencia -->
+    <div class="transparency-note">
+      <span class="note-icon">🔗</span>
+      <p>Todos los activos son verificables públicamente en blockchain. Los valores se actualizan en tiempo real desde DeBank API.</p>
+    </div>
   </div>
 </section>
 
