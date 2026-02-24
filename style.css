@@ -1279,3 +1279,19 @@
       .story-stats { grid-template-columns: 1fr 1fr; }
       .footer-grid { grid-template-columns: 1fr; }
     }
+/* Botón reintentar */
+.retry-btn {
+  font-family: "DM Sans", sans-serif;
+  font-size: 13px;
+  padding: 10px 20px;
+  background: var(--gold);
+  color: var(--dark);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 16px;
+}
+.retry-btn:hover {
+  background: var(--gold-light);
+  transform: translateY(-2px);
+}

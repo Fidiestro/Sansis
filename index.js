@@ -26,183 +26,267 @@ function calcular() {
   document.getElementById('calcTotal').textContent = 'Total a recibir: ' + formatCOP(total);
 }
 
-// ── WALLET / DEBANK - VERSIÓN MEJORADA
+// ── WALLET CONFIG
 const WALLET = '0x25E6997CD1037E03662996E63875C99704f8F38D';
 let allAssets = [];
 let currentChain = 'all';
-let USD_TO_COP = 4200; // Tasa por defecto
+let USD_TO_COP = 4200;
 
 const chainNames = {
-  eth: { label: 'Ethereum', key: 'ethereum', icon: '⟠', color: '#627EEA' },
-  arb: { label: 'Arbitrum', key: 'arbitrum', icon: '🔵', color: '#28A0F0' },
-  bsc: { label: 'BNB Chain', key: 'bsc', icon: '🟡', color: '#F3BA2F' },
-  matic: { label: 'Polygon', key: 'polygon', icon: '🟣', color: '#8247E5' },
-  op: { label: 'Optimism', key: 'optimism', icon: '🔴', color: '#FF0420' },
-  base: { label: 'Base', key: 'base', icon: '🔷', color: '#0052FF' },
-  avax: { label: 'Avalanche', key: 'avalanche', icon: '🔺', color: '#E84142' },
-  ftm: { label: 'Fantom', key: 'fantom', icon: '👻', color: '#1969FF' },
+  eth: { label: 'Ethereum', key: 'ethereum', icon: '⟠', color: '#627EEA', id: 1 },
+  arb: { label: 'Arbitrum', key: 'arbitrum', icon: '🔵', color: '#28A0F0', id: 42161 },
+  arbitrum: { label: 'Arbitrum', key: 'arbitrum', icon: '🔵', color: '#28A0F0', id: 42161 },
+  bsc: { label: 'BNB Chain', key: 'bsc', icon: '🟡', color: '#F3BA2F', id: 56 },
+  matic: { label: 'Polygon', key: 'polygon', icon: '🟣', color: '#8247E5', id: 137 },
+  polygon: { label: 'Polygon', key: 'polygon', icon: '🟣', color: '#8247E5', id: 137 },
+  op: { label: 'Optimism', key: 'optimism', icon: '🔴', color: '#FF0420', id: 10 },
+  base: { label: 'Base', key: 'base', icon: '🔷', color: '#0052FF', id: 8453 },
 };
 
-// Obtener tasa USD/COP actualizada
+// Tokens conocidos en Arbitrum con sus contratos
+const KNOWN_TOKENS = {
+  arbitrum: [
+    { symbol: 'ETH', name: 'Ethereum', contract: 'native', decimals: 18, coingeckoId: 'ethereum' },
+    { symbol: 'USDC', name: 'USD Coin', contract: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831', decimals: 6, coingeckoId: 'usd-coin' },
+    { symbol: 'USDC.e', name: 'Bridged USDC', contract: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8', decimals: 6, coingeckoId: 'usd-coin' },
+    { symbol: 'USDT', name: 'Tether', contract: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', decimals: 6, coingeckoId: 'tether' },
+    { symbol: 'WBTC', name: 'Wrapped Bitcoin', contract: '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f', decimals: 8, coingeckoId: 'wrapped-bitcoin' },
+    { symbol: 'ARB', name: 'Arbitrum', contract: '0x912CE59144191C1204E64559FE8253a0e49E6548', decimals: 18, coingeckoId: 'arbitrum' },
+    { symbol: 'WETH', name: 'Wrapped Ether', contract: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', decimals: 18, coingeckoId: 'weth' },
+    { symbol: 'DAI', name: 'Dai', contract: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1', decimals: 18, coingeckoId: 'dai' },
+    { symbol: 'LINK', name: 'Chainlink', contract: '0xf97f4df75117a78c1A5a0DBb814Af92458539FB4', decimals: 18, coingeckoId: 'chainlink' },
+    { symbol: 'UNI', name: 'Uniswap', contract: '0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0', decimals: 18, coingeckoId: 'uniswap' },
+    { symbol: 'GMX', name: 'GMX', contract: '0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a', decimals: 18, coingeckoId: 'gmx' },
+    { symbol: 'PENDLE', name: 'Pendle', contract: '0x0c880f6761F1af8d9Aa9C466984b80DAb9a8c9e8', decimals: 18, coingeckoId: 'pendle' },
+    { symbol: 'RDNT', name: 'Radiant', contract: '0x3082CC23568eA640225c2467653dB90e9250AaA0', decimals: 18, coingeckoId: 'radiant-capital' },
+    { symbol: 'MAGIC', name: 'Magic', contract: '0x539bdE0d7Dbd336b79148AA742883198BBF60342', decimals: 18, coingeckoId: 'magic' },
+    { symbol: 'GNS', name: 'Gains Network', contract: '0x18c11FD286C5EC11c3b683Caa813B77f5163A122', decimals: 18, coingeckoId: 'gains-network' },
+  ]
+};
+
+// Obtener tasa USD/COP
 async function fetchExchangeRate() {
   try {
     const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
     const data = await res.json();
-    if (data.rates && data.rates.COP) {
+    if (data.rates?.COP) {
       USD_TO_COP = data.rates.COP;
       document.getElementById('exchangeRate').textContent = `1 USD = ${formatCOP(USD_TO_COP)}`;
     }
   } catch(e) {
-    console.log('Usando tasa por defecto USD/COP');
     document.getElementById('exchangeRate').textContent = `1 USD ≈ ${formatCOP(USD_TO_COP)}`;
   }
 }
 
-// Función de respaldo usando múltiples proxies
-async function fetchBackupData() {
-  const proxies = [
-    'https://corsproxy.io/?',
-    'https://api.codetabs.com/v1/proxy?quest=',
-  ];
-  
-  const debankUrl = `https://api.debank.com/user/all_token_list?id=${WALLET.toLowerCase()}&is_all=false`;
-  
-  for (const proxy of proxies) {
-    try {
-      const res = await fetch(proxy + encodeURIComponent(debankUrl), {
-        headers: { 'Accept': 'application/json' }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data?.data) {
-          return data.data.filter(t => t.amount > 0);
-        }
-      }
-    } catch(e) {
-      console.log(`Proxy ${proxy} falló, intentando siguiente...`);
-    }
+// Obtener precios de CoinGecko
+async function fetchPrices() {
+  const ids = [...new Set(KNOWN_TOKENS.arbitrum.map(t => t.coingeckoId))].join(',');
+  try {
+    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
+    if (!res.ok) throw new Error('CoinGecko rate limit');
+    return await res.json();
+  } catch(e) {
+    console.log('CoinGecko falló, usando precios de respaldo');
+    return {
+      'ethereum': { usd: 2500 },
+      'usd-coin': { usd: 1 },
+      'tether': { usd: 1 },
+      'wrapped-bitcoin': { usd: 95000 },
+      'arbitrum': { usd: 0.35 },
+      'weth': { usd: 2500 },
+      'dai': { usd: 1 },
+      'chainlink': { usd: 14 },
+      'uniswap': { usd: 6 },
+      'gmx': { usd: 20 },
+      'pendle': { usd: 4 },
+      'radiant-capital': { usd: 0.02 },
+      'magic': { usd: 0.3 },
+      'gains-network': { usd: 2 },
+    };
   }
+}
+
+// Leer balance ETH nativo
+async function getEthBalance(rpcUrl) {
+  const res = await fetch(rpcUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      method: 'eth_getBalance',
+      params: [WALLET, 'latest'],
+      id: 1
+    })
+  });
+  const data = await res.json();
+  return parseInt(data.result, 16) / 1e18;
+}
+
+// Leer balance de token ERC20
+async function getTokenBalance(rpcUrl, tokenContract, decimals) {
+  // balanceOf(address) = 0x70a08231
+  const data = '0x70a08231000000000000000000000000' + WALLET.slice(2).toLowerCase();
   
-  // Si todos los proxies fallan, usar datos estáticos
-  // ACTUALIZA ESTOS DATOS PERIÓDICAMENTE
-  console.log('Usando datos estáticos de respaldo');
-  return getStaticAssets();
+  const res = await fetch(rpcUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      method: 'eth_call',
+      params: [{ to: tokenContract, data: data }, 'latest'],
+      id: 1
+    })
+  });
+  const result = await res.json();
+  if (result.result && result.result !== '0x') {
+    return parseInt(result.result, 16) / Math.pow(10, decimals);
+  }
+  return 0;
 }
 
-// Datos estáticos de respaldo - ACTUALIZAR MANUALMENTE
-// Última actualización: Agregar fecha aquí
-function getStaticAssets() {
-  return [
-    // Agrega aquí tus tokens actuales copiados de DeBank
-    // Ejemplo de formato:
-    // { symbol: 'ETH', name: 'Ethereum', chain: 'eth', amount: 0.5, price: 2500, logo_url: 'https://static.debank.com/image/eth_token/logo_url/eth/xxx.png' },
-    // { symbol: 'USDC', name: 'USD Coin', chain: 'arb', amount: 1000, price: 1, logo_url: '...' },
-  ];
-}
-
+// Función principal para obtener activos
 async function fetchAssets() {
   const tbody = document.getElementById('assetsBody');
-  const loadingHTML = `
+  tbody.innerHTML = `
     <tr class="loading-row">
       <td colspan="5">
         <div class="loading-spinner">
           <div class="spinner"></div>
-          <span>Conectando con blockchain...</span>
+          <span>Leyendo blockchain de Arbitrum...</span>
         </div>
       </td>
     </tr>
   `;
-  tbody.innerHTML = loadingHTML;
   
-  // Animación de los totales
   document.getElementById('cryptoTotalUSD').innerHTML = '<span class="shimmer">Cargando...</span>';
   document.getElementById('cryptoTotalCOP').innerHTML = '<span class="shimmer">Cargando...</span>';
   document.getElementById('totalManejo').innerHTML = '<span class="shimmer">Calculando...</span>';
   
   try {
-    // Intentar con proxy CORS para DeBank
-    const proxyUrl = 'https://api.allorigins.win/raw?url=';
-    const debankUrl = `https://api.debank.com/user/all_token_list?id=${WALLET.toLowerCase()}&is_all=false`;
+    // RPCs públicos de Arbitrum
+    const rpcUrls = [
+      'https://arb1.arbitrum.io/rpc',
+      'https://arbitrum.llamarpc.com',
+      'https://1rpc.io/arb'
+    ];
     
-    let data;
-    let useBackup = false;
+    let rpcUrl = rpcUrls[0];
     
-    try {
-      const res = await fetch(proxyUrl + encodeURIComponent(debankUrl));
-      if (!res.ok) throw new Error('Proxy failed');
-      data = await res.json();
-    } catch(proxyError) {
-      console.log('Proxy falló, usando datos de respaldo...');
-      useBackup = true;
+    // Probar conexión
+    for (const url of rpcUrls) {
+      try {
+        const test = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jsonrpc: '2.0', method: 'eth_blockNumber', params: [], id: 1 })
+        });
+        if (test.ok) {
+          rpcUrl = url;
+          break;
+        }
+      } catch(e) { continue; }
     }
     
-    // Si el proxy falla, usar datos estáticos de respaldo
-    if (useBackup || !data?.data) {
-      // Usar Moralis o datos de respaldo
-      allAssets = await fetchBackupData();
-      if (!allAssets || allAssets.length === 0) {
-        throw new Error('No se pudieron obtener datos');
-      }
-    } else {
-      allAssets = data.data.filter(t => t.amount > 0);
-    }
+    console.log('Usando RPC:', rpcUrl);
     
-    if (allAssets.length > 0) {
-      
-      // Calcular totales
-      const totalUSD = allAssets.reduce((s, t) => s + (t.amount * (t.price || 0)), 0);
-      const totalCryptoCOP = totalUSD * USD_TO_COP;
-      const prestamosVigentes = 36670233; // COP
-      const totalBajoGestion = totalCryptoCOP + prestamosVigentes;
-      
-      // Actualizar UI con animación
-      animateValue('cryptoTotalUSD', totalUSD, true);
-      animateValue('cryptoTotalCOP', totalCryptoCOP, false);
-      animateValue('totalManejo', totalBajoGestion, false, true);
-      
-      // Calcular distribución por red
-      updateChainDistribution(allAssets);
-      
-      // Renderizar tabla
-      renderAssets(allAssets);
-      
-      // Mostrar timestamp
-      const now = new Date();
-      document.getElementById('lastUpdate').textContent = 
-        `Última actualización: ${now.toLocaleTimeString('es-CO')}`;
+    // Obtener precios primero
+    const prices = await fetchPrices();
+    
+    // Leer balances en paralelo
+    const balancePromises = KNOWN_TOKENS.arbitrum.map(async (token) => {
+      try {
+        let balance;
+        if (token.contract === 'native') {
+          balance = await getEthBalance(rpcUrl);
+        } else {
+          balance = await getTokenBalance(rpcUrl, token.contract, token.decimals);
+        }
         
-    } else { 
-      throw new Error('Sin datos'); 
-    }
-  } catch(e) {
-    console.error('Error fetching assets:', e);
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="5" class="error-cell">
-          <div class="error-message">
-            <span class="error-icon">🔗</span>
-            <p>Los datos en tiempo real requieren verificación directa</p>
-            <p style="font-size:12px;margin-top:8px;opacity:0.7;">La API de DeBank tiene restricciones de acceso directo</p>
-            <a href="https://debank.com/profile/${WALLET}" target="_blank" class="debank-fallback">
-              🔍 Ver balance actual en DeBank →
-            </a>
-          </div>
-        </td>
-      </tr>
-    `;
-    document.getElementById('cryptoTotalUSD').textContent = '—';
-    document.getElementById('cryptoTotalCOP').textContent = '—';
-    document.getElementById('totalManejo').textContent = '$36.7M+';
+        const priceData = prices[token.coingeckoId] || {};
+        const price = priceData.usd || 0;
+        const change24h = priceData.usd_24h_change || 0;
+        
+        return {
+          symbol: token.symbol,
+          name: token.name,
+          chain: 'arb',
+          amount: balance,
+          price: price,
+          price_24h_change: change24h / 100,
+          logo_url: `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/${token.contract}/logo.png`
+        };
+      } catch(e) {
+        console.log(`Error leyendo ${token.symbol}:`, e);
+        return null;
+      }
+    });
     
-    // Ocultar distribución si no hay datos
-    const distPanel = document.querySelector('.chain-distribution-panel');
-    if (distPanel) distPanel.style.display = 'none';
+    const results = await Promise.all(balancePromises);
+    allAssets = results.filter(t => t && t.amount > 0.0001);
+    
+    if (allAssets.length === 0) {
+      // Si no hay tokens, mostrar mensaje pero con el ETH aunque sea 0
+      throw new Error('No se encontraron activos con balance');
+    }
+    
+    // Calcular totales
+    const totalUSD = allAssets.reduce((s, t) => s + (t.amount * (t.price || 0)), 0);
+    const totalCryptoCOP = totalUSD * USD_TO_COP;
+    const prestamosVigentes = 36670233;
+    const totalBajoGestion = totalCryptoCOP + prestamosVigentes;
+    
+    // Actualizar UI
+    animateValue('cryptoTotalUSD', totalUSD, true);
+    animateValue('cryptoTotalCOP', totalCryptoCOP, false);
+    animateValue('totalManejo', totalBajoGestion, false, true);
+    
+    updateChainDistribution(allAssets);
+    renderAssets(allAssets);
+    
+    const now = new Date();
+    document.getElementById('lastUpdate').textContent = 
+      `Última actualización: ${now.toLocaleTimeString('es-CO')}`;
+    
+  } catch(e) {
+    console.error('Error:', e);
+    
+    // Mostrar datos de demostración si falla
+    showDemoData();
   }
+}
+
+// Datos de demostración si todo falla
+function showDemoData() {
+  const tbody = document.getElementById('assetsBody');
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="5" class="error-cell">
+        <div class="error-message">
+          <span class="error-icon">⏳</span>
+          <p>Cargando datos de la blockchain...</p>
+          <p style="font-size:12px;margin-top:8px;opacity:0.7;">Si persiste, verifica tu conexión</p>
+          <button onclick="fetchAssets()" class="retry-btn">🔄 Reintentar</button>
+          <a href="https://arbiscan.io/address/${WALLET}" target="_blank" class="debank-fallback" style="margin-top:12px;">
+            Ver en Arbiscan →
+          </a>
+        </div>
+      </td>
+    </tr>
+  `;
+  
+  document.getElementById('cryptoTotalUSD').textContent = '—';
+  document.getElementById('cryptoTotalCOP').textContent = '—';
+  document.getElementById('totalManejo').textContent = '$36.7M+';
+  
+  const distPanel = document.querySelector('.chain-distribution-panel');
+  if (distPanel) distPanel.style.display = 'none';
 }
 
 // Animación de números
 function animateValue(elementId, finalValue, isUSD = false, isMillions = false) {
   const el = document.getElementById(elementId);
+  if (!el) return;
+  
   const duration = 1200;
   const steps = 30;
   const increment = finalValue / steps;
@@ -221,7 +305,7 @@ function animateValue(elementId, finalValue, isUSD = false, isMillions = false) 
     if (isUSD) {
       el.textContent = '$' + Math.round(current).toLocaleString('en-US');
     } else if (isMillions) {
-      el.textContent = '$' + (current / 1e6).toFixed(1).toLocaleString('es-CO') + 'M';
+      el.textContent = '$' + (current / 1e6).toFixed(1) + 'M';
     } else {
       el.textContent = formatCOP(current);
     }
@@ -235,13 +319,15 @@ function updateChainDistribution(assets) {
   
   assets.forEach(token => {
     const value = token.amount * (token.price || 0);
-    const chain = chainNames[token.chain]?.key || token.chain;
-    distribution[chain] = (distribution[chain] || 0) + value;
+    const chainKey = chainNames[token.chain]?.key || token.chain;
+    distribution[chainKey] = (distribution[chainKey] || 0) + value;
     totalValue += value;
   });
   
   const container = document.getElementById('chainDistribution');
-  if (!container) return;
+  if (!container || totalValue === 0) return;
+  
+  container.style.display = 'grid';
   
   const sortedChains = Object.entries(distribution)
     .sort((a, b) => b[1] - a[1])
@@ -249,7 +335,7 @@ function updateChainDistribution(assets) {
   
   container.innerHTML = sortedChains.map(([chain, value]) => {
     const percentage = ((value / totalValue) * 100).toFixed(1);
-    const chainInfo = Object.values(chainNames).find(c => c.key === chain) || { label: chain, color: '#C9A84C' };
+    const chainInfo = chainNames[chain] || { label: chain, color: '#C9A84C' };
     
     return `
       <div class="chain-bar-item">
@@ -285,7 +371,6 @@ function renderAssets(assets) {
     return;
   }
   
-  // Ordenar por valor USD descendente
   const sorted = filtered.sort((a, b) => (b.amount * (b.price || 0)) - (a.amount * (a.price || 0)));
   
   tbody.innerHTML = sorted.map((token, index) => {
@@ -296,12 +381,33 @@ function renderAssets(assets) {
     const changeClass = priceChange >= 0 ? 'positive' : 'negative';
     const changeIcon = priceChange >= 0 ? '↑' : '↓';
     
+    // Logos por símbolo
+    const logoMap = {
+      'ETH': 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+      'USDC': 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png',
+      'USDC.e': 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png',
+      'USDT': 'https://assets.coingecko.com/coins/images/325/small/Tether.png',
+      'WBTC': 'https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png',
+      'ARB': 'https://assets.coingecko.com/coins/images/16547/small/photo_2023-03-29_21.47.00.jpeg',
+      'WETH': 'https://assets.coingecko.com/coins/images/2518/small/weth.png',
+      'DAI': 'https://assets.coingecko.com/coins/images/9956/small/4943.png',
+      'LINK': 'https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png',
+      'UNI': 'https://assets.coingecko.com/coins/images/12504/small/uniswap-uni.png',
+      'GMX': 'https://assets.coingecko.com/coins/images/18323/small/arbit.png',
+      'PENDLE': 'https://assets.coingecko.com/coins/images/15069/small/Pendle_Logo_Normal-03.png',
+      'RDNT': 'https://assets.coingecko.com/coins/images/26536/small/Radiant-Logo-200x200.png',
+      'MAGIC': 'https://assets.coingecko.com/coins/images/18623/small/magic.png',
+      'GNS': 'https://assets.coingecko.com/coins/images/19737/small/logo.png',
+    };
+    
+    const logoUrl = logoMap[token.symbol] || '';
+    
     return `
       <tr class="asset-row" style="animation-delay: ${index * 50}ms;">
         <td class="token-cell">
           <div class="token-info">
-            ${token.logo_url 
-              ? `<img src="${token.logo_url}" alt="${token.symbol}" class="token-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+            ${logoUrl 
+              ? `<img src="${logoUrl}" alt="${token.symbol}" class="token-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
                  <div class="token-logo-fallback" style="display:none;">${token.symbol.charAt(0)}</div>`
               : `<div class="token-logo-fallback">${token.symbol.charAt(0)}</div>`
             }
@@ -336,7 +442,6 @@ function renderAssets(assets) {
   }).join('');
 }
 
-// Formatear cantidad de tokens
 function formatTokenAmount(amount) {
   if (amount >= 1000000) {
     return (amount / 1000000).toFixed(2) + 'M';
@@ -344,8 +449,10 @@ function formatTokenAmount(amount) {
     return (amount / 1000).toFixed(2) + 'K';
   } else if (amount >= 1) {
     return amount.toFixed(4);
-  } else {
+  } else if (amount >= 0.0001) {
     return amount.toFixed(6);
+  } else {
+    return amount.toExponential(2);
   }
 }
 
@@ -358,9 +465,11 @@ function filterChain(chain, btn) {
 
 function refreshAssets() {
   const btn = document.querySelector('.refresh-btn');
-  btn.classList.add('spinning');
+  if (btn) btn.classList.add('spinning');
   fetchAssets().finally(() => {
-    setTimeout(() => btn.classList.remove('spinning'), 500);
+    setTimeout(() => {
+      if (btn) btn.classList.remove('spinning');
+    }, 500);
   });
 }
 
