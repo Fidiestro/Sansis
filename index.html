@@ -10,742 +10,601 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Header -->
-    <header>
-    <div class="container">
-        <div class="nav-inner">
-            <a href="#inicio" class="logo">SANSE <span>CAPITAL</span></a>
-            <nav>
-                <a href="#inicio"><span class="nav-num">01</span>Inicio</a>
-                <a href="#wallet"><span class="nav-num">02</span>Activos del Fondo</a>
-                <a href="#modelo"><span class="nav-num">03</span>Modelo</a>
-                <a href="#servicios"><span class="nav-num">04</span>Servicios</a>
-                <a href="#faq"><span class="nav-num">05</span>FAQ</a>
-            </nav>
-            <div class="nav-actions">
-                <a href="terminos.html" class="btn-outline">Términos</a>
-                <button class="btn-primary" onclick="openModal()">Comenzar →</button>
-            </div>
-            <button class="menu-toggle" onclick="openMobileMenu()" aria-label="Abrir menú">☰</button>
-        </div>
-    </div>
-</header>
 
-<!-- ================================================================
-     MOBILE MENU
-================================================================ -->
-<div class="mobile-menu-overlay" id="mobileMenu">
-    <div class="mobile-menu-header">
-        <a href="#inicio" class="logo" onclick="closeMobileMenu()">SANSE <span>CAPITAL</span></a>
-        <button class="mobile-menu-close" onclick="closeMobileMenu()" aria-label="Cerrar menú">✕</button>
-    </div>
-    <div class="mobile-menu-body">
-        <a href="#inicio" onclick="closeMobileMenu()">
-            <span class="mob-num">01</span>
-            <span class="mob-icon">🏠</span>
-            Inicio
-        </a>
-        <a href="#wallet" onclick="closeMobileMenu()">
-            <span class="mob-num">02</span>
-            <span class="mob-icon">📊</span>
-            Activos del Fondo
-        </a>
-        <a href="#modelo" onclick="closeMobileMenu()">
-            <span class="mob-num">03</span>
-            <span class="mob-icon">💰</span>
-            Nuestro Modelo
-        </a>
-        <a href="#servicios" onclick="closeMobileMenu()">
-            <span class="mob-num">04</span>
-            <span class="mob-icon">🎯</span>
-            Servicios
-        </a>
-        <a href="#faq" onclick="closeMobileMenu()">
-            <span class="mob-num">05</span>
-            <span class="mob-icon">❓</span>
-            FAQ
-        </a>
-    </div>
-    <div class="mobile-menu-cta">
-        <button class="btn-primary" onclick="closeMobileMenu();openModal()">📈 Comenzar a Invertir</button>
-        <a href="terminos.html" class="btn-outline" style="justify-content:center;">Términos y Condiciones</a>
-    </div>
-    <div class="mobile-menu-social">
-        <a href="https://www.instagram.com/sansecapital" target="_blank" rel="noopener" aria-label="Instagram">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-        </a>
-        <a href="https://x.com/sansecapital" target="_blank" rel="noopener" aria-label="X (Twitter)">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-        </a>
-        <a href="https://wa.me/573194552890?text=Quiero%20entrar%20a%20SanseCapital" target="_blank" rel="noopener" aria-label="WhatsApp">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        </a>
-    </div>
+<!-- ══════════════ NAV ══════════════ -->
+<nav>
+  <a class="nav-logo" href="#inicio">SANSE <span>CAPITAL</span></a>
+  <ul class="nav-links">
+    <li><a href="#inicio">Inicio</a></li>
+    <li><a href="#wallet">Activos</a></li>
+    <li><a href="#modelo">Modelo</a></li>
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#quienes">Equipo</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="terminos.html">Términos</a></li>
+  </ul>
+  <a class="nav-cta" href="https://wa.me/573194552890?text=Quiero%20entrar%20a%20SanseCapital">Comenzar →</a>
+  <div class="nav-hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<div class="nav-mobile" id="navMobile">
+  <a href="#inicio" onclick="toggleMenu()">🏠 Inicio</a>
+  <a href="#wallet" onclick="toggleMenu()">📊 Activos del Fondo</a>
+  <a href="#modelo" onclick="toggleMenu()">💰 Nuestro Modelo</a>
+  <a href="#servicios" onclick="toggleMenu()">🎯 Servicios</a>
+  <a href="#quienes" onclick="toggleMenu()">👤 Quiénes Somos</a>
+  <a href="#faq" onclick="toggleMenu()">❓ FAQ</a>
+  <a href="terminos.html">📄 Términos y Condiciones</a>
+  <a class="mobile-cta" href="https://wa.me/573194552890?text=Quiero%20entrar%20a%20SanseCapital">📱 Comenzar a Invertir</a>
 </div>
 
-<!-- ================================================================
-     HERO
-================================================================ -->
-<section class="hero" id="inicio">
-    <div class="hero-glow glow-1"></div>
-    <div class="hero-glow glow-2"></div>
-    <div class="container hero-content">
-        <div class="hero-badge">
-            <span class="dot"></span>
-            Fondo privado activo · Bogotá, Colombia
-        </div>
-        <h1>Tu Futuro<br>Financiero <span>Empieza</span><br>Aquí</h1>
-        <p>Inversiones inteligentes con rendimientos del 13.5% al 42% anual. Únete a nuestra comunidad de inversionistas exitosos.</p>
-        <div class="hero-ctas">
-            <button class="btn-primary" onclick="openModal()">📈 Comenzar a Invertir</button>
-            <a href="#modelo" class="btn-outline">Cómo funciona →</a>
-        </div>
+<!-- ══════════════ HERO ══════════════ -->
+<section id="inicio" style="padding-top:0;">
+  <div style="min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:120px 48px 80px;max-width:1100px;margin:0 auto;">
+    <p class="hero-label">Fondo privado activo · Bogotá, Colombia</p>
+    <h1>Tu Futuro<br/>Financiero<br/><em>Empieza Aquí</em></h1>
+    <p class="hero-sub">Inversiones inteligentes con rendimientos históricos del 13.5% al 42% anual. Gestión transparente, verificable en blockchain.</p>
+
+    <!-- AVISO LEGAL EN HERO -->
+    <div class="hero-disclaimer">
+      <strong>⚠️ Aviso importante:</strong> Sanse Capital opera como fondo privado entre particulares bajo contrato. No somos una entidad vigilada por la SFC. Las rentabilidades históricas no garantizan resultados futuros. Invertir implica riesgo de pérdida de capital.
     </div>
+
+    <div class="hero-btns">
+      <a class="btn-primary" href="https://wa.me/573194552890?text=Quiero%20entrar%20a%20SanseCapital">📱 Comenzar a Invertir</a>
+      <a class="btn-ghost" href="#modelo">Cómo funciona →</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <span class="hero-stat-num">20+</span>
+        <span class="hero-stat-label">Clientes Activos</span>
+      </div>
+      <div>
+        <span class="hero-stat-num">13.5–42%</span>
+        <span class="hero-stat-label">Rentabilidad Anual Histórica</span>
+      </div>
+      <div>
+        <span class="hero-stat-num">2021</span>
+        <span class="hero-stat-label">Año de Inicio</span>
+      </div>
+      <div>
+        <span class="hero-stat-num">100%</span>
+        <span class="hero-stat-label">Trazabilidad On-Chain</span>
+      </div>
+    </div>
+  </div>
 </section>
 
-<!-- ================================================================
-     STATS BAR
-================================================================ -->
-<div class="stats-bar">
-    <div class="container">
-        <div class="stats-grid">
-            <div class="stat-item">
-                <div class="stat-value"><span class="count-up" data-target="20" data-suffix="+">20+</span></div>
-                <div class="stat-label">Clientes Activos</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value"><span>13.5–42<span style="color:var(--gold)">%</span></span></div>
-                <div class="stat-label">Rentabilidad Anual</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value"><span>100<span style="color:var(--gold)">%</span></span></div>
-                <div class="stat-label">Transparencia</div>
-            </div>
-        </div>
-    </div>
+<!-- ══════════════ AVISO LEGAL BANNER ══════════════ -->
+<div class="legal-banner">
+  <span class="legal-banner-icon">⚖️</span>
+  <p class="legal-banner-text">
+    <strong>Aviso legal:</strong> Sanse Capital es un fondo privado de inversión entre particulares, constituido bajo contrato civil. No está registrado ni vigilado por la Superintendencia Financiera de Colombia (SFC). La participación se formaliza mediante un contrato de mandato y/o acuerdo privado entre las partes. Los rendimientos pasados <strong>no garantizan rendimientos futuros</strong>. Todo capital invertido está sujeto a riesgo de mercado. Antes de invertir, lea y comprenda los <a href="terminos.html" style="color:var(--gold);">Términos y Condiciones</a>.
+  </p>
 </div>
 
-<!-- ================================================================
-     WALLET TRACKER — MULTI-CHAIN
-================================================================ -->
-<section class="section wallet-section" id="wallet">
-    <div class="container">
-        <div class="wallet-header-row">
-            <div>
-                <div class="section-label">Transparencia en Vivo</div>
-                <h2 style="font-family:'Syne',sans-serif;font-size:clamp(1.6rem,3vw,2.4rem);font-weight:800;letter-spacing:-0.02em;margin-bottom:8px;">Activos del Fondo</h2>
-                <p style="color:var(--muted);font-size:0.9rem;max-width:460px;">Balance multi-chain en tiempo real. ETH, Arbitrum, BSC, Polygon y más — verificable públicamente.</p>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                <div class="wallet-address-badge" onclick="copyAddress()" title="Copiar dirección">
-                    <span class="dot"></span>
-                    <span id="addrShort">0x25E6...8F38D</span>
-                    <span style="opacity:0.5;font-size:0.7rem;">⧉</span>
-                </div>
-                <button class="wallet-refresh-btn" id="refreshBtn" onclick="loadWalletData()">
-                    <span class="refresh-icon">↻</span> Actualizar
-                </button>
-                <a href="https://debank.com/profile/0x25E6997CD1037E03662996E63875C99704f8F38D" target="_blank" class="explorer-link">
-                    🔍 Ver en DeBank ↗
-                </a>
-            </div>
+<!-- ══════════════ ACTIVOS ══════════════ -->
+<section id="wallet">
+  <div class="section-inner">
+    <p class="section-label">Transparencia en Vivo</p>
+    <h2 class="section-title">Activos del <em>Fondo</em></h2>
+    <p class="section-intro">Balance multi-chain en tiempo real. ETH, Arbitrum, BSC, Polygon y más — verificable públicamente por cualquier persona.</p>
+
+    <div class="wallet-header">
+      <div>
+        <div class="wallet-address" onclick="copyAddress()" title="Copiar dirección">
+          <span>0x25E6...8F38D</span> <span>⧉</span>
         </div>
-
-        <!-- Total balance card — rediseñado -->
-        <div class="wallet-total-card" style="display:block;padding:32px 36px;">
-
-            <!-- Fila superior: 3 métricas + precio ETH -->
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:0;margin-bottom:0;" id="metricsGrid">
-
-                <!-- Col 1: Activos Crypto -->
-                <div style="padding-right:28px;border-right:1px solid rgba(255,255,255,0.08);">
-                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-                        <span style="font-size:0.85rem;">⟠</span>
-                        <span style="font-size:0.68rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);">Activos Crypto</span>
-                    </div>
-                    <div style="font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;letter-spacing:-0.025em;color:var(--white);line-height:1;" id="totalUSD">
-                        <span class="wallet-skeleton" style="width:160px;height:1.7rem;">&nbsp;</span>
-                    </div>
-                    <div style="font-size:0.72rem;color:var(--muted);margin-top:7px;" id="cryptoCOP">
-                        <span class="wallet-skeleton" style="width:100px;height:0.8rem;">&nbsp;</span>
-                    </div>
-                    <div id="totalChange" style="margin-top:4px;"></div>
-                </div>
-
-                <!-- Col 2: Préstamos Vigentes -->
-                <div style="padding:0 28px;border-right:1px solid rgba(255,255,255,0.08);">
-                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-                        <span style="font-size:0.85rem;">💼</span>
-                        <span style="font-size:0.68rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);">Préstamos Vigentes</span>
-                    </div>
-                    <div style="font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;letter-spacing:-0.025em;color:var(--white);line-height:1;">
-                        $36.670.233
-                    </div>
-                    <div style="font-size:0.72rem;color:var(--muted);margin-top:7px;">pesos colombianos (COP)</div>
-                    <div style="margin-top:6px;display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--green);font-weight:600;">
-                        <span style="width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;display:inline-block;"></span>
-                        Capital en circulación
-                    </div>
-                </div>
-
-                <!-- Col 3: Total de Manejo -->
-                <div style="padding:0 28px;border-right:1px solid rgba(255,255,255,0.08);">
-                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-                        <span style="font-size:0.85rem;">📊</span>
-                        <span style="font-size:0.68rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:var(--gold);">Total de Manejo</span>
-                    </div>
-                    <div style="font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;letter-spacing:-0.025em;color:var(--gold);line-height:1;" id="totalManejo">
-                        <span class="wallet-skeleton" style="width:160px;height:1.7rem;">&nbsp;</span>
-                    </div>
-                    <div style="font-size:0.72rem;color:var(--muted);margin-top:7px;" id="totalManejoSub">Crypto (USD→COP) + Préstamos</div>
-                    <div style="margin-top:6px;font-size:0.72rem;color:rgba(245,197,66,0.6);">= activos + cartera</div>
-                </div>
-
-                <!-- Col 4: Precio ETH -->
-                <div style="padding-left:28px;text-align:right;min-width:130px;">
-                    <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Precio ETH</div>
-                    <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--white);" id="ethPriceMain">
-                        <span class="wallet-skeleton" style="width:90px;height:1.3rem;">&nbsp;</span>
-                    </div>
-                    <div style="margin-top:6px;" id="ethChangeMain"></div>
-                    <div class="updated-label" id="lastUpdated" style="margin-top:10px;display:block;text-align:right;"></div>
-                </div>
-            </div>
-
-        </div>
-
-        <style>
-        @media(max-width:900px) {
-            #metricsGrid { grid-template-columns:1fr 1fr !important; gap:20px !important; }
-            #metricsGrid > div { border-right:none !important; padding:0 !important; border-bottom:1px solid rgba(255,255,255,0.07); padding-bottom:16px !important; }
-            #metricsGrid > div:last-child { border-bottom:none; padding-bottom:0 !important; }
-        }
-        @media(max-width:540px) {
-            #metricsGrid { grid-template-columns:1fr !important; }
-        }
-        </style>
-
-        <!-- Chain tabs -->
-        <div class="chain-tabs" id="chainTabs">
-            <div class="chain-tab active" data-chain="all" onclick="switchChain('all')">
-                <span class="chain-emoji">🌐</span> Todas las redes
-                <span class="chain-usd" id="tab-usd-all"></span>
-            </div>
-            <div class="chain-tab" data-chain="eth" onclick="switchChain('eth')">
-                <span class="chain-emoji">⟠</span> Ethereum
-                <span class="chain-usd" id="tab-usd-eth"></span>
-            </div>
-            <div class="chain-tab" data-chain="arb" onclick="switchChain('arb')">
-                <span class="chain-emoji">🔵</span> Arbitrum
-                <span class="chain-usd" id="tab-usd-arb"></span>
-            </div>
-            <div class="chain-tab" data-chain="bsc" onclick="switchChain('bsc')">
-                <span class="chain-emoji">🟡</span> BNB Chain
-                <span class="chain-usd" id="tab-usd-bsc"></span>
-            </div>
-            <div class="chain-tab" data-chain="matic" onclick="switchChain('matic')">
-                <span class="chain-emoji">🟣</span> Polygon
-                <span class="chain-usd" id="tab-usd-matic"></span>
-            </div>
-            <div class="chain-tab" data-chain="op" onclick="switchChain('op')">
-                <span class="chain-emoji">🔴</span> Optimism
-                <span class="chain-usd" id="tab-usd-op"></span>
-            </div>
-            <div class="chain-tab" data-chain="base" onclick="switchChain('base')">
-                <span class="chain-emoji">🔷</span> Base
-                <span class="chain-usd" id="tab-usd-base"></span>
-            </div>
-        </div>
-
-        <!-- Chain panels -->
-        <div id="panelAll" class="chain-panel active">
-            <div class="chain-header-bar">
-                <div class="ch-name">🌐 Todos los activos</div>
-                <div class="ch-total" id="allTotal">—</div>
-            </div>
-            <div class="token-list-wrap">
-                <div class="token-list-row header-row">
-                    <div></div>
-                    <div>Token</div>
-                    <div style="text-align:right">Balance</div>
-                    <div style="text-align:right">Valor USD</div>
-                </div>
-                <div id="allTokensList">
-                    <div class="wallet-loading-placeholder">⟳ Cargando activos multi-chain...</div>
-                </div>
-            </div>
-        </div>
-
-        <div id="panelEth" class="chain-panel">
-            <div class="chain-header-bar">
-                <div class="ch-name">⟠ Ethereum Mainnet <span class="ch-native" id="ethNativeBal"></span></div>
-                <div class="ch-total" id="ethChainTotal">—</div>
-            </div>
-            <div class="token-list-wrap">
-                <div class="token-list-row header-row"><div></div><div>Token</div><div style="text-align:right">Balance</div><div style="text-align:right">Valor USD</div></div>
-                <div id="ethTokensList"><div class="wallet-loading-placeholder">⟳ Cargando...</div></div>
-            </div>
-        </div>
-
-        <div id="panelArb" class="chain-panel">
-            <div class="chain-header-bar">
-                <div class="ch-name">🔵 Arbitrum One <span class="ch-native" id="arbNativeBal"></span></div>
-                <div class="ch-total" id="arbChainTotal">—</div>
-            </div>
-            <div class="token-list-wrap">
-                <div class="token-list-row header-row"><div></div><div>Token</div><div style="text-align:right">Balance</div><div style="text-align:right">Valor USD</div></div>
-                <div id="arbTokensList"><div class="wallet-loading-placeholder">⟳ Cargando...</div></div>
-            </div>
-        </div>
-
-        <div id="panelBsc" class="chain-panel">
-            <div class="chain-header-bar">
-                <div class="ch-name">🟡 BNB Smart Chain <span class="ch-native" id="bscNativeBal"></span></div>
-                <div class="ch-total" id="bscChainTotal">—</div>
-            </div>
-            <div class="token-list-wrap">
-                <div class="token-list-row header-row"><div></div><div>Token</div><div style="text-align:right">Balance</div><div style="text-align:right">Valor USD</div></div>
-                <div id="bscTokensList"><div class="wallet-loading-placeholder">⟳ Cargando...</div></div>
-            </div>
-        </div>
-
-        <div id="panelMatic" class="chain-panel">
-            <div class="chain-header-bar">
-                <div class="ch-name">🟣 Polygon <span class="ch-native" id="maticNativeBal"></span></div>
-                <div class="ch-total" id="maticChainTotal">—</div>
-            </div>
-            <div class="token-list-wrap">
-                <div class="token-list-row header-row"><div></div><div>Token</div><div style="text-align:right">Balance</div><div style="text-align:right">Valor USD</div></div>
-                <div id="maticTokensList"><div class="wallet-loading-placeholder">⟳ Cargando...</div></div>
-            </div>
-        </div>
-
-        <div id="panelOp" class="chain-panel">
-            <div class="chain-header-bar">
-                <div class="ch-name">🔴 Optimism <span class="ch-native" id="opNativeBal"></span></div>
-                <div class="ch-total" id="opChainTotal">—</div>
-            </div>
-            <div class="token-list-wrap">
-                <div class="token-list-row header-row"><div></div><div>Token</div><div style="text-align:right">Balance</div><div style="text-align:right">Valor USD</div></div>
-                <div id="opTokensList"><div class="wallet-loading-placeholder">⟳ Cargando...</div></div>
-            </div>
-        </div>
-
-        <div id="panelBase" class="chain-panel">
-            <div class="chain-header-bar">
-                <div class="ch-name">🔷 Base <span class="ch-native" id="baseNativeBal"></span></div>
-                <div class="ch-total" id="baseChainTotal">—</div>
-            </div>
-            <div class="token-list-wrap">
-                <div class="token-list-row header-row"><div></div><div>Token</div><div style="text-align:right">Balance</div><div style="text-align:right">Valor USD</div></div>
-                <div id="baseTokensList"><div class="wallet-loading-placeholder">⟳ Cargando...</div></div>
-            </div>
-        </div>
-
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <button class="chain-btn" onclick="refreshAssets()">↻ Actualizar</button>
+        <a class="debank-link" href="https://debank.com/profile/0x25E6997CD1037E03662996E63875C99704f8F38D" target="_blank" rel="noopener">🔍 Ver en DeBank ↗</a>
+      </div>
     </div>
+
+    <div class="wallet-summary">
+      <div class="wallet-card">
+        <span class="wallet-card-icon">⟠</span>
+        <span class="wallet-card-val" id="cryptoTotal">Cargando...</span>
+        <span class="wallet-card-label">Activos Crypto (USD)</span>
+      </div>
+      <div class="wallet-card">
+        <span class="wallet-card-icon">💼</span>
+        <span class="wallet-card-val">$36.670.233</span>
+        <span class="wallet-card-label">Préstamos Vigentes (COP)</span>
+      </div>
+      <div class="wallet-card">
+        <span class="wallet-card-icon">📊</span>
+        <span class="wallet-card-val" id="totalManejo">Calculando...</span>
+        <span class="wallet-card-label">Total Bajo Gestión</span>
+      </div>
+    </div>
+
+    <div class="wallet-controls" id="chainControls">
+      <button class="chain-btn active" onclick="filterChain('all', this)">🌐 Todas las redes</button>
+      <button class="chain-btn" onclick="filterChain('ethereum', this)">⟠ Ethereum</button>
+      <button class="chain-btn" onclick="filterChain('arbitrum', this)">🔵 Arbitrum</button>
+      <button class="chain-btn" onclick="filterChain('bsc', this)">🟡 BNB Chain</button>
+      <button class="chain-btn" onclick="filterChain('polygon', this)">🟣 Polygon</button>
+      <button class="chain-btn" onclick="filterChain('optimism', this)">🔴 Optimism</button>
+      <button class="chain-btn" onclick="filterChain('base', this)">🔷 Base</button>
+    </div>
+
+    <table class="assets-table">
+      <thead>
+        <tr>
+          <th>Token</th>
+          <th>Red</th>
+          <th>Balance</th>
+          <th>Valor USD</th>
+        </tr>
+      </thead>
+      <tbody id="assetsBody">
+        <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:32px;">⟳ Cargando activos multi-chain...</td></tr>
+      </tbody>
+    </table>
+  </div>
 </section>
 
-<!-- ================================================================
-     INVESTMENT MODEL
-================================================================ -->
-<section class="section" id="modelo">
-    <div class="container">
-        <div class="section-header">
-            <div class="section-label">Nuestro Modelo</div>
-            <h2>Cómo Generamos<br>tu Rentabilidad</h2>
-            <p>Estrategia diversificada que maximiza rendimientos mientras gestionamos el riesgo profesionalmente.</p>
+<!-- ══════════════ MODELO ══════════════ -->
+<section id="modelo">
+  <div class="section-inner">
+    <p class="section-label">Nuestro Modelo</p>
+    <h2 class="section-title">Cómo Generamos<br/><em>tu Rentabilidad</em></h2>
+    <p class="section-intro">Estrategia diversificada que maximiza rendimientos mientras gestionamos el riesgo de forma profesional y transparente.</p>
+
+    <div class="modelo-grid">
+      <div class="modelo-card">
+        <span class="modelo-icon">💰</span>
+        <h3>Préstamos con Intereses — Fuente Principal</h3>
+        <p>Otorgamos préstamos a miembros (4% mensual) y no socios (6% mensual). Del total de intereses recaudados, el 50% se distribuye entre los inversionistas.</p>
+        <div class="modelo-split">
+          <div class="modelo-split-item">
+            <span class="modelo-split-pct">50%</span>
+            <span class="modelo-split-desc">Para inversionistas</span>
+          </div>
+          <div class="modelo-split-item">
+            <span class="modelo-split-pct">50%</span>
+            <span class="modelo-split-desc">Operación y crecimiento</span>
+          </div>
         </div>
-
-        <div class="model-grid">
-            <!-- Featured card -->
-            <div class="model-card featured">
-                <div class="model-icon">💰</div>
-                <h3>Préstamos con Intereses — Fuente Principal</h3>
-                <p>Otorgamos préstamos a miembros (4% mensual) y no socios (6% mensual). Del total de intereses recaudados, el 50% se distribuye entre los inversionistas y el 50% restante financia la operación y expansión del fondo.</p>
-                <div class="distribution-row">
-                    <div class="dist-pill">
-                        <div class="pct">50%</div>
-                        <div class="lbl">Para inversionistas</div>
-                    </div>
-                    <div class="dist-sep">+</div>
-                    <div class="dist-pill">
-                        <div class="pct">50%</div>
-                        <div class="lbl">Operación y crecimiento</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="model-card">
-                <div class="model-icon">₿</div>
-                <h3>Criptoactivos</h3>
-                <p>Operamos principalmente con Bitcoin y Ethereum, aprovechando momentos específicos del mercado para maximizar retornos.</p>
-                <span class="model-tag">🎯 Alto potencial</span>
-            </div>
-
-            <div class="model-card">
-                <div class="model-icon">🔄</div>
-                <h3>DeFi — Finanzas Descentralizadas</h3>
-                <p>Participamos en protocolos DeFi seleccionados: staking, yield farming y provisión de liquidez.</p>
-                <span class="model-tag">💎 Innovación financiera</span>
-            </div>
-
-            <div class="model-card">
-                <div class="model-icon">🏗️</div>
-                <h3>Financiación de Proyectos</h3>
-                <p>Nueva línea de negocio: financiamiento de proyectos empresariales que diversifica nuestras fuentes de ingreso.</p>
-                <span class="model-tag">🚀 En expansión</span>
-            </div>
-        </div>
+      </div>
+      <div class="modelo-card">
+        <span class="modelo-icon">₿</span>
+        <h3>Criptoactivos</h3>
+        <p>Operamos principalmente con Bitcoin y Ethereum, aprovechando momentos específicos del mercado para maximizar retornos con gestión activa del riesgo.</p>
+        <span class="modelo-tag">🎯 Alto potencial</span>
+      </div>
+      <div class="modelo-card">
+        <span class="modelo-icon">🔄</span>
+        <h3>DeFi — Finanzas Descentralizadas</h3>
+        <p>Participamos en protocolos DeFi seleccionados: staking, yield farming y provisión de liquidez en plataformas verificadas.</p>
+        <span class="modelo-tag">💎 Innovación financiera</span>
+      </div>
+      <div class="modelo-card">
+        <span class="modelo-icon">🏗️</span>
+        <h3>Financiación de Proyectos</h3>
+        <p>Nueva línea de negocio: financiamiento de proyectos empresariales que diversifica nuestras fuentes de ingreso y reduce la dependencia del mercado cripto.</p>
+        <span class="modelo-tag">🚀 En expansión</span>
+      </div>
     </div>
+  </div>
 </section>
 
-<!-- ================================================================
-     HOW IT WORKS
-================================================================ -->
-<section class="section" style="padding-top:0;" id="como-funciona">
-    <div class="container">
-        <div class="section-header">
-            <div class="section-label">Proceso</div>
-            <h2>¿Cómo Funciona?</h2>
-            <p>Empieza a invertir en 3 simples pasos.</p>
-        </div>
+<!-- ══════════════ SERVICIOS / PROCESO ══════════════ -->
+<section id="servicios">
+  <div class="section-inner">
+    <p class="section-label">Proceso</p>
+    <h2 class="section-title">¿Cómo <em>Funciona?</em></h2>
+    <p class="section-intro">Empieza a invertir en 3 simples pasos. Todo el proceso es guiado directamente por nuestro equipo.</p>
 
-        <div class="steps-list">
-            <div class="step-item">
-                <div class="step-num">01</div>
-                <div class="step-body">
-                    <h3>Solicita Entrar</h3>
-                    <p>Contacta con nosotros vía WhatsApp para iniciar tu proceso. Te guiaremos en cada paso de la vinculación y firma de términos.</p>
-                    <a href="https://wa.me/573194552890?text=Quiero%20entrar%20a%20SanseCapital" target="_blank" class="step-link">📱 Enviar WhatsApp →</a>
-                </div>
-            </div>
-            <div class="step-item">
-                <div class="step-num">02</div>
-                <div class="step-body">
-                    <h3>Deposita tu Capital</h3>
-                    <p>Realiza tu depósito inicial y elige la modalidad que mejor se adapte a tus necesidades financieras y perfil de riesgo.</p>
-                </div>
-            </div>
-            <div class="step-item">
-                <div class="step-num">03</div>
-                <div class="step-body">
-                    <h3>Elige tu Modalidad</h3>
-                    <p>Selecciona la opción que mejor se alinee con tus objetivos.</p>
-                    <div class="options-grid">
-                        <div class="option-pill">
-                            <strong>Ahorro Cadena</strong>
-                            <span>Disciplina mensual con compromiso de aportes</span>
-                        </div>
-                        <div class="option-pill">
-                            <strong>Préstamo</strong>
-                            <span>Tasas 4–6% mensual para socios y no socios</span>
-                        </div>
-                        <div class="option-pill">
-                            <strong>Inversión</strong>
-                            <span>13.5% – 42% anual según perfil de riesgo</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="proceso-steps">
+      <div class="paso">
+        <div class="paso-num">01</div>
+        <h3>Solicita Entrar</h3>
+        <p>Contacta con nosotros vía WhatsApp para iniciar tu proceso. Te guiaremos en cada paso de la vinculación y firma del contrato.</p>
+        <a class="paso-link" href="https://wa.me/573194552890?text=Quiero%20entrar%20a%20SanseCapital">📱 Enviar WhatsApp →</a>
+      </div>
+      <div class="paso">
+        <div class="paso-num">02</div>
+        <h3>Firma el Contrato</h3>
+        <p>Antes de cualquier depósito, formalizamos el acuerdo mediante contrato privado entre las partes. Lees y aceptas los Términos y Condiciones.</p>
+        <a class="paso-link" href="terminos.html">Ver Términos →</a>
+      </div>
+      <div class="paso">
+        <div class="paso-num">03</div>
+        <h3>Elige tu Modalidad</h3>
+        <p>Selecciona la opción que mejor se alinee con tus objetivos y perfil de riesgo.</p>
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;">
+          <div style="font-size:13px;padding:10px 12px;border:1px solid var(--border);color:var(--text-muted);">📦 <strong style="color:var(--text);">Ahorro Cadena</strong> — Aportes mensuales disciplinados</div>
+          <div style="font-size:13px;padding:10px 12px;border:1px solid var(--border);color:var(--text-muted);">💳 <strong style="color:var(--text);">Préstamo</strong> — 4–6% mensual socios/no socios</div>
+          <div style="font-size:13px;padding:10px 12px;border:1px solid var(--border);color:var(--text-muted);">📈 <strong style="color:var(--text);">Inversión</strong> — 13.5%–42% anual histórico</div>
         </div>
+      </div>
     </div>
+
+    <!-- CALCULADORA -->
+    <div class="calc-container">
+      <div class="calc-left">
+        <h3>Proyecta tus Ganancias</h3>
+        <div class="form-group">
+          <label>Monto a invertir (COP)</label>
+          <input type="number" id="calcMonto" placeholder="Ej: 5000000" min="0"/>
+        </div>
+        <div class="form-group">
+          <label>Período (meses)</label>
+          <input type="number" id="calcMeses" placeholder="Ej: 12" min="1" max="120"/>
+        </div>
+        <div class="form-group">
+          <label>Tipo de inversión</label>
+          <select id="calcTipo">
+            <option value="0.135">Conservadora — 13.5% anual</option>
+            <option value="0.22">Moderada — 22% anual</option>
+            <option value="0.42">Agresiva — 42% anual</option>
+          </select>
+        </div>
+        <button class="btn-calc" onclick="calcular()">Calcular rendimiento →</button>
+      </div>
+      <div class="calc-right">
+        <p class="calc-result-label">Ganancias estimadas</p>
+        <div class="calc-result-val" id="calcGanancias">$0</div>
+        <p class="calc-result-total" id="calcTotal">Total a recibir: $0</p>
+
+        <div class="tasas-grid">
+          <div class="tasa-item">
+            <p class="tasa-name"><span class="tasa-badge" style="background:#4CAF50;"></span>Conservadora</p>
+            <div class="tasa-val">13.5% anual</div>
+          </div>
+          <div class="tasa-item">
+            <p class="tasa-name"><span class="tasa-badge" style="background:#FFC107;"></span>Moderada</p>
+            <div class="tasa-val">22% anual</div>
+          </div>
+          <div class="tasa-item">
+            <p class="tasa-name"><span class="tasa-badge" style="background:#F44336;"></span>Agresiva</p>
+            <div class="tasa-val">42% anual</div>
+          </div>
+          <div class="tasa-item">
+            <p class="tasa-name"><span class="tasa-badge" style="background:var(--gold);"></span>Préstamo socios</p>
+            <div class="tasa-val">4% mensual</div>
+          </div>
+        </div>
+        <p class="calc-disclaimer">⚠️ Proyección estimada con base en rendimientos históricos. No garantiza resultados futuros. La rentabilidad real puede variar según condiciones del mercado.</p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<!-- ================================================================
-     CALCULATOR
-================================================================ -->
-<section class="section calc-section">
-    <div class="container">
-        <div class="calc-wrapper">
-            <div class="calc-card">
-                <div class="section-label">Calculadora</div>
-                <h3 style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:24px;letter-spacing:-0.02em;">Proyecta tus Ganancias</h3>
-                <div class="form-group">
-                    <label for="investAmount">Monto a invertir (COP)</label>
-                    <input type="number" id="investAmount" value="1000000" min="100000" step="100000">
-                </div>
-                <div class="form-group">
-                    <label for="investPeriod">Período (meses)</label>
-                    <input type="number" id="investPeriod" value="12" min="1" max="60">
-                </div>
-                <div class="form-group">
-                    <label for="investRate">Tipo de inversión</label>
-                    <select id="investRate">
-                        <option value="13.5">Conservadora — 13.5% anual</option>
-                        <option value="22">Moderada — 22% anual</option>
-                        <option value="42">Agresiva — 42% anual</option>
-                    </select>
-                </div>
-                <button class="btn-primary" onclick="calculateReturn()" style="width:100%;">Calcular rendimiento →</button>
-                <div class="calc-result" id="calculatorResult">
-                    <div class="result-row">
-                        <span class="label">Ganancias estimadas</span>
-                        <span class="value" id="totalEarnings">$0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="label">Total a recibir</span>
-                        <span class="value" id="totalAmount">$0</span>
-                    </div>
-                    <p class="result-disclaimer">* La rentabilidad puede variar según condiciones del mercado.</p>
-                </div>
-            </div>
+<!-- ══════════════ QUIÉNES SOMOS ══════════════ -->
+<section id="quienes">
+  <div class="section-inner">
+    <p class="section-label">Quiénes Somos</p>
+    <h2 class="section-title">Construimos tu futuro<br/>con <em>disciplina y visión.</em></h2>
+    <p class="section-intro">Sanse Capital nació de una convicción simple: las oportunidades del mercado cripto y financiero no deben ser exclusivas de grandes instituciones. Somos un equipo bogotano que lleva años estudiando, operando y perfeccionando estrategias para que tu capital trabaje de forma inteligente.</p>
 
-            <div class="calc-info">
-                <div class="section-label">Tasas</div>
-                <h3>Tasas<br>Competitivas</h3>
-                <p>Ofrecemos tres perfiles de inversión para adaptarnos a cada tipo de inversionista. Los rendimientos históricos del fondo han oscilado entre 13.5% y 42% anual.</p>
-                <div class="rate-cards">
-                    <div class="rate-card">
-                        <span class="name">🟢 Conservadora</span>
-                        <span class="rate">13.5% anual</span>
-                    </div>
-                    <div class="rate-card">
-                        <span class="name">🟡 Moderada</span>
-                        <span class="rate">22% anual</span>
-                    </div>
-                    <div class="rate-card">
-                        <span class="name">🔴 Agresiva</span>
-                        <span class="rate">42% anual</span>
-                    </div>
-                    <div class="rate-card" style="margin-top:4px;border-color:rgba(245,197,66,0.25)">
-                        <span class="name">💼 Préstamo (socios)</span>
-                        <span class="rate">4% mensual</span>
-                    </div>
-                    <div class="rate-card">
-                        <span class="name">💼 Préstamo (no socios)</span>
-                        <span class="rate">6% mensual</span>
-                    </div>
-                </div>
-            </div>
+    <div class="story-block">
+      <div class="story-text">
+        <h3>Nuestra Historia</h3>
+        <p>Todo comenzó en 2021, cuando Juan Sebastián decidió adentrarse en el mundo de las criptomonedas por cuenta propia. Sin una institución detrás, con disciplina y estudio constante, logró rendimientos consistentes que llamaron la atención de personas cercanas que confiaron en su gestión.</p>
+        <p>Lo que empezó como un proyecto íntimo de 5 personas se ha convertido en un fondo privado con más de 20 inversionistas activos, capital gestionado en múltiples redes blockchain y una cartera diversificada entre cripto, DeFi y préstamos.</p>
+        <p>Hoy, junto a Leidi, seguimos creciendo con la misma filosofía: resultados reales, comunicación transparente y una relación directa con cada inversionista.</p>
+      </div>
+      <div class="story-stats">
+        <div class="qs-stat-card">
+          <span class="qs-stat-num">2021</span>
+          <span class="qs-stat-label">Año de inicio</span>
         </div>
+        <div class="qs-stat-card">
+          <span class="qs-stat-num">20+</span>
+          <span class="qs-stat-label">Inversionistas activos</span>
+        </div>
+        <div class="qs-stat-card">
+          <span class="qs-stat-num">42%</span>
+          <span class="qs-stat-label">Rendimiento máx. histórico</span>
+        </div>
+        <div class="qs-stat-card">
+          <span class="qs-stat-num">100%</span>
+          <span class="qs-stat-label">Trazabilidad on-chain</span>
+        </div>
+      </div>
     </div>
+
+    <p class="section-label" style="margin-bottom:28px;">El Equipo</p>
+    <div class="team-grid">
+      <div class="team-card">
+        <!-- REEMPLAZA con tu foto: <img class="team-card-img" src="images/juan.jpg" alt="Juan Sebastián"/> -->
+        <div class="team-card-img-placeholder">👤</div>
+        <div class="team-body">
+          <p class="team-name">Juan Sebastián Fandiño C.</p>
+          <p class="team-role">CEO · Fundador · Gestor de Inversiones</p>
+          <p class="team-bio">Inversor autodidacta desde 2021 con track record probado en mercados cripto. Programador y emprendedor con empresa propia activa en el sector hidráulico. Su perfil técnico le permite gestionar activos on-chain con precisión y construir las herramientas que hacen a Sanse Capital transparente y verificable.</p>
+          <div class="team-tags">
+            <span class="tag">Cripto</span>
+            <span class="tag">DeFi</span>
+            <span class="tag">Programación</span>
+            <span class="tag">Emprendimiento</span>
+          </div>
+        </div>
+      </div>
+      <div class="team-card">
+        <!-- REEMPLAZA con la foto de Leidi: <img class="team-card-img" src="images/leidi.jpg" alt="Leidi Salamanca"/> -->
+        <div class="team-card-img-placeholder">👤</div>
+        <div class="team-body">
+          <p class="team-name">Leidi Salamanca Acevedo</p>
+          <p class="team-role">Marketing & Relaciones con Inversionistas</p>
+          <p class="team-bio">Responsable de la comunicación, crecimiento y experiencia de cada inversionista dentro de la comunidad Sanse Capital. Su enfoque en personas garantiza que cada cliente reciba atención personalizada, información clara y acompañamiento constante a lo largo de su proceso de inversión.</p>
+          <div class="team-tags">
+            <span class="tag">Marketing</span>
+            <span class="tag">Ventas</span>
+            <span class="tag">Comunidad</span>
+            <span class="tag">Atención al cliente</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Diego Mauricio Delgado -->
+      <div class="team-card">
+        <!-- REEMPLAZA con foto de Diego: <img class="team-card-img" src="images/diego.jpg" alt="Diego Delgado"/> -->
+        <div class="team-card-img-placeholder">👤</div>
+        <div class="team-body">
+          <p class="team-name">Diego Mauricio Delgado E.</p>
+          <p class="team-role">Desarrollador Full-Stack</p>
+          <p class="team-bio">Desarrollador web Full-Stack con dominio en React.js, Node.js, PHP (CodeIgniter), MySQL y AWS. Su experiencia en front-end y back-end es clave para construir y mantener la plataforma tecnológica de Sanse Capital con altos estándares de seguridad y rendimiento.</p>
+          <div class="team-tags">
+            <span class="tag">React</span>
+            <span class="tag">Node.js</span>
+            <span class="tag">PHP</span>
+            <span class="tag">AWS</span>
+            <span class="tag">MySQL</span>
+          </div>
+          <div style="margin-top:16px;">
+            <a href="https://www.linkedin.com/in/diegodelgadomao/" target="_blank" rel="noopener"
+               style="font-size:12px;color:var(--gold);text-decoration:none;border:1px solid var(--border);padding:6px 12px;letter-spacing:0.08em;text-transform:uppercase;">
+              🔗 LinkedIn →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="values-bar">
+      <div class="value-item">
+        <span class="value-icon">🔍</span>
+        <p class="value-name">Transparencia radical</p>
+        <p class="value-desc">Wallet pública en tiempo real. Cada peso gestionado es verificable por cualquier inversionista.</p>
+      </div>
+      <div class="value-item">
+        <span class="value-icon">📐</span>
+        <p class="value-name">Gestión disciplinada</p>
+        <p class="value-desc">No tomamos decisiones impulsivas. Cada operación responde a una estrategia y un análisis de riesgo.</p>
+      </div>
+      <div class="value-item">
+        <span class="value-icon">🤝</span>
+        <p class="value-name">Relación directa</p>
+        <p class="value-desc">No somos una plataforma anónima. Tienes acceso directo al equipo que gestiona tu capital.</p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<!-- ================================================================
-     FEATURES
-================================================================ -->
-<section class="section" id="servicios">
-    <div class="container">
-        <div class="section-header">
-            <div class="section-label">Beneficios</div>
-            <h2>¿Por Qué Sanse Capital?</h2>
-        </div>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon-wrap">💰</div>
-                <h3>Inversiones Seguras</h3>
-                <p>Tu dinero trabajando con seguridad y transparencia absoluta en cada operación.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon-wrap">📈</div>
-                <h3>Rendimientos Atractivos</h3>
-                <p>Ganancias competitivas: 13.5% a 42% anual según tu perfil de riesgo.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon-wrap">📱</div>
-                <h3>Atención Personalizada</h3>
-                <p>Soporte directo vía WhatsApp para resolver tus dudas en cualquier momento.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon-wrap">🔒</div>
-                <h3>Transparencia Total</h3>
-                <p>Términos y condiciones claros. Sabes exactamente cómo funciona tu inversión.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon-wrap">💼</div>
-                <h3>Diversificación</h3>
-                <p>Múltiples fuentes: préstamos, cripto, DeFi y financiación de proyectos.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon-wrap">🎯</div>
-                <h3>Flexibilidad</h3>
-                <p>Elige entre Ahorro Cadena, Préstamos o Inversión según tus necesidades.</p>
-            </div>
-        </div>
+<!-- ══════════════ POR QUÉ SANSE ══════════════ -->
+<section id="beneficios">
+  <div class="section-inner">
+    <p class="section-label">Beneficios</p>
+    <h2 class="section-title">¿Por Qué <em>Sanse Capital?</em></h2>
+    <p class="section-intro">Lo que nos diferencia no es solo la rentabilidad — es cómo tratamos a cada inversionista.</p>
+    <div class="beneficios-grid">
+      <div class="beneficio-card">
+        <span class="beneficio-icon">📈</span>
+        <h3>Rendimientos Históricos Atractivos</h3>
+        <p>Entre 13.5% y 42% anual según perfil de riesgo, basado en resultados reales desde 2021. No garantizados.</p>
+      </div>
+      <div class="beneficio-card">
+        <span class="beneficio-icon">📱</span>
+        <h3>Atención Personalizada</h3>
+        <p>Soporte directo vía WhatsApp. Hablas con las personas que realmente gestionan tu dinero, no con un bot.</p>
+      </div>
+      <div class="beneficio-card">
+        <span class="beneficio-icon">🔒</span>
+        <h3>Contrato y Términos Claros</h3>
+        <p>Cada inversión está respaldada por un acuerdo escrito. Sabes exactamente cómo funciona, cuándo y cómo puedes retirar.</p>
+      </div>
+      <div class="beneficio-card">
+        <span class="beneficio-icon">🌐</span>
+        <h3>Transparencia On-Chain</h3>
+        <p>Wallet pública verificable en tiempo real. Cualquier persona puede auditar los activos cripto del fondo.</p>
+      </div>
+      <div class="beneficio-card">
+        <span class="beneficio-icon">💼</span>
+        <h3>Diversificación Real</h3>
+        <p>Múltiples fuentes de ingreso: préstamos, cripto, DeFi y financiación de proyectos reducen la exposición a un solo mercado.</p>
+      </div>
+      <div class="beneficio-card">
+        <span class="beneficio-icon">🎯</span>
+        <h3>Flexibilidad de Modalidades</h3>
+        <p>Ahorro Cadena, Préstamos o Inversión directa. Cada opción está diseñada para un perfil diferente de inversionista.</p>
+      </div>
     </div>
+  </div>
 </section>
 
-<!-- ================================================================
-     TESTIMONIALS
-================================================================ -->
-<section class="section testimonials-section">
-    <div class="container">
-        <div class="section-header">
-            <div class="section-label">Clientes</div>
-            <h2>Lo que Dicen<br>Nuestros Inversionistas</h2>
-            <p>Historias reales de inversionistas satisfechos.</p>
+<!-- ══════════════ TESTIMONIOS ══════════════ -->
+<section style="background:var(--dark-2);">
+  <div class="section-inner">
+    <p class="section-label">Clientes</p>
+    <h2 class="section-title">Lo que Dicen Nuestros <em>Inversionistas</em></h2>
+    <p class="section-intro">Historias reales de personas que confiaron en Sanse Capital.</p>
+    <div class="testimonios-grid">
+      <div class="testimonio">
+        <div class="stars">★★★★★</div>
+        <p class="testimonio-text">Llevo más de 6 meses invirtiendo con Sanse Capital y las ganancias han sido consistentes. La plataforma es súper fácil y el equipo siempre está disponible.</p>
+        <div class="testimonio-author">
+          <div class="author-avatar">SR</div>
+          <div>
+            <p class="author-name">Santiago R.</p>
+            <p class="author-since">Cliente desde 2024</p>
+          </div>
         </div>
-        <div class="testi-grid">
-            <div class="testi-card">
-                <div class="stars">★★★★★</div>
-                <p class="testi-text">"Llevo más de 6 meses invirtiendo con Sanse Capital y las ganancias han sido consistentes. La plataforma es súper fácil y el equipo siempre está disponible."</p>
-                <div class="testi-author">
-                    <div class="testi-avatar">SR</div>
-                    <div>
-                        <div class="testi-name">Santiago R.</div>
-                        <div class="testi-since">Cliente desde 2024</div>
-                    </div>
-                </div>
-            </div>
-            <div class="testi-card">
-                <div class="stars">★★★★★</div>
-                <p class="testi-text">"Lo mejor es la transparencia. Puedo ver cada movimiento de mi inversión en tiempo real. Me siento segura y he recomendado Sanse Capital a toda mi familia."</p>
-                <div class="testi-author">
-                    <div class="testi-avatar">LC</div>
-                    <div>
-                        <div class="testi-name">Lina C.</div>
-                        <div class="testi-since">Cliente desde 2024</div>
-                    </div>
-                </div>
-            </div>
-            <div class="testi-card">
-                <div class="stars">★★★★★</div>
-                <p class="testi-text">"Excelente servicio. Las tasas son competitivas y el proceso de retiro es rápido. Definitivamente la mejor decisión financiera que he tomado este año."</p>
-                <div class="testi-author">
-                    <div class="testi-avatar">JM</div>
-                    <div>
-                        <div class="testi-name">Jaime M.</div>
-                        <div class="testi-since">Cliente desde 2025</div>
-                    </div>
-                </div>
-            </div>
+      </div>
+      <div class="testimonio">
+        <div class="stars">★★★★★</div>
+        <p class="testimonio-text">Lo mejor es la transparencia. Puedo ver cada movimiento en tiempo real. Me siento segura y he recomendado Sanse Capital a toda mi familia.</p>
+        <div class="testimonio-author">
+          <div class="author-avatar">LC</div>
+          <div>
+            <p class="author-name">Lina C.</p>
+            <p class="author-since">Cliente desde 2024</p>
+          </div>
         </div>
+      </div>
+      <div class="testimonio">
+        <div class="stars">★★★★★</div>
+        <p class="testimonio-text">Excelente servicio. Las tasas son competitivas y el proceso de retiro es rápido. Definitivamente la mejor decisión financiera que he tomado este año.</p>
+        <div class="testimonio-author">
+          <div class="author-avatar">JM</div>
+          <div>
+            <p class="author-name">Jaime M.</p>
+            <p class="author-since">Cliente desde 2025</p>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </section>
 
-<!-- ================================================================
-     FAQ
-================================================================ -->
-<section class="section" id="faq">
-    <div class="container">
-        <div class="section-header" style="text-align:center;max-width:600px;margin:0 auto 56px;">
-            <div class="section-label">FAQ</div>
-            <h2>Respuestas a tus Preguntas</h2>
-            <p>Todo lo que necesitas saber sobre tu inversión. Si tienes más dudas, escríbenos al WhatsApp.</p>
-        </div>
-        <div class="faq-list">
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>¿Cuándo puedo retirar mi dinero?</span>
-                    <span class="faq-icon">+</span>
-                </div>
-                <div class="faq-answer">Los retiros de capital se realizan únicamente al cierre de cada mes calendario. No se permiten retiros parciales o totales fuera de estas fechas bajo ninguna circunstancia.</div>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>¿Existe un límite de retiro mensual?</span>
-                    <span class="faq-icon">+</span>
-                </div>
-                <div class="faq-answer">El monto máximo permitido para retiro mensual sin previo aviso es de hasta $2.000.000 COP. Si deseas retirar un monto superior, deberás notificarlo con un mínimo de 30 días calendario de anticipación.</div>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>¿Qué es la modalidad de Ahorro Cadena?</span>
-                    <span class="faq-icon">+</span>
-                </div>
-                <div class="faq-answer">Los participantes se comprometen a cumplir puntualmente con los aportes establecidos. En caso de incumplimiento, el capital acumulado será utilizado como colateral y se aplicará una sanción fija de $5.000 COP descontada automáticamente del saldo.</div>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>¿Cómo funcionan los préstamos?</span>
-                    <span class="faq-icon">+</span>
-                </div>
-                <div class="faq-answer">Todo participante en modalidad de préstamo deberá realizar un abono obligatorio a capital cada mes, además del pago de intereses. Tasas: 4% mensual para socios y 6% mensual para no socios. En caso de incumplimiento, se podrá utilizar el capital ahorrado como garantía.</div>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>¿La rentabilidad está garantizada?</span>
-                    <span class="faq-icon">+</span>
-                </div>
-                <div class="faq-answer">El participante entiende que el interés generado por el fondo no es fijo ni garantizado. La rentabilidad puede variar entre 13.5% y 42% anual según el perfil de riesgo y las condiciones del mercado.</div>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>¿Cómo empiezo a invertir con Sanse Capital?</span>
-                    <span class="faq-icon">+</span>
-                </div>
-                <div class="faq-answer">Contáctanos vía WhatsApp al 319 455 2890. Te guiaremos en el proceso de vinculación y firma de términos y condiciones.</div>
-            </div>
-        </div>
+<!-- ══════════════ FAQ ══════════════ -->
+<section id="faq">
+  <div class="section-inner">
+    <p class="section-label">Preguntas Frecuentes</p>
+    <h2 class="section-title">Respuestas a tus <em>Preguntas</em></h2>
+    <p class="section-intro">Todo lo que necesitas saber. Si tienes más dudas, escríbenos al WhatsApp.</p>
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          ¿Sanse Capital está regulado por la SFC?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">Sanse Capital opera como fondo privado entre particulares bajo contrato civil. No está registrado ni vigilado por la Superintendencia Financiera de Colombia (SFC). Esto significa que no cuenta con los mismos mecanismos de protección de un fondo regulado. Por eso ponemos énfasis en la transparencia contractual y la verificación on-chain de activos. Te recomendamos leer los Términos y Condiciones antes de invertir.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          ¿Cuándo puedo retirar mi dinero?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">Los retiros de capital se realizan únicamente al cierre de cada mes calendario. No se permiten retiros parciales o totales fuera de estas fechas bajo ninguna circunstancia.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          ¿Existe un límite de retiro mensual?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">El monto máximo permitido para retiro mensual sin previo aviso es de hasta $2.000.000 COP. Si deseas retirar un monto superior, deberás notificarlo con un mínimo de 30 días calendario de anticipación.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          ¿Qué es la modalidad de Ahorro Cadena?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">Los participantes se comprometen a cumplir puntualmente con los aportes establecidos. En caso de incumplimiento, el capital acumulado será utilizado como colateral y se aplicará una sanción fija de $5.000 COP descontada automáticamente del saldo.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          ¿Cómo funcionan los préstamos?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">Todo participante en modalidad de préstamo deberá realizar un abono obligatorio a capital cada mes, además del pago de intereses. Tasas: 4% mensual para socios y 6% mensual para no socios. En caso de incumplimiento, se podrá utilizar el capital ahorrado como garantía.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          ¿La rentabilidad está garantizada?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">No. El participante entiende que el rendimiento del fondo no es fijo ni garantizado. La rentabilidad puede variar entre 13.5% y 42% anual según el perfil de riesgo y las condiciones del mercado. Las cifras históricas no son promesa de resultados futuros.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          ¿Cómo empiezo a invertir con Sanse Capital?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">Contáctanos vía WhatsApp al 319 455 2890. Te guiaremos en el proceso de vinculación, firma del contrato y depósito inicial. Todo el proceso es personalizado y acompañado por nuestro equipo.</div>
+      </div>
+
     </div>
+  </div>
 </section>
 
-<!-- ================================================================
-     CTA
-================================================================ -->
-<section class="cta-section" id="contacto">
-    <div class="container">
-        <div class="section-label" style="justify-content:center">Únete ahora</div>
-        <h2>Empieza a Invertir<br>Hoy Mismo</h2>
-        <p>Únete a nuestros inversionistas y comienza a hacer crecer tu patrimonio con estrategias probadas.</p>
-        <div class="cta-btns">
-            <a href="https://wa.me/573194552890?text=Quiero%20entrar%20a%20SanseCapital" target="_blank" class="btn-primary">📱 Contactar por WhatsApp</a>
-            <a href="terminos.html" class="btn-outline">Ver Términos y Condiciones</a>
-        </div>
-    </div>
-</section>
-
-<!-- ================================================================
-     MODAL
-================================================================ -->
-<div class="modal-overlay" id="modal" onclick="handleModalClick(event)">
-    <div class="modal-box">
-        <button class="modal-close" onclick="closeModal()">✕</button>
-        <div class="modal-emoji">🚧</div>
-        <h2>¡Plataforma en Construcción!</h2>
-        <p>Nuestro portal de registro online estará disponible muy pronto. Por ahora, inicia tu inversión contactándonos directamente por WhatsApp.</p>
-        <a href="https://wa.me/573194552890?text=Quiero%20entrar%20a%20SanseCapital" target="_blank" class="modal-wa">
-            📱 Contactar por WhatsApp
-        </a>
-    </div>
+<!-- ══════════════ CTA FINAL ══════════════ -->
+<div class="cta-section">
+  <h2>Empieza a Invertir <em>Hoy Mismo</em></h2>
+  <p>Únete a nuestros inversionistas y comienza a hacer crecer tu patrimonio con estrategias probadas y total transparencia.</p>
+  <div class="cta-btns">
+    <a class="btn-primary" href="https://wa.me/573194552890?text=Quiero%20entrar%20a%20SanseCapital">📱 Contactar por WhatsApp</a>
+    <a class="btn-ghost" href="terminos.html">Ver Términos y Condiciones →</a>
+  </div>
 </div>
 
-<!-- ================================================================
-     FOOTER
-================================================================ -->
+<!-- ══════════════ FOOTER ══════════════ -->
 <footer>
-    <div class="container">
-        <div class="footer-inner">
-            <div class="footer-brand">
-                <a href="#inicio" class="logo">SANSE <span>CAPITAL</span></a>
-                <p>Inversiones inteligentes para un futuro próspero. Fondo privado de inversión y préstamos entre particulares.</p>
-                <div class="footer-social">
-                    <a href="https://www.instagram.com/sansecapital" target="_blank" rel="noopener" aria-label="Instagram">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-                    </a>
-                    <a href="https://x.com/sansecapital" target="_blank" rel="noopener" aria-label="X (Twitter)">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                    </a>
-                    <a href="https://wa.me/573194552890?text=Quiero%20entrar%20a%20SanseCapital" target="_blank" rel="noopener" aria-label="WhatsApp">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                    </a>
-                </div>
-            </div>
-            <div class="footer-col">
-                <h4>Navegación</h4>
-                <a href="#inicio">Inicio</a>
-                <a href="#wallet">Activos del Fondo</a>
-                <a href="#modelo">Nuestro Modelo</a>
-                <a href="#servicios">Servicios</a>
-                <a href="#faq">Preguntas Frecuentes</a>
-            </div>
-            <div class="footer-col">
-                <h4>Contacto</h4>
-                <a href="https://wa.me/573194552890" target="_blank">📱 WhatsApp: 319 455 2890</a>
-                <a href="terminos.html">Términos y Condiciones</a>
-            </div>
-            <div class="footer-col">
-                <h4>Redes Sociales</h4>
-                <a href="https://www.instagram.com/sansecapital" target="_blank">📸 @sansecapital</a>
-                <a href="https://x.com/sansecapital" target="_blank">𝕏 @sansecapital</a>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>© 2025 Sanse Capital. Todos los derechos reservados.</p>
-            <a href="terminos.html">Términos y Condiciones</a>
-        </div>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a class="nav-logo" href="#inicio">SANSE <span style="color:var(--gold);">CAPITAL</span></a>
+      <p>Fondo privado de inversión y préstamos entre particulares. Bogotá, Colombia.</p>
     </div>
+    <div class="footer-col">
+      <h4>Navegación</h4>
+      <ul>
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#wallet">Activos del Fondo</a></li>
+        <li><a href="#modelo">Nuestro Modelo</a></li>
+        <li><a href="#servicios">Servicios</a></li>
+        <li><a href="#quienes">Quiénes Somos</a></li>
+        <li><a href="#faq">Preguntas Frecuentes</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contacto</h4>
+      <ul>
+        <li><a href="https://wa.me/573194552890">📱 319 455 2890</a></li>
+        <li><a href="terminos.html">Términos y Condiciones</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Redes Sociales</h4>
+      <ul>
+        <li><a href="https://www.instagram.com/sansecapital" target="_blank">📸 @sansecapital</a></li>
+        <li><a href="https://x.com/sansecapital" target="_blank">𝕏 @sansecapital</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Sanse Capital. Todos los derechos reservados.</p>
+    <a href="terminos.html" style="font-size:12px;color:var(--text-muted);text-decoration:none;">Términos y Condiciones</a>
+  </div>
+  <p class="footer-legal-note">
+    Sanse Capital es un fondo privado entre particulares. No está vigilado por la Superintendencia Financiera de Colombia (SFC). La inversión en activos digitales y préstamos privados conlleva riesgos, incluyendo la posible pérdida del capital invertido. Los rendimientos históricos no garantizan resultados futuros. Esta página web es de carácter informativo y no constituye una oferta pública de valores.
+  </p>
 </footer>
+
+<!-- ══════════════ MODAL CONSTRUCCIÓN ══════════════ -->
+<div class="modal-overlay" id="modalConstruccion">
+  <div class="modal">
+    <div class="modal-icon">🚧</div>
+    <h3>¡Plataforma en Construcción!</h3>
+    <p>Nuestro portal de registro online estará disponible muy pronto. Por ahora, inicia tu inversión contactándonos directamente por WhatsApp.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a class="btn-primary" href="https://wa.me/573194552890?text=Quiero%20entrar%20a%20SanseCapital" style="font-size:13px;">📱 WhatsApp</a>
+      <button class="modal-close" onclick="closeModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
     <script src="/index.js" ></script>
 </body>
 </html>
