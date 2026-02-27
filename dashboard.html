@@ -27,413 +27,228 @@
             --red-bg: rgba(231,76,94,0.1);
             --blue: #5b8def;
             --blue-bg: rgba(91,141,239,0.1);
+            --purple: #a78bfa;
             --sidebar-w: 260px;
         }
 
         html { scroll-behavior: smooth; }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--dark);
-            color: var(--text);
-            min-height: 100vh;
-        }
-
-        /* Noise texture */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.4;
-        }
+        body { font-family: 'DM Sans', sans-serif; background: var(--dark); color: var(--text); min-height: 100vh; }
+        body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; opacity: 0.4; }
 
         /* ══════ SIDEBAR ══════ */
-        .sidebar {
-            position: fixed;
-            top: 0; left: 0;
-            width: var(--sidebar-w);
-            height: 100vh;
-            background: var(--dark-2);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            z-index: 100;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-        }
+        .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh; background: var(--dark-2); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease; }
         .sidebar.open { transform: translateX(0); }
-
-        .sidebar-logo {
-            padding: 24px 20px;
-            border-bottom: 1px solid var(--border);
-        }
-        .sidebar-logo h1 {
-            font-family: 'Syne', sans-serif;
-            font-size: 18px;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-        }
+        .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid var(--border); }
+        .sidebar-logo h1 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: 0.08em; }
         .sidebar-logo h1 span { color: var(--gold); }
-        .sidebar-logo p {
-            font-size: 10px;
-            color: var(--text-muted);
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            margin-top: 4px;
-        }
-
+        .sidebar-logo p { font-size: 10px; color: var(--text-muted); letter-spacing: 0.2em; text-transform: uppercase; margin-top: 4px; }
         .sidebar-nav { flex: 1; padding: 20px 12px; overflow-y: auto; }
         .nav-section { margin-bottom: 24px; }
-        .nav-section-title {
-            font-size: 10px;
-            color: var(--text-muted);
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            padding: 0 12px;
-            margin-bottom: 10px;
-        }
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s;
-            cursor: pointer;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
-        }
+        .nav-section-title { font-size: 10px; color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; padding: 0 12px; margin-bottom: 10px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
         .nav-item:hover { background: var(--dark-3); color: var(--text); }
         .nav-item.active { background: var(--gold-dim); color: var(--gold); }
         .nav-item .icon { font-size: 18px; width: 24px; text-align: center; }
-
-        .sidebar-footer {
-            padding: 20px 16px;
-            border-top: 1px solid var(--border);
-        }
+        .sidebar-footer { padding: 20px 16px; border-top: 1px solid var(--border); }
         .user-info { display: flex; align-items: center; gap: 12px; }
-        .user-avatar {
-            width: 38px; height: 38px;
-            background: var(--gold);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Syne', sans-serif;
-            font-weight: 800;
-            font-size: 14px;
-            color: var(--dark);
-            flex-shrink: 0;
-        }
+        .user-avatar { width: 38px; height: 38px; background: var(--gold); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 14px; color: var(--dark); flex-shrink: 0; }
         .user-name { font-size: 13px; font-weight: 600; }
         .user-email { font-size: 11px; color: var(--text-muted); }
-        .btn-logout {
-            margin-top: 12px;
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border);
-            background: transparent;
-            color: var(--text-muted);
-            font-family: 'DM Sans', sans-serif;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+        .btn-logout { margin-top: 12px; width: 100%; padding: 10px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.2s; }
         .btn-logout:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
-
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            z-index: 90;
-        }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; }
         .sidebar-overlay.show { display: block; }
 
         /* ══════ MAIN ══════ */
-        .main {
-            min-height: 100vh;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Topbar */
-        .topbar {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(9,9,9,0.9);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border);
-        }
+        .main { min-height: 100vh; position: relative; z-index: 1; }
+        .topbar { position: sticky; top: 0; z-index: 50; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; background: rgba(9,9,9,0.9); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
         .topbar-left { display: flex; align-items: center; gap: 16px; }
-        .menu-toggle {
-            background: none;
-            border: 1px solid var(--border);
-            color: var(--text);
-            font-size: 18px;
-            cursor: pointer;
-            padding: 8px 12px;
-            transition: all 0.2s;
-        }
+        .menu-toggle { background: none; border: 1px solid var(--border); color: var(--text); font-size: 18px; cursor: pointer; padding: 8px 12px; transition: all 0.2s; }
         .menu-toggle:hover { border-color: var(--gold); color: var(--gold); }
         .topbar h2 { font-size: 18px; font-weight: 600; }
         .topbar p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
         .topbar-right { display: flex; gap: 12px; }
-        .btn-home {
-            font-size: 12px;
-            color: var(--text-muted);
-            text-decoration: none;
-            padding: 8px 16px;
-            border: 1px solid var(--border);
-            transition: all 0.2s;
-        }
+        .btn-home { font-size: 12px; color: var(--text-muted); text-decoration: none; padding: 8px 16px; border: 1px solid var(--border); transition: all 0.2s; }
         .btn-home:hover { color: var(--gold); border-color: var(--gold); }
-
-        /* Content */
         .content { padding: 20px; }
 
-        /* ══════ BALANCE HERO ══════ */
-        .balance-hero {
-            background: var(--dark-2);
-            border: 1px solid var(--border);
-            padding: 24px;
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-        .balance-hero::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--gold), transparent);
-        }
-        .balance-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            margin-bottom: 8px;
-        }
-        .balance-amount {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--gold);
-            line-height: 1.1;
-        }
-        .balance-currency {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-        .balance-meta {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-        }
-        .meta-item { text-align: center; }
-        .meta-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 16px;
-            font-weight: 700;
-        }
-        .meta-value.green { color: var(--green); }
-        .meta-value.blue { color: var(--blue); }
-        .meta-value.purple { color: #a78bfa; }
-        .meta-label {
-            font-size: 10px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-top: 4px;
-        }
+        /* ══════ BALANCE HERO — REDISEÑADO ══════ */
+        .balance-hero { background: var(--dark-2); border: 1px solid var(--border); padding: 28px; margin-bottom: 20px; position: relative; overflow: hidden; }
+        .balance-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--gold), var(--gold-light), transparent); }
 
-        /* Goal progress */
-        .goal-section { margin-top: 20px; }
-        .goal-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
-        .goal-bar {
-            height: 6px;
-            background: var(--dark-3);
-            overflow: hidden;
-        }
-        .goal-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--gold), var(--gold-light));
-            transition: width 1.5s ease;
-        }
+        .balance-top-row { display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 24px; }
+        .balance-main { }
+        .balance-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 6px; }
+        .balance-amount { font-family: 'JetBrains Mono', monospace; font-size: 36px; font-weight: 700; color: var(--gold); line-height: 1.1; }
+        .balance-currency { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 
-        /* ══════ STAT CARDS ══════ */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .stat-card {
-            background: var(--dark-2);
-            border: 1px solid var(--border);
-            padding: 20px;
-            transition: all 0.2s;
-        }
+        .balance-breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .breakdown-card { background: var(--dark-3); border: 1px solid var(--border); padding: 18px; position: relative; overflow: hidden; }
+        .breakdown-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; }
+        .breakdown-card.available::before { background: var(--green); }
+        .breakdown-card.invested::before { background: var(--blue); }
+        .breakdown-icon { font-size: 16px; margin-bottom: 8px; display: block; }
+        .breakdown-val { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; }
+        .breakdown-val.green { color: var(--green); }
+        .breakdown-val.blue { color: var(--blue); }
+        .breakdown-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+
+        .balance-bar-container { margin-top: 20px; }
+        .balance-bar-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.08em; }
+        .balance-bar { height: 8px; background: var(--dark-3); display: flex; overflow: hidden; }
+        .balance-bar-invested { height: 100%; background: var(--blue); transition: width 1s ease; }
+        .balance-bar-available { height: 100%; background: var(--green); transition: width 1s ease; }
+
+        /* ══════ STATS CARDS ══════ */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: var(--dark-2); border: 1px solid var(--border); padding: 20px; transition: all 0.2s; }
         .stat-card:hover { border-color: var(--border-hover); }
         .stat-icon { font-size: 20px; margin-bottom: 10px; }
-        .stat-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 22px;
-            font-weight: 700;
-        }
-        .stat-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-top: 4px;
-        }
-        .stat-change {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 11px;
-            margin-top: 8px;
-            padding: 4px 8px;
-            font-weight: 500;
-        }
-        .stat-change.up { color: var(--green); background: var(--green-bg); }
+        .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; }
+        .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
 
-        /* ══════ CHART ══════ */
-        .chart-card {
-            background: var(--dark-2);
-            border: 1px solid var(--border);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+        /* ══════ INVESTMENT PRODUCTS ══════ */
+        .products-section { margin-bottom: 20px; }
+        .products-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+        .products-title .badge-new { font-size: 9px; background: var(--gold); color: var(--dark); padding: 3px 8px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+
+        .product-card { background: var(--dark-2); border: 1px solid var(--border); overflow: hidden; transition: border-color 0.3s; cursor: pointer; }
+        .product-card:hover { border-color: var(--gold); }
+        .product-card-top { padding: 24px; position: relative; }
+        .product-card-top::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+        .product-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .product-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
+        .product-badge { font-size: 10px; color: var(--green); background: var(--green-bg); padding: 4px 10px; font-weight: 600; letter-spacing: 0.05em; }
+        .product-rates { display: flex; gap: 16px; margin-bottom: 16px; }
+        .product-rate { text-align: center; padding: 12px 16px; background: var(--dark-3); border: 1px solid var(--border); flex: 1; }
+        .product-rate-val { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: var(--gold); }
+        .product-rate-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+        .product-features { display: flex; flex-wrap: wrap; gap: 8px; }
+        .product-feature { font-size: 11px; color: var(--text-muted); padding: 5px 10px; background: var(--dark-3); border: 1px solid var(--border); }
+        .product-cta { display: block; width: 100%; padding: 16px; text-align: center; background: var(--gold-dim); color: var(--gold); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border: none; border-top: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+        .product-cta:hover { background: var(--gold); color: var(--dark); }
+
+        /* ══════ INVEST MODAL ══════ */
+        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); align-items: center; justify-content: center; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: var(--dark-2); border: 1px solid var(--border); width: 90%; max-width: 500px; position: relative; overflow: hidden; max-height: 90vh; overflow-y: auto; }
+        .modal::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+        .modal-header { padding: 24px 24px 0; display: flex; justify-content: space-between; align-items: flex-start; }
+        .modal-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
+        .modal-close { background: none; border: 1px solid var(--border); color: var(--text-muted); width: 32px; height: 32px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .modal-close:hover { border-color: var(--red); color: var(--red); }
+        .modal-body { padding: 24px; }
+        .modal-info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+        .modal-info-row .label { color: var(--text-muted); }
+        .modal-info-row .value { font-weight: 600; color: var(--text); }
+        .modal-info-row .value.gold { color: var(--gold); }
+
+        .invest-input-group { margin-top: 24px; }
+        .invest-input-group label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+        .invest-input-wrap { position: relative; }
+        .invest-input-wrap .prefix { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 14px; }
+        .invest-input { width: 100%; padding: 14px 14px 14px 28px; background: var(--dark-3); border: 1px solid var(--border); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 18px; outline: none; transition: border 0.2s; }
+        .invest-input:focus { border-color: var(--gold); }
+        .invest-available { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+        .invest-available span { color: var(--green); font-weight: 600; }
+
+        .invest-preview { background: var(--dark-3); border: 1px solid var(--border); padding: 16px; margin-top: 20px; }
+        .invest-preview-title { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+        .invest-preview-row { display: flex; justify-content: space-between; font-size: 13px; padding: 8px 0; }
+        .invest-preview-row .label { color: var(--text-muted); }
+        .invest-preview-row .value { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .invest-preview-row .value.green { color: var(--green); }
+
+        .btn-invest { width: 100%; padding: 16px; margin-top: 20px; background: var(--gold); border: none; color: var(--dark); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+        .btn-invest:hover { background: var(--gold-light); transform: translateY(-1px); }
+        .btn-invest:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .invest-disclaimer { font-size: 10px; color: var(--text-muted); margin-top: 12px; line-height: 1.6; }
+
+        /* ══════ MY INVESTMENTS LIST ══════ */
+        .my-investments { margin-bottom: 20px; }
+        .inv-list-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+        .inv-card { background: var(--dark-2); border: 1px solid var(--border); padding: 20px; margin-bottom: 12px; cursor: pointer; transition: border-color 0.3s; }
+        .inv-card:hover { border-color: var(--border-hover); }
+        .inv-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .inv-card-type { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .inv-card-status { font-size: 10px; padding: 3px 10px; font-weight: 600; }
+        .inv-card-status.active { color: var(--green); background: var(--green-bg); }
+        .inv-card-status.completed { color: var(--blue); background: var(--blue-bg); }
+        .inv-card-body { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+        .inv-card-stat { }
+        .inv-card-stat-val { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; }
+        .inv-card-stat-val.gold { color: var(--gold); }
+        .inv-card-stat-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+        .inv-progress-bar { height: 4px; background: var(--dark-3); overflow: hidden; margin-top: 4px; }
+        .inv-progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); transition: width 1s ease; }
+        .inv-progress-info { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: 6px; }
+
+        /* ══════ INVESTMENT DETAIL PANEL ══════ */
+        .detail-panel { display: none; }
+        .detail-panel.open { display: block; }
+        .detail-back { background: none; border: none; color: var(--gold); cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; margin-bottom: 16px; padding: 0; }
+        .detail-back:hover { text-decoration: underline; }
+        .detail-hero { background: var(--dark-2); border: 1px solid var(--border); padding: 28px; margin-bottom: 16px; position: relative; overflow: hidden; }
+        .detail-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+        .detail-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 20px; }
+        .detail-stat { text-align: center; }
+        .detail-stat-val { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; }
+        .detail-stat-val.gold { color: var(--gold); }
+        .detail-stat-val.green { color: var(--green); }
+        .detail-stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+
+        .returns-table { background: var(--dark-2); border: 1px solid var(--border); overflow: hidden; margin-bottom: 16px; }
+        .returns-table-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
+        .returns-table table { width: 100%; border-collapse: collapse; }
+        .returns-table th { text-align: left; padding: 12px 16px; font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--border); font-weight: 500; }
+        .returns-table td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid var(--border); }
+        .returns-table tr:last-child td { border-bottom: none; }
+        .returns-table tr:hover td { background: var(--gold-dim); }
+
+        /* ══════ CHART & TABLES (existing) ══════ */
+        .chart-card { background: var(--dark-2); border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; }
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .chart-title { font-size: 14px; font-weight: 600; }
         .chart-subtitle { font-size: 11px; color: var(--text-muted); }
         .chart-container { position: relative; height: 180px; }
         .chart-svg { width: 100%; height: 100%; }
 
-        /* ══════ TABLES ══════ */
-        .table-card {
-            background: var(--dark-2);
-            border: 1px solid var(--border);
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        .table-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
-        }
+        .table-card { background: var(--dark-2); border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden; }
+        .table-header { padding: 16px 20px; border-bottom: 1px solid var(--border); }
         .table-title { font-size: 14px; font-weight: 600; }
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .data-table th {
-            text-align: left;
-            padding: 12px 16px;
-            font-size: 10px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            border-bottom: 1px solid var(--border);
-            font-weight: 500;
-        }
-        .data-table td {
-            padding: 14px 16px;
-            font-size: 13px;
-            border-bottom: 1px solid var(--border);
-        }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th { text-align: left; padding: 12px 16px; font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--border); font-weight: 500; }
+        .data-table td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid var(--border); }
         .data-table tr:last-child td { border-bottom: none; }
         .data-table tr:hover td { background: var(--gold-dim); }
-
-        .badge {
-            display: inline-flex;
-            padding: 4px 10px;
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-        }
+        .badge { display: inline-flex; padding: 4px 10px; font-size: 10px; font-weight: 600; letter-spacing: 0.05em; }
         .badge-deposit { color: var(--green); background: var(--green-bg); }
         .badge-profit { color: var(--gold); background: var(--gold-dim); }
         .badge-withdraw { color: var(--red); background: var(--red-bg); }
-
+        .badge-investment { color: var(--blue); background: var(--blue-bg); }
         .amount-positive { color: var(--green); font-family: 'JetBrains Mono', monospace; }
         .amount-negative { color: var(--red); font-family: 'JetBrains Mono', monospace; }
         .amount-neutral { font-family: 'JetBrains Mono', monospace; }
-        .inv-rate { color: var(--gold); font-weight: 600; }
 
         /* ══════ LOADING / ERROR ══════ */
-        .loading-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 60px 20px;
-            color: var(--text-muted);
-        }
-        .loading-spinner {
-            width: 40px; height: 40px;
-            border: 3px solid var(--border);
-            border-top-color: var(--gold);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-bottom: 16px;
-        }
+        .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; color: var(--text-muted); }
+        .loading-spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .error-state { background: var(--red-bg); border: 1px solid rgba(231,76,94,0.2); padding: 32px; text-align: center; color: var(--red); }
+        .error-state button { margin-top: 16px; padding: 10px 24px; background: var(--red); color: white; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; }
 
-        .error-state {
-            background: var(--red-bg);
-            border: 1px solid rgba(231,76,94,0.2);
-            padding: 32px;
-            text-align: center;
-            color: var(--red);
-        }
-        .error-state button {
-            margin-top: 16px;
-            padding: 10px 24px;
-            background: var(--red);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-family: 'DM Sans', sans-serif;
-            font-weight: 600;
-        }
+        /* ══════ TOAST ══════ */
+        .toast { position: fixed; bottom: 24px; right: 24px; padding: 14px 24px; border-radius: 0; font-size: 13px; font-weight: 600; z-index: 999; transform: translateY(100px); opacity: 0; transition: all 0.3s; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast-success { background: var(--green); color: var(--dark); }
+        .toast-error { background: var(--red); color: white; }
 
         /* ══════ RESPONSIVE ══════ */
         @media (min-width: 480px) {
             .content { padding: 24px; }
-            .balance-amount { font-size: 40px; }
-            .stats-grid { grid-template-columns: repeat(3, 1fr); }
+            .balance-amount { font-size: 44px; }
         }
-
         @media (min-width: 768px) {
             .sidebar { transform: translateX(0); }
             .main { margin-left: var(--sidebar-w); }
@@ -442,29 +257,22 @@
             .content { padding: 32px; }
             .balance-hero { padding: 32px; }
             .balance-amount { font-size: 48px; }
-            .grid-2 {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 20px;
-            }
+            .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+            .inv-card-body { grid-template-columns: repeat(4, 1fr); }
+            .detail-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .inv-card-body { grid-template-columns: repeat(2, 1fr); }
+            .detail-grid { grid-template-columns: repeat(2, 1fr); }
+            .product-rates { flex-direction: column; }
         }
 
-        @media (min-width: 1024px) {
-            .topbar { padding: 20px 40px; }
-            .content { padding: 40px; }
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-in { animation: fadeInUp 0.5s ease-out forwards; opacity: 0; }
         .delay-1 { animation-delay: 0.1s; }
         .delay-2 { animation-delay: 0.2s; }
         .delay-3 { animation-delay: 0.3s; }
-
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--dark); }
         ::-webkit-scrollbar-thumb { background: var(--border); }
@@ -474,47 +282,27 @@
 
 <!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo">
-        <h1>SANSE <span>CAPITAL</span></h1>
-        <p>Panel de Control</p>
-    </div>
-
+    <div class="sidebar-logo"><h1>SANSE <span>CAPITAL</span></h1><p>Panel de Control</p></div>
     <nav class="sidebar-nav">
         <div class="nav-section">
             <div class="nav-section-title">Principal</div>
-            <a class="nav-item active" href="#">
-                <span class="icon">📊</span> Dashboard
-            </a>
-            <a class="nav-item" href="#" onclick="alert('Próximamente'); return false;">
-                <span class="icon">💰</span> Inversiones
-            </a>
-            <a class="nav-item" href="#" onclick="alert('Próximamente'); return false;">
-                <span class="icon">📋</span> Movimientos
-            </a>
+            <a class="nav-item active" href="#" onclick="showView('dashboard')"><span class="icon">📊</span> Dashboard</a>
+            <a class="nav-item" href="#" onclick="showView('investments')"><span class="icon">💰</span> Inversiones</a>
+            <a class="nav-item" href="#" onclick="showView('movements')"><span class="icon">📋</span> Movimientos</a>
         </div>
         <div class="nav-section">
             <div class="nav-section-title">Más</div>
-            <a class="nav-item" href="#" onclick="alert('Próximamente'); return false;">
-                <span class="icon">⚙️</span> Configuración
-            </a>
-            <a class="nav-item" href="https://wa.me/573194552890" target="_blank">
-                <span class="icon">💬</span> Soporte
-            </a>
+            <a class="nav-item" href="https://wa.me/573194552890" target="_blank"><span class="icon">💬</span> Soporte</a>
         </div>
     </nav>
-
     <div class="sidebar-footer">
         <div class="user-info">
             <div class="user-avatar" id="user-avatar">--</div>
-            <div>
-                <div class="user-name" id="user-name">Cargando...</div>
-                <div class="user-email" id="user-email">...</div>
-            </div>
+            <div><div class="user-name" id="user-name">Cargando...</div><div class="user-email" id="user-email">...</div></div>
         </div>
         <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
     </div>
 </aside>
-
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <!-- Main -->
@@ -522,245 +310,493 @@
     <div class="topbar">
         <div class="topbar-left">
             <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-            <div>
-                <h2 id="greeting">Cargando...</h2>
-                <p id="date-display"></p>
-            </div>
+            <div><h2 id="greeting">Cargando...</h2><p id="date-display"></p></div>
         </div>
-        <div class="topbar-right">
-            <a href="index.html" class="btn-home">← Ir al Home</a>
-        </div>
+        <div class="topbar-right"><a href="index.html" class="btn-home">← Ir al Home</a></div>
     </div>
 
     <div class="content" id="dashboard-content">
-        <div class="loading-state">
-            <div class="loading-spinner"></div>
-            <p>Cargando tu información...</p>
-        </div>
+        <div class="loading-state"><div class="loading-spinner"></div><p>Cargando tu información...</p></div>
     </div>
 </main>
 
-<!-- Template -->
-<template id="dashboard-template">
-    <!-- Balance Hero -->
-    <div class="balance-hero animate-in">
-        <div class="balance-label">💰 Tu Ahorro Total</div>
-        <div class="balance-amount" id="balance-display">$0</div>
-        <div class="balance-currency">Pesos Colombianos (COP)</div>
+<!-- Invest Modal -->
+<div class="modal-overlay" id="investModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">💰 Invertir en SDTC</div>
+            <button class="modal-close" onclick="closeInvestModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-info-row"><span class="label">Producto</span><span class="value">Inversión SDTC</span></div>
+            <div class="modal-info-row"><span class="label">Plazo</span><span class="value">6 meses</span></div>
+            <div class="modal-info-row"><span class="label">Rendimiento mensual</span><span class="value gold">2% — 4% variable</span></div>
+            <div class="modal-info-row"><span class="label">Monto mínimo</span><span class="value">$100.000 COP</span></div>
 
-        <div class="balance-meta">
-            <div class="meta-item">
-                <div class="meta-value green" id="total-profit">+$0</div>
-                <div class="meta-label">Ganancias</div>
-            </div>
-            <div class="meta-item">
-                <div class="meta-value blue" id="total-invested">$0</div>
-                <div class="meta-label">Invertido</div>
-            </div>
-            <div class="meta-item">
-                <div class="meta-value purple" id="active-count">0</div>
-                <div class="meta-label">Activas</div>
-            </div>
-        </div>
-
-        <div class="goal-section">
-            <div class="goal-header">
-                <span>Meta de ahorro</span>
-                <span id="goal-text">0%</span>
-            </div>
-            <div class="goal-bar">
-                <div class="goal-fill" id="goal-fill" style="width:0%"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Stats -->
-    <div class="stats-grid animate-in delay-1">
-        <div class="stat-card">
-            <div class="stat-icon">📈</div>
-            <div class="stat-value" id="stat-rendimiento">0%</div>
-            <div class="stat-label">Rendimiento</div>
-            <div class="stat-change up">↑ anual</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">📅</div>
-            <div class="stat-value" id="stat-months">0</div>
-            <div class="stat-label">Meses</div>
-            <div class="stat-change up">↑ activo</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">💎</div>
-            <div class="stat-value" id="stat-last-profit">$0</div>
-            <div class="stat-label">Último Rendimiento</div>
-            <div class="stat-change up">↑ este mes</div>
-        </div>
-    </div>
-
-    <!-- Chart & Investments -->
-    <div class="grid-2 animate-in delay-2">
-        <div class="chart-card">
-            <div class="chart-header">
-                <div>
-                    <div class="chart-title">Crecimiento</div>
-                    <div class="chart-subtitle">Historial de ahorro</div>
+            <div class="invest-input-group">
+                <label>Monto a invertir (COP)</label>
+                <div class="invest-input-wrap">
+                    <span class="prefix">$</span>
+                    <input type="number" class="invest-input" id="invest-amount" placeholder="0" min="100000" oninput="updateInvestPreview()">
                 </div>
+                <div class="invest-available">Disponible: <span id="invest-available-display">$0</span></div>
             </div>
-            <div class="chart-container">
-                <svg class="chart-svg" id="chart-svg" viewBox="0 0 500 200" preserveAspectRatio="none"></svg>
-            </div>
-        </div>
 
-        <div class="table-card">
-            <div class="table-header">
-                <span class="table-title">Inversiones Activas</span>
+            <div class="invest-preview" id="invest-preview" style="display:none;">
+                <div class="invest-preview-title">📋 Resumen de tu inversión</div>
+                <div class="invest-preview-row"><span class="label">Capital</span><span class="value" id="preview-capital">$0</span></div>
+                <div class="invest-preview-row"><span class="label">Desbloqueo estimado</span><span class="value" id="preview-unlock">—</span></div>
+                <div class="invest-preview-row"><span class="label">Ganancia mín. estimada (6m)</span><span class="value green" id="preview-min-gain">$0</span></div>
+                <div class="invest-preview-row"><span class="label">Ganancia máx. estimada (6m)</span><span class="value green" id="preview-max-gain">$0</span></div>
             </div>
-            <table class="data-table">
-                <thead>
-                    <tr><th>Tipo</th><th>Monto</th><th>Tasa</th></tr>
-                </thead>
-                <tbody id="investments-tbody"></tbody>
-            </table>
+
+            <button class="btn-invest" id="btn-invest" onclick="executeInvestment()" disabled>Confirmar Inversión →</button>
+            <p class="invest-disclaimer">⚠️ El capital quedará bloqueado por 6 meses. Los rendimientos son variables y no garantizados. Al confirmar, aceptas los Términos y Condiciones.</p>
         </div>
     </div>
+</div>
 
-    <!-- Transactions -->
-    <div class="table-card animate-in delay-3">
-        <div class="table-header">
-            <span class="table-title">Últimos Movimientos</span>
-        </div>
-        <table class="data-table">
-            <thead>
-                <tr><th>Fecha</th><th>Descripción</th><th>Tipo</th><th style="text-align:right">Monto</th></tr>
-            </thead>
-            <tbody id="transactions-tbody"></tbody>
-        </table>
-    </div>
-</template>
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 
 <script>
     const API_URL = 'https://sanse-backend-production.up.railway.app/api';
 
-    // Auth
-    function getToken() {
-        return localStorage.getItem('sanse_access_token') || sessionStorage.getItem('sanse_access_token');
-    }
-    function getRefreshToken() {
-        return localStorage.getItem('sanse_refresh_token') || sessionStorage.getItem('sanse_refresh_token');
-    }
-    function getUserData() {
-        const data = localStorage.getItem('sanse_user') || sessionStorage.getItem('sanse_user');
-        return data ? JSON.parse(data) : null;
-    }
-    function getStorage() {
-        return localStorage.getItem('sanse_access_token') ? localStorage : sessionStorage;
-    }
+    // ══════ AUTH ══════
+    function getToken() { return localStorage.getItem('sanse_access_token') || sessionStorage.getItem('sanse_access_token'); }
+    function getRefreshToken() { return localStorage.getItem('sanse_refresh_token') || sessionStorage.getItem('sanse_refresh_token'); }
+    function getUserData() { const d = localStorage.getItem('sanse_user') || sessionStorage.getItem('sanse_user'); return d ? JSON.parse(d) : null; }
+    function getStorage() { return localStorage.getItem('sanse_access_token') ? localStorage : sessionStorage; }
+    if (!getToken()) window.location.href = 'login.html';
 
-    if (!getToken()) {
-        window.location.href = 'login.html';
-    }
-
-    // API Helper
     async function apiFetch(endpoint, options = {}) {
         const token = getToken();
-        const config = {
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-                ...options.headers,
-            },
-        };
-
-        let response = await fetch(`${API_URL}${endpoint}`, config);
-
-        if (response.status === 401) {
-            const refreshed = await refreshAccessToken();
-            if (refreshed) {
-                config.headers['Authorization'] = `Bearer ${getToken()}`;
-                response = await fetch(`${API_URL}${endpoint}`, config);
-            } else {
-                logout();
-                return null;
-            }
+        const config = { ...options, headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}`, ...options.headers } };
+        let res = await fetch(`${API_URL}${endpoint}`, config);
+        if (res.status === 401) {
+            const ok = await refreshAccessToken();
+            if (ok) { config.headers['Authorization'] = `Bearer ${getToken()}`; res = await fetch(`${API_URL}${endpoint}`, config); }
+            else { logout(); return null; }
         }
-
-        return response;
+        return res;
     }
 
     async function refreshAccessToken() {
         try {
-            const refreshToken = getRefreshToken();
-            if (!refreshToken) return false;
-
-            const response = await fetch(`${API_URL}/auth/refresh`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refreshToken }),
-            });
-
-            if (!response.ok) return false;
-
-            const data = await response.json();
-            const storage = getStorage();
-            storage.setItem('sanse_access_token', data.accessToken);
-            storage.setItem('sanse_refresh_token', data.refreshToken);
+            const rt = getRefreshToken(); if (!rt) return false;
+            const res = await fetch(`${API_URL}/auth/refresh`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({refreshToken:rt}) });
+            if (!res.ok) return false;
+            const data = await res.json();
+            const s = getStorage();
+            s.setItem('sanse_access_token', data.accessToken);
+            s.setItem('sanse_refresh_token', data.refreshToken);
             return true;
-        } catch {
-            return false;
-        }
-    }
-
-    // Utils
-    function formatCOP(n) {
-        return '$' + Math.round(n).toLocaleString('es-CO');
+        } catch { return false; }
     }
 
     function logout() {
-        localStorage.removeItem('sanse_access_token');
-        localStorage.removeItem('sanse_refresh_token');
-        localStorage.removeItem('sanse_user');
-        sessionStorage.removeItem('sanse_access_token');
-        sessionStorage.removeItem('sanse_refresh_token');
-        sessionStorage.removeItem('sanse_user');
+        ['sanse_access_token','sanse_refresh_token','sanse_user'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
         window.location.href = 'login.html';
     }
 
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('open');
-        document.getElementById('sidebar-overlay').classList.toggle('show');
-    }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('show'); }
+
+    // ══════ UTILS ══════
+    function formatCOP(n) { return '$' + Math.round(n).toLocaleString('es-CO'); }
+    function formatDate(d) { return new Date(d).toLocaleDateString('es-CO', { day:'numeric', month:'short', year:'numeric' }); }
+    function toast(msg, type='success') { const el = document.getElementById('toast'); el.textContent = msg; el.className = `toast toast-${type} show`; setTimeout(() => el.classList.remove('show'), 3500); }
 
     function setGreeting(userName) {
         const h = new Date().getHours();
-        let g = 'Buenas noches';
-        if (h >= 5 && h < 12) g = 'Buenos días';
-        else if (h >= 12 && h < 19) g = 'Buenas tardes';
-
+        let g = h >= 5 && h < 12 ? 'Buenos días' : h >= 12 && h < 19 ? 'Buenas tardes' : 'Buenas noches';
         const firstName = userName ? userName.split(' ')[0] : '';
-        document.getElementById('greeting').textContent = `${g}, ${firstName} 👋`;
-
-        const opts = { weekday: 'long', day: 'numeric', month: 'short' };
-        document.getElementById('date-display').textContent = new Date().toLocaleDateString('es-CO', opts);
+        document.getElementById('greeting').textContent = `${g}, ${firstName}`;
+        document.getElementById('date-display').textContent = new Date().toLocaleDateString('es-CO', { weekday:'long', day:'numeric', month:'short' });
     }
 
-    function animateNumber(elId, target, isCurrency) {
-        const el = document.getElementById(elId);
-        if (!el) return;
-        const duration = 1500;
-        const start = 0;
-        const startTime = performance.now();
+    // ══════ STATE ══════
+    let dashboardData = null;
+    let balanceSummary = { totalBalance: 0, totalInvested: 0, availableBalance: 0, totalEarnings: 0 };
+    let myInvestments = [];
+    let currentView = 'dashboard';
 
-        function update(currentTime) {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            const current = Math.round(start + (target - start) * eased);
-            el.textContent = isCurrency ? formatCOP(current) : current.toLocaleString('es-CO');
-            if (progress < 1) requestAnimationFrame(update);
+    // ══════ VIEWS ══════
+    function showView(view) {
+        currentView = view;
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        event?.target?.closest('.nav-item')?.classList.add('active');
+        renderCurrentView();
+    }
+
+    function renderCurrentView() {
+        const content = document.getElementById('dashboard-content');
+        if (currentView === 'dashboard') renderDashboard(content);
+        else if (currentView === 'investments') renderInvestmentsView(content);
+        else if (currentView === 'movements') renderMovementsView(content);
+    }
+
+    // ══════ RENDER DASHBOARD ══════
+    function renderDashboard(container) {
+        if (!dashboardData) return;
+        const d = dashboardData;
+        const b = balanceSummary;
+        const investedPct = b.totalBalance > 0 ? Math.round((b.totalInvested / b.totalBalance) * 100) : 0;
+        const availablePct = 100 - investedPct;
+
+        container.innerHTML = `
+        <!-- Balance Hero -->
+        <div class="balance-hero animate-in">
+            <div class="balance-top-row">
+                <div class="balance-main">
+                    <div class="balance-label">💰 Tu Saldo Total</div>
+                    <div class="balance-amount">${formatCOP(b.totalBalance)}</div>
+                    <div class="balance-currency">Pesos Colombianos (COP)</div>
+                </div>
+            </div>
+
+            <div class="balance-breakdown">
+                <div class="breakdown-card available">
+                    <span class="breakdown-icon">🟢</span>
+                    <div class="breakdown-val green">${formatCOP(b.availableBalance)}</div>
+                    <div class="breakdown-label">Disponible para invertir</div>
+                </div>
+                <div class="breakdown-card invested">
+                    <span class="breakdown-icon">🔵</span>
+                    <div class="breakdown-val blue">${formatCOP(b.totalInvested)}</div>
+                    <div class="breakdown-label">En inversiones activas</div>
+                </div>
+            </div>
+
+            <div class="balance-bar-container">
+                <div class="balance-bar-labels">
+                    <span>Invertido ${investedPct}%</span>
+                    <span>Disponible ${availablePct}%</span>
+                </div>
+                <div class="balance-bar">
+                    <div class="balance-bar-invested" style="width:${investedPct}%"></div>
+                    <div class="balance-bar-available" style="width:${availablePct}%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid animate-in delay-1">
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-value" style="color:var(--green)">+${formatCOP(b.totalEarnings)}</div>
+                <div class="stat-label">Rendimientos Totales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-value">${d.monthsInvesting}</div>
+                <div class="stat-label">Meses Invirtiendo</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💎</div>
+                <div class="stat-value">${myInvestments.filter(i => i.status === 'active').length}</div>
+                <div class="stat-label">Inversiones Activas</div>
+            </div>
+        </div>
+
+        <!-- Product Card -->
+        <div class="products-section animate-in delay-2">
+            <div class="products-title">Productos de Inversión <span class="badge-new">Nuevo</span></div>
+            <div class="product-card" onclick="openInvestModal()">
+                <div class="product-card-top">
+                    <div class="product-header">
+                        <div class="product-name">Inversión SDTC</div>
+                        <span class="product-badge">Disponible</span>
+                    </div>
+                    <div class="product-rates">
+                        <div class="product-rate">
+                            <div class="product-rate-val">2% — 4%</div>
+                            <div class="product-rate-label">Rendimiento Mensual</div>
+                        </div>
+                        <div class="product-rate">
+                            <div class="product-rate-val">6</div>
+                            <div class="product-rate-label">Meses de Plazo</div>
+                        </div>
+                    </div>
+                    <div class="product-features">
+                        <span class="product-feature">📅 Plazo fijo 6 meses</span>
+                        <span class="product-feature">📈 Rendimiento variable</span>
+                        <span class="product-feature">🔒 Capital bloqueado</span>
+                        <span class="product-feature">💰 Mín. $100K</span>
+                    </div>
+                </div>
+                <button class="product-cta">Invertir Ahora →</button>
+            </div>
+        </div>
+
+        <!-- Active Investments -->
+        ${myInvestments.filter(i => i.status === 'active').length > 0 ? `
+        <div class="my-investments animate-in delay-3">
+            <div class="inv-list-title">📊 Mis Inversiones Activas</div>
+            ${myInvestments.filter(i => i.status === 'active').map(inv => `
+                <div class="inv-card" onclick="showInvestmentDetail(${inv.id})">
+                    <div class="inv-card-header">
+                        <span class="inv-card-type">💰 ${inv.type} <span style="font-size:12px;color:var(--text-muted);font-weight:400;">— ${inv.durationMonths || 6} meses</span></span>
+                        <span class="inv-card-status active">Activa</span>
+                    </div>
+                    <div class="inv-card-body">
+                        <div class="inv-card-stat"><div class="inv-card-stat-val gold">${formatCOP(inv.amount)}</div><div class="inv-card-stat-label">Capital</div></div>
+                        <div class="inv-card-stat"><div class="inv-card-stat-val">${inv.minMonthlyRate}%-${inv.maxMonthlyRate}%</div><div class="inv-card-stat-label">Tasa Mensual</div></div>
+                        <div class="inv-card-stat"><div class="inv-card-stat-val" style="color:var(--green)">+${formatCOP(inv.totalEarned)}</div><div class="inv-card-stat-label">Ganado</div></div>
+                        <div class="inv-card-stat"><div class="inv-card-stat-val">${inv.daysRemaining}d</div><div class="inv-card-stat-label">Restantes</div></div>
+                    </div>
+                    <div class="inv-progress-bar"><div class="inv-progress-fill" style="width:${inv.progressPct}%"></div></div>
+                    <div class="inv-progress-info"><span>${formatDate(inv.startDate)}</span><span>${inv.progressPct}% completado</span><span>🔓 ${formatDate(inv.lockEndDate || inv.endDate)}</span></div>
+                </div>
+            `).join('')}
+        </div>` : ''}
+
+        <!-- Chart & Transactions -->
+        <div class="grid-2 animate-in delay-3">
+            <div class="chart-card">
+                <div class="chart-header"><div><div class="chart-title">Crecimiento</div><div class="chart-subtitle">Historial de saldo</div></div></div>
+                <div class="chart-container"><svg class="chart-svg" id="chart-svg" viewBox="0 0 500 200" preserveAspectRatio="none"></svg></div>
+            </div>
+            <div class="table-card">
+                <div class="table-header"><span class="table-title">Últimos Movimientos</span></div>
+                <table class="data-table">
+                    <thead><tr><th>Fecha</th><th>Tipo</th><th style="text-align:right">Monto</th></tr></thead>
+                    <tbody>${d.transactions.slice(0, 8).map(tx => {
+                        const typeLabels = { deposit:'Depósito', profit:'Rendimiento', withdraw:'Retiro', payment:'Abono', interest:'Intereses', investment:'Inversión', loan:'Préstamo' };
+                        const badgeClass = { deposit:'badge-deposit', profit:'badge-profit', withdraw:'badge-withdraw', investment:'badge-investment' };
+                        const isNeg = tx.type === 'withdraw' || tx.type === 'investment';
+                        return `<tr>
+                            <td style="color:var(--text-muted)">${formatDate(tx.date)}</td>
+                            <td><span class="badge ${badgeClass[tx.type] || 'badge-deposit'}">${typeLabels[tx.type] || tx.type}</span></td>
+                            <td class="${isNeg ? 'amount-negative' : 'amount-positive'}" style="text-align:right">${isNeg ? '-' : '+'}${formatCOP(tx.amount)}</td>
+                        </tr>`;
+                    }).join('')}</tbody>
+                </table>
+            </div>
+        </div>`;
+
+        // Draw chart
+        setTimeout(() => drawChart(d.balanceHistory), 100);
+    }
+
+    // ══════ RENDER INVESTMENTS VIEW ══════
+    function renderInvestmentsView(container) {
+        container.innerHTML = `
+        <div class="products-section animate-in">
+            <div class="products-title">💰 Productos Disponibles</div>
+            <div class="product-card" onclick="openInvestModal()">
+                <div class="product-card-top">
+                    <div class="product-header"><div class="product-name">Inversión SDTC</div><span class="product-badge">Disponible</span></div>
+                    <div class="product-rates">
+                        <div class="product-rate"><div class="product-rate-val">2% — 4%</div><div class="product-rate-label">Rendimiento Mensual</div></div>
+                        <div class="product-rate"><div class="product-rate-val">6</div><div class="product-rate-label">Meses de Plazo</div></div>
+                    </div>
+                    <div class="product-features">
+                        <span class="product-feature">📅 Plazo fijo 6 meses</span>
+                        <span class="product-feature">📈 Rendimiento variable</span>
+                        <span class="product-feature">🔒 Capital bloqueado</span>
+                    </div>
+                </div>
+                <button class="product-cta">Invertir Ahora →</button>
+            </div>
+        </div>
+
+        <div class="my-investments animate-in delay-1">
+            <div class="inv-list-title">📊 Todas Mis Inversiones</div>
+            <div id="all-investments-list"></div>
+        </div>
+
+        <div class="detail-panel" id="investment-detail-panel"></div>`;
+
+        const list = document.getElementById('all-investments-list');
+        if (!myInvestments.length) {
+            list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">Aún no tienes inversiones. ¡Comienza invirtiendo arriba!</div>';
+        } else {
+            list.innerHTML = myInvestments.map(inv => `
+                <div class="inv-card" onclick="showInvestmentDetail(${inv.id})">
+                    <div class="inv-card-header">
+                        <span class="inv-card-type">💰 ${inv.type} <span style="font-size:12px;color:var(--text-muted);font-weight:400;">— ${inv.durationMonths || 6} meses</span></span>
+                        <span class="inv-card-status ${inv.status}">${inv.status === 'active' ? 'Activa' : inv.status === 'completed' ? 'Completada' : inv.status}</span>
+                    </div>
+                    <div class="inv-card-body">
+                        <div class="inv-card-stat"><div class="inv-card-stat-val gold">${formatCOP(inv.amount)}</div><div class="inv-card-stat-label">Capital</div></div>
+                        <div class="inv-card-stat"><div class="inv-card-stat-val">${inv.minMonthlyRate}%-${inv.maxMonthlyRate}%</div><div class="inv-card-stat-label">Tasa</div></div>
+                        <div class="inv-card-stat"><div class="inv-card-stat-val" style="color:var(--green)">+${formatCOP(inv.totalEarned)}</div><div class="inv-card-stat-label">Ganado</div></div>
+                        <div class="inv-card-stat"><div class="inv-card-stat-val">${inv.daysRemaining}d</div><div class="inv-card-stat-label">Restantes</div></div>
+                    </div>
+                    <div class="inv-progress-bar"><div class="inv-progress-fill" style="width:${inv.progressPct}%"></div></div>
+                    <div class="inv-progress-info"><span>${formatDate(inv.startDate)}</span><span>${inv.progressPct}%</span><span>🔓 ${formatDate(inv.lockEndDate || inv.endDate)}</span></div>
+                </div>
+            `).join('');
         }
-        requestAnimationFrame(update);
     }
 
+    // ══════ RENDER MOVEMENTS VIEW ══════
+    function renderMovementsView(container) {
+        if (!dashboardData) return;
+        container.innerHTML = `
+        <div class="table-card animate-in">
+            <div class="table-header"><span class="table-title">📋 Todos los Movimientos</span></div>
+            <table class="data-table">
+                <thead><tr><th>Fecha</th><th>Descripción</th><th>Tipo</th><th style="text-align:right">Monto</th></tr></thead>
+                <tbody>${dashboardData.transactions.map(tx => {
+                    const typeLabels = { deposit:'Depósito', profit:'Rendimiento', withdraw:'Retiro', payment:'Abono', interest:'Intereses', investment:'Inversión', loan:'Préstamo' };
+                    const badgeClass = { deposit:'badge-deposit', profit:'badge-profit', withdraw:'badge-withdraw', investment:'badge-investment' };
+                    const isNeg = tx.type === 'withdraw' || tx.type === 'investment';
+                    return `<tr>
+                        <td style="color:var(--text-muted)">${formatDate(tx.date)}</td>
+                        <td>${tx.description || '-'}</td>
+                        <td><span class="badge ${badgeClass[tx.type] || 'badge-deposit'}">${typeLabels[tx.type] || tx.type}</span></td>
+                        <td class="${isNeg ? 'amount-negative' : 'amount-positive'}" style="text-align:right">${isNeg ? '-' : '+'}${formatCOP(tx.amount)}</td>
+                    </tr>`;
+                }).join('')}</tbody>
+            </table>
+        </div>`;
+    }
+
+    // ══════ INVESTMENT DETAIL ══════
+    async function showInvestmentDetail(invId) {
+        try {
+            const res = await apiFetch(`/investments/${invId}`);
+            if (!res || !res.ok) { toast('Error cargando detalle', 'error'); return; }
+            const data = await res.json();
+            const inv = data.investment;
+            const returns = data.returns;
+
+            const now = new Date();
+            const end = new Date(inv.lockEndDate || inv.endDate);
+            const start = new Date(inv.startDate);
+            const totalDays = Math.max(1, (end - start) / (1000*60*60*24));
+            const elapsed = Math.max(0, (now - start) / (1000*60*60*24));
+            const pct = Math.min(100, Math.round((elapsed / totalDays) * 100));
+            const daysLeft = Math.max(0, Math.ceil((end - now) / (1000*60*60*24)));
+            const totalEarned = returns.reduce((s, r) => s + r.earned, 0);
+
+            const content = document.getElementById('dashboard-content');
+            content.innerHTML = `
+            <button class="detail-back" onclick="showView('${currentView === 'investments' ? 'investments' : 'dashboard'}')">← Volver</button>
+
+            <div class="detail-hero animate-in">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px;">Inversión ${inv.type}</div>
+                        <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--gold);">${formatCOP(inv.amount)}</div>
+                    </div>
+                    <span class="inv-card-status ${inv.status}" style="font-size:12px;padding:6px 14px;">${inv.status === 'active' ? '🟢 Activa' : '✅ Completada'}</span>
+                </div>
+
+                <div class="detail-grid">
+                    <div class="detail-stat"><div class="detail-stat-val">${formatDate(inv.startDate)}</div><div class="detail-stat-label">Fecha Inicio</div></div>
+                    <div class="detail-stat"><div class="detail-stat-val">${formatDate(inv.lockEndDate || inv.endDate)}</div><div class="detail-stat-label">Desbloqueo</div></div>
+                    <div class="detail-stat"><div class="detail-stat-val green">+${formatCOP(totalEarned)}</div><div class="detail-stat-label">Rendimiento Acumulado</div></div>
+                    <div class="detail-stat"><div class="detail-stat-val">${daysLeft} días</div><div class="detail-stat-label">Restantes</div></div>
+                </div>
+
+                <div style="margin-top:20px;">
+                    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.08em;">
+                        <span>Progreso</span><span>${pct}%</span>
+                    </div>
+                    <div class="inv-progress-bar" style="height:6px;"><div class="inv-progress-fill" style="width:${pct}%"></div></div>
+                </div>
+            </div>
+
+            <div class="returns-table animate-in delay-1">
+                <div class="returns-table-header">📈 Historial de Rendimientos Mensuales</div>
+                ${returns.length > 0 ? `
+                <table>
+                    <thead><tr><th>Mes</th><th>Tasa Aplicada</th><th>Rendimiento</th><th>Estado</th></tr></thead>
+                    <tbody>${returns.map(r => `
+                        <tr>
+                            <td>${formatDate(r.month)}</td>
+                            <td style="color:var(--gold);font-weight:600;">${r.rate}%</td>
+                            <td style="color:var(--green);font-family:'JetBrains Mono',monospace;">+${formatCOP(r.earned)}</td>
+                            <td><span class="badge ${r.status === 'paid' ? 'badge-deposit' : 'badge-profit'}">${r.status === 'paid' ? 'Pagado' : r.status === 'reinvested' ? 'Reinvertido' : 'Pendiente'}</span></td>
+                        </tr>
+                    `).join('')}</tbody>
+                </table>` : `<div style="padding:40px;text-align:center;color:var(--text-muted);">Aún no hay rendimientos registrados. Se actualizan mensualmente.</div>`}
+            </div>
+
+            ${data.transactions.length > 0 ? `
+            <div class="table-card animate-in delay-2">
+                <div class="table-header"><span class="table-title">📋 Movimientos de esta Inversión</span></div>
+                <table class="data-table">
+                    <thead><tr><th>Fecha</th><th>Descripción</th><th>Ref</th><th style="text-align:right">Monto</th></tr></thead>
+                    <tbody>${data.transactions.map(t => `
+                        <tr>
+                            <td style="color:var(--text-muted)">${formatDate(t.date)}</td>
+                            <td>${t.description || '-'}</td>
+                            <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)">${t.refId || '-'}</td>
+                            <td style="text-align:right;font-family:'JetBrains Mono',monospace;">${formatCOP(t.amount)}</td>
+                        </tr>
+                    `).join('')}</tbody>
+                </table>
+            </div>` : ''}`;
+        } catch (e) {
+            console.error(e);
+            toast('Error cargando detalle de inversión', 'error');
+        }
+    }
+
+    // ══════ INVEST MODAL ══════
+    function openInvestModal() {
+        document.getElementById('invest-available-display').textContent = formatCOP(balanceSummary.availableBalance);
+        document.getElementById('invest-amount').value = '';
+        document.getElementById('invest-preview').style.display = 'none';
+        document.getElementById('btn-invest').disabled = true;
+        document.getElementById('investModal').classList.add('open');
+    }
+    function closeInvestModal() { document.getElementById('investModal').classList.remove('open'); }
+
+    function updateInvestPreview() {
+        const amount = parseFloat(document.getElementById('invest-amount').value) || 0;
+        const preview = document.getElementById('invest-preview');
+        const btn = document.getElementById('btn-invest');
+
+        if (amount >= 100000 && amount <= balanceSummary.availableBalance) {
+            const unlockDate = new Date();
+            unlockDate.setMonth(unlockDate.getMonth() + 6);
+            const minGain = amount * 0.02 * 6;
+            const maxGain = amount * 0.04 * 6;
+
+            document.getElementById('preview-capital').textContent = formatCOP(amount);
+            document.getElementById('preview-unlock').textContent = formatDate(unlockDate);
+            document.getElementById('preview-min-gain').textContent = '+' + formatCOP(minGain);
+            document.getElementById('preview-max-gain').textContent = '+' + formatCOP(maxGain);
+
+            preview.style.display = 'block';
+            btn.disabled = false;
+        } else {
+            preview.style.display = 'none';
+            btn.disabled = true;
+        }
+    }
+
+    async function executeInvestment() {
+        const amount = parseFloat(document.getElementById('invest-amount').value);
+        const btn = document.getElementById('btn-invest');
+        btn.disabled = true;
+        btn.textContent = 'Procesando...';
+
+        try {
+            const res = await apiFetch('/investments/create', {
+                method: 'POST',
+                body: JSON.stringify({ productId: 'sdtc_6m', amount })
+            });
+            const data = await res.json();
+            if (!res.ok) { toast(data.error || 'Error al invertir', 'error'); return; }
+
+            closeInvestModal();
+            toast('✅ Inversión SDTC creada exitosamente');
+            await loadAllData();
+            renderCurrentView();
+        } catch (e) {
+            toast('Error de conexión', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Confirmar Inversión →';
+        }
+    }
+
+    // ══════ CHART ══════
     function drawChart(history) {
         if (!history || !history.length) return;
         const svg = document.getElementById('chart-svg');
@@ -769,173 +805,99 @@
         const vals = history.map(h => h.amount);
         const min = Math.min(...vals) * 0.9;
         const max = Math.max(...vals) * 1.05;
-
         const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-
         const points = history.map((item, i) => {
             const x = pad + (i / Math.max(history.length - 1, 1)) * (w - pad * 2);
             const y = h - pad - ((item.amount - min) / (max - min || 1)) * (h - pad * 2);
-            const d = new Date(item.date);
-            const label = months[d.getMonth()];
-            return { x, y, label, ...item };
+            return { x, y, label: months[new Date(item.date).getMonth()], ...item };
         });
-
         const pathD = points.map((p, i) => {
             if (i === 0) return `M ${p.x} ${p.y}`;
-            const prev = points[i - 1];
-            const cpx1 = prev.x + (p.x - prev.x) / 3;
-            const cpx2 = prev.x + (p.x - prev.x) * 2 / 3;
+            const prev = points[i-1]; const cpx1 = prev.x + (p.x - prev.x)/3; const cpx2 = prev.x + (p.x - prev.x)*2/3;
             return `C ${cpx1} ${prev.y}, ${cpx2} ${p.y}, ${p.x} ${p.y}`;
         }).join(' ');
-
-        const areaD = pathD + ` L ${points[points.length-1].x} ${h - pad} L ${points[0].x} ${h - pad} Z`;
-
-        let svgContent = `
-            <defs>
-                <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stop-color="#C9A84C"/>
-                    <stop offset="100%" stop-color="#E8C96A"/>
-                </linearGradient>
-                <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="rgba(201,168,76,0.2)"/>
-                    <stop offset="100%" stop-color="rgba(201,168,76,0)"/>
-                </linearGradient>
-            </defs>
-        `;
-
-        for (let i = 0; i < 4; i++) {
-            const y = pad + (i / 3) * (h - pad * 2);
-            svgContent += `<line x1="${pad}" y1="${y}" x2="${w-pad}" y2="${y}" stroke="rgba(201,168,76,0.1)" stroke-width="1"/>`;
-        }
-
-        svgContent += `<path d="${areaD}" fill="url(#areaGrad)"/>`;
-        svgContent += `<path d="${pathD}" fill="none" stroke="url(#lineGrad)" stroke-width="2.5" stroke-linecap="round"/>`;
-
-        points.forEach((p) => {
-            svgContent += `<circle cx="${p.x}" cy="${p.y}" r="4" fill="var(--dark)" stroke="#C9A84C" stroke-width="2"/>`;
-            svgContent += `<text x="${p.x}" y="${h - 8}" text-anchor="middle" fill="#7A7670" font-size="10" font-family="DM Sans">${p.label}</text>`;
-        });
-
+        const areaD = pathD + ` L ${points[points.length-1].x} ${h-pad} L ${points[0].x} ${h-pad} Z`;
+        let svgContent = `<defs><linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#E8C96A"/></linearGradient><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(201,168,76,0.2)"/><stop offset="100%" stop-color="rgba(201,168,76,0)"/></linearGradient></defs>`;
+        for (let i = 0; i < 4; i++) { const y = pad + (i/3)*(h-pad*2); svgContent += `<line x1="${pad}" y1="${y}" x2="${w-pad}" y2="${y}" stroke="rgba(201,168,76,0.1)" stroke-width="1"/>`; }
+        svgContent += `<path d="${areaD}" fill="url(#areaGrad)"/><path d="${pathD}" fill="none" stroke="url(#lineGrad)" stroke-width="2.5" stroke-linecap="round"/>`;
+        points.forEach(p => { svgContent += `<circle cx="${p.x}" cy="${p.y}" r="4" fill="var(--dark)" stroke="#C9A84C" stroke-width="2"/><text x="${p.x}" y="${h-8}" text-anchor="middle" fill="#7A7670" font-size="10" font-family="DM Sans">${p.label}</text>`; });
         svg.innerHTML = svgContent;
     }
 
-    function populateDashboard(data, user) {
-        const template = document.getElementById('dashboard-template');
-        const content = document.getElementById('dashboard-content');
-        content.innerHTML = '';
-        content.appendChild(template.content.cloneNode(true));
-
-        const initials = (user.fullName || user.email).split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
-        document.getElementById('user-avatar').textContent = initials;
-        document.getElementById('user-name').textContent = user.fullName || user.email;
-        document.getElementById('user-email').textContent = user.email;
-
-        animateNumber('balance-display', data.balance, true);
-
-        document.getElementById('total-profit').textContent = '+' + formatCOP(data.totalProfit);
-        document.getElementById('total-invested').textContent = formatCOP(data.totalInvested);
-        document.getElementById('active-count').textContent = data.activeInvestments;
-
-        const goal = data.monthlyGoal || 20000000;
-        const pct = Math.min(100, Math.round((data.balance / goal) * 100));
-        document.getElementById('goal-text').textContent = `${pct}% — Meta: ${formatCOP(goal)}`;
-        setTimeout(() => {
-            document.getElementById('goal-fill').style.width = pct + '%';
-        }, 500);
-
-        document.getElementById('stat-rendimiento').textContent = data.avgRate + '%';
-        document.getElementById('stat-months').textContent = data.monthsInvesting;
-        document.getElementById('stat-last-profit').textContent = formatCOP(data.lastProfit);
-
-        const invBody = document.getElementById('investments-tbody');
-        if (data.investments.length === 0) {
-            invBody.innerHTML = '<tr><td colspan="3" style="color:var(--text-muted);text-align:center;padding:24px;">Sin inversiones</td></tr>';
-        } else {
-            data.investments.forEach(inv => {
-                invBody.innerHTML += `
-                    <tr>
-                        <td>${inv.type}</td>
-                        <td class="amount-neutral">${formatCOP(inv.amount)}</td>
-                        <td><span class="inv-rate">${inv.rate}%</span></td>
-                    </tr>
-                `;
-            });
-        }
-
-        const txBody = document.getElementById('transactions-tbody');
-        if (data.transactions.length === 0) {
-            txBody.innerHTML = '<tr><td colspan="4" style="color:var(--text-muted);text-align:center;padding:24px;">Sin movimientos</td></tr>';
-        } else {
-            data.transactions.forEach(tx => {
-                const typeLabels = { deposit:'Depósito', profit:'Rendimiento', withdraw:'Retiro' };
-                const badgeClass = { deposit:'badge-deposit', profit:'badge-profit', withdraw:'badge-withdraw' };
-                const amountClass = tx.type === 'withdraw' ? 'amount-negative' : 'amount-positive';
-                const prefix = tx.type === 'withdraw' ? '-' : '+';
-                const dateStr = new Date(tx.date).toLocaleDateString('es-CO', { day:'numeric', month:'short' });
-
-                txBody.innerHTML += `
-                    <tr>
-                        <td style="color:var(--text-muted)">${dateStr}</td>
-                        <td>${tx.description || '-'}</td>
-                        <td><span class="badge ${badgeClass[tx.type] || ''}">${typeLabels[tx.type] || tx.type}</span></td>
-                        <td class="${amountClass}" style="text-align:right">${prefix}${formatCOP(tx.amount)}</td>
-                    </tr>
-                `;
-            });
-        }
-
-        drawChart(data.balanceHistory);
-    }
-
-    function showError(message) {
-        const content = document.getElementById('dashboard-content');
-        content.innerHTML = `
-            <div class="error-state">
-                <p>⚠️ ${message}</p>
-                <button onclick="loadDashboard()">Reintentar</button>
-                <button onclick="logout()" style="background:transparent;border:1px solid var(--red);color:var(--red);margin-left:8px;">Cerrar sesión</button>
-            </div>
-        `;
-    }
-
-    async function loadDashboard() {
-        const content = document.getElementById('dashboard-content');
-        content.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Cargando...</p></div>';
-
+    // ══════ LOAD DATA ══════
+    async function loadAllData() {
         try {
-            const user = getUserData();
-            if (user) setGreeting(user.fullName || user.email);
+            const [dashRes, balRes, invRes] = await Promise.all([
+                apiFetch('/dashboard/summary'),
+                apiFetch('/investments/balance-summary'),
+                apiFetch('/investments/my'),
+            ]);
 
-            const response = await apiFetch('/dashboard/summary');
-            if (!response) return;
+            if (dashRes && dashRes.ok) dashboardData = await dashRes.json();
+            if (balRes && balRes.ok) balanceSummary = await balRes.json();
+            if (invRes && invRes.ok) myInvestments = await invRes.json();
 
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.error || 'Error cargando datos');
+            // Fallback: si balance-summary no funciona todavía, calcular del dashboard
+            if (!balRes || !balRes.ok) {
+                if (dashboardData) {
+                    const totalInv = dashboardData.investments.filter(i => i.status === 'active').reduce((s, i) => s + i.amount, 0);
+                    balanceSummary = {
+                        totalBalance: dashboardData.balance,
+                        totalInvested: totalInv,
+                        availableBalance: Math.max(0, dashboardData.balance - totalInv),
+                        totalEarnings: dashboardData.totalProfit,
+                    };
+                }
             }
 
-            const data = await response.json();
-            populateDashboard(data, user || { email: 'Usuario', fullName: 'Usuario' });
-
-        } catch (error) {
-            console.error('Error:', error);
-            showError(error.message || 'No se pudo conectar.');
+            // Fallback: si investments/my no funciona, usar del dashboard
+            if (!invRes || !invRes.ok) {
+                if (dashboardData) {
+                    myInvestments = dashboardData.investments.map(inv => ({
+                        ...inv,
+                        durationMonths: 6,
+                        minMonthlyRate: 2,
+                        maxMonthlyRate: 4,
+                        lockEndDate: inv.endDate || null,
+                        progressPct: 0,
+                        daysRemaining: 0,
+                        totalEarned: 0,
+                        returns: [],
+                    }));
+                }
+            }
+        } catch (e) {
+            console.error('Error loading data:', e);
         }
     }
 
-    // Init
-    const opts = { weekday: 'long', day: 'numeric', month: 'short' };
-    document.getElementById('date-display').textContent = new Date().toLocaleDateString('es-CO', opts);
+    async function init() {
+        const user = getUserData();
+        if (user) {
+            setGreeting(user.fullName || user.email);
+            const initials = (user.fullName || user.email).split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+            document.getElementById('user-avatar').textContent = initials;
+            document.getElementById('user-name').textContent = user.fullName || user.email;
+            document.getElementById('user-email').textContent = user.email;
+        }
 
-    const userData = getUserData();
-    if (userData) {
-        setGreeting(userData.fullName || userData.email);
-        const initials = (userData.fullName || userData.email).split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
-        document.getElementById('user-avatar').textContent = initials;
-        document.getElementById('user-name').textContent = userData.fullName || userData.email;
-        document.getElementById('user-email').textContent = userData.email;
+        document.getElementById('date-display').textContent = new Date().toLocaleDateString('es-CO', { weekday:'long', day:'numeric', month:'short' });
+
+        await loadAllData();
+
+        if (dashboardData) {
+            renderCurrentView();
+        } else {
+            document.getElementById('dashboard-content').innerHTML = `
+                <div class="error-state">
+                    <p>⚠️ No se pudo cargar la información</p>
+                    <button onclick="init()">Reintentar</button>
+                    <button onclick="logout()" style="background:transparent;border:1px solid var(--red);color:var(--red);margin-left:8px;">Cerrar sesión</button>
+                </div>`;
+        }
     }
-    loadDashboard();
+
+    init();
 </script>
 </body>
 </html>
