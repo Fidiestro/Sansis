@@ -104,7 +104,7 @@
         .toast-success { background:var(--green); color:#0a0a0f; }
         .toast-error { background:var(--red); color:white; }
 
-        /* Users list in tab */
+        /* Users list */
         .user-list { display:grid; gap:8px; margin-top:16px; }
         .user-row {
             display:flex; align-items:center; justify-content:space-between; padding:14px 18px;
@@ -120,12 +120,43 @@
         .user-row-email { font-size:12px; color:var(--text2); }
         .user-row-right { display:flex; align-items:center; gap:12px; }
 
+        /* Investment cards for returns section */
+        .inv-card {
+            background:var(--input); border:1px solid var(--border); border-radius:14px; padding:20px;
+            margin-bottom:12px; cursor:pointer; transition:all 0.2s;
+        }
+        .inv-card:hover { border-color:var(--gold); }
+        .inv-card.selected { border-color:var(--gold); background:rgba(212,168,67,0.05); box-shadow:0 0 0 1px var(--gold); }
+        .inv-card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+        .inv-card-user { font-weight:600; font-size:15px; }
+        .inv-card-type { font-size:12px; color:var(--gold); font-weight:600; }
+        .inv-card-details { display:flex; gap:24px; flex-wrap:wrap; }
+        .inv-card-detail { display:flex; flex-direction:column; gap:2px; }
+        .inv-card-detail .label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+        .inv-card-detail .value { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; }
+        .inv-card-returns { margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+        .inv-card-returns-title { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+        .return-tag { display:inline-block; padding:3px 10px; border-radius:8px; font-size:11px; margin:2px 4px 2px 0; background:rgba(78,203,141,0.1); color:var(--green); font-family:'JetBrains Mono',monospace; }
+
+        /* Preview box */
+        .preview-box {
+            background:rgba(212,168,67,0.06); border:1px solid rgba(212,168,67,0.2); border-radius:12px;
+            padding:20px; margin:16px 0;
+        }
+        .preview-box h4 { font-size:13px; color:var(--gold); margin-bottom:12px; text-transform:uppercase; letter-spacing:1px; }
+        .preview-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+        .preview-item .label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+        .preview-item .value { font-family:'JetBrains Mono',monospace; font-size:18px; font-weight:600; color:var(--text); margin-top:4px; }
+        .preview-item .value.green { color:var(--green); }
+
         @media(max-width:768px) {
             .form-row, .form-row.cols-3 { grid-template-columns:1fr; }
             .stats-row { grid-template-columns:1fr 1fr; }
             .tabs { flex-wrap:wrap; }
             .container { padding:16px; }
             .topbar { padding:12px 16px; }
+            .preview-grid { grid-template-columns:1fr; }
+            .inv-card-details { gap:12px; }
         }
     </style>
 </head>
@@ -152,9 +183,10 @@
 
         <!-- TABS -->
         <div class="tabs">
-            <div class="tab active" onclick="switchTab('register',this)">👤 Registrar Usuario</div>
-            <div class="tab" onclick="switchTab('transactions',this)">💸 Registrar Transacción</div>
-            <div class="tab" onclick="switchTab('users',this)">📋 Ver Usuarios</div>
+            <div class="tab active" onclick="switchTab('register',this)">👤 Registrar</div>
+            <div class="tab" onclick="switchTab('transactions',this)">💸 Transacción</div>
+            <div class="tab" onclick="switchTab('returns',this)">📈 Rendimientos</div>
+            <div class="tab" onclick="switchTab('users',this)">📋 Usuarios</div>
         </div>
 
         <!-- ====== REGISTRAR USUARIO ====== -->
@@ -223,6 +255,76 @@
                     <table>
                         <thead><tr><th>ID</th><th>Usuario</th><th>Tipo</th><th>Monto</th><th>Descripción</th><th>Fecha</th></tr></thead>
                         <tbody id="tx-table"><tr><td colspan="6" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== RENDIMIENTOS SDTC ====== -->
+        <div class="section" id="sec-returns">
+            <div class="card">
+                <div class="card-title">📈 Registrar Rendimiento SDTC</div>
+                <div class="card-desc">
+                    Selecciona una inversión activa y registra el rendimiento mensual. 
+                    Se calculará automáticamente la ganancia y se reflejará en el dashboard del usuario.
+                </div>
+
+                <!-- Lista de inversiones activas -->
+                <div id="active-investments-list" style="margin-bottom:20px;">
+                    <div style="color:var(--muted);text-align:center;padding:40px 0;">Cargando inversiones activas...</div>
+                </div>
+
+                <!-- Formulario de rendimiento (oculto hasta seleccionar inversión) -->
+                <div id="return-form" style="display:none;">
+                    <div style="height:1px;background:var(--border);margin:20px 0;"></div>
+                    
+                    <div class="card-title" style="font-size:15px;">💰 Nuevo Rendimiento para: <span id="rf-inv-label" style="color:var(--gold);"></span></div>
+
+                    <div class="form-row cols-3">
+                        <div class="form-group">
+                            <label>Tasa Mensual (%) *</label>
+                            <input id="rf-rate" type="number" step="0.01" min="0" max="100" placeholder="3.5" oninput="updateReturnPreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>Mes del Rendimiento *</label>
+                            <input id="rf-month" type="month" oninput="updateReturnPreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>Notas (opcional)</label>
+                            <input id="rf-notes" placeholder="Ej: Rendimiento marzo 2026">
+                        </div>
+                    </div>
+
+                    <!-- Preview de la ganancia -->
+                    <div class="preview-box" id="return-preview" style="display:none;">
+                        <h4>📊 Vista Previa del Rendimiento</h4>
+                        <div class="preview-grid">
+                            <div class="preview-item">
+                                <div class="label">Capital Invertido</div>
+                                <div class="value" id="rp-capital">$0</div>
+                            </div>
+                            <div class="preview-item">
+                                <div class="label">Tasa Aplicada</div>
+                                <div class="value" id="rp-rate">0%</div>
+                            </div>
+                            <div class="preview-item">
+                                <div class="label">Ganancia Generada</div>
+                                <div class="value green" id="rp-earned">$0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-gold" onclick="registerReturn()" id="btn-register-return" disabled>📈 Registrar Rendimiento</button>
+                </div>
+            </div>
+
+            <!-- Historial de rendimientos registrados -->
+            <div class="card">
+                <div class="card-title">📋 Últimos Rendimientos Registrados</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Inversión</th><th>Usuario</th><th>Mes</th><th>Tasa</th><th>Ganancia</th><th>Capital</th></tr></thead>
+                        <tbody id="returns-table"><tr><td colspan="6" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -301,6 +403,8 @@
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             el.classList.add('active');
             document.getElementById(`sec-${tab}`).classList.add('active');
+            // Cargar inversiones activas al entrar a la pestaña de rendimientos
+            if (tab === 'returns') loadActiveInvestments();
         }
 
         // ====== FORMAT ======
@@ -309,7 +413,8 @@
 
         // ====== DATA ======
         let allUsers = [];
-        let txCounter = 1;
+        let activeInvestments = [];
+        let selectedInvestment = null;
 
         async function loadData() {
             await loadUsers();
@@ -324,7 +429,6 @@
                 const data = await res.json();
                 allUsers = data.users || [];
 
-                // Users table
                 const tbody = document.getElementById('users-table');
                 if (!allUsers.length) {
                     tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">No hay usuarios</td></tr>';
@@ -341,7 +445,6 @@
                     `).join('');
                 }
 
-                // Populate user select for transactions
                 const sel = document.getElementById('t-user');
                 sel.innerHTML = '<option value="">Seleccionar usuario...</option>' +
                     allUsers.map(u => `<option value="${u.id}">${u.full_name} — ${u.email}</option>`).join('');
@@ -351,7 +454,6 @@
         }
 
         async function loadStats() {
-            // Para stats necesitamos un endpoint nuevo, por ahora calculamos con lo que hay
             try {
                 const res = await apiFetch('/admin/stats');
                 if (res && res.ok) {
@@ -373,8 +475,8 @@
                     tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">No hay transacciones</td></tr>';
                     return;
                 }
-                const typeLabels = {deposit:'Depósito',withdraw:'Retiro',payment:'Abono',interest:'Intereses',profit:'Ganancias',loan:'Préstamo'};
-                const typeBadge = {deposit:'badge-green',withdraw:'badge-red',payment:'badge-blue',interest:'badge-gold',profit:'badge-green',loan:'badge-purple'};
+                const typeLabels = {deposit:'Depósito',withdraw:'Retiro',payment:'Abono',interest:'Intereses',profit:'Ganancias',loan:'Préstamo',investment:'Inversión',investment_return:'Rendimiento SDTC'};
+                const typeBadge = {deposit:'badge-green',withdraw:'badge-red',payment:'badge-blue',interest:'badge-gold',profit:'badge-green',loan:'badge-purple',investment:'badge-blue',investment_return:'badge-green'};
                 tbody.innerHTML = data.map(tx => `
                     <tr>
                         <td class="mono">${tx.ref_id || tx.id}</td>
@@ -386,6 +488,225 @@
                     </tr>
                 `).join('');
             } catch(e) { document.getElementById('tx-table').innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">Sin datos</td></tr>'; }
+        }
+
+        // ====== RENDIMIENTOS SDTC ======
+        async function loadActiveInvestments() {
+            const container = document.getElementById('active-investments-list');
+            const returnsTable = document.getElementById('returns-table');
+            
+            try {
+                const res = await apiFetch('/admin/investments/active');
+                if (!res || !res.ok) {
+                    container.innerHTML = '<div style="color:var(--red);text-align:center;padding:20px;">Error cargando inversiones. Verifica que el backend esté actualizado.</div>';
+                    return;
+                }
+                activeInvestments = await res.json();
+
+                if (!activeInvestments.length) {
+                    container.innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px 0;">No hay inversiones activas. Los usuarios deben crear una inversión SDTC primero.</div>';
+                    returnsTable.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">Sin rendimientos</td></tr>';
+                    return;
+                }
+
+                // Render investment cards
+                container.innerHTML = activeInvestments.map(inv => `
+                    <div class="inv-card ${selectedInvestment && selectedInvestment.id === inv.id ? 'selected' : ''}" 
+                         onclick="selectInvestment(${inv.id})" id="inv-card-${inv.id}">
+                        <div class="inv-card-header">
+                            <div>
+                                <div class="inv-card-user">${inv.userName}</div>
+                                <div style="font-size:12px;color:var(--text2)">${inv.userEmail}</div>
+                            </div>
+                            <div class="inv-card-type">${inv.type} — ID #${inv.id}</div>
+                        </div>
+                        <div class="inv-card-details">
+                            <div class="inv-card-detail">
+                                <span class="label">Capital</span>
+                                <span class="value" style="color:var(--gold)">${formatCOP(inv.amount)}</span>
+                            </div>
+                            <div class="inv-card-detail">
+                                <span class="label">Tasa</span>
+                                <span class="value">${inv.minMonthlyRate}% — ${inv.maxMonthlyRate}%</span>
+                            </div>
+                            <div class="inv-card-detail">
+                                <span class="label">Inicio</span>
+                                <span class="value">${formatDate(inv.startDate)}</span>
+                            </div>
+                            <div class="inv-card-detail">
+                                <span class="label">Vence</span>
+                                <span class="value">${formatDate(inv.lockEndDate || inv.endDate)}</span>
+                            </div>
+                            <div class="inv-card-detail">
+                                <span class="label">Ganancia Total</span>
+                                <span class="value" style="color:var(--green)">${formatCOP(inv.totalEarned)}</span>
+                            </div>
+                            <div class="inv-card-detail">
+                                <span class="label">Meses Pagados</span>
+                                <span class="value">${inv.returnsCount} / 6</span>
+                            </div>
+                        </div>
+                        ${inv.returns.length > 0 ? `
+                            <div class="inv-card-returns">
+                                <div class="inv-card-returns-title">Rendimientos registrados</div>
+                                ${inv.returns.map(r => `<span class="return-tag">${r.month.slice(0,7)} → ${r.rate}% → ${formatCOP(r.earned)}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+
+                // Build returns history table from all investments
+                const allReturns = [];
+                activeInvestments.forEach(inv => {
+                    inv.returns.forEach(r => {
+                        allReturns.push({
+                            invId: inv.id,
+                            userName: inv.userName,
+                            month: r.month,
+                            rate: r.rate,
+                            earned: r.earned,
+                            capital: inv.amount,
+                        });
+                    });
+                });
+
+                if (allReturns.length > 0) {
+                    allReturns.sort((a, b) => b.month.localeCompare(a.month));
+                    returnsTable.innerHTML = allReturns.map(r => `
+                        <tr>
+                            <td class="mono">#${r.invId}</td>
+                            <td style="font-weight:600">${r.userName}</td>
+                            <td class="mono">${r.month.slice(0,7)}</td>
+                            <td><span class="badge badge-gold">${r.rate}%</span></td>
+                            <td class="mono" style="color:var(--green)">+${formatCOP(r.earned)}</td>
+                            <td class="mono" style="color:var(--text2)">${formatCOP(r.capital)}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    returnsTable.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">Aún no se han registrado rendimientos</td></tr>';
+                }
+
+            } catch(e) {
+                console.error('loadActiveInvestments error:', e);
+                container.innerHTML = '<div style="color:var(--red);text-align:center;padding:20px;">Error: ' + e.message + '</div>';
+            }
+        }
+
+        function selectInvestment(invId) {
+            const inv = activeInvestments.find(i => i.id === invId);
+            if (!inv) return;
+
+            selectedInvestment = inv;
+
+            // Update card styles
+            document.querySelectorAll('.inv-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById(`inv-card-${invId}`).classList.add('selected');
+
+            // Show form
+            const form = document.getElementById('return-form');
+            form.style.display = 'block';
+            document.getElementById('rf-inv-label').textContent = `${inv.userName} — ${inv.type} #${inv.id} — ${formatCOP(inv.amount)}`;
+
+            // Set default month to next unpaid month
+            const paidMonths = inv.returns.map(r => r.month.slice(0, 7));
+            const startDate = new Date(inv.startDate);
+            let nextMonth = null;
+            for (let i = 0; i < 6; i++) {
+                const d = new Date(startDate);
+                d.setMonth(d.getMonth() + i + 1);
+                const monthStr = d.toISOString().slice(0, 7);
+                if (!paidMonths.includes(monthStr)) {
+                    nextMonth = monthStr;
+                    break;
+                }
+            }
+            if (nextMonth) {
+                document.getElementById('rf-month').value = nextMonth;
+            }
+
+            // Clear rate
+            document.getElementById('rf-rate').value = '';
+            document.getElementById('rf-notes').value = '';
+            document.getElementById('return-preview').style.display = 'none';
+            document.getElementById('btn-register-return').disabled = true;
+
+            // Scroll to form
+            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function updateReturnPreview() {
+            if (!selectedInvestment) return;
+
+            const rate = parseFloat(document.getElementById('rf-rate').value);
+            const month = document.getElementById('rf-month').value;
+            const preview = document.getElementById('return-preview');
+            const btn = document.getElementById('btn-register-return');
+
+            if (!rate || rate <= 0 || !month) {
+                preview.style.display = 'none';
+                btn.disabled = true;
+                return;
+            }
+
+            const capital = selectedInvestment.amount;
+            const earned = Math.round(capital * (rate / 100));
+
+            document.getElementById('rp-capital').textContent = formatCOP(capital);
+            document.getElementById('rp-rate').textContent = rate + '%';
+            document.getElementById('rp-earned').textContent = '+' + formatCOP(earned);
+
+            preview.style.display = 'block';
+            btn.disabled = false;
+        }
+
+        async function registerReturn() {
+            if (!selectedInvestment) return toast('Selecciona una inversión primero', 'error');
+
+            const rate = parseFloat(document.getElementById('rf-rate').value);
+            const month = document.getElementById('rf-month').value;
+            const notes = document.getElementById('rf-notes').value.trim();
+
+            if (!rate || rate <= 0) return toast('Ingresa una tasa válida', 'error');
+            if (!month) return toast('Selecciona el mes del rendimiento', 'error');
+
+            const btn = document.getElementById('btn-register-return');
+            btn.disabled = true;
+            btn.textContent = 'Registrando...';
+
+            try {
+                const periodMonth = month + '-01'; // Convert "2026-03" to "2026-03-01"
+
+                const res = await apiFetch(`/admin/investments/${selectedInvestment.id}/return`, {
+                    method: 'POST',
+                    body: JSON.stringify({ rate, periodMonth, notes: notes || undefined }),
+                });
+
+                if (!res) return;
+                const data = await res.json();
+
+                if (!res.ok) {
+                    toast(data.error || 'Error registrando rendimiento', 'error');
+                    return;
+                }
+
+                toast(`✅ Rendimiento de ${formatCOP(data.return.amountEarned)} registrado para ${selectedInvestment.userName}`);
+
+                // Reset form
+                selectedInvestment = null;
+                document.getElementById('return-form').style.display = 'none';
+                document.getElementById('return-preview').style.display = 'none';
+
+                // Reload data
+                await loadActiveInvestments();
+                loadRecentTransactions();
+                loadStats();
+
+            } catch(e) {
+                toast('Error: ' + e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📈 Registrar Rendimiento';
+            }
         }
 
         // ====== CREATE USER ======
@@ -410,7 +731,6 @@
                 const data = await res.json();
                 if (!res.ok) return toast(data.error, 'error');
 
-                // Si hay balance inicial, registrarlo
                 if (initialBalance > 0) {
                     await apiFetch('/admin/balance', {
                         method:'POST',
