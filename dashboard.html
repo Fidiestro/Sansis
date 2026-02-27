@@ -297,6 +297,7 @@
             <div class="nav-section-title">Principal</div>
             <a class="nav-item active" href="#" onclick="showView('dashboard')"><span class="icon">📊</span> Dashboard</a>
             <a class="nav-item" href="#" onclick="showView('investments')"><span class="icon">💰</span> Inversiones</a>
+            <a class="nav-item" href="#" onclick="showView('withdraw')"><span class="icon">📤</span> Retirar</a>
             <a class="nav-item" href="#" onclick="showView('movements')"><span class="icon">📋</span> Movimientos</a>
         </div>
         <div class="nav-section">
@@ -337,6 +338,7 @@
             <button class="modal-close" onclick="closeInvestModal()">✕</button>
         </div>
         <div class="modal-body">
+            <div id="invest-active-warning" style="display:none;"></div>
             <div class="modal-info-row"><span class="label">Producto</span><span class="value">Inversión SDTC</span></div>
             <div class="modal-info-row"><span class="label">Plazo</span><span class="value">6 meses</span></div>
             <div class="modal-info-row"><span class="label">Rendimiento mensual</span><span class="value gold">2% — 4% variable</span></div>
@@ -479,6 +481,7 @@
         if (currentView === 'dashboard') renderDashboard(content);
         else if (currentView === 'investments') renderInvestmentsView(content);
         else if (currentView === 'movements') renderMovementsView(content);
+        else if (currentView === 'withdraw') renderWithdrawView(content);
     }
 
     // ══════ RENDER DASHBOARD ══════
@@ -799,6 +802,35 @@
 
     // ══════ INVEST MODAL ══════
     function openInvestModal() {
+        // Check if user already has an active SDTC
+        const activeSDTC = myInvestments.find(i => i.status === 'active' && i.type === 'SDTC');
+        
+        if (activeSDTC) {
+            // Show warning with option to add capital instead
+            const warningEl = document.getElementById('invest-active-warning');
+            if (warningEl) {
+                warningEl.style.display = 'block';
+                warningEl.innerHTML = `
+                    <div style="background:rgba(91,141,239,0.1);border:1px solid rgba(91,141,239,0.3);padding:16px;margin-bottom:16px;">
+                        <div style="font-weight:700;color:var(--blue);margin-bottom:8px;">⚠️ Ya tienes una inversión SDTC activa</div>
+                        <div style="font-size:12px;color:var(--text-muted);line-height:1.6;">
+                            Tu inversión actual de <strong style="color:var(--gold)">${formatCOP(activeSDTC.amount)}</strong> vence el <strong>${formatDate(activeSDTC.lockEndDate || activeSDTC.endDate)}</strong>.<br>
+                            Si creas una nueva, tendrá un <strong style="color:var(--red)">nuevo periodo de bloqueo de 6 meses</strong>.
+                        </div>
+                        <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+                            <button onclick="closeInvestModal(); window._currentDetailInv = { id: ${activeSDTC.id}, amount: ${activeSDTC.amount}, lockEndDate: '${activeSDTC.lockEndDate || activeSDTC.endDate}', type: '${activeSDTC.type}' }; openAddCapitalModal();" 
+                                style="padding:10px 20px;background:var(--blue);border:none;color:white;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;">
+                                ➕ Reinvertir en la Actual (mismo plazo)
+                            </button>
+                            <span style="font-size:11px;color:var(--text-muted);align-self:center;">o continúa abajo para crear una nueva</span>
+                        </div>
+                    </div>`;
+            }
+        } else {
+            const warningEl = document.getElementById('invest-active-warning');
+            if (warningEl) warningEl.style.display = 'none';
+        }
+
         document.getElementById('invest-available-display').textContent = formatCOP(balanceSummary.availableBalance);
         document.getElementById('invest-amount').value = '';
         document.getElementById('invest-preview').style.display = 'none';
@@ -939,6 +971,309 @@
             renderCurrentView();
         } catch (e) {
             toast('Error de conexión', 'error');
+        }
+    }
+
+    // ══════ WITHDRAW VIEW ══════
+    let userPaymentMethods = [];
+    let userWithdrawals = [];
+
+    async function loadWithdrawData() {
+        try {
+            const [pmRes, wrRes] = await Promise.all([
+                apiFetch('/withdrawals/payment-methods'),
+                apiFetch('/withdrawals/my'),
+            ]);
+            if (pmRes && pmRes.ok) userPaymentMethods = await pmRes.json();
+            if (wrRes && wrRes.ok) userWithdrawals = await wrRes.json();
+        } catch(e) { console.error('Error loading withdraw data:', e); }
+    }
+
+    async function renderWithdrawView(container) {
+        await loadWithdrawData();
+
+        const pmTypeIcons = { nequi: '💜', bancolombia: '💛', daviplata: '🟢', otro: '🏦' };
+        const pmTypeNames = { nequi: 'Nequi', bancolombia: 'Bancolombia', daviplata: 'Daviplata', otro: 'Otro' };
+        const statusLabels = { pending: '⏳ Pendiente', approved: '✅ Aprobado', rejected: '❌ Rechazado', completed: '💰 Completado' };
+        const statusBadge = { pending: 'badge-profit', approved: 'badge-deposit', rejected: 'badge-withdraw', completed: 'badge-investment' };
+
+        // Calcular limite mensual usado
+        const now = new Date();
+        const thisMonthWithdrawals = userWithdrawals.filter(w => {
+            const d = new Date(w.created_at);
+            return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && ['pending','approved','completed'].includes(w.status);
+        });
+        const monthlyUsed = thisMonthWithdrawals.reduce((s, w) => s + parseFloat(w.amount), 0);
+        const monthlyRemaining = Math.max(0, 2000000 - monthlyUsed);
+
+        container.innerHTML = `
+        <!-- Info Cards -->
+        <div class="stats-grid animate-in" style="grid-template-columns:repeat(3,1fr);">
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-value" style="color:var(--green)">${formatCOP(balanceSummary.availableBalance)}</div>
+                <div class="stat-label">Disponible para Retirar</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-value" style="color:var(--gold)">${formatCOP(monthlyRemaining)}</div>
+                <div class="stat-label">Límite Mensual Restante</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📤</div>
+                <div class="stat-value">${userWithdrawals.filter(w => w.status === 'pending').length}</div>
+                <div class="stat-label">Retiros Pendientes</div>
+            </div>
+        </div>
+
+        <!-- Avisos -->
+        <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px 20px;margin-bottom:20px;" class="animate-in delay-1">
+            <div style="font-size:12px;color:var(--text-muted);line-height:1.8;">
+                ⏱️ <strong style="color:var(--text)">Retiros hasta $2.000.000/mes</strong> se procesan en <strong style="color:var(--gold)">48 horas</strong><br>
+                📅 <strong style="color:var(--text)">Retiros mayores</strong> requieren aprobación especial y pueden tomar <strong style="color:var(--red)">hasta 30 días</strong><br>
+                💰 <strong style="color:var(--text)">Límite mensual:</strong> $2.000.000 COP
+            </div>
+        </div>
+
+        <!-- Métodos de Pago -->
+        <div style="background:var(--dark-2);border:1px solid var(--border);padding:24px;margin-bottom:20px;" class="animate-in delay-1">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;">💳 Métodos de Pago</div>
+                <button onclick="showAddPaymentMethodForm()" style="padding:8px 16px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--border);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='var(--gold)';this.style.color='var(--dark)'" onmouseout="this.style.background='var(--gold-dim)';this.style.color='var(--gold)'">+ Agregar Método</button>
+            </div>
+            
+            <div id="payment-methods-list">
+                ${userPaymentMethods.length > 0 ? userPaymentMethods.map(pm => `
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--dark-3);border:1px solid var(--border);margin-bottom:8px;${pm.is_default ? 'border-color:var(--gold);' : ''}">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <span style="font-size:20px;">${pmTypeIcons[pm.type] || '🏦'}</span>
+                            <div>
+                                <div style="font-weight:600;font-size:14px;">${pm.label} ${pm.is_default ? '<span style="font-size:10px;color:var(--gold);background:var(--gold-dim);padding:2px 8px;">DEFAULT</span>' : ''}</div>
+                                <div style="font-size:12px;color:var(--text-muted);">${pmTypeNames[pm.type]} · ${pm.phone || pm.account_number || ''} ${pm.account_type ? '(' + pm.account_type + ')' : ''}</div>
+                            </div>
+                        </div>
+                        <button onclick="deletePaymentMethod(${pm.id})" style="background:none;border:1px solid var(--border);color:var(--text-muted);padding:6px 12px;font-size:11px;cursor:pointer;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">Eliminar</button>
+                    </div>
+                `).join('') : '<div style="text-align:center;padding:30px;color:var(--text-muted);font-size:13px;">No tienes métodos de pago registrados. Agrega uno para poder retirar.</div>'}
+            </div>
+
+            <!-- Add payment method form (hidden) -->
+            <div id="add-pm-form" style="display:none;margin-top:16px;padding:20px;background:var(--dark-3);border:1px solid var(--border);">
+                <div style="font-weight:700;font-size:14px;margin-bottom:16px;">Nuevo Método de Pago</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                    <div style="display:flex;flex-direction:column;gap:4px;">
+                        <label style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Tipo *</label>
+                        <select id="pm-type" style="padding:10px;background:var(--input);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;outline:none;" onchange="togglePMFields()">
+                            <option value="nequi">💜 Nequi</option>
+                            <option value="bancolombia">💛 Bancolombia</option>
+                            <option value="daviplata">🟢 Daviplata</option>
+                        </select>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:4px;">
+                        <label style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Nombre / Alias *</label>
+                        <input id="pm-label" placeholder="Ej: Mi Nequi" style="padding:10px;background:var(--input);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;outline:none;">
+                    </div>
+                </div>
+                <div id="pm-phone-fields" style="display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:12px;">
+                    <div style="display:flex;flex-direction:column;gap:4px;">
+                        <label style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Teléfono (10 dígitos) *</label>
+                        <input id="pm-phone" placeholder="3101234567" maxlength="10" style="padding:10px;background:var(--input);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;outline:none;">
+                    </div>
+                </div>
+                <div id="pm-bank-fields" style="display:none;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                    <div style="display:flex;flex-direction:column;gap:4px;">
+                        <label style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Número de Cuenta *</label>
+                        <input id="pm-account" placeholder="000012345678" style="padding:10px;background:var(--input);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;outline:none;">
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:4px;">
+                        <label style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Tipo de Cuenta *</label>
+                        <select id="pm-account-type" style="padding:10px;background:var(--input);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;outline:none;">
+                            <option value="ahorros">Ahorros</option>
+                            <option value="corriente">Corriente</option>
+                        </select>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:4px;">
+                        <label style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Titular *</label>
+                        <input id="pm-holder" placeholder="Nombre completo" style="padding:10px;background:var(--input);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;outline:none;">
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:4px;">
+                        <label style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Cédula Titular</label>
+                        <input id="pm-holder-doc" placeholder="1234567890" style="padding:10px;background:var(--input);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;outline:none;">
+                    </div>
+                </div>
+                <div style="display:flex;gap:10px;">
+                    <button onclick="savePaymentMethod()" style="padding:10px 24px;background:var(--gold);border:none;color:var(--dark);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Guardar</button>
+                    <button onclick="document.getElementById('add-pm-form').style.display='none'" style="padding:10px 24px;background:transparent;border:1px solid var(--border);color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario de Retiro -->
+        <div style="background:var(--dark-2);border:1px solid var(--border);padding:24px;margin-bottom:20px;" class="animate-in delay-2">
+            <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;">📤 Solicitar Retiro</div>
+            
+            ${userPaymentMethods.length === 0 ? `
+                <div style="text-align:center;padding:30px;color:var(--text-muted);">
+                    ⚠️ Primero debes registrar un método de pago arriba para poder solicitar un retiro.
+                </div>
+            ` : `
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                        <label style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Método de Pago *</label>
+                        <select id="wr-pm" style="padding:12px;background:var(--dark-3);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;outline:none;">
+                            ${userPaymentMethods.map(pm => `<option value="${pm.id}">${pmTypeIcons[pm.type]} ${pm.label} — ${pm.phone || pm.account_number || ''}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                        <label style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Monto a Retirar (COP) *</label>
+                        <input id="wr-amount" type="number" placeholder="500000" min="10000" max="${Math.min(monthlyRemaining, balanceSummary.availableBalance)}" oninput="updateWithdrawPreview()" style="padding:12px;background:var(--dark-3);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:16px;outline:none;">
+                    </div>
+                </div>
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:16px;">
+                    Disponible: <strong style="color:var(--green)">${formatCOP(balanceSummary.availableBalance)}</strong> · 
+                    Límite restante este mes: <strong style="color:var(--gold)">${formatCOP(monthlyRemaining)}</strong>
+                </div>
+
+                <div id="wr-preview" style="display:none;background:var(--dark-3);border:1px solid var(--border);padding:16px;margin-bottom:16px;">
+                    <div id="wr-preview-content"></div>
+                </div>
+
+                <button id="btn-withdraw-request" onclick="submitWithdrawalRequest()" disabled style="padding:14px 28px;background:var(--gold);border:none;color:var(--dark);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;opacity:0.5;">
+                    Solicitar Retiro →
+                </button>
+            `}
+        </div>
+
+        <!-- Historial de Retiros -->
+        ${userWithdrawals.length > 0 ? `
+        <div class="table-card animate-in delay-3">
+            <div class="table-header"><span class="table-title">📋 Historial de Retiros</span></div>
+            <table class="data-table">
+                <thead><tr><th>Ref</th><th>Monto</th><th>Método</th><th>Estado</th><th>Tiempo Est.</th><th>Fecha</th></tr></thead>
+                <tbody>${userWithdrawals.map(w => `
+                    <tr>
+                        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${w.ref_id || '-'}</td>
+                        <td style="font-family:'JetBrains Mono',monospace;color:var(--red);">-${formatCOP(w.amount)}</td>
+                        <td>${pmTypeIcons[w.pm_type] || '🏦'} ${w.pm_label || '-'}</td>
+                        <td><span class="badge ${statusBadge[w.status] || 'badge-profit'}">${statusLabels[w.status] || w.status}</span></td>
+                        <td style="font-size:12px;color:var(--text-muted);">${w.estimated_completion || '-'}</td>
+                        <td style="color:var(--text-muted)">${formatDate(w.created_at)}</td>
+                    </tr>
+                `).join('')}</tbody>
+            </table>
+        </div>` : ''}`;
+    }
+
+    function showAddPaymentMethodForm() {
+        document.getElementById('add-pm-form').style.display = 'block';
+        togglePMFields();
+    }
+
+    function togglePMFields() {
+        const type = document.getElementById('pm-type').value;
+        const phoneFields = document.getElementById('pm-phone-fields');
+        const bankFields = document.getElementById('pm-bank-fields');
+        if (type === 'bancolombia') {
+            phoneFields.style.display = 'none';
+            bankFields.style.display = 'grid';
+        } else {
+            phoneFields.style.display = 'grid';
+            bankFields.style.display = 'none';
+        }
+    }
+
+    async function savePaymentMethod() {
+        const type = document.getElementById('pm-type').value;
+        const label = document.getElementById('pm-label').value.trim();
+        if (!label) return toast('Ingresa un nombre para el método', 'error');
+
+        const body = { type, label };
+        if (type === 'nequi' || type === 'daviplata') {
+            body.phone = document.getElementById('pm-phone').value.trim();
+            if (!body.phone || body.phone.length !== 10) return toast('Teléfono debe tener 10 dígitos', 'error');
+        } else if (type === 'bancolombia') {
+            body.accountNumber = document.getElementById('pm-account').value.trim();
+            body.accountType = document.getElementById('pm-account-type').value;
+            body.holderName = document.getElementById('pm-holder').value.trim();
+            body.holderDocument = document.getElementById('pm-holder-doc').value.trim();
+            if (!body.accountNumber || !body.holderName) return toast('Completa los datos de la cuenta', 'error');
+        }
+
+        try {
+            const res = await apiFetch('/withdrawals/payment-methods', { method: 'POST', body: JSON.stringify(body) });
+            const data = await res.json();
+            if (!res.ok) return toast(data.error, 'error');
+            toast('✅ Método de pago registrado');
+            renderWithdrawView(document.getElementById('dashboard-content'));
+        } catch(e) { toast('Error de conexión', 'error'); }
+    }
+
+    async function deletePaymentMethod(id) {
+        if (!confirm('¿Eliminar este método de pago?')) return;
+        try {
+            const res = await apiFetch(`/withdrawals/payment-methods/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (!res.ok) return toast(data.error, 'error');
+            toast('Método eliminado');
+            renderWithdrawView(document.getElementById('dashboard-content'));
+        } catch(e) { toast('Error', 'error'); }
+    }
+
+    function updateWithdrawPreview() {
+        const amount = parseFloat(document.getElementById('wr-amount').value) || 0;
+        const preview = document.getElementById('wr-preview');
+        const btn = document.getElementById('btn-withdraw-request');
+        const maxAllowed = Math.min(2000000, balanceSummary.availableBalance);
+
+        if (amount >= 10000 && amount <= maxAllowed) {
+            const est = amount <= 2000000 ? '48 horas' : '30 días';
+            const estColor = amount <= 2000000 ? 'var(--gold)' : 'var(--red)';
+            document.getElementById('wr-preview-content').innerHTML = `
+                <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border);">
+                    <span style="color:var(--text-muted);">Monto a retirar</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--red);">-${formatCOP(amount)}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border);">
+                    <span style="color:var(--text-muted);">Tiempo estimado</span>
+                    <span style="font-weight:600;color:${estColor};">${est}</span>
+                </div>
+                ${amount > 2000000 ? `<div style="margin-top:10px;font-size:11px;color:var(--red);line-height:1.6;">⚠️ Retiros mayores a $2.000.000 requieren aprobación especial y pueden demorar hasta 30 días hábiles.</div>` : ''}
+                <div style="margin-top:10px;font-size:11px;color:var(--text-muted);">El retiro será enviado al método de pago seleccionado una vez aprobado por el equipo.</div>
+            `;
+            preview.style.display = 'block';
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        } else {
+            preview.style.display = 'none';
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+        }
+    }
+
+    async function submitWithdrawalRequest() {
+        const amount = parseFloat(document.getElementById('wr-amount').value);
+        const paymentMethodId = parseInt(document.getElementById('wr-pm').value);
+        const btn = document.getElementById('btn-withdraw-request');
+
+        btn.disabled = true;
+        btn.textContent = 'Procesando...';
+
+        try {
+            const res = await apiFetch('/withdrawals/request', {
+                method: 'POST',
+                body: JSON.stringify({ amount, paymentMethodId })
+            });
+            const data = await res.json();
+            if (!res.ok) return toast(data.error, 'error');
+
+            toast(`✅ Solicitud de retiro por ${formatCOP(amount)} creada. ${data.withdrawal.estimatedCompletion}`);
+            await loadAllData();
+            renderWithdrawView(document.getElementById('dashboard-content'));
+        } catch(e) {
+            toast('Error de conexión', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Solicitar Retiro →';
         }
     }
 

@@ -186,6 +186,7 @@
             <div class="tab active" onclick="switchTab('register',this)">👤 Registrar</div>
             <div class="tab" onclick="switchTab('transactions',this)">💸 Transacción</div>
             <div class="tab" onclick="switchTab('returns',this)">📈 Rendimientos</div>
+            <div class="tab" onclick="switchTab('withdrawals',this)">📤 Retiros</div>
             <div class="tab" onclick="switchTab('users',this)">📋 Usuarios</div>
         </div>
 
@@ -330,6 +331,31 @@
             </div>
         </div>
 
+        <!-- ====== SOLICITUDES DE RETIRO ====== -->
+        <div class="section" id="sec-withdrawals">
+            <div class="card">
+                <div class="card-title">📤 Solicitudes de Retiro</div>
+                <div class="card-desc">Gestiona las solicitudes de retiro de los usuarios. Puedes aprobar, completar o rechazar cada solicitud.</div>
+
+                <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+                    <button class="btn btn-sm btn-outline wr-filter-btn active" onclick="filterWithdrawals('all', this)">Todas</button>
+                    <button class="btn btn-sm btn-outline wr-filter-btn" onclick="filterWithdrawals('pending', this)">⏳ Pendientes</button>
+                    <button class="btn btn-sm btn-outline wr-filter-btn" onclick="filterWithdrawals('approved', this)">✅ Aprobadas</button>
+                    <button class="btn btn-sm btn-outline wr-filter-btn" onclick="filterWithdrawals('completed', this)">💰 Completadas</button>
+                    <button class="btn btn-sm btn-outline wr-filter-btn" onclick="filterWithdrawals('rejected', this)">❌ Rechazadas</button>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr>
+                            <th>Ref</th><th>Usuario</th><th>Monto</th><th>Método</th><th>Detalle Pago</th><th>Estado</th><th>Tiempo Est.</th><th>Fecha</th><th>Acciones</th>
+                        </tr></thead>
+                        <tbody id="wr-table"><tr><td colspan="9" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- ====== VER USUARIOS ====== -->
         <div class="section" id="sec-users">
             <div class="card">
@@ -405,6 +431,7 @@
             document.getElementById(`sec-${tab}`).classList.add('active');
             // Cargar inversiones activas al entrar a la pestaña de rendimientos
             if (tab === 'returns') loadActiveInvestments();
+            if (tab === 'withdrawals') loadAdminWithdrawals('all');
         }
 
         // ====== FORMAT ======
@@ -782,6 +809,92 @@
                 loadStats();
             } catch(e) { toast('Error: ' + e.message, 'error'); }
             finally { btn.disabled = false; btn.textContent = '💸 Registrar Transacción'; }
+        }
+
+        // ====== ADMIN WITHDRAWALS ======
+        let currentWrFilter = 'all';
+
+        async function loadAdminWithdrawals(status) {
+            currentWrFilter = status;
+            const tbody = document.getElementById('wr-table');
+            tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">Cargando...</td></tr>';
+
+            try {
+                const res = await apiFetch(`/admin/withdrawals?status=${status}`);
+                if (!res || !res.ok) { tbody.innerHTML = '<tr><td colspan="9" style="color:var(--red);text-align:center">Error cargando retiros</td></tr>'; return; }
+                const data = await res.json();
+
+                if (!data.length) {
+                    tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">No hay solicitudes de retiro</td></tr>';
+                    return;
+                }
+
+                const statusLabels = { pending: '⏳ Pendiente', approved: '✅ Aprobado', rejected: '❌ Rechazado', completed: '💰 Completado' };
+                const statusBadge = { pending: 'badge-gold', approved: 'badge-green', rejected: 'badge-red', completed: 'badge-blue' };
+                const pmTypeNames = { nequi: '💜 Nequi', bancolombia: '💛 Bancol.', daviplata: '🟢 Daviplata', otro: '🏦 Otro' };
+
+                tbody.innerHTML = data.map(w => `
+                    <tr>
+                        <td class="mono" style="font-size:11px;">${w.ref_id || '-'}</td>
+                        <td>
+                            <div style="font-weight:600;font-size:13px;">${w.user_name || 'ID:'+w.user_id}</div>
+                            <div style="font-size:11px;color:var(--text2);">${w.user_email || ''}</div>
+                        </td>
+                        <td class="mono" style="color:var(--red);font-weight:600;">-${formatCOP(w.amount)}</td>
+                        <td>${pmTypeNames[w.pm_type] || '—'}<br><span style="font-size:10px;color:var(--text2);">${w.pm_label || ''}</span></td>
+                        <td style="font-size:11px;font-family:'JetBrains Mono',monospace;">
+                            ${w.pm_phone ? '📱 ' + w.pm_phone : ''}
+                            ${w.pm_account ? '🏦 ' + w.pm_account : ''}
+                            ${w.pm_account_type ? ' (' + w.pm_account_type + ')' : ''}
+                            ${w.pm_holder ? '<br>👤 ' + w.pm_holder : ''}
+                            ${w.pm_holder_doc ? ' — CC ' + w.pm_holder_doc : ''}
+                        </td>
+                        <td><span class="badge ${statusBadge[w.status] || 'badge-gold'}">${statusLabels[w.status] || w.status}</span></td>
+                        <td style="font-size:12px;">${w.estimated_completion || '-'}</td>
+                        <td style="color:var(--muted);font-size:12px;">${formatDate(w.created_at)}</td>
+                        <td>
+                            ${w.status === 'pending' ? `
+                                <button class="btn btn-sm btn-gold" onclick="processWithdrawal(${w.id}, 'approve')">Aprobar</button>
+                                <button class="btn btn-sm btn-red" onclick="processWithdrawal(${w.id}, 'reject')" style="margin-top:4px;">Rechazar</button>
+                            ` : w.status === 'approved' ? `
+                                <button class="btn btn-sm btn-gold" onclick="processWithdrawal(${w.id}, 'complete')">Completar</button>
+                                <button class="btn btn-sm btn-red" onclick="processWithdrawal(${w.id}, 'reject')" style="margin-top:4px;">Rechazar</button>
+                            ` : `<span style="font-size:11px;color:var(--muted);">—</span>`}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(e) {
+                console.error('loadAdminWithdrawals error:', e);
+                tbody.innerHTML = '<tr><td colspan="9" style="color:var(--red);text-align:center">Error: ' + e.message + '</td></tr>';
+            }
+        }
+
+        function filterWithdrawals(status, btn) {
+            document.querySelectorAll('.wr-filter-btn').forEach(b => { b.classList.remove('active'); b.style.background=''; b.style.color=''; });
+            btn.classList.add('active');
+            btn.style.background = 'var(--gold)';
+            btn.style.color = '#0a0a0f';
+            loadAdminWithdrawals(status);
+        }
+
+        async function processWithdrawal(id, action) {
+            const actionLabels = { approve: 'aprobar', reject: 'rechazar', complete: 'completar (transferencia realizada)' };
+            const notes = action === 'reject' ? prompt('Motivo del rechazo (opcional):') : null;
+            
+            if (!confirm(`¿Seguro que deseas ${actionLabels[action]} esta solicitud de retiro?`)) return;
+
+            try {
+                const res = await apiFetch(`/admin/withdrawals/${id}/process`, {
+                    method: 'POST',
+                    body: JSON.stringify({ action, notes: notes || undefined })
+                });
+                const data = await res.json();
+                if (!res.ok) return toast(data.error, 'error');
+
+                toast(`✅ Solicitud ${data.status === 'approved' ? 'aprobada' : data.status === 'rejected' ? 'rechazada' : 'completada'}`);
+                loadAdminWithdrawals(currentWrFilter);
+                loadStats();
+            } catch(e) { toast('Error: ' + e.message, 'error'); }
         }
 
         // ====== INIT ======
