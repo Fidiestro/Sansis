@@ -165,6 +165,15 @@
 
         .invest-disclaimer { font-size: 10px; color: var(--text-muted); margin-top: 12px; line-height: 1.6; }
 
+        /* ══════ INVESTMENT ACTION BUTTONS ══════ */
+        .inv-actions { display: flex; gap: 12px; margin-top: 20px; }
+        .btn-add-capital { padding: 12px 24px; background: var(--blue); border: none; color: white; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+        .btn-add-capital:hover { background: #4a7de0; transform: translateY(-1px); }
+        .btn-withdraw { padding: 12px 24px; background: transparent; border: 1px solid var(--green); color: var(--green); font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+        .btn-withdraw:hover:not(:disabled) { background: var(--green); color: var(--dark); transform: translateY(-1px); }
+        .btn-withdraw:disabled { opacity: 0.35; cursor: not-allowed; border-color: var(--border); color: var(--text-muted); transform: none; }
+        .btn-withdraw:disabled:hover { background: transparent; }
+
         /* ══════ MY INVESTMENTS LIST ══════ */
         .my-investments { margin-bottom: 20px; }
         .inv-list-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 14px; }
@@ -352,6 +361,43 @@
 
             <button class="btn-invest" id="btn-invest" onclick="executeInvestment()" disabled>Confirmar Inversión →</button>
             <p class="invest-disclaimer">⚠️ El capital quedará bloqueado por 6 meses. Los rendimientos son variables y no garantizados. Al confirmar, aceptas los Términos y Condiciones.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Add Capital Modal -->
+<div class="modal-overlay" id="addCapitalModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">➕ Invertir Más Capital</div>
+            <button class="modal-close" onclick="closeAddCapitalModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-info-row"><span class="label">Inversión</span><span class="value" id="ac-inv-label">SDTC #—</span></div>
+            <div class="modal-info-row"><span class="label">Capital Actual</span><span class="value gold" id="ac-current">$0</span></div>
+            <div class="modal-info-row"><span class="label">Fecha de Vencimiento</span><span class="value" id="ac-lock-date">—</span></div>
+            <div style="background:var(--blue-bg);border:1px solid rgba(91,141,239,0.2);padding:12px 16px;margin-top:16px;font-size:12px;color:var(--blue);">
+                ℹ️ El capital adicional se suma al contrato actual. La fecha de vencimiento <strong>no cambia</strong>.
+            </div>
+
+            <div class="invest-input-group">
+                <label>Monto a agregar (COP)</label>
+                <div class="invest-input-wrap">
+                    <span class="prefix">$</span>
+                    <input type="number" class="invest-input" id="ac-amount" placeholder="0" min="50000" oninput="updateAddCapitalPreview()">
+                </div>
+                <div class="invest-available">Disponible: <span id="ac-available-display">$0</span> · Mínimo: $50.000</div>
+            </div>
+
+            <div class="invest-preview" id="ac-preview" style="display:none;">
+                <div class="invest-preview-title">📋 Resumen</div>
+                <div class="invest-preview-row"><span class="label">Capital actual</span><span class="value" id="acp-current">$0</span></div>
+                <div class="invest-preview-row"><span class="label">+ Capital adicional</span><span class="value" style="color:var(--blue)" id="acp-added">$0</span></div>
+                <div class="invest-preview-row" style="border-top:1px solid var(--border);padding-top:12px;"><span class="label">Nuevo capital total</span><span class="value gold" id="acp-new-total">$0</span></div>
+            </div>
+
+            <button class="btn-invest" id="btn-add-capital-confirm" onclick="executeAddCapital()" disabled style="background:var(--blue);">Confirmar Capital Adicional →</button>
+            <p class="invest-disclaimer">⚠️ La fecha de vencimiento permanece igual. Los rendimientos futuros se calcularán sobre el nuevo capital total.</p>
         </div>
     </div>
 </div>
@@ -561,8 +607,8 @@
                 <table class="data-table">
                     <thead><tr><th>Fecha</th><th>Tipo</th><th style="text-align:right">Monto</th></tr></thead>
                     <tbody>${d.transactions.slice(0, 8).map(tx => {
-                        const typeLabels = { deposit:'Depósito', profit:'Rendimiento', withdraw:'Retiro', payment:'Abono', interest:'Intereses', investment:'Inversión', loan:'Préstamo' };
-                        const badgeClass = { deposit:'badge-deposit', profit:'badge-profit', withdraw:'badge-withdraw', investment:'badge-investment' };
+                        const typeLabels = { deposit:'Depósito', profit:'Rendimiento', withdraw:'Retiro', payment:'Abono', interest:'Intereses', investment:'Inversión', investment_return:'Rendimiento SDTC', investment_withdrawal:'Retiro SDTC', loan:'Préstamo' };
+                        const badgeClass = { deposit:'badge-deposit', profit:'badge-profit', withdraw:'badge-withdraw', investment:'badge-investment', investment_return:'badge-deposit', investment_withdrawal:'badge-profit' };
                         const isNeg = tx.type === 'withdraw' || tx.type === 'investment';
                         return `<tr>
                             <td style="color:var(--text-muted)">${formatDate(tx.date)}</td>
@@ -639,8 +685,8 @@
             <table class="data-table">
                 <thead><tr><th>Fecha</th><th>Descripción</th><th>Tipo</th><th style="text-align:right">Monto</th></tr></thead>
                 <tbody>${dashboardData.transactions.map(tx => {
-                    const typeLabels = { deposit:'Depósito', profit:'Rendimiento', withdraw:'Retiro', payment:'Abono', interest:'Intereses', investment:'Inversión', loan:'Préstamo' };
-                    const badgeClass = { deposit:'badge-deposit', profit:'badge-profit', withdraw:'badge-withdraw', investment:'badge-investment' };
+                    const typeLabels = { deposit:'Depósito', profit:'Rendimiento', withdraw:'Retiro', payment:'Abono', interest:'Intereses', investment:'Inversión', investment_return:'Rendimiento SDTC', investment_withdrawal:'Retiro SDTC', loan:'Préstamo' };
+                    const badgeClass = { deposit:'badge-deposit', profit:'badge-profit', withdraw:'badge-withdraw', investment:'badge-investment', investment_return:'badge-deposit', investment_withdrawal:'badge-profit' };
                     const isNeg = tx.type === 'withdraw' || tx.type === 'investment';
                     return `<tr>
                         <td style="color:var(--text-muted)">${formatDate(tx.date)}</td>
@@ -670,6 +716,11 @@
             const pct = Math.min(100, Math.round((elapsed / totalDays) * 100));
             const daysLeft = Math.max(0, Math.ceil((end - now) / (1000*60*60*24)));
             const totalEarned = returns.reduce((s, r) => s + r.earned, 0);
+            const isMatured = inv.isMatured || now >= end;
+            const isActive = inv.status === 'active';
+
+            // Store for add-capital modal
+            window._currentDetailInv = { id: invId, amount: inv.amount, lockEndDate: inv.lockEndDate || inv.endDate, type: inv.type };
 
             const content = document.getElementById('dashboard-content');
             content.innerHTML = `
@@ -697,6 +748,16 @@
                     </div>
                     <div class="inv-progress-bar" style="height:6px;"><div class="inv-progress-fill" style="width:${pct}%"></div></div>
                 </div>
+
+                ${isActive ? `
+                <div class="inv-actions">
+                    ${!isMatured ? `<button class="btn-add-capital" onclick="openAddCapitalModal()">➕ Invertir Más</button>` : ''}
+                    <button class="btn-withdraw" ${!isMatured ? 'disabled title="Disponible cuando venza el plazo el ' + formatDate(inv.lockEndDate || inv.endDate) + '"' : `onclick="withdrawInvestment(${invId})"`}>
+                        ${isMatured ? '💰 Retirar Inversión' : '🔒 Retirar (Bloqueado)'}
+                    </button>
+                    ${!isMatured ? `<span style="font-size:11px;color:var(--text-muted);align-self:center;">Retiro disponible el ${formatDate(inv.lockEndDate || inv.endDate)}</span>` : `<span style="font-size:11px;color:var(--green);align-self:center;">✅ Tu inversión ha vencido. Ya puedes retirar.</span>`}
+                </div>
+                ` : `<div style="margin-top:20px;padding:12px 16px;background:var(--blue-bg);border:1px solid rgba(91,141,239,0.2);font-size:12px;color:var(--blue);">✅ Esta inversión fue completada y el capital fue devuelto a tu saldo disponible.</div>`}
             </div>
 
             <div class="returns-table animate-in delay-1">
@@ -793,6 +854,91 @@
         } finally {
             btn.disabled = false;
             btn.textContent = 'Confirmar Inversión →';
+        }
+    }
+
+    // ══════ ADD CAPITAL MODAL ══════
+    function openAddCapitalModal() {
+        const inv = window._currentDetailInv;
+        if (!inv) return;
+
+        document.getElementById('ac-inv-label').textContent = `${inv.type} #${inv.id}`;
+        document.getElementById('ac-current').textContent = formatCOP(inv.amount);
+        document.getElementById('ac-lock-date').textContent = formatDate(inv.lockEndDate);
+        document.getElementById('ac-available-display').textContent = formatCOP(balanceSummary.availableBalance);
+        document.getElementById('ac-amount').value = '';
+        document.getElementById('ac-preview').style.display = 'none';
+        document.getElementById('btn-add-capital-confirm').disabled = true;
+        document.getElementById('addCapitalModal').classList.add('open');
+    }
+
+    function closeAddCapitalModal() {
+        document.getElementById('addCapitalModal').classList.remove('open');
+    }
+
+    function updateAddCapitalPreview() {
+        const inv = window._currentDetailInv;
+        if (!inv) return;
+
+        const amount = parseFloat(document.getElementById('ac-amount').value) || 0;
+        const preview = document.getElementById('ac-preview');
+        const btn = document.getElementById('btn-add-capital-confirm');
+
+        if (amount >= 50000 && amount <= balanceSummary.availableBalance) {
+            document.getElementById('acp-current').textContent = formatCOP(inv.amount);
+            document.getElementById('acp-added').textContent = '+' + formatCOP(amount);
+            document.getElementById('acp-new-total').textContent = formatCOP(inv.amount + amount);
+            preview.style.display = 'block';
+            btn.disabled = false;
+        } else {
+            preview.style.display = 'none';
+            btn.disabled = true;
+        }
+    }
+
+    async function executeAddCapital() {
+        const inv = window._currentDetailInv;
+        if (!inv) return;
+
+        const amount = parseFloat(document.getElementById('ac-amount').value);
+        const btn = document.getElementById('btn-add-capital-confirm');
+        btn.disabled = true;
+        btn.textContent = 'Procesando...';
+
+        try {
+            const res = await apiFetch(`/investments/${inv.id}/add-capital`, {
+                method: 'POST',
+                body: JSON.stringify({ amount })
+            });
+            const data = await res.json();
+            if (!res.ok) { toast(data.error || 'Error al agregar capital', 'error'); return; }
+
+            closeAddCapitalModal();
+            toast(`✅ ${formatCOP(amount)} agregado a tu inversión SDTC`);
+            await loadAllData();
+            showInvestmentDetail(inv.id);
+        } catch (e) {
+            toast('Error de conexión', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Confirmar Capital Adicional →';
+        }
+    }
+
+    // ══════ WITHDRAW INVESTMENT ══════
+    async function withdrawInvestment(invId) {
+        if (!confirm('¿Estás seguro de que deseas retirar esta inversión?\n\nEl capital será devuelto a tu saldo disponible.')) return;
+
+        try {
+            const res = await apiFetch(`/investments/${invId}/withdraw`, { method: 'POST' });
+            const data = await res.json();
+            if (!res.ok) { toast(data.error || 'Error al retirar', 'error'); return; }
+
+            toast(`✅ Inversión retirada. ${formatCOP(data.investment.capitalReturned)} devuelto a tu saldo.`);
+            await loadAllData();
+            renderCurrentView();
+        } catch (e) {
+            toast('Error de conexión', 'error');
         }
     }
 
