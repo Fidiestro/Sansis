@@ -186,6 +186,7 @@
             <div class="tab active" onclick="switchTab('register',this)">👤 Registrar</div>
             <div class="tab" onclick="switchTab('transactions',this)">💸 Transacción</div>
             <div class="tab" onclick="switchTab('returns',this)">📈 Rendimientos</div>
+            <div class="tab" onclick="switchTab('sdtc_overview',this)">🔒 SDTC</div>
             <div class="tab" onclick="switchTab('withdrawals',this)">📤 Retiros</div>
             <div class="tab" onclick="switchTab('users',this)">📋 Usuarios</div>
         </div>
@@ -331,6 +332,56 @@
             </div>
         </div>
 
+        <!-- ====== SDTC OVERVIEW ====== -->
+        <div class="section" id="sec-sdtc_overview">
+            <div class="card">
+                <div class="card-title">🔒 Panel SDTC — Vista General</div>
+                <div class="card-desc">Total de capital bloqueado, rentabilidad APY real, e inversiones próximas a vencer.</div>
+
+                <!-- Global Stats -->
+                <div id="sdtc-global-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">
+                    <div style="text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
+                        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">🔒 Capital Bloqueado</div>
+                        <div id="sdtc-total-locked" class="mono" style="font-size:22px;font-weight:700;color:var(--gold);">—</div>
+                    </div>
+                    <div style="text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
+                        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">📈 APY Real</div>
+                        <div id="sdtc-apy" class="mono" style="font-size:22px;font-weight:700;color:var(--green);">—</div>
+                    </div>
+                    <div style="text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
+                        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">👥 Inversionistas</div>
+                        <div id="sdtc-investors" class="mono" style="font-size:22px;font-weight:700;">—</div>
+                    </div>
+                    <div style="text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
+                        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">💰 Total Rendimientos Pagados</div>
+                        <div id="sdtc-total-earned" class="mono" style="font-size:22px;font-weight:700;color:var(--green);">—</div>
+                    </div>
+                </div>
+
+                <!-- Expiring Soon -->
+                <div style="margin-bottom:16px;font-weight:700;font-size:15px;">⏰ Inversiones Próximas a Vencer (30 días)</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr>
+                            <th>ID</th><th>Usuario</th><th>Capital</th><th>Inicio</th><th>Vence</th><th>Días Restantes</th><th>Estado</th><th>Acciones</th>
+                        </tr></thead>
+                        <tbody id="sdtc-expiring-table"><tr><td colspan="8" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
+                    </table>
+                </div>
+
+                <!-- All Active SDTC -->
+                <div style="margin:24px 0 16px;font-weight:700;font-size:15px;">📊 Todas las Inversiones Activas</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr>
+                            <th>ID</th><th>Usuario</th><th>Capital</th><th>Tasa</th><th>Inicio</th><th>Vence</th><th>Progreso</th><th>Acciones</th>
+                        </tr></thead>
+                        <tbody id="sdtc-all-table"><tr><td colspan="8" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- ====== SOLICITUDES DE RETIRO ====== -->
         <div class="section" id="sec-withdrawals">
             <div class="card">
@@ -362,8 +413,8 @@
                 <div class="card-title">📋 Usuarios Registrados</div>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>CC</th><th>Rol</th><th>Creado</th></tr></thead>
-                        <tbody id="users-table"><tr><td colspan="6" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
+                        <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>CC</th><th>Rol</th><th>Estado</th><th>Creado</th><th>Acciones</th></tr></thead>
+                        <tbody id="users-table"><tr><td colspan="8" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -432,6 +483,8 @@
             // Cargar inversiones activas al entrar a la pestaña de rendimientos
             if (tab === 'returns') loadActiveInvestments();
             if (tab === 'withdrawals') loadAdminWithdrawals('all');
+            if (tab === 'sdtc_overview') loadSDTCOverview();
+            if (tab === 'users') loadUsers();
         }
 
         // ====== FORMAT ======
@@ -458,18 +511,28 @@
 
                 const tbody = document.getElementById('users-table');
                 if (!allUsers.length) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">No hay usuarios</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" style="color:var(--muted);text-align:center">No hay usuarios</td></tr>';
                 } else {
-                    tbody.innerHTML = allUsers.map(u => `
-                        <tr>
+                    tbody.innerHTML = allUsers.map(u => {
+                        const isBlocked = u.status === 'blocked';
+                        return `
+                        <tr style="${isBlocked ? 'opacity:0.6;background:rgba(239,68,68,0.05);' : ''}">
                             <td class="mono">${u.id}</td>
                             <td style="font-weight:600">${u.full_name}</td>
                             <td style="color:var(--text2)">${u.email}</td>
                             <td class="mono">${u.document_number || '—'}</td>
                             <td><span class="badge ${u.role==='admin'?'badge-gold':u.role==='institution'?'badge-purple':'badge-blue'}">${u.role}</span></td>
+                            <td><span class="badge ${isBlocked?'badge-red':'badge-green'}">${isBlocked ? '🚫 Bloqueado' : '✅ Activo'}</span></td>
                             <td style="color:var(--muted)">${formatDate(u.created_at)}</td>
-                        </tr>
-                    `).join('');
+                            <td>
+                                ${u.role !== 'admin' ? `
+                                    <button class="btn btn-sm ${isBlocked ? 'btn-gold' : 'btn-red'}" onclick="toggleBlockUser(${u.id}, ${isBlocked}, '${u.full_name.replace(/'/g,"\\'")}')">
+                                        ${isBlocked ? '🔓 Desbloquear' : '🚫 Bloquear'}
+                                    </button>
+                                ` : '<span style="font-size:11px;color:var(--muted);">Admin</span>'}
+                            </td>
+                        </tr>`;
+                    }).join('');
                 }
 
                 const sel = document.getElementById('t-user');
@@ -810,6 +873,132 @@
                 loadStats();
             } catch(e) { toast('Error: ' + e.message, 'error'); }
             finally { btn.disabled = false; btn.textContent = '💸 Registrar Transacción'; }
+        }
+
+        // ====== SDTC OVERVIEW ======
+        async function loadSDTCOverview() {
+            try {
+                // 1. Load global stats
+                const gsRes = await apiFetch('/investments/global-stats');
+                if (gsRes && gsRes.ok) {
+                    const gs = await gsRes.json();
+                    document.getElementById('sdtc-total-locked').textContent = formatCOP(gs.totalLocked);
+                    document.getElementById('sdtc-apy').textContent = gs.apyReal > 0 ? gs.apyReal + '% APY Real' : gs.apyMin + '% — ' + gs.apyMax + '% APY Est.';
+                    document.getElementById('sdtc-investors').textContent = gs.totalInvestors;
+                    document.getElementById('sdtc-total-earned').textContent = formatCOP(gs.totalEarnedGlobal);
+                }
+
+                // 2. Load all active investments
+                const invRes = await apiFetch('/admin/investments/active');
+                if (!invRes || !invRes.ok) return;
+                const investments = await invRes.json();
+
+                const now = new Date();
+
+                // Separate expiring (within 30 days) and all active
+                const expiring = investments.filter(inv => {
+                    const lockEnd = new Date(inv.lock_end_date || inv.end_date);
+                    const daysLeft = Math.ceil((lockEnd - now) / (1000 * 60 * 60 * 24));
+                    return daysLeft <= 30 && daysLeft >= 0 && inv.status === 'active';
+                }).sort((a, b) => new Date(a.lock_end_date || a.end_date) - new Date(b.lock_end_date || b.end_date));
+
+                // Render expiring table
+                const expiringTbody = document.getElementById('sdtc-expiring-table');
+                if (!expiring.length) {
+                    expiringTbody.innerHTML = '<tr><td colspan="8" style="color:var(--muted);text-align:center">✅ No hay inversiones por vencer en los próximos 30 días</td></tr>';
+                } else {
+                    expiringTbody.innerHTML = expiring.map(inv => {
+                        const lockEnd = new Date(inv.lock_end_date || inv.end_date);
+                        const daysLeft = Math.max(0, Math.ceil((lockEnd - now) / (1000 * 60 * 60 * 24)));
+                        const urgency = daysLeft <= 7 ? 'color:var(--red);font-weight:700;' : daysLeft <= 15 ? 'color:var(--gold);font-weight:600;' : '';
+                        return `<tr>
+                            <td class="mono">${inv.id}</td>
+                            <td><strong>${inv.user_name || 'ID:'+inv.user_id}</strong><br><span style="font-size:11px;color:var(--text2)">${inv.user_email || ''}</span></td>
+                            <td class="mono" style="color:var(--gold);font-weight:600;">${formatCOP(inv.amount)}</td>
+                            <td style="color:var(--muted)">${formatDate(inv.start_date)}</td>
+                            <td style="font-weight:600">${formatDate(inv.lock_end_date || inv.end_date)}</td>
+                            <td style="${urgency}">${daysLeft === 0 ? '🔴 HOY' : daysLeft + ' días'}</td>
+                            <td><span class="badge badge-green">Activa</span></td>
+                            <td><button class="btn btn-sm btn-red" onclick="adminCancelInvestment(${inv.id}, '${(inv.user_name||'').replace(/'/g,"\\'")}', ${inv.amount})">❌ Cancelar</button></td>
+                        </tr>`;
+                    }).join('');
+                }
+
+                // Render all active table
+                const allTbody = document.getElementById('sdtc-all-table');
+                if (!investments.length) {
+                    allTbody.innerHTML = '<tr><td colspan="8" style="color:var(--muted);text-align:center">No hay inversiones activas</td></tr>';
+                } else {
+                    allTbody.innerHTML = investments.map(inv => {
+                        const lockEnd = new Date(inv.lock_end_date || inv.end_date);
+                        const start = new Date(inv.start_date);
+                        const totalDays = Math.max(1, (lockEnd - start) / (1000*60*60*24));
+                        const elapsed = Math.max(0, (now - start) / (1000*60*60*24));
+                        const pct = Math.min(100, Math.round((elapsed / totalDays) * 100));
+                        const statusBadge = inv.status === 'pending_deposit' ? 'badge-gold' : 'badge-green';
+                        const statusLabel = inv.status === 'pending_deposit' ? '⏳ Depósito' : '🟢 Activa';
+                        return `<tr>
+                            <td class="mono">${inv.id}</td>
+                            <td><strong>${inv.user_name || 'ID:'+inv.user_id}</strong></td>
+                            <td class="mono" style="color:var(--gold);">${formatCOP(inv.amount)}</td>
+                            <td style="font-size:12px;">${inv.min_monthly_rate || 2}%—${inv.max_monthly_rate || 4}%</td>
+                            <td style="color:var(--muted)">${formatDate(inv.start_date)}</td>
+                            <td>${formatDate(inv.lock_end_date || inv.end_date)}</td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+                                        <div style="height:100%;width:${pct}%;background:${pct >= 90 ? 'var(--gold)' : 'var(--green)'};"></div>
+                                    </div>
+                                    <span style="font-size:11px;color:var(--muted);">${pct}%</span>
+                                </div>
+                            </td>
+                            <td><button class="btn btn-sm btn-red" onclick="adminCancelInvestment(${inv.id}, '${(inv.user_name||'').replace(/'/g,"\\'")}', ${inv.amount})">❌</button></td>
+                        </tr>`;
+                    }).join('');
+                }
+            } catch(e) { console.error('loadSDTCOverview error:', e); }
+        }
+
+        async function adminCancelInvestment(invId, userName, amount) {
+            const reason = prompt(`¿Cancelar inversión #${invId} de ${userName}?\nCapital: ${formatCOP(amount)}\n\nMotivo de cancelación:`);
+            if (reason === null) return; // cancelled prompt
+
+            try {
+                const res = await apiFetch(`/admin/investments/${invId}/cancel`, {
+                    method: 'POST',
+                    body: JSON.stringify({ reason: reason || 'Cancelado por administrador' })
+                });
+                const data = await res.json();
+                if (!res.ok) return toast(data.error || 'Error', 'error');
+
+                toast('✅ Inversión cancelada. Capital devuelto al usuario.');
+                loadSDTCOverview();
+                loadStats();
+            } catch(e) { toast('Error: ' + e.message, 'error'); }
+        }
+
+        // ====== BLOCK/UNBLOCK USER ======
+        async function toggleBlockUser(userId, isCurrentlyBlocked, userName) {
+            const action = isCurrentlyBlocked ? 'desbloquear' : 'bloquear';
+            let reason = '';
+            if (!isCurrentlyBlocked) {
+                reason = prompt(`¿Bloquear a ${userName}?\n\nMotivo del bloqueo:`);
+                if (reason === null) return;
+            } else {
+                if (!confirm(`¿Desbloquear a ${userName}?`)) return;
+            }
+
+            try {
+                const res = await apiFetch(`/admin/users/${userId}/toggle-block`, {
+                    method: 'POST',
+                    body: JSON.stringify({ reason: reason || undefined })
+                });
+                const data = await res.json();
+                if (!res.ok) return toast(data.error || 'Error', 'error');
+
+                toast(`✅ Usuario ${action === 'bloquear' ? 'bloqueado' : 'desbloqueado'}`);
+                loadUsers();
+            } catch(e) { toast('Error: ' + e.message, 'error'); }
         }
 
         // ====== DELETE TRANSACTION ======

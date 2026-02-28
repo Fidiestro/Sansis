@@ -429,6 +429,16 @@
             if (ok) { config.headers['Authorization'] = `Bearer ${getToken()}`; res = await fetch(`${API_URL}${endpoint}`, config); }
             else { logout(); return null; }
         }
+        // Usuario bloqueado
+        if (res.status === 403) {
+            try {
+                const data = await res.clone().json();
+                if (data.blocked) {
+                    document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0a0a0f;color:#fff;font-family:sans-serif;padding:40px;text-align:center;"><div style="font-size:48px;margin-bottom:20px;">🚫</div><h2 style="font-size:24px;margin-bottom:12px;color:#ef4444;">Cuenta Suspendida</h2><p style="color:#888;max-width:400px;line-height:1.6;">Tu cuenta ha sido suspendida por el administrador. Si crees que esto es un error, contacta al soporte de Sanse Capital.</p><button onclick="logout()" style="margin-top:24px;padding:12px 32px;background:#c9a84c;color:#0a0a0f;border:none;font-weight:700;cursor:pointer;">Cerrar Sesión</button></div>';
+                    return null;
+                }
+            } catch {}
+        }
         return res;
     }
 
@@ -469,6 +479,7 @@
     let dashboardData = null;
     let balanceSummary = { totalBalance: 0, totalInvested: 0, availableBalance: 0, totalEarnings: 0 };
     let myInvestments = [];
+    let globalStats = { totalLocked: 0, totalActiveInvestments: 0, totalInvestors: 0, apyReal: 0, apyMin: 0, apyMax: 0 };
     let currentView = 'dashboard';
 
     // ══════ VIEWS ══════
@@ -559,6 +570,34 @@
         <!-- Product Card -->
         <div class="products-section animate-in delay-2">
             <div class="products-title">Productos de Inversión <span class="badge-new">Nuevo</span></div>
+
+            <!-- SDTC Explanation -->
+            <div style="background:linear-gradient(135deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 100%);border:1px solid rgba(201,168,76,0.15);padding:20px 24px;margin-bottom:16px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                    <span style="font-size:22px;">📜</span>
+                    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;">¿Qué es un SDTC?</div>
+                </div>
+                <div style="font-size:12px;color:var(--text-muted);line-height:1.7;">
+                    Un <strong style="color:var(--gold)">SDTC</strong> (Certificado de Depósito a Término — Sanse Capital) es un producto de inversión donde depositas un capital por un plazo fijo de <strong>6 meses</strong>. Durante ese tiempo tu dinero genera <strong style="color:var(--green)">rendimientos mensuales variables entre 2% y 4%</strong>, que se acumulan a tu inversión. Al vencer el plazo, puedes retirar tu capital más los rendimientos generados.
+                </div>
+            </div>
+
+            <!-- Global Stats Bar -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);">${formatCOP(globalStats.totalLocked)}</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">🔒 Total Bloqueado</div>
+                </div>
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--green);">${globalStats.apyReal > 0 ? globalStats.apyReal + '%' : globalStats.apyMin + '% — ' + globalStats.apyMax + '%'}</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">📈 APY ${globalStats.apyReal > 0 ? 'Real' : 'Estimado'}</div>
+                </div>
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--blue);">${globalStats.totalInvestors}</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">👥 Inversionistas</div>
+                </div>
+            </div>
+
             <div class="product-card" onclick="openInvestModal()">
                 <div class="product-card-top">
                     <div class="product-header">
@@ -648,9 +687,42 @@
     // ══════ RENDER INVESTMENTS VIEW ══════
     function renderInvestmentsView(container) {
         const activeCount = myInvestments.filter(i => ['active','pending_deposit'].includes(i.status)).length;
+        const gs = globalStats;
         container.innerHTML = `
         <div class="products-section animate-in">
             <div class="products-title">💰 Productos Disponibles</div>
+
+            <!-- SDTC Explanation -->
+            <div style="background:linear-gradient(135deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 100%);border:1px solid rgba(201,168,76,0.15);padding:20px 24px;margin-bottom:16px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                    <span style="font-size:22px;">📜</span>
+                    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;">¿Qué es un SDTC?</div>
+                </div>
+                <div style="font-size:12px;color:var(--text-muted);line-height:1.7;">
+                    Un <strong style="color:var(--gold)">SDTC</strong> (Certificado de Depósito a Término — Sanse Capital) es un producto de inversión donde depositas un capital por un plazo fijo de <strong>6 meses</strong>. Durante ese tiempo tu dinero genera <strong style="color:var(--green)">rendimientos mensuales variables entre 2% y 4%</strong>, que se acumulan a tu inversión. Al vencer el plazo, puedes retirar tu capital más los rendimientos generados.
+                </div>
+            </div>
+
+            <!-- Global Stats -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--gold);">${formatCOP(gs.totalLocked)}</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">🔒 Total Bloqueado</div>
+                </div>
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--green);">${gs.apyReal > 0 ? gs.apyReal + '%' : gs.apyMin + '% — ' + gs.apyMax + '%'}</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">📈 APY ${gs.apyReal > 0 ? 'Real' : 'Estimado'}</div>
+                </div>
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--blue);">${gs.totalInvestors}</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">👥 Inversionistas</div>
+                </div>
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--text);">${gs.totalActiveInvestments}</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">📊 SDTC Activos</div>
+                </div>
+            </div>
+
             <div class="product-card" onclick="${activeCount >= 3 ? '' : 'openInvestModal()'}">
                 <div class="product-card-top">
                     <div class="product-header">
@@ -1385,15 +1457,17 @@
     // ══════ LOAD DATA ══════
     async function loadAllData() {
         try {
-            const [dashRes, balRes, invRes] = await Promise.all([
+            const [dashRes, balRes, invRes, gsRes] = await Promise.all([
                 apiFetch('/dashboard/summary'),
                 apiFetch('/investments/balance-summary'),
                 apiFetch('/investments/my'),
+                apiFetch('/investments/global-stats'),
             ]);
 
             if (dashRes && dashRes.ok) dashboardData = await dashRes.json();
             if (balRes && balRes.ok) balanceSummary = await balRes.json();
             if (invRes && invRes.ok) myInvestments = await invRes.json();
+            if (gsRes && gsRes.ok) globalStats = await gsRes.json();
 
             // Fallback: si balance-summary no funciona todavía, calcular del dashboard
             if (!balRes || !balRes.ok) {
