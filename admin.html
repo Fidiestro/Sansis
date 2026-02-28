@@ -187,6 +187,7 @@
             <div class="tab" onclick="switchTab('transactions',this)">💸 Transacción</div>
             <div class="tab" onclick="switchTab('returns',this)">📈 Rendimientos</div>
             <div class="tab" onclick="switchTab('sdtc_overview',this)">🔒 SDTC</div>
+            <div class="tab" onclick="switchTab('loans',this)">🏦 Préstamos</div>
             <div class="tab" onclick="switchTab('withdrawals',this)">📤 Retiros</div>
             <div class="tab" onclick="switchTab('users',this)">📋 Usuarios</div>
         </div>
@@ -382,6 +383,32 @@
             </div>
         </div>
 
+        <!-- ====== PRÉSTAMOS (ADMIN) ====== -->
+        <div class="section" id="sec-loans">
+            <div class="card">
+                <div class="card-title">🏦 Solicitudes de Préstamo</div>
+                <div class="card-desc">Gestiona las solicitudes de préstamo. Puedes aprobar (definiendo monto y tasa), rechazar, o marcar como pagado/mora.</div>
+
+                <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+                    <button class="btn btn-sm btn-outline ln-filter-btn active" onclick="filterLoans('all', this)">Todas</button>
+                    <button class="btn btn-sm btn-outline ln-filter-btn" onclick="filterLoans('pending', this)">⏳ Pendientes</button>
+                    <button class="btn btn-sm btn-outline ln-filter-btn" onclick="filterLoans('active', this)">🟢 Activos</button>
+                    <button class="btn btn-sm btn-outline ln-filter-btn" onclick="filterLoans('paid', this)">✅ Pagados</button>
+                    <button class="btn btn-sm btn-outline ln-filter-btn" onclick="filterLoans('overdue', this)">🔴 En Mora</button>
+                    <button class="btn btn-sm btn-outline ln-filter-btn" onclick="filterLoans('rejected', this)">❌ Rechazados</button>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr>
+                            <th>Ref</th><th>Usuario</th><th>Monto Sol.</th><th>Plazo</th><th>Score</th><th>Propósito</th><th>Estado</th><th>Fecha</th><th>Acciones</th>
+                        </tr></thead>
+                        <tbody id="loans-table"><tr><td colspan="9" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- ====== SOLICITUDES DE RETIRO ====== -->
         <div class="section" id="sec-withdrawals">
             <div class="card">
@@ -483,6 +510,7 @@
             // Cargar inversiones activas al entrar a la pestaña de rendimientos
             if (tab === 'returns') loadActiveInvestments();
             if (tab === 'withdrawals') loadAdminWithdrawals('all');
+            if (tab === 'loans') loadAdminLoans('all');
             if (tab === 'sdtc_overview') loadSDTCOverview();
             if (tab === 'users') loadUsers();
         }
@@ -1098,6 +1126,96 @@
 
                 toast(`✅ Solicitud ${data.status === 'approved' ? 'aprobada' : data.status === 'rejected' ? 'rechazada' : 'completada'}`);
                 loadAdminWithdrawals(currentWrFilter);
+                loadStats();
+            } catch(e) { toast('Error: ' + e.message, 'error'); }
+        }
+
+        // ====== ADMIN LOANS ======
+        let currentLnFilter = 'all';
+
+        async function loadAdminLoans(status) {
+            currentLnFilter = status;
+            const tbody = document.getElementById('loans-table');
+            tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">Cargando...</td></tr>';
+
+            try {
+                const res = await apiFetch(`/admin/loans?status=${status}`);
+                if (!res || !res.ok) { tbody.innerHTML = '<tr><td colspan="9" style="color:var(--red);text-align:center">Error cargando préstamos</td></tr>'; return; }
+                const data = await res.json();
+
+                if (!data.length) {
+                    tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">No hay solicitudes de préstamo</td></tr>';
+                    return;
+                }
+
+                const statusLabels = { pending: '⏳ Pendiente', active: '🟢 Activo', rejected: '❌ Rechazado', paid: '✅ Pagado', overdue: '🔴 Mora', cancelled: '⚪ Cancelado' };
+                const statusBadge = { pending: 'badge-gold', active: 'badge-green', rejected: 'badge-red', paid: 'badge-blue', overdue: 'badge-red', cancelled: '' };
+
+                tbody.innerHTML = data.map(l => `
+                    <tr>
+                        <td class="mono" style="font-size:11px;">${l.ref_id || '-'}</td>
+                        <td>
+                            <div style="font-weight:600;font-size:13px;">${l.user_name || 'ID:'+l.user_id}</div>
+                            <div style="font-size:11px;color:var(--text2);">${l.user_email || ''}</div>
+                        </td>
+                        <td class="mono" style="color:var(--gold);font-weight:600;">${formatCOP(l.amount)}${l.approved_amount && l.approved_amount != l.amount ? '<br><span style="color:var(--green);font-size:10px;">Aprobado: '+formatCOP(l.approved_amount)+'</span>' : ''}</td>
+                        <td>${l.term_months} mes${l.term_months>1?'es':''}</td>
+                        <td><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:${l.credit_score >= 600 ? 'var(--green)' : l.credit_score >= 400 ? 'var(--gold)' : 'var(--red)'};">${l.credit_score || 0}</span></td>
+                        <td style="font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.purpose || '—'}</td>
+                        <td><span class="badge ${statusBadge[l.status] || 'badge-gold'}">${statusLabels[l.status] || l.status}</span></td>
+                        <td style="color:var(--muted);font-size:12px;">${formatDate(l.created_at)}</td>
+                        <td>
+                            ${l.status === 'pending' ? `
+                                <button class="btn btn-sm btn-gold" onclick="processLoan(${l.id}, 'approve', ${l.amount})">Aprobar</button>
+                                <button class="btn btn-sm btn-red" onclick="processLoan(${l.id}, 'reject')" style="margin-top:4px;">Rechazar</button>
+                            ` : l.status === 'active' ? `
+                                <button class="btn btn-sm btn-gold" onclick="processLoan(${l.id}, 'mark_paid')">✅ Pagado</button>
+                                <button class="btn btn-sm btn-red" onclick="processLoan(${l.id}, 'mark_overdue')" style="margin-top:4px;">🔴 Mora</button>
+                            ` : l.status === 'overdue' ? `
+                                <button class="btn btn-sm btn-gold" onclick="processLoan(${l.id}, 'mark_paid')">✅ Pagado</button>
+                            ` : '<span style="font-size:11px;color:var(--muted);">—</span>'}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(e) {
+                console.error('loadAdminLoans error:', e);
+                tbody.innerHTML = '<tr><td colspan="9" style="color:var(--red);text-align:center">Error: ' + e.message + '</td></tr>';
+            }
+        }
+
+        function filterLoans(status, btn) {
+            document.querySelectorAll('.ln-filter-btn').forEach(b => { b.classList.remove('active'); b.style.background=''; b.style.color=''; });
+            btn.classList.add('active'); btn.style.background = 'var(--gold)'; btn.style.color = '#0a0a0f';
+            loadAdminLoans(status);
+        }
+
+        async function processLoan(id, action, requestedAmount) {
+            let approvedAmount, approvedRate, notes;
+
+            if (action === 'approve') {
+                approvedAmount = prompt(`Monto a aprobar (solicitado: $${Math.round(requestedAmount).toLocaleString('es-CO')}):`, requestedAmount);
+                if (approvedAmount === null) return;
+                approvedRate = prompt('Tasa mensual % (ej: 3 para 3%):', '3');
+                if (approvedRate === null) return;
+                notes = prompt('Notas (opcional):');
+            } else if (action === 'reject') {
+                notes = prompt('Motivo del rechazo:');
+                if (notes === null) return;
+            } else if (action === 'mark_overdue') {
+                notes = prompt('Detalle de la mora (opcional):');
+            }
+
+            if (!confirm(`¿Confirmar acción "${action}" para este préstamo?`)) return;
+
+            try {
+                const res = await apiFetch(`/admin/loans/${id}/process`, {
+                    method: 'POST',
+                    body: JSON.stringify({ action, approvedAmount: approvedAmount ? parseFloat(approvedAmount) : undefined, approvedRate: approvedRate ? parseFloat(approvedRate) : undefined, notes })
+                });
+                const data = await res.json();
+                if (!res.ok) return toast(data.error, 'error');
+                toast(`✅ ${data.message}`);
+                loadAdminLoans(currentLnFilter);
                 loadStats();
             } catch(e) { toast('Error: ' + e.message, 'error'); }
         }

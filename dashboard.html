@@ -300,8 +300,10 @@
             <div class="nav-section-title">Principal</div>
             <a class="nav-item active" href="#" onclick="showView('dashboard')"><span class="icon">📊</span> Dashboard</a>
             <a class="nav-item" href="#" onclick="showView('investments')"><span class="icon">💰</span> Inversiones</a>
+            <a class="nav-item" href="#" onclick="showView('loans')"><span class="icon">🏦</span> Préstamos</a>
             <a class="nav-item" href="#" onclick="showView('withdraw')"><span class="icon">📤</span> Retirar</a>
             <a class="nav-item" href="#" onclick="showView('movements')"><span class="icon">📋</span> Movimientos</a>
+            <a class="nav-item" href="#" onclick="showView('points')"><span class="icon">⭐</span> Sanse Score</a>
         </div>
         <div class="nav-section">
             <div class="nav-section-title">Más</div>
@@ -480,6 +482,8 @@
     let balanceSummary = { totalBalance: 0, totalInvested: 0, availableBalance: 0, totalEarnings: 0 };
     let myInvestments = [];
     let globalStats = { totalLocked: 0, totalActiveInvestments: 0, totalInvestors: 0, apyReal: 0, apyMin: 0, apyMax: 0 };
+    let myLoans = { legacyLoans: [], loanRequests: [] };
+    let creditScore = null;
     let currentView = 'dashboard';
 
     // ══════ VIEWS ══════
@@ -496,6 +500,8 @@
         else if (currentView === 'investments') renderInvestmentsView(content);
         else if (currentView === 'movements') renderMovementsView(content);
         else if (currentView === 'withdraw') renderWithdrawView(content);
+        else if (currentView === 'loans') renderLoansView(content);
+        else if (currentView === 'points') renderPointsView(content);
     }
 
     // ══════ RENDER DASHBOARD ══════
@@ -1426,6 +1432,184 @@
         }
     }
 
+    // ══════ RENDER LOANS VIEW ══════
+    function renderLoansView(container) {
+        const allLoans = [...myLoans.loanRequests];
+        const activeLoans = allLoans.filter(l => l.status === 'active' || l.status === 'overdue');
+        const sc = creditScore || { total: 0, tier: 'Inicial' };
+        const tierColors = { Platino: 'var(--purple)', Oro: 'var(--gold)', Plata: '#aaa', Bronce: '#cd7f32', Inicial: 'var(--text-muted)' };
+
+        container.innerHTML = `
+        <div class="animate-in">
+            <!-- Score mini -->
+            <div style="background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(201,168,76,0.02));border:1px solid var(--border);padding:20px 24px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <div style="font-size:13px;color:var(--text-muted);">Tu Sanse Score</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:${tierColors[sc.tier]};">${sc.total}<span style="font-size:14px;color:var(--text-muted);">/1000</span></div>
+                    <div style="font-size:12px;color:${tierColors[sc.tier]};font-weight:600;">⭐ ${sc.tier} ${sc.total >= 200 ? '— Elegible para préstamos' : '— Necesitas 200+ pts'}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">Multiplicador Airdrop</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--green);">${sc.airdropMultiplier || 0}x</div>
+                </div>
+            </div>
+
+            <!-- Solicitar préstamo -->
+            <div style="background:var(--dark-2);border:1px solid var(--border);padding:24px;margin-bottom:20px;">
+                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:6px;">🏦 Solicitar Préstamo</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">
+                    Solicita un préstamo con base en tu Sanse Score. Monto: $100K — $10M COP. Plazo: 1, 2, 3 o 6 meses. Tasa: ~3% mensual (varía según perfil). Tu solicitud será revisada en 24-48 horas.
+                </div>
+                ${activeLoans.length > 0 ? `
+                    <div style="background:var(--red-bg);border:1px solid rgba(231,76,94,0.2);padding:12px 16px;font-size:12px;color:var(--red);">
+                        ⚠️ Ya tienes un préstamo activo. Debes pagarlo antes de solicitar otro.
+                    </div>
+                ` : allLoans.some(l => l.status === 'pending') ? `
+                    <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);padding:12px 16px;font-size:12px;color:var(--gold);">
+                        ⏳ Tienes una solicitud pendiente de revisión. Te notificaremos cuando se procese.
+                    </div>
+                ` : `
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                        <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Monto (COP)</label>
+                            <input id="loan-amount" type="number" placeholder="1000000" min="100000" max="10000000" style="width:100%;padding:10px 12px;background:var(--dark-3);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;"></div>
+                        <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Plazo</label>
+                            <select id="loan-term" style="width:100%;padding:10px 12px;background:var(--dark-3);border:1px solid var(--border);color:var(--text);font-size:14px;">
+                                <option value="1">1 mes</option><option value="2">2 meses</option><option value="3" selected>3 meses</option><option value="6">6 meses</option>
+                            </select></div>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Propósito (opcional)</label>
+                        <input id="loan-purpose" placeholder="Ej: Capital de trabajo, emergencia, inversión..." style="width:100%;padding:10px 12px;background:var(--dark-3);border:1px solid var(--border);color:var(--text);font-size:13px;">
+                    </div>
+                    <button onclick="submitLoanRequest()" id="btn-loan-request" style="width:100%;padding:14px;background:var(--gold);color:#0a0a0f;font-weight:700;font-size:14px;border:none;cursor:pointer;font-family:'Syne',sans-serif;letter-spacing:0.05em;">
+                        🏦 Solicitar Préstamo →
+                    </button>
+                `}
+            </div>
+
+            <!-- Mis préstamos -->
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px;">📋 Historial de Préstamos</div>
+            ${allLoans.length === 0 ? `
+                <div style="text-align:center;padding:40px;color:var(--text-muted);font-size:13px;">No tienes préstamos registrados.</div>
+            ` : allLoans.map(l => {
+                const statusLabels = { pending: '⏳ En Revisión', active: '🟢 Activo', rejected: '❌ Rechazado', paid: '✅ Pagado', overdue: '🔴 En Mora', cancelled: '⚪ Cancelado' };
+                const statusColors = { pending: 'var(--gold)', active: 'var(--green)', rejected: 'var(--red)', paid: 'var(--blue)', overdue: 'var(--red)', cancelled: 'var(--text-muted)' };
+                const amt = l.approvedAmount || l.amount;
+                const rate = l.approvedRate || l.monthlyRate || 0;
+                return `
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px 20px;margin-bottom:10px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);">${formatCOP(amt)}</div>
+                        <span style="font-size:12px;font-weight:600;color:${statusColors[l.status]};">${statusLabels[l.status] || l.status}</span>
+                    </div>
+                    <div style="display:flex;gap:20px;font-size:12px;color:var(--text-muted);">
+                        ${rate ? `<span>📈 ${rate}% mensual</span>` : ''}
+                        <span>📅 ${l.term || '—'} meses</span>
+                        ${l.dueDate ? `<span>⏰ Vence: ${formatDate(l.dueDate)}</span>` : ''}
+                        <span>🔖 ${l.createdAt ? formatDate(l.createdAt) : '—'}</span>
+                    </div>
+                    ${l.adminNotes && l.status === 'rejected' ? `<div style="margin-top:8px;font-size:11px;color:var(--red);background:var(--red-bg);padding:8px 12px;">💬 ${l.adminNotes}</div>` : ''}
+                    ${l.purpose ? `<div style="margin-top:6px;font-size:11px;color:var(--text-muted);">📝 ${l.purpose}</div>` : ''}
+                </div>`;
+            }).join('')}
+        </div>`;
+    }
+
+    async function submitLoanRequest() {
+        const amount = parseFloat(document.getElementById('loan-amount').value);
+        const termMonths = parseInt(document.getElementById('loan-term').value);
+        const purpose = document.getElementById('loan-purpose').value;
+        const btn = document.getElementById('btn-loan-request');
+
+        btn.disabled = true; btn.textContent = 'Procesando...';
+        try {
+            const res = await apiFetch('/loans/request', {
+                method: 'POST',
+                body: JSON.stringify({ amount, termMonths, purpose })
+            });
+            const data = await res.json();
+            if (!res.ok) return toast(data.error, 'error');
+            toast(`✅ Solicitud creada. Score: ${data.loan.creditScore} (${data.loan.tier})`);
+            await loadAllData();
+            renderLoansView(document.getElementById('dashboard-content'));
+        } catch(e) { toast('Error de conexión', 'error'); }
+        finally { btn.disabled = false; btn.textContent = '🏦 Solicitar Préstamo →'; }
+    }
+
+    // ══════ RENDER POINTS / AIRDROP VIEW ══════
+    function renderPointsView(container) {
+        const sc = creditScore || { total: 0, tier: 'Inicial', airdropMultiplier: 0, breakdown: {} };
+        const tierColors = { Platino: '#a78bfa', Oro: '#C9A84C', Plata: '#aaa', Bronce: '#cd7f32', Inicial: '#7A7670' };
+        const tierEmojis = { Platino: '💎', Oro: '🥇', Plata: '🥈', Bronce: '🥉', Inicial: '⭐' };
+        const pct = Math.round((sc.total / 1000) * 100);
+        const bd = sc.breakdown || {};
+
+        container.innerHTML = `
+        <div class="animate-in">
+            <!-- Hero Score -->
+            <div style="background:linear-gradient(135deg,rgba(201,168,76,0.1) 0%,rgba(167,139,250,0.05) 100%);border:1px solid var(--border);padding:32px;text-align:center;margin-bottom:20px;">
+                <div style="font-size:14px;color:var(--text-muted);margin-bottom:8px;">Tu Sanse Score</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:56px;font-weight:800;color:${tierColors[sc.tier]};line-height:1;">${sc.total}</div>
+                <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">de 1,000 puntos posibles</div>
+                <div style="width:80%;max-width:300px;height:8px;background:var(--dark-3);border-radius:4px;margin:16px auto 8px;overflow:hidden;">
+                    <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,${tierColors[sc.tier]},var(--gold));border-radius:4px;"></div>
+                </div>
+                <div style="font-size:16px;font-weight:700;color:${tierColors[sc.tier]};">${tierEmojis[sc.tier]} Nivel ${sc.tier}</div>
+            </div>
+
+            <!-- Airdrop Banner -->
+            <div style="background:linear-gradient(135deg,rgba(78,203,141,0.08),rgba(91,141,239,0.05));border:1px solid rgba(78,203,141,0.2);padding:24px;margin-bottom:20px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--green);">🪂 Airdrop $SANSE</div>
+                        <div style="font-size:12px;color:var(--text-muted);margin-top:6px;line-height:1.7;max-width:400px;">
+                            Sanse Capital lanzará su propio token <strong style="color:var(--gold);">$SANSE</strong> en la red Polygon. 
+                            Tus puntos determinarán cuántos tokens recibirás en el airdrop. 
+                            <strong>Más puntos = más tokens gratis.</strong> Invierte, ahorra y paga tus préstamos a tiempo para maximizar tu multiplicador.
+                        </div>
+                    </div>
+                    <div style="text-align:center;min-width:120px;">
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:800;color:var(--green);">${sc.airdropMultiplier || 0}x</div>
+                        <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;">Multiplicador</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Breakdown -->
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px;">📊 Desglose de Puntos</div>
+            <div style="display:grid;gap:8px;margin-bottom:20px;">
+                ${Object.entries(bd).map(([key, val]) => {
+                    const labels = { antiguedad: '📅 Antigüedad', capital: '💰 Capital Depositado', inversiones: '🔒 Inversiones SDTC', prestamos: '🏦 Préstamos Pagados', actividad: '⚡ Actividad Reciente', balance: '💵 Balance Actual' };
+                    const barPct = val.max > 0 ? Math.round((val.pts / val.max) * 100) : 0;
+                    return `
+                    <div style="background:var(--dark-2);border:1px solid var(--border);padding:14px 18px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                            <span style="font-size:13px;font-weight:600;">${labels[key] || key}</span>
+                            <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--gold);">${val.pts}<span style="color:var(--text-muted);font-weight:400;">/${val.max}</span></span>
+                        </div>
+                        <div style="height:4px;background:var(--dark-3);border-radius:2px;overflow:hidden;margin-bottom:4px;">
+                            <div style="height:100%;width:${barPct}%;background:var(--gold);border-radius:2px;"></div>
+                        </div>
+                        <div style="font-size:10px;color:var(--text-muted);">${val.detail}</div>
+                    </div>`;
+                }).join('')}
+            </div>
+
+            <!-- Tips -->
+            <div style="background:var(--dark-2);border:1px solid var(--border);padding:20px 24px;">
+                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:10px;">💡 Cómo Mejorar tu Score</div>
+                <div style="font-size:12px;color:var(--text-muted);line-height:2;">
+                    ✅ Deposita capital regularmente (+20 pts por cada $500K)<br>
+                    ✅ Mantén inversiones SDTC activas (+50 pts cada una)<br>
+                    ✅ Paga tus préstamos a tiempo (+80 pts cada uno)<br>
+                    ✅ Mantén un balance saludable (+20 pts por cada $1M)<br>
+                    ✅ Usa la plataforma activamente (+10 pts por transacción reciente)<br>
+                    ⚠️ Los préstamos en mora restan -100 pts cada uno
+                </div>
+            </div>
+        </div>`;
+    }
+
     // ══════ CHART ══════
     function drawChart(history) {
         if (!history || !history.length) return;
@@ -1457,17 +1641,21 @@
     // ══════ LOAD DATA ══════
     async function loadAllData() {
         try {
-            const [dashRes, balRes, invRes, gsRes] = await Promise.all([
+            const [dashRes, balRes, invRes, gsRes, loanRes, scoreRes] = await Promise.all([
                 apiFetch('/dashboard/summary'),
                 apiFetch('/investments/balance-summary'),
                 apiFetch('/investments/my'),
                 apiFetch('/investments/global-stats'),
+                apiFetch('/loans/my'),
+                apiFetch('/loans/credit-score'),
             ]);
 
             if (dashRes && dashRes.ok) dashboardData = await dashRes.json();
             if (balRes && balRes.ok) balanceSummary = await balRes.json();
             if (invRes && invRes.ok) myInvestments = await invRes.json();
             if (gsRes && gsRes.ok) globalStats = await gsRes.json();
+            if (loanRes && loanRes.ok) myLoans = await loanRes.json();
+            if (scoreRes && scoreRes.ok) creditScore = await scoreRes.json();
 
             // Fallback: si balance-summary no funciona todavía, calcular del dashboard
             if (!balRes || !balRes.ok) {
