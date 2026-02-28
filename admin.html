@@ -254,8 +254,8 @@
                 <div class="card-title">📋 Últimas Transacciones</div>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>ID</th><th>Usuario</th><th>Tipo</th><th>Monto</th><th>Descripción</th><th>Fecha</th></tr></thead>
-                        <tbody id="tx-table"><tr><td colspan="6" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
+                        <thead><tr><th>ID</th><th>Usuario</th><th>Tipo</th><th>Monto</th><th>Descripción</th><th>Fecha</th><th>Acciones</th></tr></thead>
+                        <tbody id="tx-table"><tr><td colspan="7" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -499,11 +499,11 @@
                 const data = await res.json();
                 const tbody = document.getElementById('tx-table');
                 if (!data.length) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">No hay transacciones</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center">No hay transacciones</td></tr>';
                     return;
                 }
-                const typeLabels = {deposit:'Depósito',withdraw:'Retiro',payment:'Abono',interest:'Intereses',profit:'Ganancias',loan:'Préstamo',investment:'Inversión',investment_return:'Rendimiento SDTC'};
-                const typeBadge = {deposit:'badge-green',withdraw:'badge-red',payment:'badge-blue',interest:'badge-gold',profit:'badge-green',loan:'badge-purple',investment:'badge-blue',investment_return:'badge-green'};
+                const typeLabels = {deposit:'Depósito',withdraw:'Retiro',payment:'Abono',interest:'Intereses',profit:'Ganancias',loan:'Préstamo',investment:'Inversión',investment_return:'Rendimiento SDTC',investment_withdrawal:'Retiro SDTC'};
+                const typeBadge = {deposit:'badge-green',withdraw:'badge-red',payment:'badge-blue',interest:'badge-gold',profit:'badge-green',loan:'badge-purple',investment:'badge-blue',investment_return:'badge-green',investment_withdrawal:'badge-gold'};
                 tbody.innerHTML = data.map(tx => `
                     <tr>
                         <td class="mono">${tx.ref_id || tx.id}</td>
@@ -512,9 +512,10 @@
                         <td class="mono" style="color:${['withdraw'].includes(tx.type)?'var(--red)':'var(--green)'}">${['withdraw'].includes(tx.type)?'-':'+'} ${formatCOP(tx.amount)}</td>
                         <td style="color:var(--text2)">${tx.description||'—'}</td>
                         <td style="color:var(--muted)">${formatDate(tx.created_at)}</td>
+                        <td><button class="btn btn-sm btn-red" onclick="deleteTransaction(${tx.id}, '${(tx.description||'').replace(/'/g,"\\'")}')">🗑️</button></td>
                     </tr>
                 `).join('');
-            } catch(e) { document.getElementById('tx-table').innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">Sin datos</td></tr>'; }
+            } catch(e) { document.getElementById('tx-table').innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center">Sin datos</td></tr>'; }
         }
 
         // ====== RENDIMIENTOS SDTC ======
@@ -809,6 +810,21 @@
                 loadStats();
             } catch(e) { toast('Error: ' + e.message, 'error'); }
             finally { btn.disabled = false; btn.textContent = '💸 Registrar Transacción'; }
+        }
+
+        // ====== DELETE TRANSACTION ======
+        async function deleteTransaction(txId, desc) {
+            if (!confirm(`¿Eliminar esta transacción?\n\n"${desc}"\n\nEsta acción no se puede deshacer y recalculará el balance del usuario.`)) return;
+
+            try {
+                const res = await apiFetch(`/admin/transactions/${txId}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (!res.ok) return toast(data.error || 'Error eliminando', 'error');
+
+                toast('✅ Transacción eliminada y balance recalculado');
+                loadRecentTransactions();
+                loadStats();
+            } catch(e) { toast('Error: ' + e.message, 'error'); }
         }
 
         // ====== ADMIN WITHDRAWALS ======

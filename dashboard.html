@@ -112,21 +112,23 @@
         .products-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
         .products-title .badge-new { font-size: 9px; background: var(--gold); color: var(--dark); padding: 3px 8px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
 
-        .product-card { background: var(--dark-2); border: 1px solid var(--border); overflow: hidden; transition: border-color 0.3s; cursor: pointer; }
-        .product-card:hover { border-color: var(--gold); }
-        .product-card-top { padding: 24px; position: relative; }
-        .product-card-top::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+        .product-card { background: linear-gradient(135deg, var(--dark-2) 0%, #131318 50%, var(--dark-2) 100%); border: 1px solid rgba(201,168,76,0.25); overflow: hidden; transition: all 0.4s; cursor: pointer; position: relative; }
+        .product-card::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(201,168,76,0.06) 0%, transparent 60%); pointer-events: none; }
+        .product-card:hover { border-color: var(--gold); box-shadow: 0 8px 32px rgba(201,168,76,0.15), inset 0 1px 0 rgba(201,168,76,0.1); transform: translateY(-2px); }
+        .product-card-top { padding: 28px; position: relative; z-index: 1; }
+        .product-card-top::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent); }
         .product-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
         .product-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
-        .product-badge { font-size: 10px; color: var(--green); background: var(--green-bg); padding: 4px 10px; font-weight: 600; letter-spacing: 0.05em; }
+        .product-badge { font-size: 10px; color: var(--green); background: var(--green-bg); padding: 4px 10px; font-weight: 600; letter-spacing: 0.05em; border: 1px solid rgba(78,203,141,0.2); }
         .product-rates { display: flex; gap: 16px; margin-bottom: 16px; }
-        .product-rate { text-align: center; padding: 12px 16px; background: var(--dark-3); border: 1px solid var(--border); flex: 1; }
-        .product-rate-val { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: var(--gold); }
-        .product-rate-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+        .product-rate { text-align: center; padding: 16px 20px; background: rgba(201,168,76,0.06); border: 1px solid rgba(201,168,76,0.15); flex: 1; position: relative; }
+        .product-rate-val { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--gold); text-shadow: 0 0 20px rgba(201,168,76,0.2); }
+        .product-rate-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
         .product-features { display: flex; flex-wrap: wrap; gap: 8px; }
-        .product-feature { font-size: 11px; color: var(--text-muted); padding: 5px 10px; background: var(--dark-3); border: 1px solid var(--border); }
-        .product-cta { display: block; width: 100%; padding: 16px; text-align: center; background: var(--gold-dim); color: var(--gold); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border: none; border-top: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
-        .product-cta:hover { background: var(--gold); color: var(--dark); }
+        .product-feature { font-size: 11px; color: var(--text-muted); padding: 6px 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); transition: border-color 0.2s; }
+        .product-feature:hover { border-color: rgba(201,168,76,0.3); }
+        .product-cta { display: block; width: 100%; padding: 18px; text-align: center; background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.08)); color: var(--gold); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border: none; border-top: 1px solid rgba(201,168,76,0.2); cursor: pointer; transition: all 0.3s; position: relative; z-index: 1; }
+        .product-cta:hover { background: var(--gold); color: var(--dark); letter-spacing: 0.15em; }
 
         /* ══════ INVEST MODAL ══════ */
         .modal-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); align-items: center; justify-content: center; }
@@ -184,6 +186,7 @@
         .inv-card-status { font-size: 10px; padding: 3px 10px; font-weight: 600; }
         .inv-card-status.active { color: var(--green); background: var(--green-bg); }
         .inv-card-status.completed { color: var(--blue); background: var(--blue-bg); }
+        .inv-card-status.pending_deposit { color: #f59e0b; background: rgba(245,158,11,0.1); }
         .inv-card-body { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
         .inv-card-stat { }
         .inv-card-stat-val { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; }
@@ -553,8 +556,11 @@
             <div class="product-card" onclick="openInvestModal()">
                 <div class="product-card-top">
                     <div class="product-header">
-                        <div class="product-name">Inversión SDTC</div>
-                        <span class="product-badge">Disponible</span>
+                        <div>
+                            <div class="product-name">Inversión SDTC</div>
+                            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Certificado de Depósito a Término — Sanse Capital</div>
+                        </div>
+                        <span class="product-badge">${myInvestments.filter(i => ['active','pending_deposit'].includes(i.status)).length}/3 Activas</span>
                     </div>
                     <div class="product-rates">
                         <div class="product-rate">
@@ -565,28 +571,34 @@
                             <div class="product-rate-val">6</div>
                             <div class="product-rate-label">Meses de Plazo</div>
                         </div>
+                        <div class="product-rate">
+                            <div class="product-rate-val">$100K</div>
+                            <div class="product-rate-label">Inversión Mínima</div>
+                        </div>
                     </div>
                     <div class="product-features">
                         <span class="product-feature">📅 Plazo fijo 6 meses</span>
                         <span class="product-feature">📈 Rendimiento variable</span>
                         <span class="product-feature">🔒 Capital bloqueado</span>
-                        <span class="product-feature">💰 Mín. $100K</span>
+                        <span class="product-feature">⏱️ 12h para cancelar</span>
+                        <span class="product-feature">🔄 Máx. 3 activas</span>
                     </div>
                 </div>
-                <button class="product-cta">Invertir Ahora →</button>
+                <button class="product-cta">${myInvestments.filter(i => ['active','pending_deposit'].includes(i.status)).length >= 3 ? '🔒 Límite Alcanzado (3/3)' : '✨ Invertir Ahora →'}</button>
             </div>
         </div>
 
         <!-- Active Investments -->
-        ${myInvestments.filter(i => i.status === 'active').length > 0 ? `
+        ${myInvestments.filter(i => i.status === 'active' || i.status === 'pending_deposit').length > 0 ? `
         <div class="my-investments animate-in delay-3">
             <div class="inv-list-title">📊 Mis Inversiones Activas</div>
-            ${myInvestments.filter(i => i.status === 'active').map(inv => `
+            ${myInvestments.filter(i => i.status === 'active' || i.status === 'pending_deposit').map(inv => `
                 <div class="inv-card" onclick="showInvestmentDetail(${inv.id})">
                     <div class="inv-card-header">
                         <span class="inv-card-type">💰 ${inv.type} <span style="font-size:12px;color:var(--text-muted);font-weight:400;">— ${inv.durationMonths || 6} meses</span></span>
-                        <span class="inv-card-status active">Activa</span>
+                        <span class="inv-card-status ${inv.status}">${inv.status === 'pending_deposit' ? '⏳ En depósito' : 'Activa'}</span>
                     </div>
+                    ${inv.status === 'pending_deposit' ? `<div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);padding:10px 14px;margin-bottom:12px;font-size:11px;color:#f59e0b;">⏱️ Período de depósito — Puedes cancelar en las próximas horas. <strong>Haz clic para ver opciones.</strong></div>` : ''}
                     <div class="inv-card-body">
                         <div class="inv-card-stat"><div class="inv-card-stat-val gold">${formatCOP(inv.amount)}</div><div class="inv-card-stat-label">Capital</div></div>
                         <div class="inv-card-stat"><div class="inv-card-stat-val">${inv.minMonthlyRate}%-${inv.maxMonthlyRate}%</div><div class="inv-card-stat-label">Tasa Mensual</div></div>
@@ -629,23 +641,33 @@
 
     // ══════ RENDER INVESTMENTS VIEW ══════
     function renderInvestmentsView(container) {
+        const activeCount = myInvestments.filter(i => ['active','pending_deposit'].includes(i.status)).length;
         container.innerHTML = `
         <div class="products-section animate-in">
             <div class="products-title">💰 Productos Disponibles</div>
-            <div class="product-card" onclick="openInvestModal()">
+            <div class="product-card" onclick="${activeCount >= 3 ? '' : 'openInvestModal()'}">
                 <div class="product-card-top">
-                    <div class="product-header"><div class="product-name">Inversión SDTC</div><span class="product-badge">Disponible</span></div>
+                    <div class="product-header">
+                        <div>
+                            <div class="product-name">Inversión SDTC</div>
+                            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Certificado de Depósito a Término — Sanse Capital</div>
+                        </div>
+                        <span class="product-badge">${activeCount}/3 Activas</span>
+                    </div>
                     <div class="product-rates">
                         <div class="product-rate"><div class="product-rate-val">2% — 4%</div><div class="product-rate-label">Rendimiento Mensual</div></div>
                         <div class="product-rate"><div class="product-rate-val">6</div><div class="product-rate-label">Meses de Plazo</div></div>
+                        <div class="product-rate"><div class="product-rate-val">$100K</div><div class="product-rate-label">Inversión Mínima</div></div>
                     </div>
                     <div class="product-features">
                         <span class="product-feature">📅 Plazo fijo 6 meses</span>
                         <span class="product-feature">📈 Rendimiento variable</span>
                         <span class="product-feature">🔒 Capital bloqueado</span>
+                        <span class="product-feature">⏱️ 12h para cancelar</span>
+                        <span class="product-feature">🔄 Máx. 3 activas</span>
                     </div>
                 </div>
-                <button class="product-cta">Invertir Ahora →</button>
+                <button class="product-cta">${activeCount >= 3 ? '🔒 Límite Alcanzado (3/3)' : '✨ Invertir Ahora →'}</button>
             </div>
         </div>
 
@@ -664,8 +686,9 @@
                 <div class="inv-card" onclick="showInvestmentDetail(${inv.id})">
                     <div class="inv-card-header">
                         <span class="inv-card-type">💰 ${inv.type} <span style="font-size:12px;color:var(--text-muted);font-weight:400;">— ${inv.durationMonths || 6} meses</span></span>
-                        <span class="inv-card-status ${inv.status}">${inv.status === 'active' ? 'Activa' : inv.status === 'completed' ? 'Completada' : inv.status}</span>
+                        <span class="inv-card-status ${inv.status}">${inv.status === 'pending_deposit' ? '⏳ En depósito' : inv.status === 'active' ? 'Activa' : inv.status === 'completed' ? 'Completada' : inv.status}</span>
                     </div>
+                    ${inv.isPendingDeposit ? `<div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);padding:8px 12px;margin-bottom:10px;font-size:11px;color:#f59e0b;">⏱️ Período de depósito. Haz clic para cancelar o confirmar.</div>` : ''}
                     <div class="inv-card-body">
                         <div class="inv-card-stat"><div class="inv-card-stat-val gold">${formatCOP(inv.amount)}</div><div class="inv-card-stat-label">Capital</div></div>
                         <div class="inv-card-stat"><div class="inv-card-stat-val">${inv.minMonthlyRate}%-${inv.maxMonthlyRate}%</div><div class="inv-card-stat-label">Tasa</div></div>
@@ -721,6 +744,7 @@
             const totalEarned = returns.reduce((s, r) => s + r.earned, 0);
             const isMatured = inv.isMatured || now >= end;
             const isActive = inv.status === 'active';
+            const isPendingDeposit = inv.status === 'pending_deposit';
 
             // Store for add-capital modal
             window._currentDetailInv = { id: invId, amount: inv.amount, lockEndDate: inv.lockEndDate || inv.endDate, type: inv.type };
@@ -735,7 +759,7 @@
                         <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px;">Inversión ${inv.type}</div>
                         <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--gold);">${formatCOP(inv.amount)}</div>
                     </div>
-                    <span class="inv-card-status ${inv.status}" style="font-size:12px;padding:6px 14px;">${inv.status === 'active' ? '🟢 Activa' : '✅ Completada'}</span>
+                    <span class="inv-card-status ${inv.status}" style="font-size:12px;padding:6px 14px;">${inv.status === 'active' ? '🟢 Activa' : inv.status === 'pending_deposit' ? '⏳ En depósito' : '✅ Completada'}</span>
                 </div>
 
                 <div class="detail-grid">
@@ -752,7 +776,18 @@
                     <div class="inv-progress-bar" style="height:6px;"><div class="inv-progress-fill" style="width:${pct}%"></div></div>
                 </div>
 
-                ${isActive ? `
+                ${isPendingDeposit ? `
+                <div style="margin-top:20px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);padding:20px;">
+                    <div style="font-weight:700;color:#f59e0b;margin-bottom:8px;font-size:14px;">⏱️ Período de Depósito (12 horas)</div>
+                    <div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">
+                        Tu inversión está en período de depósito. Puedes <strong style="color:var(--text)">cancelarla sin costo</strong> dentro de las próximas horas, o <strong style="color:var(--green)">confirmarla</strong> para activarla inmediatamente.
+                    </div>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                        <button onclick="confirmPendingInvestment(${invId})" style="padding:12px 24px;background:var(--green);border:none;color:var(--dark);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;">✅ Confirmar Inversión</button>
+                        <button onclick="cancelPendingInvestment(${invId})" style="padding:12px 24px;background:transparent;border:1px solid var(--red);color:var(--red);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;">❌ Cancelar Inversión</button>
+                    </div>
+                </div>
+                ` : isActive ? `
                 <div class="inv-actions">
                     ${!isMatured ? `<button class="btn-add-capital" onclick="openAddCapitalModal()">➕ Invertir Más</button>` : ''}
                     <button class="btn-withdraw" ${!isMatured ? 'disabled title="Disponible cuando venza el plazo el ' + formatDate(inv.lockEndDate || inv.endDate) + '"' : `onclick="withdrawInvestment(${invId})"`}>
@@ -802,6 +837,13 @@
 
     // ══════ INVEST MODAL ══════
     function openInvestModal() {
+        // Check max 3 active
+        const activeCount = myInvestments.filter(i => ['active','pending_deposit'].includes(i.status)).length;
+        if (activeCount >= 3) {
+            toast('Ya tienes 3 inversiones SDTC activas. Espera a que una termine o retírala.', 'error');
+            return;
+        }
+
         // Check if user already has an active SDTC
         const activeSDTC = myInvestments.find(i => i.status === 'active' && i.type === 'SDTC');
         
@@ -972,6 +1014,35 @@
         } catch (e) {
             toast('Error de conexión', 'error');
         }
+    }
+
+    // ══════ CANCEL / CONFIRM PENDING INVESTMENT ══════
+    async function cancelPendingInvestment(invId) {
+        if (!confirm('¿Cancelar esta inversión?\n\nEl capital volverá inmediatamente a tu saldo disponible.')) return;
+
+        try {
+            const res = await apiFetch(`/investments/${invId}/cancel`, { method: 'POST' });
+            const data = await res.json();
+            if (!res.ok) { toast(data.error || 'Error al cancelar', 'error'); return; }
+
+            toast(`✅ Inversión cancelada. ${formatCOP(data.refundedAmount)} devuelto a tu saldo.`);
+            await loadAllData();
+            renderCurrentView();
+        } catch (e) { toast('Error de conexión', 'error'); }
+    }
+
+    async function confirmPendingInvestment(invId) {
+        if (!confirm('¿Confirmar esta inversión?\n\nSe activará inmediatamente y el capital quedará bloqueado por 6 meses.')) return;
+
+        try {
+            const res = await apiFetch(`/investments/${invId}/confirm`, { method: 'POST' });
+            const data = await res.json();
+            if (!res.ok) { toast(data.error || 'Error al confirmar', 'error'); return; }
+
+            toast('✅ Inversión confirmada y activada.');
+            await loadAllData();
+            showInvestmentDetail(invId);
+        } catch (e) { toast('Error de conexión', 'error'); }
     }
 
     // ══════ WITHDRAW VIEW ══════
