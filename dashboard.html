@@ -1439,6 +1439,143 @@
         const sc = creditScore || { total: 0, tier: 'Inicial' };
         const tierColors = { Platino: 'var(--purple)', Oro: 'var(--gold)', Plata: '#aaa', Bronce: '#cd7f32', Inicial: 'var(--text-muted)' };
 
+        // Calcular detalles de préstamo activo
+        let activeLoanHTML = '';
+        if (activeLoans.length > 0) {
+            const loan = activeLoans[0];
+            const capital = loan.approvedAmount || loan.amount;
+            const rate = loan.approvedRate || loan.monthlyRate || 3;
+            const term = loan.term || 1;
+            const monthlyInterest = Math.round(capital * (rate / 100));
+            const monthlyInstallment = Math.round(capital / term);
+            const totalMonthlyPayment = monthlyInstallment + monthlyInterest;
+
+            // Calcular meses transcurridos y mora
+            const startDate = loan.startDate ? new Date(loan.startDate) : new Date(loan.createdAt);
+            const now = new Date();
+            const monthsElapsed = Math.max(0, Math.floor((now - startDate) / (1000*60*60*24*30)));
+            const dueDate = loan.dueDate ? new Date(loan.dueDate) : null;
+            const isOverdue = loan.status === 'overdue' || (dueDate && now > dueDate);
+            const daysLate = dueDate && now > dueDate ? Math.ceil((now - dueDate) / (1000*60*60*24)) : 0;
+
+            // Mora: 1% adicional sobre capital por cada mes de atraso
+            const moraRate = isOverdue ? Math.ceil(daysLate / 30) : 0;
+            const moraAmount = Math.round(capital * 0.01 * moraRate);
+            const totalOwedThisMonth = isOverdue ? totalMonthlyPayment + moraAmount : totalMonthlyPayment;
+
+            activeLoanHTML = `
+            <div style="background:linear-gradient(135deg,${isOverdue ? 'rgba(231,76,94,0.08)' : 'rgba(78,203,141,0.06)'},rgba(0,0,0,0));border:1px solid ${isOverdue ? 'rgba(231,76,94,0.3)' : 'rgba(78,203,141,0.2)'};padding:24px;margin-bottom:20px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;">${isOverdue ? '🔴 Préstamo en MORA' : '🟢 Préstamo Activo'}</div>
+                    <span style="font-size:12px;font-weight:600;color:${isOverdue ? 'var(--red)' : 'var(--green)'};">${isOverdue ? `${daysLate} días de atraso` : 'Al día'}</span>
+                </div>
+
+                <!-- Resumen del préstamo -->
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+                    <div style="background:var(--dark-3);padding:12px;text-align:center;">
+                        <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Capital</div>
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--gold);">${formatCOP(capital)}</div>
+                    </div>
+                    <div style="background:var(--dark-3);padding:12px;text-align:center;">
+                        <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Tasa Mensual</div>
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--text);">${rate}%</div>
+                    </div>
+                    <div style="background:var(--dark-3);padding:12px;text-align:center;">
+                        <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Plazo</div>
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--text);">${term} mes${term>1?'es':''}</div>
+                    </div>
+                </div>
+
+                <!-- Desglose de pago mensual -->
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;margin-bottom:16px;">
+                    <div style="font-size:13px;font-weight:600;margin-bottom:10px;">💳 Desglose de Pago Este Mes</div>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);">
+                        <span style="color:var(--text-muted);">Cuota capital (${formatCOP(capital)} ÷ ${term})</span>
+                        <span style="font-family:'JetBrains Mono',monospace;">${formatCOP(monthlyInstallment)}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);">
+                        <span style="color:var(--text-muted);">Intereses (${rate}% de ${formatCOP(capital)})</span>
+                        <span style="font-family:'JetBrains Mono',monospace;color:var(--gold);">${formatCOP(monthlyInterest)}</span>
+                    </div>
+                    ${isOverdue ? `
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);">
+                        <span style="color:var(--red);">⚠️ Mora (1% × ${moraRate} mes${moraRate>1?'es':''})</span>
+                        <span style="font-family:'JetBrains Mono',monospace;color:var(--red);font-weight:700;">+${formatCOP(moraAmount)}</span>
+                    </div>` : ''}
+                    <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;font-weight:700;">
+                        <span>TOTAL A PAGAR</span>
+                        <span style="font-family:'JetBrains Mono',monospace;color:${isOverdue ? 'var(--red)' : 'var(--green)'};">${formatCOP(totalOwedThisMonth)}</span>
+                    </div>
+                </div>
+
+                <!-- Tabla de cuotas -->
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;margin-bottom:16px;">
+                    <div style="font-size:13px;font-weight:600;margin-bottom:10px;">📅 Plan de Cuotas</div>
+                    <div style="overflow-x:auto;">
+                    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                        <thead><tr style="border-bottom:1px solid var(--border);">
+                            <th style="text-align:left;padding:6px;color:var(--text-muted);">Mes</th>
+                            <th style="text-align:right;padding:6px;color:var(--text-muted);">Capital</th>
+                            <th style="text-align:right;padding:6px;color:var(--text-muted);">Interés</th>
+                            <th style="text-align:right;padding:6px;color:var(--text-muted);">Total</th>
+                            <th style="text-align:center;padding:6px;color:var(--text-muted);">Estado</th>
+                        </tr></thead>
+                        <tbody>
+                            ${Array.from({length: term}, (_, i) => {
+                                const installmentDate = new Date(startDate);
+                                installmentDate.setMonth(installmentDate.getMonth() + i + 1);
+                                const isPast = now > installmentDate;
+                                const isCurrent = !isPast && i === monthsElapsed;
+                                return `<tr style="border-bottom:1px solid rgba(255,255,255,0.03);${isCurrent ? 'background:rgba(201,168,76,0.06);' : ''}">
+                                    <td style="padding:6px;font-family:'JetBrains Mono',monospace;">${installmentDate.toLocaleDateString('es-CO', {month:'short', year:'numeric'})}</td>
+                                    <td style="padding:6px;text-align:right;font-family:'JetBrains Mono',monospace;">${formatCOP(monthlyInstallment)}</td>
+                                    <td style="padding:6px;text-align:right;font-family:'JetBrains Mono',monospace;color:var(--gold);">${formatCOP(monthlyInterest)}</td>
+                                    <td style="padding:6px;text-align:right;font-family:'JetBrains Mono',monospace;font-weight:600;">${formatCOP(monthlyInstallment + monthlyInterest)}</td>
+                                    <td style="padding:6px;text-align:center;">${isCurrent ? '📌 Actual' : isPast ? (isOverdue ? '🔴 Pendiente' : '⏳ Pendiente') : '⬜ Próxima'}</td>
+                                </tr>`;
+                            }).join('')}
+                        </tbody>
+                        <tfoot><tr style="font-weight:700;border-top:2px solid var(--border);">
+                            <td style="padding:8px;">TOTAL</td>
+                            <td style="padding:8px;text-align:right;font-family:'JetBrains Mono',monospace;">${formatCOP(capital)}</td>
+                            <td style="padding:8px;text-align:right;font-family:'JetBrains Mono',monospace;color:var(--gold);">${formatCOP(monthlyInterest * term)}</td>
+                            <td style="padding:8px;text-align:right;font-family:'JetBrains Mono',monospace;color:var(--green);">${formatCOP(capital + (monthlyInterest * term))}</td>
+                            <td></td>
+                        </tr></tfoot>
+                    </table>
+                    </div>
+                </div>
+
+                ${dueDate ? `<div style="font-size:11px;color:var(--text-muted);margin-bottom:16px;">📆 Fecha límite de pago total: <strong style="color:var(--text);">${dueDate.toLocaleDateString('es-CO', {day:'numeric', month:'long', year:'numeric'})}</strong></div>` : ''}
+
+                <!-- Opciones de abono -->
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;margin-bottom:12px;">
+                    <div style="font-size:13px;font-weight:600;margin-bottom:10px;">💰 Abonar a Préstamo</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;">Elige cuánto abonar: solo intereses, cuota completa, o un monto personalizado.</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+                        <button onclick="setLoanPayment(${monthlyInterest})" style="padding:12px;background:var(--dark-3);border:1px solid var(--border);color:var(--gold);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">
+                            💡 Solo Intereses<br><strong style="font-family:'JetBrains Mono',monospace;font-size:14px;">${formatCOP(monthlyInterest)}</strong>
+                        </button>
+                        <button onclick="setLoanPayment(${totalOwedThisMonth})" style="padding:12px;background:var(--dark-3);border:1px solid var(--border);color:var(--green);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">
+                            ✅ Cuota Completa${isOverdue ? ' + Mora' : ''}<br><strong style="font-family:'JetBrains Mono',monospace;font-size:14px;">${formatCOP(totalOwedThisMonth)}</strong>
+                        </button>
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <input id="loan-pay-amount" type="number" placeholder="Monto personalizado" style="flex:1;padding:10px 12px;background:var(--dark-3);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;">
+                        <button onclick="submitLoanPayment(${loan.id})" id="btn-loan-pay" style="padding:10px 20px;background:var(--gold);color:#0a0a0f;font-weight:700;font-size:13px;border:none;cursor:pointer;white-space:nowrap;font-family:'Syne',sans-serif;">
+                            💳 Abonar
+                        </button>
+                    </div>
+                </div>
+
+                ${isOverdue ? `
+                <div style="background:var(--red-bg);border:1px solid rgba(231,76,94,0.3);padding:14px 16px;font-size:12px;color:var(--red);line-height:1.7;">
+                    ⚠️ <strong>Tu préstamo está en mora.</strong> Se acumula un 1% mensual de recargo sobre el capital. 
+                    Abona lo antes posible para evitar que crezca la deuda y que afecte tu Sanse Score (−100 pts por mora).
+                </div>` : ''}
+            </div>`;
+        }
+
         container.innerHTML = `
         <div class="animate-in">
             <!-- Score mini -->
@@ -1454,17 +1591,16 @@
                 </div>
             </div>
 
+            ${activeLoanHTML}
+
             <!-- Solicitar préstamo -->
+            ${activeLoans.length === 0 ? `
             <div style="background:var(--dark-2);border:1px solid var(--border);padding:24px;margin-bottom:20px;">
                 <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:6px;">🏦 Solicitar Préstamo</div>
                 <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">
                     Solicita un préstamo con base en tu Sanse Score. Monto: $100K — $10M COP. Plazo: 1, 2, 3 o 6 meses. Tasa: ~3% mensual (varía según perfil). Tu solicitud será revisada en 24-48 horas.
                 </div>
-                ${activeLoans.length > 0 ? `
-                    <div style="background:var(--red-bg);border:1px solid rgba(231,76,94,0.2);padding:12px 16px;font-size:12px;color:var(--red);">
-                        ⚠️ Ya tienes un préstamo activo. Debes pagarlo antes de solicitar otro.
-                    </div>
-                ` : allLoans.some(l => l.status === 'pending') ? `
+                ${allLoans.some(l => l.status === 'pending') ? `
                     <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);padding:12px 16px;font-size:12px;color:var(--gold);">
                         ⏳ Tienes una solicitud pendiente de revisión. Te notificaremos cuando se procese.
                     </div>
@@ -1485,15 +1621,14 @@
                         🏦 Solicitar Préstamo →
                     </button>
                 `}
-            </div>
+            </div>` : ''}
 
-            <!-- Mis préstamos -->
+            <!-- Historial de préstamos (no activos) -->
+            ${allLoans.filter(l => !['active','overdue'].includes(l.status)).length > 0 ? `
             <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px;">📋 Historial de Préstamos</div>
-            ${allLoans.length === 0 ? `
-                <div style="text-align:center;padding:40px;color:var(--text-muted);font-size:13px;">No tienes préstamos registrados.</div>
-            ` : allLoans.map(l => {
-                const statusLabels = { pending: '⏳ En Revisión', active: '🟢 Activo', rejected: '❌ Rechazado', paid: '✅ Pagado', overdue: '🔴 En Mora', cancelled: '⚪ Cancelado' };
-                const statusColors = { pending: 'var(--gold)', active: 'var(--green)', rejected: 'var(--red)', paid: 'var(--blue)', overdue: 'var(--red)', cancelled: 'var(--text-muted)' };
+            ${allLoans.filter(l => !['active','overdue'].includes(l.status)).map(l => {
+                const statusLabels = { pending: '⏳ En Revisión', rejected: '❌ Rechazado', paid: '✅ Pagado', cancelled: '⚪ Cancelado' };
+                const statusColors = { pending: 'var(--gold)', rejected: 'var(--red)', paid: 'var(--blue)', cancelled: 'var(--text-muted)' };
                 const amt = l.approvedAmount || l.amount;
                 const rate = l.approvedRate || l.monthlyRate || 0;
                 return `
@@ -1505,14 +1640,37 @@
                     <div style="display:flex;gap:20px;font-size:12px;color:var(--text-muted);">
                         ${rate ? `<span>📈 ${rate}% mensual</span>` : ''}
                         <span>📅 ${l.term || '—'} meses</span>
-                        ${l.dueDate ? `<span>⏰ Vence: ${formatDate(l.dueDate)}</span>` : ''}
                         <span>🔖 ${l.createdAt ? formatDate(l.createdAt) : '—'}</span>
                     </div>
                     ${l.adminNotes && l.status === 'rejected' ? `<div style="margin-top:8px;font-size:11px;color:var(--red);background:var(--red-bg);padding:8px 12px;">💬 ${l.adminNotes}</div>` : ''}
-                    ${l.purpose ? `<div style="margin-top:6px;font-size:11px;color:var(--text-muted);">📝 ${l.purpose}</div>` : ''}
                 </div>`;
-            }).join('')}
+            }).join('')}` : (allLoans.length === 0 ? '<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:13px;">No tienes préstamos registrados.</div>' : '')}
         </div>`;
+    }
+
+    function setLoanPayment(amount) {
+        const input = document.getElementById('loan-pay-amount');
+        if (input) input.value = amount;
+    }
+
+    async function submitLoanPayment(loanId) {
+        const amount = parseFloat(document.getElementById('loan-pay-amount').value);
+        if (!amount || isNaN(amount) || amount < 1000) return toast('Monto mínimo de abono: $1.000 COP', 'error');
+
+        const btn = document.getElementById('btn-loan-pay');
+        btn.disabled = true; btn.textContent = 'Procesando...';
+        try {
+            const res = await apiFetch('/loans/pay', {
+                method: 'POST',
+                body: JSON.stringify({ loanId, amount })
+            });
+            const data = await res.json();
+            if (!res.ok) return toast(data.error, 'error');
+            toast(`✅ Abono de ${formatCOP(amount)} registrado. ${data.message || ''}`);
+            await loadAllData();
+            renderLoansView(document.getElementById('dashboard-content'));
+        } catch(e) { toast('Error de conexión', 'error'); }
+        finally { btn.disabled = false; btn.textContent = '💳 Abonar'; }
     }
 
     async function submitLoanRequest() {
