@@ -299,6 +299,7 @@
         <div class="nav-section">
             <div class="nav-section-title">Principal</div>
             <a class="nav-item active" href="#" onclick="showView('dashboard')"><span class="icon">📊</span> Dashboard</a>
+            <a class="nav-item" href="#" onclick="showView('deposit')"><span class="icon">📥</span> Depositar</a>
             <a class="nav-item" href="#" onclick="showView('investments')"><span class="icon">💰</span> Inversiones</a>
             <a class="nav-item" href="#" onclick="showView('loans')"><span class="icon">🏦</span> Préstamos</a>
             <a class="nav-item" href="#" onclick="showView('withdraw')"><span class="icon">📤</span> Retirar</a>
@@ -500,6 +501,7 @@
         else if (currentView === 'investments') renderInvestmentsView(content);
         else if (currentView === 'movements') renderMovementsView(content);
         else if (currentView === 'withdraw') renderWithdrawView(content);
+        else if (currentView === 'deposit') renderDepositView(content);
         else if (currentView === 'loans') renderLoansView(content);
         else if (currentView === 'points') renderPointsView(content);
     }
@@ -1144,6 +1146,121 @@
         } catch(e) { console.error('Error loading withdraw data:', e); }
     }
 
+    // ══════ RENDER DEPOSIT VIEW ══════
+    let myDeposits = [];
+    async function loadMyDeposits() {
+        try {
+            const res = await apiFetch('/deposits/my');
+            if (res && res.ok) myDeposits = await res.json();
+        } catch(e) { console.error('Error loading deposits', e); }
+    }
+
+    async function renderDepositView(container) {
+        await loadMyDeposits();
+        const statusLabels = { pending: '⏳ En Revisión', approved: '✅ Aprobado', rejected: '❌ Rechazado' };
+        const statusColors = { pending: 'var(--gold)', approved: 'var(--green)', rejected: 'var(--red)' };
+
+        container.innerHTML = `
+        <div class="animate-in">
+            <div style="background:linear-gradient(135deg,rgba(78,203,141,0.08),rgba(201,168,76,0.04));border:1px solid rgba(78,203,141,0.2);padding:24px;margin-bottom:20px;">
+                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:10px;">📥 Depositar Fondos</div>
+                <div style="font-size:12px;color:var(--text-muted);line-height:1.8;">
+                    Para depositar fondos en tu cuenta de Sanse Capital, realiza una transferencia usando la siguiente llave Bre-B y sube el comprobante.
+                    Tu depósito será verificado y acreditado en menos de 24 horas.
+                </div>
+            </div>
+
+            <div style="background:var(--dark-2);border:1px solid var(--border);padding:24px;margin-bottom:20px;">
+                <div style="font-size:13px;font-weight:600;margin-bottom:14px;">🔑 Datos para Transferencia</div>
+                <div style="background:var(--dark-3);border:2px dashed var(--gold);padding:20px;text-align:center;margin-bottom:16px;">
+                    <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:6px;">Llave Bre-B</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:var(--gold);letter-spacing:0.05em;">@JFC927</div>
+                    <button onclick="navigator.clipboard.writeText('@JFC927');toast('✅ Llave copiada')" style="margin-top:10px;padding:8px 20px;background:var(--gold-dim);border:1px solid var(--border);color:var(--gold);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">📋 Copiar Llave</button>
+                </div>
+                <div style="font-size:11px;color:var(--text-muted);line-height:1.8;">
+                    🏦 <strong>Método:</strong> Transferencia por Bre-B (Sistema de Pagos Inmediatos del Banco de la República)<br>
+                    🔑 <strong>Llave:</strong> @JFC927 — Puedes enviar desde cualquier banco o billetera (Nequi, Bancolombia, Davivienda, etc.)<br>
+                    📌 <strong>Importante:</strong> Después de realizar la transferencia, sube el comprobante abajo para que sea verificado.
+                </div>
+            </div>
+
+            <div style="background:var(--dark-2);border:1px solid var(--border);padding:24px;margin-bottom:20px;">
+                <div style="font-size:13px;font-weight:600;margin-bottom:14px;">📤 Reportar Depósito</div>
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Monto Depositado (COP) *</label>
+                    <input id="dep-amount" type="number" placeholder="500000" min="10000" style="width:100%;padding:10px 12px;background:var(--dark-3);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:16px;">
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Comprobante de Pago (captura) *</label>
+                    <div id="dep-drop-zone" style="border:2px dashed var(--border);padding:30px;text-align:center;cursor:pointer;transition:all 0.2s;" onclick="document.getElementById('dep-file').click()" ondragover="event.preventDefault();this.style.borderColor='var(--gold)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="event.preventDefault();this.style.borderColor='var(--border)';handleDepositFile(event.dataTransfer.files[0])">
+                        <input type="file" id="dep-file" accept="image/*" style="display:none" onchange="handleDepositFile(this.files[0])">
+                        <div id="dep-file-preview" style="color:var(--text-muted);font-size:13px;">
+                            📷 Haz clic o arrastra tu comprobante aquí<br><span style="font-size:11px;">JPG, PNG — Máx 5MB</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Nota (opcional)</label>
+                    <input id="dep-note" placeholder="Ej: Transferencia desde Bancolombia..." style="width:100%;padding:10px 12px;background:var(--dark-3);border:1px solid var(--border);color:var(--text);font-size:13px;">
+                </div>
+                <button onclick="submitDeposit()" id="btn-deposit" style="width:100%;padding:14px;background:var(--green);color:#0a0a0f;font-weight:700;font-size:14px;border:none;cursor:pointer;font-family:'Syne',sans-serif;letter-spacing:0.05em;">
+                    📥 Enviar Comprobante →
+                </button>
+            </div>
+
+            ${myDeposits.length > 0 ? `
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px;">📋 Mis Depósitos</div>
+            ${myDeposits.map(d => `
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:14px 18px;margin-bottom:8px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--green);">${formatCOP(d.amount)}</div>
+                        <span style="font-size:12px;font-weight:600;color:${statusColors[d.status]};">${statusLabels[d.status] || d.status}</span>
+                    </div>
+                    <div style="font-size:11px;color:var(--text-muted);">
+                        🔖 ${d.ref_id || '—'} · ${formatDate(d.created_at)}${d.admin_notes ? ' · 💬 ' + d.admin_notes : ''}
+                    </div>
+                </div>
+            `).join('')}` : ''}
+        </div>`;
+    }
+
+    let depositFileBase64 = null;
+    function handleDepositFile(file) {
+        if (!file) return;
+        if (file.size > 5*1024*1024) return toast('Archivo demasiado grande (máx 5MB)', 'error');
+        if (!file.type.startsWith('image/')) return toast('Solo se permiten imágenes', 'error');
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            depositFileBase64 = e.target.result;
+            document.getElementById('dep-file-preview').innerHTML = `
+                <img src="${e.target.result}" style="max-height:120px;max-width:100%;border:1px solid var(--border);margin-bottom:6px;"><br>
+                <span style="color:var(--green);font-size:12px;">✅ ${file.name}</span>`;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function submitDeposit() {
+        const amount = parseFloat(document.getElementById('dep-amount').value);
+        const note = document.getElementById('dep-note').value;
+        if (!amount || isNaN(amount) || amount < 10000) return toast('Monto mínimo: $10.000 COP', 'error');
+        if (!depositFileBase64) return toast('Sube el comprobante de pago', 'error');
+        const btn = document.getElementById('btn-deposit');
+        btn.disabled = true; btn.textContent = 'Enviando...';
+        try {
+            const res = await apiFetch('/deposits/request', {
+                method: 'POST',
+                body: JSON.stringify({ amount, note, proofImage: depositFileBase64 })
+            });
+            const data = await res.json();
+            if (!res.ok) return toast(data.error, 'error');
+            toast('✅ Comprobante enviado. Tu depósito será verificado pronto.');
+            depositFileBase64 = null;
+            await loadAllData();
+            renderDepositView(document.getElementById('dashboard-content'));
+        } catch(e) { toast('Error de conexión', 'error'); }
+        finally { btn.disabled = false; btn.textContent = '📥 Enviar Comprobante →'; }
+    }
+
     async function renderWithdrawView(container) {
         await loadWithdrawData();
 
@@ -1184,7 +1301,7 @@
         <!-- Avisos -->
         <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px 20px;margin-bottom:20px;" class="animate-in delay-1">
             <div style="font-size:12px;color:var(--text-muted);line-height:1.8;">
-                ⏱️ <strong style="color:var(--text)">Retiros hasta $2.000.000/mes</strong> se procesan en <strong style="color:var(--gold)">48 horas</strong><br>
+                ⏱️ <strong style="color:var(--text)">Retiros hasta $2.000.000/mes</strong> se procesan en <strong style="color:var(--gold)">24 horas o menos</strong><br>
                 📅 <strong style="color:var(--text)">Retiros mayores</strong> requieren aprobación especial y pueden tomar <strong style="color:var(--red)">hasta 30 días</strong><br>
                 💰 <strong style="color:var(--text)">Límite mensual:</strong> $2.000.000 COP
             </div>
@@ -1381,7 +1498,7 @@
         const maxAllowed = Math.min(2000000, balanceSummary.availableBalance);
 
         if (amount >= 10000 && amount <= maxAllowed) {
-            const est = amount <= 2000000 ? '48 horas' : '30 días';
+            const est = amount <= 2000000 ? '24 horas o menos' : '30 días';
             const estColor = amount <= 2000000 ? 'var(--gold)' : 'var(--red)';
             document.getElementById('wr-preview-content').innerHTML = `
                 <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border);">
@@ -1598,7 +1715,7 @@
             <div style="background:var(--dark-2);border:1px solid var(--border);padding:24px;margin-bottom:20px;">
                 <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:6px;">🏦 Solicitar Préstamo</div>
                 <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">
-                    Solicita un préstamo con base en tu Sanse Score. Monto: $100K — $10M COP. Plazo: 1, 2, 3 o 6 meses. Tasa: ~3% mensual (varía según perfil). Tu solicitud será revisada en 24-48 horas.
+                    Solicita un préstamo con base en tu Sanse Score. Monto: $100K — $10M COP. Plazo: 1, 2, 3 o 6 meses. Tasa: 4% mensual si tienes inversiones SDTC, 6% si no. Tu solicitud será revisada en 24-48 horas.
                 </div>
                 ${allLoans.some(l => l.status === 'pending') ? `
                     <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);padding:12px 16px;font-size:12px;color:var(--gold);">

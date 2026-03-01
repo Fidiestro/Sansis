@@ -188,6 +188,7 @@
             <div class="tab" onclick="switchTab('returns',this)">📈 Rendimientos</div>
             <div class="tab" onclick="switchTab('sdtc_overview',this)">🔒 SDTC</div>
             <div class="tab" onclick="switchTab('loans',this)">🏦 Préstamos</div>
+            <div class="tab" onclick="switchTab('deposits',this)">📥 Depósitos</div>
             <div class="tab" onclick="switchTab('withdrawals',this)">📤 Retiros</div>
             <div class="tab" onclick="switchTab('users',this)">📋 Usuarios</div>
         </div>
@@ -409,6 +410,30 @@
             </div>
         </div>
 
+        <!-- ====== SOLICITUDES DE DEPÓSITO ====== -->
+        <div class="section" id="sec-deposits">
+            <div class="card">
+                <div class="card-title">📥 Solicitudes de Depósito</div>
+                <div class="card-desc">Revisa los comprobantes de depósito, aprueba para acreditar fondos, o rechaza si no es válido. Al aprobar puedes enviar WhatsApp al usuario.</div>
+
+                <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+                    <button class="btn btn-sm btn-outline dep-filter-btn active" onclick="filterDeposits('all', this)">Todas</button>
+                    <button class="btn btn-sm btn-outline dep-filter-btn" onclick="filterDeposits('pending', this)">⏳ Pendientes</button>
+                    <button class="btn btn-sm btn-outline dep-filter-btn" onclick="filterDeposits('approved', this)">✅ Aprobados</button>
+                    <button class="btn btn-sm btn-outline dep-filter-btn" onclick="filterDeposits('rejected', this)">❌ Rechazados</button>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr>
+                            <th>Ref</th><th>Usuario</th><th>Tel</th><th>Monto</th><th>Comprobante</th><th>Nota</th><th>Estado</th><th>Fecha</th><th>Acciones</th>
+                        </tr></thead>
+                        <tbody id="deposits-table"><tr><td colspan="9" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- ====== SOLICITUDES DE RETIRO ====== -->
         <div class="section" id="sec-withdrawals">
             <div class="card">
@@ -510,6 +535,7 @@
             // Cargar inversiones activas al entrar a la pestaña de rendimientos
             if (tab === 'returns') loadActiveInvestments();
             if (tab === 'withdrawals') loadAdminWithdrawals('all');
+            if (tab === 'deposits') loadAdminDeposits('all');
             if (tab === 'loans') loadAdminLoans('all');
             if (tab === 'sdtc_overview') loadSDTCOverview();
             if (tab === 'users') loadUsers();
@@ -1195,7 +1221,7 @@
             if (action === 'approve') {
                 approvedAmount = prompt(`Monto a aprobar (solicitado: $${Math.round(requestedAmount).toLocaleString('es-CO')}):`, requestedAmount);
                 if (approvedAmount === null) return;
-                approvedRate = prompt('Tasa mensual % (ej: 3 para 3%):', '3');
+                approvedRate = prompt('Tasa mensual % (4 con inversiones SDTC, 6 sin inversiones):', '4');
                 if (approvedRate === null) return;
                 notes = prompt('Notas (opcional):');
             } else if (action === 'reject') {
@@ -1218,6 +1244,153 @@
                 loadAdminLoans(currentLnFilter);
                 loadStats();
             } catch(e) { toast('Error: ' + e.message, 'error'); }
+        }
+
+        // ====== DEPÓSITOS ADMIN ======
+        let currentDepFilter = 'all';
+
+        async function loadAdminDeposits(status) {
+            currentDepFilter = status;
+            const tbody = document.getElementById('deposits-table');
+            tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">Cargando...</td></tr>';
+
+            try {
+                const res = await apiFetch(`/admin/deposits?status=${status}`);
+                if (!res || !res.ok) { tbody.innerHTML = '<tr><td colspan="9" style="color:var(--red);text-align:center">Error cargando depósitos</td></tr>'; return; }
+                const data = await res.json();
+
+                if (!data.length) {
+                    tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">No hay solicitudes de depósito</td></tr>';
+                    return;
+                }
+
+                const statusLabels = { pending: '⏳ Pendiente', approved: '✅ Aprobado', rejected: '❌ Rechazado' };
+                const statusBadge = { pending: 'badge-gold', approved: 'badge-green', rejected: 'badge-red' };
+
+                tbody.innerHTML = data.map(d => `
+                    <tr>
+                        <td class="mono" style="font-size:11px;">${d.ref_id || '-'}</td>
+                        <td>
+                            <div style="font-weight:600;font-size:13px;">${d.user_name || 'ID:'+d.user_id}</div>
+                            <div style="font-size:11px;color:var(--text2);">${d.user_email || ''}</div>
+                        </td>
+                        <td class="mono" style="font-size:12px;">${d.user_phone || '—'}</td>
+                        <td class="mono" style="color:var(--green);font-weight:600;">${formatCOP(d.amount)}</td>
+                        <td>
+                            ${d.proof_image ? `<button class="btn btn-sm btn-outline" onclick="showProofImage('${d.id}')">📷 Ver</button>` : '—'}
+                        </td>
+                        <td style="font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.note || '—'}</td>
+                        <td><span class="badge ${statusBadge[d.status] || 'badge-gold'}">${statusLabels[d.status] || d.status}</span></td>
+                        <td style="color:var(--muted);font-size:12px;">${formatDate(d.created_at)}</td>
+                        <td>
+                            ${d.status === 'pending' ? `
+                                <button class="btn btn-sm btn-gold" onclick="processDeposit(${d.id}, 'approve', '${(d.user_phone||'').replace(/'/g,"\\'")}', '${(d.user_name||'').replace(/'/g,"\\'")}', ${d.amount}, '${d.ref_id}')">✅ Aprobar</button>
+                                <button class="btn btn-sm btn-red" onclick="processDeposit(${d.id}, 'reject')" style="margin-top:4px;">❌ Rechazar</button>
+                            ` : d.status === 'approved' && d.user_phone ? `
+                                <button class="btn btn-sm btn-outline" onclick="sendDepositWhatsApp('${d.user_phone}', '${(d.user_name||'').replace(/'/g,"\\'")}', ${d.amount}, '${d.ref_id}')" style="background:rgba(37,211,102,0.1);border-color:rgba(37,211,102,0.3);color:#25D366;">💬 WhatsApp</button>
+                            ` : '<span style="font-size:11px;color:var(--muted);">—</span>'}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(e) {
+                console.error('loadAdminDeposits error:', e);
+                tbody.innerHTML = '<tr><td colspan="9" style="color:var(--red);text-align:center">Error: ' + e.message + '</td></tr>';
+            }
+        }
+
+        function filterDeposits(status, btn) {
+            document.querySelectorAll('.dep-filter-btn').forEach(b => { b.classList.remove('active'); b.style.background=''; b.style.color=''; });
+            btn.classList.add('active'); btn.style.background = 'var(--gold)'; btn.style.color = '#0a0a0f';
+            loadAdminDeposits(status);
+        }
+
+        // Almacenar imágenes para modal
+        let depositProofCache = {};
+
+        async function showProofImage(depositId) {
+            // Si ya está cacheada, mostrar directo
+            if (depositProofCache[depositId]) {
+                openProofModal(depositProofCache[depositId]);
+                return;
+            }
+            // Buscar en los datos cargados (hacemos otra llamada para obtener la imagen)
+            try {
+                const res = await apiFetch(`/admin/deposits?status=all`);
+                if (res && res.ok) {
+                    const data = await res.json();
+                    const dep = data.find(d => d.id == depositId);
+                    if (dep && dep.proof_image) {
+                        depositProofCache[depositId] = dep.proof_image;
+                        openProofModal(dep.proof_image);
+                    } else {
+                        toast('Comprobante no encontrado', 'error');
+                    }
+                }
+            } catch(e) { toast('Error cargando comprobante', 'error'); }
+        }
+
+        function openProofModal(imageData) {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:9999;cursor:pointer;';
+            modal.onclick = () => modal.remove();
+            modal.innerHTML = `
+                <div style="max-width:90vw;max-height:90vh;position:relative;" onclick="event.stopPropagation()">
+                    <img src="${imageData}" style="max-width:90vw;max-height:85vh;border:2px solid var(--gold);border-radius:8px;">
+                    <button onclick="this.parentElement.parentElement.remove()" style="position:absolute;top:-12px;right:-12px;width:30px;height:30px;border-radius:50%;background:var(--red);color:white;border:none;font-size:16px;cursor:pointer;font-weight:700;">✕</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        async function processDeposit(id, action, phone, userName, amount, refId) {
+            let notes;
+
+            if (action === 'approve') {
+                if (!confirm(`¿Aprobar depósito de $${Math.round(amount).toLocaleString('es-CO')} COP?\n\nEsto acreditará los fondos en la cuenta del usuario.`)) return;
+                notes = prompt('Notas (opcional):');
+            } else if (action === 'reject') {
+                notes = prompt('Motivo del rechazo:');
+                if (notes === null) return;
+                if (!confirm('¿Confirmar rechazo del depósito?')) return;
+            }
+
+            try {
+                const res = await apiFetch(`/admin/deposits/${id}/process`, {
+                    method: 'POST',
+                    body: JSON.stringify({ action, notes })
+                });
+                const data = await res.json();
+                if (!res.ok) return toast(data.error, 'error');
+                toast(`✅ ${data.message}`);
+                loadAdminDeposits(currentDepFilter);
+                loadStats();
+
+                // Si se aprobó y hay teléfono, preguntar si quiere enviar WhatsApp
+                if (action === 'approve' && phone && phone !== '—' && phone !== 'null') {
+                    if (confirm(`¿Enviar WhatsApp a ${userName} notificando la aprobación?`)) {
+                        sendDepositWhatsApp(phone, userName, amount, refId);
+                    }
+                }
+            } catch(e) { toast('Error: ' + e.message, 'error'); }
+        }
+
+        function sendDepositWhatsApp(phone, userName, amount, refId) {
+            // Limpiar teléfono: quitar espacios, guiones, +
+            let cleanPhone = phone.replace(/[\s\-\+\(\)]/g, '');
+            // Si empieza con 0, quitar y agregar 57
+            if (cleanPhone.startsWith('0')) cleanPhone = '57' + cleanPhone.slice(1);
+            // Si no tiene código de país, agregar 57
+            if (cleanPhone.length === 10 && cleanPhone.startsWith('3')) cleanPhone = '57' + cleanPhone;
+
+            const message = encodeURIComponent(
+                `¡Hola ${userName}! 👋\n\n` +
+                `Tu depósito en *Sanse Capital* ha sido aprobado ✅\n\n` +
+                `💰 Monto: $${Math.round(amount).toLocaleString('es-CO')} COP\n` +
+                `🔖 Referencia: ${refId}\n\n` +
+                `Los fondos ya están disponibles en tu cuenta. Puedes verificarlo en tu dashboard.\n\n` +
+                `Gracias por confiar en Sanse Capital. 🏦`
+            );
+            window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
         }
 
         // ====== INIT ======
