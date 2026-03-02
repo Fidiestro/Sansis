@@ -490,9 +490,76 @@
                 <div class="card-title">📋 Usuarios Registrados</div>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>CC</th><th>Rol</th><th>Estado</th><th>Creado</th><th>Acciones</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>CC</th><th>Teléfono</th><th>Rol</th><th>Estado</th><th>Creado</th><th>Acciones</th></tr></thead>
                         <tbody id="users-table"><tr><td colspan="8" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ MODAL EDITAR USUARIO ══ -->
+    <div id="edit-user-modal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+        <div style="background:#12121a;border:1px solid rgba(255,255,255,0.08);border-radius:14px;width:100%;max-width:480px;margin:20px;overflow:hidden;">
+            <div style="padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;">✏️ Editar Usuario</div>
+                <button onclick="closeEditModal()" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;line-height:1;">✕</button>
+            </div>
+            <div style="padding:24px;display:flex;flex-direction:column;gap:14px;">
+                <input type="hidden" id="eu-id">
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Nombre completo</label>
+                        <input id="eu-name" type="text" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Email</label>
+                        <input id="eu-email" type="email" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
+                    </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Teléfono</label>
+                        <input id="eu-phone" type="tel" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Cédula / Documento</label>
+                        <input id="eu-doc" type="text" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
+                    </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Rol</label>
+                        <select id="eu-role" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
+                            <option value="client">client</option>
+                            <option value="p2p">p2p</option>
+                            <option value="admin">admin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Estado</label>
+                        <select id="eu-status" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
+                            <option value="active">✅ Activo</option>
+                            <option value="blocked">🚫 Bloqueado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Contraseña con toggle ver/ocultar -->
+                <div>
+                    <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Nueva contraseña <span style="font-weight:400;text-transform:none;color:rgba(255,255,255,0.3);">(dejar vacío para no cambiar)</span></label>
+                    <div style="position:relative;">
+                        <input id="eu-password" type="password" placeholder="••••••••" style="width:100%;padding:10px 40px 10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;font-family:'JetBrains Mono',monospace;outline:none;box-sizing:border-box;">
+                        <button onclick="togglePassVis()" id="eu-eye" title="Ver contraseña" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--text2);padding:0;line-height:1;">👁️</button>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:10px;margin-top:4px;">
+                    <button onclick="saveEditUser()" id="eu-save-btn" style="flex:1;padding:12px;background:#C9A84C;color:#0a0a0f;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:opacity 0.2s;">💾 Guardar Cambios</button>
+                    <button onclick="closeEditModal()" style="padding:12px 20px;background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:13px;cursor:pointer;">Cancelar</button>
                 </div>
             </div>
         </div>
@@ -591,25 +658,33 @@
 
                 const tbody = document.getElementById('users-table');
                 if (!allUsers.length) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="color:var(--muted);text-align:center">No hay usuarios</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">No hay usuarios</td></tr>';
                 } else {
                     tbody.innerHTML = allUsers.map(u => {
                         const isBlocked = u.status === 'blocked';
+                        const safeData = encodeURIComponent(JSON.stringify({
+                            id: u.id, full_name: u.full_name, email: u.email,
+                            phone: u.phone || '', document_number: u.document_number || '',
+                            role: u.role, status: u.status || 'active'
+                        }));
                         return `
                         <tr style="${isBlocked ? 'opacity:0.6;background:rgba(239,68,68,0.05);' : ''}">
                             <td class="mono">${u.id}</td>
                             <td style="font-weight:600">${u.full_name}</td>
                             <td style="color:var(--text2)">${u.email}</td>
                             <td class="mono">${u.document_number || '—'}</td>
+                            <td style="color:var(--text2)">${u.phone || '—'}</td>
                             <td><span class="badge ${u.role==='admin'?'badge-gold':u.role==='institution'?'badge-purple':'badge-blue'}">${u.role}</span></td>
                             <td><span class="badge ${isBlocked?'badge-red':'badge-green'}">${isBlocked ? '🚫 Bloqueado' : '✅ Activo'}</span></td>
                             <td style="color:var(--muted)">${formatDate(u.created_at)}</td>
-                            <td>
+                            <td style="display:flex;gap:6px;flex-wrap:wrap;">
+                                <button class="btn btn-sm" style="background:rgba(201,168,76,0.15);color:#C9A84C;border:1px solid rgba(201,168,76,0.3);"
+                                    onclick="openEditModal(decodeURIComponent('${safeData}'))">✏️ Editar</button>
                                 ${u.role !== 'admin' ? `
-                                    <button class="btn btn-sm ${isBlocked ? 'btn-gold' : 'btn-red'}" onclick="toggleBlockUser(${u.id}, ${isBlocked}, '${u.full_name.replace(/'/g,"\\'")}')">
-                                        ${isBlocked ? '🔓 Desbloquear' : '🚫 Bloquear'}
-                                    </button>
-                                ` : '<span style="font-size:11px;color:var(--muted);">Admin</span>'}
+                                    <button class="btn btn-sm ${isBlocked ? 'btn-gold' : 'btn-red'}"
+                                        onclick="toggleBlockUser(${u.id}, ${isBlocked}, '${u.full_name.replace(/'/g,"\\'")}')">
+                                        ${isBlocked ? '🔓' : '🚫'}
+                                    </button>` : ''}
                             </td>
                         </tr>`;
                     }).join('');
@@ -1491,6 +1566,69 @@
         // ====== INIT ======
         document.getElementById('t-date').valueAsDate = new Date();
         loadData();
+        // ══════ EDIT USER MODAL ══════
+        function openEditModal(jsonStr) {
+            const u = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
+            document.getElementById('eu-id').value       = u.id;
+            document.getElementById('eu-name').value     = u.full_name || '';
+            document.getElementById('eu-email').value    = u.email || '';
+            document.getElementById('eu-phone').value    = u.phone || '';
+            document.getElementById('eu-doc').value      = u.document_number || '';
+            document.getElementById('eu-role').value     = u.role || 'client';
+            document.getElementById('eu-status').value   = u.status || 'active';
+            document.getElementById('eu-password').value = '';
+            document.getElementById('eu-password').type  = 'password';
+            const modal = document.getElementById('edit-user-modal');
+            modal.style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-user-modal').style.display = 'none';
+        }
+
+        function togglePassVis() {
+            const inp = document.getElementById('eu-password');
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+        }
+
+        async function saveEditUser() {
+            const id  = document.getElementById('eu-id').value;
+            const btn = document.getElementById('eu-save-btn');
+            const body = {
+                fullName:       document.getElementById('eu-name').value.trim(),
+                email:          document.getElementById('eu-email').value.trim(),
+                phone:          document.getElementById('eu-phone').value.trim(),
+                documentNumber: document.getElementById('eu-doc').value.trim(),
+                role:           document.getElementById('eu-role').value,
+                status:         document.getElementById('eu-status').value,
+            };
+            const newPass = document.getElementById('eu-password').value;
+            if (newPass) {
+                if (newPass.length < 8) return toast('La contraseña debe tener al menos 8 caracteres', 'error');
+                body.password = newPass;
+            }
+            if (!body.fullName || !body.email) return toast('Nombre y email son obligatorios', 'error');
+
+            btn.disabled = true; btn.textContent = 'Guardando...';
+            try {
+                const res = await apiFetch(`/admin/users/${id}/edit`, {
+                    method: 'POST',
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (!res.ok) return toast(data.error || 'Error al guardar', 'error');
+                toast('✅ Usuario actualizado correctamente');
+                closeEditModal();
+                loadUsers();
+            } catch(e) { toast('Error: ' + e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = '💾 Guardar Cambios'; }
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('edit-user-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeEditModal();
+        });
+
     </script>
 </body>
 </html>
