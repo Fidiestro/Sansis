@@ -490,7 +490,7 @@
                 <div class="card-title">📋 Usuarios Registrados</div>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>CC</th><th>Teléfono</th><th>Rol</th><th>Estado</th><th>Creado</th><th>Acciones</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>CC</th><th>Rol</th><th>Estado</th><th>Creado</th><th>Acciones</th></tr></thead>
                         <tbody id="users-table"><tr><td colspan="8" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
                     </table>
                 </div>
@@ -498,69 +498,29 @@
         </div>
     </div>
 
-    <!-- ══ MODAL EDITAR USUARIO ══ -->
-    <div id="edit-user-modal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
-        <div style="background:#12121a;border:1px solid rgba(255,255,255,0.08);border-radius:14px;width:100%;max-width:480px;margin:20px;overflow:hidden;">
-            <div style="padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;">
-                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;">✏️ Editar Usuario</div>
-                <button onclick="closeEditModal()" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;line-height:1;">✕</button>
+    <!-- ══ MODAL WHATSAPP ══ -->
+    <div id="wa-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+        <div style="background:#12121a;border:1px solid rgba(37,211,102,0.2);border-radius:14px;width:100%;max-width:500px;margin:20px;overflow:hidden;">
+            <div style="padding:18px 24px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;background:rgba(37,211,102,0.05);">
+                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:#25D366;">💬 Enviar WhatsApp</div>
+                <button onclick="closeWaModal()" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;">✕</button>
             </div>
-            <div style="padding:24px;display:flex;flex-direction:column;gap:14px;">
-                <input type="hidden" id="eu-id">
-
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                    <div>
-                        <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Nombre completo</label>
-                        <input id="eu-name" type="text" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
-                    </div>
-                    <div>
-                        <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Email</label>
-                        <input id="eu-email" type="email" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
-                    </div>
-                </div>
-
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                    <div>
-                        <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Teléfono</label>
-                        <input id="eu-phone" type="tel" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
-                    </div>
-                    <div>
-                        <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Cédula / Documento</label>
-                        <input id="eu-doc" type="text" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
-                    </div>
-                </div>
-
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                    <div>
-                        <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Rol</label>
-                        <select id="eu-role" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
-                            <option value="client">client</option>
-                            <option value="p2p">p2p</option>
-                            <option value="admin">admin</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Estado</label>
-                        <select id="eu-status" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
-                            <option value="active">✅ Activo</option>
-                            <option value="blocked">🚫 Bloqueado</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Contraseña con toggle ver/ocultar -->
+            <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px;">
                 <div>
-                    <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Nueva contraseña <span style="font-weight:400;text-transform:none;color:rgba(255,255,255,0.3);">(dejar vacío para no cambiar)</span></label>
-                    <div style="position:relative;">
-                        <input id="eu-password" type="password" placeholder="••••••••" style="width:100%;padding:10px 40px 10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;font-family:'JetBrains Mono',monospace;outline:none;box-sizing:border-box;">
-                        <button onclick="togglePassVis()" id="eu-eye" title="Ver contraseña" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--text2);padding:0;line-height:1;">👁️</button>
-                    </div>
+                    <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Número de teléfono</label>
+                    <input id="wa-phone" type="tel" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-family:'JetBrains Mono',monospace;font-size:14px;outline:none;box-sizing:border-box;" placeholder="3194101127">
                 </div>
-
-                <div style="display:flex;gap:10px;margin-top:4px;">
-                    <button onclick="saveEditUser()" id="eu-save-btn" style="flex:1;padding:12px;background:#C9A84C;color:#0a0a0f;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:opacity 0.2s;">💾 Guardar Cambios</button>
-                    <button onclick="closeEditModal()" style="padding:12px 20px;background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:13px;cursor:pointer;">Cancelar</button>
+                <div>
+                    <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Mensaje <span style="font-weight:400;color:rgba(255,255,255,0.3);">— editable antes de enviar</span></label>
+                    <textarea id="wa-msg" rows="9" style="width:100%;padding:12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;font-family:inherit;"></textarea>
                 </div>
+                <div style="display:flex;gap:10px;">
+                    <button onclick="sendWaMessage()" style="flex:1;padding:13px;background:#25D366;color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;letter-spacing:0.05em;">
+                        📲 Abrir WhatsApp
+                    </button>
+                    <button onclick="closeWaModal()" style="padding:13px 20px;background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:13px;cursor:pointer;">Cancelar</button>
+                </div>
+                <p style="font-size:11px;color:var(--text2);margin:0;text-align:center;">Se abrirá WhatsApp Web con el mensaje prellenado. Puedes editarlo antes de enviar.</p>
             </div>
         </div>
     </div>
@@ -658,33 +618,25 @@
 
                 const tbody = document.getElementById('users-table');
                 if (!allUsers.length) {
-                    tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">No hay usuarios</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" style="color:var(--muted);text-align:center">No hay usuarios</td></tr>';
                 } else {
                     tbody.innerHTML = allUsers.map(u => {
                         const isBlocked = u.status === 'blocked';
-                        const safeData = encodeURIComponent(JSON.stringify({
-                            id: u.id, full_name: u.full_name, email: u.email,
-                            phone: u.phone || '', document_number: u.document_number || '',
-                            role: u.role, status: u.status || 'active'
-                        }));
                         return `
                         <tr style="${isBlocked ? 'opacity:0.6;background:rgba(239,68,68,0.05);' : ''}">
                             <td class="mono">${u.id}</td>
                             <td style="font-weight:600">${u.full_name}</td>
                             <td style="color:var(--text2)">${u.email}</td>
                             <td class="mono">${u.document_number || '—'}</td>
-                            <td style="color:var(--text2)">${u.phone || '—'}</td>
                             <td><span class="badge ${u.role==='admin'?'badge-gold':u.role==='institution'?'badge-purple':'badge-blue'}">${u.role}</span></td>
                             <td><span class="badge ${isBlocked?'badge-red':'badge-green'}">${isBlocked ? '🚫 Bloqueado' : '✅ Activo'}</span></td>
                             <td style="color:var(--muted)">${formatDate(u.created_at)}</td>
-                            <td style="display:flex;gap:6px;flex-wrap:wrap;">
-                                <button class="btn btn-sm" style="background:rgba(201,168,76,0.15);color:#C9A84C;border:1px solid rgba(201,168,76,0.3);"
-                                    onclick="openEditModal(decodeURIComponent('${safeData}'))">✏️ Editar</button>
+                            <td>
                                 ${u.role !== 'admin' ? `
-                                    <button class="btn btn-sm ${isBlocked ? 'btn-gold' : 'btn-red'}"
-                                        onclick="toggleBlockUser(${u.id}, ${isBlocked}, '${u.full_name.replace(/'/g,"\\'")}')">
-                                        ${isBlocked ? '🔓' : '🚫'}
-                                    </button>` : ''}
+                                    <button class="btn btn-sm ${isBlocked ? 'btn-gold' : 'btn-red'}" onclick="toggleBlockUser(${u.id}, ${isBlocked}, '${u.full_name.replace(/'/g,"\\'")}')">
+                                        ${isBlocked ? '🔓 Desbloquear' : '🚫 Bloquear'}
+                                    </button>
+                                ` : '<span style="font-size:11px;color:var(--muted);">Admin</span>'}
                             </td>
                         </tr>`;
                     }).join('');
@@ -1214,11 +1166,12 @@
                         <td style="color:var(--muted);font-size:12px;">${formatDate(w.created_at)}</td>
                         <td>
                             ${w.status === 'pending' ? `
-                                <button class="btn btn-sm btn-gold" onclick="processWithdrawal(${w.id}, 'approve')">Aprobar</button>
-                                <button class="btn btn-sm btn-red" onclick="processWithdrawal(${w.id}, 'reject')" style="margin-top:4px;">Rechazar</button>
+                                <button class="btn btn-sm btn-gold" onclick="processWithdrawal(${w.id},'approve','${w.user_phone||w.pm_phone||''}','${w.user_name||''}',${w.amount},'${w.ref_id||''}')">Aprobar</button>
+                                <button class="btn btn-sm btn-red" onclick="processWithdrawal(${w.id},'reject')" style="margin-top:4px;">Rechazar</button>
                             ` : w.status === 'approved' ? `
-                                <button class="btn btn-sm btn-gold" onclick="processWithdrawal(${w.id}, 'complete')">Completar</button>
-                                <button class="btn btn-sm btn-red" onclick="processWithdrawal(${w.id}, 'reject')" style="margin-top:4px;">Rechazar</button>
+                                <button class="btn btn-sm btn-gold" onclick="processWithdrawal(${w.id},'complete','${w.user_phone||w.pm_phone||''}','${w.user_name||''}',${w.amount},'${w.ref_id||''}')">Completar</button>
+                                <button class="btn btn-sm btn-red" onclick="processWithdrawal(${w.id},'reject')" style="margin-top:4px;">Rechazar</button>
+                                <button class="btn btn-sm" onclick="openWaModal('${w.user_phone||w.pm_phone||''}','retiro_aprobado','${w.user_name||''}',{amount:${w.amount},refId:'${w.ref_id||''}'})" style="margin-top:4px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.35);color:#25D366;">💬 WA</button>
                             ` : `<span style="font-size:11px;color:var(--muted);">—</span>`}
                         </td>
                     </tr>
@@ -1237,10 +1190,10 @@
             loadAdminWithdrawals(status);
         }
 
-        async function processWithdrawal(id, action) {
+        async function processWithdrawal(id, action, phone, userName, amount, refId) {
             const actionLabels = { approve: 'aprobar', reject: 'rechazar', complete: 'completar (transferencia realizada)' };
             const notes = action === 'reject' ? prompt('Motivo del rechazo (opcional):') : null;
-            
+            if (notes === null && action === 'reject') return;
             if (!confirm(`¿Seguro que deseas ${actionLabels[action]} esta solicitud de retiro?`)) return;
 
             try {
@@ -1250,10 +1203,11 @@
                 });
                 const data = await res.json();
                 if (!res.ok) return toast(data.error, 'error');
-
                 toast(`✅ Solicitud ${data.status === 'approved' ? 'aprobada' : data.status === 'rejected' ? 'rechazada' : 'completada'}`);
                 loadAdminWithdrawals(currentWrFilter);
                 loadStats();
+                if ((action === 'approve' || action === 'complete') && phone)
+                    openWaModal(phone, action === 'complete' ? 'retiro_completado' : 'retiro_aprobado', userName, { amount, refId });
             } catch(e) { toast('Error: ' + e.message, 'error'); }
         }
 
@@ -1293,8 +1247,8 @@
                         <td style="color:var(--muted);font-size:12px;">${formatDate(l.created_at)}</td>
                         <td>
                             ${l.status === 'pending' ? `
-                                <button class="btn btn-sm btn-gold" onclick="processLoan(${l.id}, 'approve', ${l.amount})">Aprobar</button>
-                                <button class="btn btn-sm btn-red" onclick="processLoan(${l.id}, 'reject')" style="margin-top:4px;">Rechazar</button>
+                                <button class="btn btn-sm btn-gold" onclick="processLoan(${l.id},'approve',${l.amount},'${(l.user_phone||'').replace(/'/g,String.fromCharCode(39))}','${(l.user_name||'').replace(/'/g,String.fromCharCode(39))}')">Aprobar</button>
+                                <button class="btn btn-sm btn-red" onclick="processLoan(${l.id},'reject')" style="margin-top:4px;">Rechazar</button>
                             ` : l.status === 'active' ? `
                                 <button class="btn btn-sm btn-gold" onclick="processLoan(${l.id}, 'mark_paid')">✅ Pagado</button>
                                 <button class="btn btn-sm btn-red" onclick="processLoan(${l.id}, 'mark_overdue')" style="margin-top:4px;">🔴 Mora</button>
@@ -1316,7 +1270,7 @@
             loadAdminLoans(status);
         }
 
-        async function processLoan(id, action, requestedAmount) {
+        async function processLoan(id, action, requestedAmount, phone, userName) {
             let approvedAmount, approvedRate, notes;
 
             if (action === 'approve') {
@@ -1344,6 +1298,8 @@
                 toast(`✅ ${data.message}`);
                 loadAdminLoans(currentLnFilter);
                 loadStats();
+                if (action === 'approve' && phone)
+                    openWaModal(phone, 'prestamo_aprobado', userName, { amount: parseFloat(approvedAmount||requestedAmount), rate: parseFloat(approvedRate||4) });
             } catch(e) { toast('Error: ' + e.message, 'error'); }
         }
 
@@ -1379,9 +1335,11 @@
                         <td style="color:var(--muted);font-size:12px;">${formatDate(r.created_at)}</td>
                         <td>
                             ${r.status === 'pending' ? `
-                                <button class="btn btn-sm btn-gold" onclick="processRegistration(${r.id}, 'approve')">✅ Aprobar</button>
-                                <button class="btn btn-sm btn-red" onclick="processRegistration(${r.id}, 'reject')" style="margin-top:4px;">❌ Rechazar</button>
-                            ` : '<span style="font-size:11px;color:var(--muted);">—</span>'}
+                                <button class="btn btn-sm btn-gold" onclick="processRegistration(${r.id},'approve','${r.phone||''}','${r.full_name||''}')">✅ Aprobar</button>
+                                <button class="btn btn-sm btn-red" onclick="processRegistration(${r.id},'reject')" style="margin-top:4px;">❌ Rechazar</button>
+                            ` : r.status==='approved' && r.phone ? `
+                                <button class="btn btn-sm" onclick="openWaModal('${r.phone||''}','registro','${r.full_name||''}',{})" style="background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.35);color:#25D366;">💬 WhatsApp</button>
+                            ` : '<span style="font-size:11px;color:var(--muted);">—</span>'
                         </td>
                     </tr>
                 `).join('');
@@ -1396,7 +1354,7 @@
             loadAdminRegistrations(status);
         }
 
-        async function processRegistration(id, action) {
+        async function processRegistration(id, action, phone, userName) {
             let notes;
             if (action === 'reject') {
                 notes = prompt('Motivo del rechazo:');
@@ -1413,6 +1371,7 @@
                 if (!res.ok) return toast(data.error, 'error');
                 toast(`✅ ${data.message}`);
                 loadAdminRegistrations(currentRegFilter);
+                if (action === 'approve' && phone) openWaModal(phone, 'registro', userName, {});
             } catch(e) { toast('Error: ' + e.message, 'error'); }
         }
 
@@ -1544,91 +1503,81 @@
             } catch(e) { toast('Error: ' + e.message, 'error'); }
         }
 
-        function sendDepositWhatsApp(phone, userName, amount, refId) {
-            // Limpiar teléfono: quitar espacios, guiones, +
-            let cleanPhone = phone.replace(/[\s\-\+\(\)]/g, '');
-            // Si empieza con 0, quitar y agregar 57
-            if (cleanPhone.startsWith('0')) cleanPhone = '57' + cleanPhone.slice(1);
-            // Si no tiene código de país, agregar 57
-            if (cleanPhone.length === 10 && cleanPhone.startsWith('3')) cleanPhone = '57' + cleanPhone;
+        // ── WHATSAPP MODAL UNIFICADO ────────────────────────────────
+        const WA_TEMPLATES = {
+            registro: (name, _) =>
+                `¡Hola ${name}! 👋\n\n` +
+                `Tu solicitud de registro en *Sanse Capital* ha sido *aprobada* ✅\n\n` +
+                `Ya puedes acceder a tu cuenta y comenzar a invertir.\n\n` +
+                `🌐 sansecapital.com\n\n` +
+                `Bienvenido/a a la familia Sanse 🚀`,
 
-            const message = encodeURIComponent(
-                `¡Hola ${userName}! 👋\n\n` +
-                `Tu depósito en *Sanse Capital* ha sido aprobado ✅\n\n` +
-                `💰 Monto: $${Math.round(amount).toLocaleString('es-CO')} COP\n` +
-                `🔖 Referencia: ${refId}\n\n` +
-                `Los fondos ya están disponibles en tu cuenta. Puedes verificarlo en tu dashboard.\n\n` +
-                `Gracias por confiar en Sanse Capital. 🏦`
-            );
-            window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
+            deposito: (name, d) =>
+                `¡Hola ${name}! 👋\n\n` +
+                `Tu depósito en *Sanse Capital* ha sido *aprobado* ✅\n\n` +
+                `💰 Monto: $${Math.round(d.amount||0).toLocaleString('es-CO')} COP\n` +
+                `🔖 Referencia: ${d.refId||'—'}\n\n` +
+                `Los fondos ya están disponibles en tu cuenta.\n\n` +
+                `Gracias por confiar en Sanse Capital 🏦`,
+
+            retiro_aprobado: (name, d) =>
+                `¡Hola ${name}! 👋\n\n` +
+                `Tu solicitud de retiro en *Sanse Capital* ha sido *aprobada* ✅\n\n` +
+                `💸 Monto: $${Math.round(d.amount||0).toLocaleString('es-CO')} COP\n` +
+                `🔖 Referencia: ${d.refId||'—'}\n\n` +
+                `La transferencia está en proceso. Te notificaremos cuando se complete.\n\n` +
+                `Gracias por confiar en Sanse Capital 🏦`,
+
+            retiro_completado: (name, d) =>
+                `¡Hola ${name}! 👋\n\n` +
+                `Tu retiro de *Sanse Capital* ha sido *transferido* 💸✅\n\n` +
+                `💰 Monto: $${Math.round(d.amount||0).toLocaleString('es-CO')} COP\n` +
+                `🔖 Referencia: ${d.refId||'—'}\n\n` +
+                `El dinero ya está en camino a tu cuenta. Si tienes alguna duda, escríbenos.\n\n` +
+                `Gracias por confiar en Sanse Capital 🏦`,
+
+            prestamo_aprobado: (name, d) =>
+                `¡Hola ${name}! 👋\n\n` +
+                `Tu solicitud de préstamo en *Sanse Capital* ha sido *aprobada* ✅\n\n` +
+                `💰 Monto aprobado: $${Math.round(d.amount||0).toLocaleString('es-CO')} COP\n` +
+                `📊 Tasa mensual: ${d.rate||4}%\n\n` +
+                `Los fondos serán acreditados en tu cuenta pronto.\n\n` +
+                `Gracias por confiar en Sanse Capital 🏦`,
+        };
+
+        let _waState = {};
+
+        function openWaModal(phone, type, userName, data) {
+            if (!phone || phone === '—' || phone === 'undefined') {
+                toast('Este usuario no tiene teléfono registrado', 'error'); return;
+            }
+            _waState = { phone, type, userName, data };
+            const tpl = WA_TEMPLATES[type] || WA_TEMPLATES['deposito'];
+            document.getElementById('wa-msg').value = tpl(userName, data);
+            document.getElementById('wa-phone').value = phone;
+            document.getElementById('wa-modal').style.display = 'flex';
+        }
+
+        function closeWaModal() { document.getElementById('wa-modal').style.display = 'none'; }
+
+        function sendWaMessage() {
+            let phone = document.getElementById('wa-phone').value.replace(/[\s\-\+\(\)]/g, '');
+            if (phone.startsWith('0')) phone = '57' + phone.slice(1);
+            if (phone.length === 10 && phone.startsWith('3')) phone = '57' + phone;
+            const msg = document.getElementById('wa-msg').value;
+            if (!msg.trim()) { toast('El mensaje no puede estar vacío', 'error'); return; }
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            closeWaModal();
+        }
+
+        // Mantener compatibilidad con botón existente de depósito
+        function sendDepositWhatsApp(phone, userName, amount, refId) {
+            openWaModal(phone, 'deposito', userName, { amount, refId });
         }
 
         // ====== INIT ======
         document.getElementById('t-date').valueAsDate = new Date();
         loadData();
-        // ══════ EDIT USER MODAL ══════
-        function openEditModal(jsonStr) {
-            const u = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
-            document.getElementById('eu-id').value       = u.id;
-            document.getElementById('eu-name').value     = u.full_name || '';
-            document.getElementById('eu-email').value    = u.email || '';
-            document.getElementById('eu-phone').value    = u.phone || '';
-            document.getElementById('eu-doc').value      = u.document_number || '';
-            document.getElementById('eu-role').value     = u.role || 'client';
-            document.getElementById('eu-status').value   = u.status || 'active';
-            document.getElementById('eu-password').value = '';
-            document.getElementById('eu-password').type  = 'password';
-            const modal = document.getElementById('edit-user-modal');
-            modal.style.display = 'flex';
-        }
-
-        function closeEditModal() {
-            document.getElementById('edit-user-modal').style.display = 'none';
-        }
-
-        function togglePassVis() {
-            const inp = document.getElementById('eu-password');
-            inp.type = inp.type === 'password' ? 'text' : 'password';
-        }
-
-        async function saveEditUser() {
-            const id  = document.getElementById('eu-id').value;
-            const btn = document.getElementById('eu-save-btn');
-            const body = {
-                fullName:       document.getElementById('eu-name').value.trim(),
-                email:          document.getElementById('eu-email').value.trim(),
-                phone:          document.getElementById('eu-phone').value.trim(),
-                documentNumber: document.getElementById('eu-doc').value.trim(),
-                role:           document.getElementById('eu-role').value,
-                status:         document.getElementById('eu-status').value,
-            };
-            const newPass = document.getElementById('eu-password').value;
-            if (newPass) {
-                if (newPass.length < 8) return toast('La contraseña debe tener al menos 8 caracteres', 'error');
-                body.password = newPass;
-            }
-            if (!body.fullName || !body.email) return toast('Nombre y email son obligatorios', 'error');
-
-            btn.disabled = true; btn.textContent = 'Guardando...';
-            try {
-                const res = await apiFetch(`/admin/users/${id}/edit`, {
-                    method: 'POST',
-                    body: JSON.stringify(body)
-                });
-                const data = await res.json();
-                if (!res.ok) return toast(data.error || 'Error al guardar', 'error');
-                toast('✅ Usuario actualizado correctamente');
-                closeEditModal();
-                loadUsers();
-            } catch(e) { toast('Error: ' + e.message, 'error'); }
-            finally { btn.disabled = false; btn.textContent = '💾 Guardar Cambios'; }
-        }
-
-        // Cerrar modal al hacer clic fuera
-        document.getElementById('edit-user-modal').addEventListener('click', function(e) {
-            if (e.target === this) closeEditModal();
-        });
-
     </script>
 </body>
 </html>
