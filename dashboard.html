@@ -112,42 +112,23 @@
         .products-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
         .products-title .badge-new { font-size: 9px; background: var(--gold); color: var(--dark); padding: 3px 8px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
 
-        /* ══ SDTC CARD — diseño premium ══ */
-        .product-card { background: linear-gradient(160deg, #13131e 0%, #0e0e18 60%, #13131e 100%); border: 1px solid rgba(201,168,76,0.3); border-radius: 16px; overflow: hidden; transition: all 0.4s cubic-bezier(.23,1,.32,1); cursor: pointer; position: relative; box-shadow: 0 4px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(201,168,76,0.08); }
-        .product-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, var(--gold) 40%, #f0cc6e 60%, var(--gold) 80%, transparent 100%); }
-        .product-card::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201,168,76,0.07) 0%, transparent 70%); pointer-events: none; }
-        .product-card:hover { border-color: rgba(201,168,76,0.6); box-shadow: 0 12px 48px rgba(201,168,76,0.12), 0 4px 16px rgba(0,0,0,0.5); transform: translateY(-3px); }
-        .product-card-top { padding: 28px 28px 20px; position: relative; z-index: 1; }
-        .product-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-        .product-name { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
-        .product-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; letter-spacing: 0.04em; }
-        .product-badge { font-size: 10px; color: var(--green); background: rgba(78,203,141,0.1); padding: 5px 12px; font-weight: 700; letter-spacing: 0.08em; border: 1px solid rgba(78,203,141,0.25); border-radius: 20px; white-space: nowrap; }
-        .product-badge.full { color: var(--red); background: rgba(231,76,94,0.1); border-color: rgba(231,76,94,0.25); }
-
-        .sdtc-apy-hero { display: flex; align-items: flex-end; gap: 6px; margin-bottom: 6px; }
-        .sdtc-apy-val { font-family: 'Syne', sans-serif; font-size: 56px; font-weight: 800; color: var(--gold); line-height: 1; text-shadow: 0 0 40px rgba(201,168,76,0.3); }
-        .sdtc-apy-pct { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700; color: var(--gold); opacity: 0.7; margin-bottom: 8px; }
-        .sdtc-apy-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
-        .sdtc-apy-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); display: inline-block; animation: pulse-dot 2s ease-in-out infinite; }
-        @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.6)} }
-
-        .sdtc-bar-wrap { margin-bottom: 20px; }
-        .sdtc-bar-header { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-bottom: 6px; }
-        .sdtc-bar-track { height: 6px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
-        .sdtc-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #4ECB8D, var(--gold)); transition: width 1s cubic-bezier(.23,1,.32,1); }
-
-        .sdtc-stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .sdtc-stat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 10px; text-align: center; }
-        .sdtc-stat-val { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--text); }
-        .sdtc-stat-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 4px; }
-
-        .product-features { display: flex; flex-wrap: wrap; gap: 7px; }
-        .product-feature { font-size: 10px; color: var(--text-muted); padding: 5px 11px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; transition: all 0.2s; }
-        .product-feature:hover { border-color: rgba(201,168,76,0.35); color: var(--gold); }
-        .product-cta { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 18px; background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.06)); color: var(--gold); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; border: none; border-top: 1px solid rgba(201,168,76,0.18); cursor: pointer; transition: all 0.3s; position: relative; z-index: 1; }
-        .product-cta:hover { background: var(--gold); color: var(--dark); }
-        .product-cta .cta-arrow { transition: transform 0.3s; }
-        .product-cta:hover .cta-arrow { transform: translateX(4px); }
+        .product-card { background: linear-gradient(135deg, var(--dark-2) 0%, #131318 50%, var(--dark-2) 100%); border: 1px solid rgba(201,168,76,0.25); overflow: hidden; transition: all 0.4s; cursor: pointer; position: relative; }
+        .product-card::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(201,168,76,0.06) 0%, transparent 60%); pointer-events: none; }
+        .product-card:hover { border-color: var(--gold); box-shadow: 0 8px 32px rgba(201,168,76,0.15), inset 0 1px 0 rgba(201,168,76,0.1); transform: translateY(-2px); }
+        .product-card-top { padding: 28px; position: relative; z-index: 1; }
+        .product-card-top::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent); }
+        .product-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .product-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
+        .product-badge { font-size: 10px; color: var(--green); background: var(--green-bg); padding: 4px 10px; font-weight: 600; letter-spacing: 0.05em; border: 1px solid rgba(78,203,141,0.2); }
+        .product-rates { display: flex; gap: 16px; margin-bottom: 16px; }
+        .product-rate { text-align: center; padding: 16px 20px; background: rgba(201,168,76,0.06); border: 1px solid rgba(201,168,76,0.15); flex: 1; position: relative; }
+        .product-rate-val { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--gold); text-shadow: 0 0 20px rgba(201,168,76,0.2); }
+        .product-rate-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+        .product-features { display: flex; flex-wrap: wrap; gap: 8px; }
+        .product-feature { font-size: 11px; color: var(--text-muted); padding: 6px 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); transition: border-color 0.2s; }
+        .product-feature:hover { border-color: rgba(201,168,76,0.3); }
+        .product-cta { display: block; width: 100%; padding: 18px; text-align: center; background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.08)); color: var(--gold); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border: none; border-top: 1px solid rgba(201,168,76,0.2); cursor: pointer; transition: all 0.3s; position: relative; z-index: 1; }
+        .product-cta:hover { background: var(--gold); color: var(--dark); letter-spacing: 0.15em; }
 
         /* ══════ INVEST MODAL ══════ */
         .modal-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); align-items: center; justify-content: center; }
@@ -159,6 +140,10 @@
         .modal-close { background: none; border: 1px solid var(--border); color: var(--text-muted); width: 32px; height: 32px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
         .modal-close:hover { border-color: var(--red); color: var(--red); }
         .modal-body { padding: 24px; }
+        /* Plan selector chips */
+        .plan-opt { background: var(--dark-3); border: 1px solid var(--border); border-radius: 10px; padding: 14px 10px; text-align: center; cursor: pointer; transition: all 0.25s; }
+        .plan-opt:hover { border-color: rgba(201,168,76,0.4); }
+        .plan-opt.selected { border-color: var(--gold); background: rgba(201,168,76,0.07); box-shadow: 0 0 16px rgba(201,168,76,0.12); }
         .modal-info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
         .modal-info-row .label { color: var(--text-muted); }
         .modal-info-row .value { font-weight: 600; color: var(--text); }
@@ -366,9 +351,32 @@
         </div>
         <div class="modal-body">
             <div id="invest-active-warning" style="display:none;"></div>
+
+            <!-- Selector de plazo -->
+            <div style="margin-bottom:20px;">
+                <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:10px;">Plazo del contrato</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;" id="plan-selector">
+                    <div class="plan-opt" data-plan="sdtc_3m" data-months="3" data-min="2" data-max="3" onclick="selectPlan(this)">
+                        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--gold);">3</div>
+                        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">meses</div>
+                        <div style="font-size:10px;color:var(--green);margin-top:6px;font-weight:600;">2% — 3%</div>
+                    </div>
+                    <div class="plan-opt selected" data-plan="sdtc_6m" data-months="6" data-min="2" data-max="4" onclick="selectPlan(this)">
+                        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--gold);">6</div>
+                        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">meses</div>
+                        <div style="font-size:10px;color:var(--green);margin-top:6px;font-weight:600;">2% — 4%</div>
+                        <div style="font-size:8px;background:var(--gold);color:var(--dark);padding:2px 6px;border-radius:99px;font-weight:700;margin-top:4px;display:inline-block;">POPULAR</div>
+                    </div>
+                    <div class="plan-opt" data-plan="sdtc_12m" data-months="12" data-min="3" data-max="4" onclick="selectPlan(this)">
+                        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--gold);">12</div>
+                        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">meses</div>
+                        <div style="font-size:10px;color:var(--green);margin-top:6px;font-weight:600;">3% — 4%</div>
+                    </div>
+                </div>
+            </div>
+
             <div class="modal-info-row"><span class="label">Producto</span><span class="value">Inversión SDTC</span></div>
-            <div class="modal-info-row"><span class="label">Plazo</span><span class="value">6 meses</span></div>
-            <div class="modal-info-row"><span class="label">Rendimiento mensual</span><span class="value gold">2% — 4% variable</span></div>
+            <div class="modal-info-row"><span class="label">Rendimiento mensual</span><span class="value gold" id="modal-rate-display">2% — 4% variable</span></div>
             <div class="modal-info-row"><span class="label">Monto mínimo</span><span class="value">$100.000 COP</span></div>
 
             <div class="invest-input-group">
@@ -383,13 +391,14 @@
             <div class="invest-preview" id="invest-preview" style="display:none;">
                 <div class="invest-preview-title">📋 Resumen de tu inversión</div>
                 <div class="invest-preview-row"><span class="label">Capital</span><span class="value" id="preview-capital">$0</span></div>
+                <div class="invest-preview-row"><span class="label">Plazo</span><span class="value" id="preview-plazo">—</span></div>
                 <div class="invest-preview-row"><span class="label">Desbloqueo estimado</span><span class="value" id="preview-unlock">—</span></div>
-                <div class="invest-preview-row"><span class="label">Ganancia mín. estimada (6m)</span><span class="value green" id="preview-min-gain">$0</span></div>
-                <div class="invest-preview-row"><span class="label">Ganancia máx. estimada (6m)</span><span class="value green" id="preview-max-gain">$0</span></div>
+                <div class="invest-preview-row"><span class="label">Ganancia mín. estimada</span><span class="value green" id="preview-min-gain">$0</span></div>
+                <div class="invest-preview-row"><span class="label">Ganancia máx. estimada</span><span class="value green" id="preview-max-gain">$0</span></div>
             </div>
 
             <button class="btn-invest" id="btn-invest" onclick="executeInvestment()" disabled>Confirmar Inversión →</button>
-            <p class="invest-disclaimer">⚠️ El capital quedará bloqueado por 6 meses. Los rendimientos son variables y no garantizados. Al confirmar, aceptas los Términos y Condiciones.</p>
+            <p class="invest-disclaimer" id="invest-disclaimer-text">⚠️ El capital quedará bloqueado por 6 meses. Los rendimientos son variables y no garantizados. Al confirmar, aceptas los Términos y Condiciones.</p>
         </div>
     </div>
 </div>
@@ -503,17 +512,7 @@
     let dashboardData = null;
     let balanceSummary = { totalBalance: 0, totalInvested: 0, availableBalance: 0, totalEarnings: 0 };
     let myInvestments = [];
-    let globalStats = { totalLocked: 0, totalActiveInvestments: 0, totalInvestors: 0, apyReal: 0, apyMin: 0, apyMax: 0, avgMonthlyRate: 0, totalPayments: 0 };
-
-    // APY real: promedio de los rendimientos efectivamente pagados a participantes SDTC
-    function calcDynamicAPY(gs) {
-        if (gs.avgMonthlyRate > 0) return gs.avgMonthlyRate.toFixed(1);
-        return '—';
-    }
-    function apyBarPercent(gs) {
-        if (!gs.avgMonthlyRate) return 0;
-        return Math.min(Math.round(((gs.avgMonthlyRate - 2) / (4 - 2)) * 100), 100);
-    }
+    let globalStats = { totalLocked: 0, totalActiveInvestments: 0, totalInvestors: 0, apyReal: 0, apyMin: 0, apyMax: 0 };
     let myLoans = { legacyLoans: [], loanRequests: [] };
     let creditScore = null;
     let currentView = 'dashboard';
@@ -613,7 +612,7 @@
             <div class="products-title">Productos de Inversión <span class="badge-new">Nuevo</span></div>
 
             <!-- SDTC Explanation -->
-            <div style="background:linear-gradient(135deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 100%);border:1px solid rgba(201,168,76,0.15);padding:20px 24px;margin-bottom:16px;border-radius:12px;">
+            <div style="background:linear-gradient(135deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 100%);border:1px solid rgba(201,168,76,0.15);padding:20px 24px;margin-bottom:16px;">
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
                     <span style="font-size:22px;">📜</span>
                     <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;">¿Qué es un SDTC?</div>
@@ -625,15 +624,15 @@
 
             <!-- Global Stats Bar -->
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
-                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;border-radius:10px;">
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
                     <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);">${formatCOP(globalStats.totalLocked)}</div>
                     <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">🔒 Total Bloqueado</div>
                 </div>
-                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;border-radius:10px;">
-                    <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--green);">${calcDynamicAPY(globalStats)}${globalStats.avgMonthlyRate > 0 ? '%' : ''}</div>
-                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">📈 Promedio Mensual Real</div>
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--green);">${globalStats.apyReal > 0 ? globalStats.apyReal + '%' : globalStats.apyMin + '% — ' + globalStats.apyMax + '%'}</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">📈 APY ${globalStats.apyReal > 0 ? 'Real' : 'Estimado'}</div>
                 </div>
-                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;border-radius:10px;">
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
                     <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--blue);">${globalStats.totalInvestors}</div>
                     <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">👥 Inversionistas</div>
                 </div>
@@ -644,48 +643,24 @@
                     <div class="product-header">
                         <div>
                             <div class="product-name">Inversión SDTC</div>
-                            <div class="product-sub">Certificado de Depósito a Término — Sanse Capital</div>
+                            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Certificado de Depósito a Término — Sanse Capital</div>
                         </div>
-                        <span class="product-badge ${myInvestments.filter(i => ['active','pending_deposit'].includes(i.status)).length >= 3 ? 'full' : ''}">${myInvestments.filter(i => ['active','pending_deposit'].includes(i.status)).length}/3 Activas</span>
+                        <span class="product-badge">${myInvestments.filter(i => ['active','pending_deposit'].includes(i.status)).length}/3 Activas</span>
                     </div>
-
-                    <div class="sdtc-apy-hero">
-                        <div class="sdtc-apy-val">${calcDynamicAPY(globalStats)}</div>
-                        ${globalStats.avgMonthlyRate > 0 ? '<div class="sdtc-apy-pct">%</div>' : ''}
-                    </div>
-                    <div class="sdtc-apy-label">
-                        <span class="sdtc-apy-dot"></span>
-                        ${globalStats.totalPayments > 0 
-                            ? `Promedio real de ${globalStats.totalPayments} rendimientos pagados a participantes`
-                            : 'Rango estimado: 2% — 4% mensual · primer rendimiento en curso'}
-                    </div>
-
-                    <div class="sdtc-bar-wrap">
-                        <div class="sdtc-bar-header">
-                            <span>2% mín</span>
-                            <span>${globalStats.totalPayments > 0 ? globalStats.totalPayments + ' pagos registrados' : 'Histórico en construcción'}</span>
-                            <span>4% máx</span>
+                    <div class="product-rates">
+                        <div class="product-rate">
+                            <div class="product-rate-val">2% — 4%</div>
+                            <div class="product-rate-label">Rendimiento Mensual</div>
                         </div>
-                        <div class="sdtc-bar-track">
-                            <div class="sdtc-bar-fill" style="width:${apyBarPercent(globalStats)}%"></div>
+                        <div class="product-rate">
+                            <div class="product-rate-val">6</div>
+                            <div class="product-rate-label">Meses de Plazo</div>
+                        </div>
+                        <div class="product-rate">
+                            <div class="product-rate-val">$100K</div>
+                            <div class="product-rate-label">Inversión Mínima</div>
                         </div>
                     </div>
-
-                    <div class="sdtc-stats-row">
-                        <div class="sdtc-stat">
-                            <div class="sdtc-stat-val">6</div>
-                            <div class="sdtc-stat-label">Meses plazo</div>
-                        </div>
-                        <div class="sdtc-stat">
-                            <div class="sdtc-stat-val">$100K</div>
-                            <div class="sdtc-stat-label">Mínimo</div>
-                        </div>
-                        <div class="sdtc-stat">
-                            <div class="sdtc-stat-val">${globalStats.totalActiveInvestments}</div>
-                            <div class="sdtc-stat-label">SDTC activos</div>
-                        </div>
-                    </div>
-
                     <div class="product-features">
                         <span class="product-feature">📅 Plazo fijo 6 meses</span>
                         <span class="product-feature">📈 Rendimiento variable</span>
@@ -694,7 +669,7 @@
                         <span class="product-feature">🔄 Máx. 3 activas</span>
                     </div>
                 </div>
-                <button class="product-cta">${myInvestments.filter(i => ['active','pending_deposit'].includes(i.status)).length >= 3 ? '🔒 Límite Alcanzado (3/3)' : '<span>Invertir Ahora</span><span class="cta-arrow"> →</span>'}</button>
+                <button class="product-cta">${myInvestments.filter(i => ['active','pending_deposit'].includes(i.status)).length >= 3 ? '🔒 Límite Alcanzado (3/3)' : '✨ Invertir Ahora →'}</button>
             </div>
         </div>
 
@@ -758,7 +733,7 @@
             <div class="products-title">💰 Productos Disponibles</div>
 
             <!-- SDTC Explanation -->
-            <div style="background:linear-gradient(135deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 100%);border:1px solid rgba(201,168,76,0.15);padding:20px 24px;margin-bottom:16px;border-radius:12px;">
+            <div style="background:linear-gradient(135deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 100%);border:1px solid rgba(201,168,76,0.15);padding:20px 24px;margin-bottom:16px;">
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
                     <span style="font-size:22px;">📜</span>
                     <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;">¿Qué es un SDTC?</div>
@@ -769,22 +744,22 @@
             </div>
 
             <!-- Global Stats -->
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
-                <div style="background:var(--dark-2);border:1px solid var(--border);padding:14px 8px;text-align:center;border-radius:10px;">
-                    <div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--gold);">${formatCOP(gs.totalLocked)}</div>
-                    <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-top:4px;">🔒 Bloqueado</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--gold);">${formatCOP(gs.totalLocked)}</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">🔒 Total Bloqueado</div>
                 </div>
-                <div style="background:var(--dark-2);border:1px solid var(--border);padding:14px 8px;text-align:center;border-radius:10px;">
-                    <div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--green);">${calcDynamicAPY(gs)}${gs.avgMonthlyRate > 0 ? '%' : ''}</div>
-                    <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-top:4px;">📈 Prom. Real</div>
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--green);">${gs.apyReal > 0 ? gs.apyReal + '%' : gs.apyMin + '% — ' + gs.apyMax + '%'}</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">📈 APY ${gs.apyReal > 0 ? 'Real' : 'Estimado'}</div>
                 </div>
-                <div style="background:var(--dark-2);border:1px solid var(--border);padding:14px 8px;text-align:center;border-radius:10px;">
-                    <div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--blue);">${gs.totalInvestors}</div>
-                    <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-top:4px;">👥 Inversores</div>
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--blue);">${gs.totalInvestors}</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">👥 Inversionistas</div>
                 </div>
-                <div style="background:var(--dark-2);border:1px solid var(--border);padding:14px 8px;text-align:center;border-radius:10px;">
-                    <div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--text);">${gs.totalActiveInvestments}</div>
-                    <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-top:4px;">📊 SDTC</div>
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--text);">${gs.totalActiveInvestments}</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">📊 SDTC Activos</div>
                 </div>
             </div>
 
@@ -793,48 +768,15 @@
                     <div class="product-header">
                         <div>
                             <div class="product-name">Inversión SDTC</div>
-                            <div class="product-sub">Certificado de Depósito a Término — Sanse Capital</div>
+                            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Certificado de Depósito a Término — Sanse Capital</div>
                         </div>
-                        <span class="product-badge ${activeCount >= 3 ? 'full' : ''}">${activeCount}/3 Activas</span>
+                        <span class="product-badge">${activeCount}/3 Activas</span>
                     </div>
-
-                    <div class="sdtc-apy-hero">
-                        <div class="sdtc-apy-val">${calcDynamicAPY(gs)}</div>
-                        ${gs.avgMonthlyRate > 0 ? '<div class="sdtc-apy-pct">%</div>' : ''}
+                    <div class="product-rates">
+                        <div class="product-rate"><div class="product-rate-val">2% — 4%</div><div class="product-rate-label">Rendimiento Mensual</div></div>
+                        <div class="product-rate"><div class="product-rate-val">6</div><div class="product-rate-label">Meses de Plazo</div></div>
+                        <div class="product-rate"><div class="product-rate-val">$100K</div><div class="product-rate-label">Inversión Mínima</div></div>
                     </div>
-                    <div class="sdtc-apy-label">
-                        <span class="sdtc-apy-dot"></span>
-                        ${gs.totalPayments > 0
-                            ? `Promedio real de ${gs.totalPayments} rendimientos pagados`
-                            : 'Rango estimado: 2% — 4% mensual · primer rendimiento en curso'}
-                    </div>
-
-                    <div class="sdtc-bar-wrap">
-                        <div class="sdtc-bar-header">
-                            <span>2% mín</span>
-                            <span>${gs.totalPayments > 0 ? gs.totalPayments + ' pagos' : 'Histórico en construcción'}</span>
-                            <span>4% máx</span>
-                        </div>
-                        <div class="sdtc-bar-track">
-                            <div class="sdtc-bar-fill" style="width:${apyBarPercent(gs)}%"></div>
-                        </div>
-                    </div>
-
-                    <div class="sdtc-stats-row">
-                        <div class="sdtc-stat">
-                            <div class="sdtc-stat-val">6</div>
-                            <div class="sdtc-stat-label">Meses plazo</div>
-                        </div>
-                        <div class="sdtc-stat">
-                            <div class="sdtc-stat-val">$100K</div>
-                            <div class="sdtc-stat-label">Mínimo</div>
-                        </div>
-                        <div class="sdtc-stat">
-                            <div class="sdtc-stat-val">${gs.totalActiveInvestments}</div>
-                            <div class="sdtc-stat-label">Activos</div>
-                        </div>
-                    </div>
-
                     <div class="product-features">
                         <span class="product-feature">📅 Plazo fijo 6 meses</span>
                         <span class="product-feature">📈 Rendimiento variable</span>
@@ -843,7 +785,7 @@
                         <span class="product-feature">🔄 Máx. 3 activas</span>
                     </div>
                 </div>
-                <button class="product-cta">${activeCount >= 3 ? '🔒 Límite Alcanzado (3/3)' : '<span>Invertir Ahora</span><span class="cta-arrow"> →</span>'}</button>
+                <button class="product-cta">${activeCount >= 3 ? '🔒 Límite Alcanzado (3/3)' : '✨ Invertir Ahora →'}</button>
             </div>
         </div>
 
@@ -1012,35 +954,51 @@
     }
 
     // ══════ INVEST MODAL ══════
+    function selectPlan(el) {
+        document.querySelectorAll('.plan-opt').forEach(e => e.classList.remove('selected'));
+        el.classList.add('selected');
+        const min = el.dataset.min, max = el.dataset.max, months = el.dataset.months;
+        document.getElementById('modal-rate-display').textContent = `${min}% — ${max}% variable`;
+        document.getElementById('invest-disclaimer-text').textContent =
+            `⚠️ El capital quedará bloqueado por ${months} meses. Los rendimientos son variables y no garantizados. Al confirmar, aceptas los Términos y Condiciones.`;
+        updateInvestPreview();
+    }
+
+    function getSelectedPlan() {
+        const el = document.querySelector('.plan-opt.selected');
+        if (!el) return { productId: 'sdtc_6m', months: 6, min: 2, max: 4 };
+        return {
+            productId: el.dataset.plan,
+            months: parseInt(el.dataset.months),
+            min: parseFloat(el.dataset.min),
+            max: parseFloat(el.dataset.max),
+        };
+    }
+
     function openInvestModal() {
-        // Check max 3 active
         const activeCount = myInvestments.filter(i => ['active','pending_deposit'].includes(i.status)).length;
         if (activeCount >= 3) {
             toast('Ya tienes 3 inversiones SDTC activas. Espera a que una termine o retírala.', 'error');
             return;
         }
 
-        // Check if user already has an active SDTC
         const activeSDTC = myInvestments.find(i => i.status === 'active' && i.type === 'SDTC');
-        
         if (activeSDTC) {
-            // Show warning with option to add capital instead
             const warningEl = document.getElementById('invest-active-warning');
             if (warningEl) {
                 warningEl.style.display = 'block';
                 warningEl.innerHTML = `
-                    <div style="background:rgba(91,141,239,0.1);border:1px solid rgba(91,141,239,0.3);padding:16px;margin-bottom:16px;">
+                    <div style="background:rgba(91,141,239,0.1);border:1px solid rgba(91,141,239,0.3);padding:16px;margin-bottom:16px;border-radius:8px;">
                         <div style="font-weight:700;color:var(--blue);margin-bottom:8px;">⚠️ Ya tienes una inversión SDTC activa</div>
                         <div style="font-size:12px;color:var(--text-muted);line-height:1.6;">
-                            Tu inversión actual de <strong style="color:var(--gold)">${formatCOP(activeSDTC.amount)}</strong> vence el <strong>${formatDate(activeSDTC.lockEndDate || activeSDTC.endDate)}</strong>.<br>
-                            Si creas una nueva, tendrá un <strong style="color:var(--red)">nuevo periodo de bloqueo de 6 meses</strong>.
+                            Tu inversión actual de <strong style="color:var(--gold)">${formatCOP(activeSDTC.amount)}</strong> vence el <strong>${formatDate(activeSDTC.lockEndDate || activeSDTC.endDate)}</strong>.
                         </div>
                         <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
-                            <button onclick="closeInvestModal(); window._currentDetailInv = { id: ${activeSDTC.id}, amount: ${activeSDTC.amount}, lockEndDate: '${activeSDTC.lockEndDate || activeSDTC.endDate}', type: '${activeSDTC.type}' }; openAddCapitalModal();" 
-                                style="padding:10px 20px;background:var(--blue);border:none;color:white;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;">
-                                ➕ Reinvertir en la Actual (mismo plazo)
+                            <button onclick="closeInvestModal(); window._currentDetailInv = { id: ${activeSDTC.id}, amount: ${activeSDTC.amount}, lockEndDate: '${activeSDTC.lockEndDate || activeSDTC.endDate}', type: '${activeSDTC.type}' }; openAddCapitalModal();"
+                                style="padding:10px 20px;background:var(--blue);border:none;color:white;border-radius:6px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;">
+                                ➕ Agregar capital a la actual
                             </button>
-                            <span style="font-size:11px;color:var(--text-muted);align-self:center;">o continúa abajo para crear una nueva</span>
+                            <span style="font-size:11px;color:var(--text-muted);align-self:center;">o crea una nueva abajo</span>
                         </div>
                     </div>`;
             }
@@ -1059,16 +1017,18 @@
 
     function updateInvestPreview() {
         const amount = parseFloat(document.getElementById('invest-amount').value) || 0;
+        const { months, min, max } = getSelectedPlan();
         const preview = document.getElementById('invest-preview');
         const btn = document.getElementById('btn-invest');
 
         if (amount >= 100000 && amount <= balanceSummary.availableBalance) {
             const unlockDate = new Date();
-            unlockDate.setMonth(unlockDate.getMonth() + 6);
-            const minGain = amount * 0.02 * 6;
-            const maxGain = amount * 0.04 * 6;
+            unlockDate.setMonth(unlockDate.getMonth() + months);
+            const minGain = amount * (min / 100) * months;
+            const maxGain = amount * (max / 100) * months;
 
             document.getElementById('preview-capital').textContent = formatCOP(amount);
+            document.getElementById('preview-plazo').textContent = `${months} meses`;
             document.getElementById('preview-unlock').textContent = formatDate(unlockDate);
             document.getElementById('preview-min-gain').textContent = '+' + formatCOP(minGain);
             document.getElementById('preview-max-gain').textContent = '+' + formatCOP(maxGain);
@@ -1083,6 +1043,7 @@
 
     async function executeInvestment() {
         const amount = parseFloat(document.getElementById('invest-amount').value);
+        const { productId, months } = getSelectedPlan();
         const btn = document.getElementById('btn-invest');
         btn.disabled = true;
         btn.textContent = 'Procesando...';
@@ -1090,13 +1051,13 @@
         try {
             const res = await apiFetch('/investments/create', {
                 method: 'POST',
-                body: JSON.stringify({ productId: 'sdtc_6m', amount })
+                body: JSON.stringify({ productId, amount })
             });
             const data = await res.json();
             if (!res.ok) { toast(data.error || 'Error al invertir', 'error'); return; }
 
             closeInvestModal();
-            toast('✅ Inversión SDTC creada exitosamente');
+            toast(`✅ Inversión SDTC a ${months} meses creada exitosamente`);
             await loadAllData();
             renderCurrentView();
         } catch (e) {
@@ -1208,7 +1169,7 @@
     }
 
     async function confirmPendingInvestment(invId) {
-        if (!confirm('¿Confirmar esta inversión?\n\nSe activará inmediatamente y el capital quedará bloqueado por 6 meses.')) return;
+        if (!confirm('¿Confirmar esta inversión?\n\nSe activará inmediatamente y el capital quedará bloqueado por el plazo seleccionado.')) return;
 
         try {
             const res = await apiFetch(`/investments/${invId}/confirm`, { method: 'POST' });
