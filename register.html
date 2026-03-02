@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro — Sanse Capital</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --dark:#0a0a0f; --dark-2:#12121a; --dark-3:#1a1a24; --border:rgba(255,255,255,0.06); --text:#e8e6e3; --text-muted:#7a7a85; --gold:#C9A84C; --gold-dim:rgba(201,168,76,0.15); --green:#4ECB8D; --red:#E74C5E; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'DM Sans',sans-serif; background:var(--dark); color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center; }
+        .container { width:100%; max-width:460px; padding:20px; }
+        .logo { text-align:center; margin-bottom:30px; }
+        .logo h1 { font-family:'Syne',sans-serif; font-size:28px; color:var(--gold); letter-spacing:0.08em; }
+        .logo p { font-size:12px; color:var(--text-muted); margin-top:4px; }
+        .card { background:var(--dark-2); border:1px solid var(--border); padding:32px; }
+        .card h2 { font-family:'Syne',sans-serif; font-size:18px; margin-bottom:6px; }
+        .card p.desc { font-size:12px; color:var(--text-muted); margin-bottom:20px; line-height:1.6; }
+        .form-group { margin-bottom:14px; }
+        .form-group label { display:block; font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:4px; }
+        .form-group input { width:100%; padding:12px 14px; background:var(--dark-3); border:1px solid var(--border); color:var(--text); font-size:14px; font-family:'DM Sans',sans-serif; outline:none; transition:border 0.2s; }
+        .form-group input:focus { border-color:var(--gold); }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .btn { width:100%; padding:14px; background:var(--gold); color:#0a0a0f; font-weight:700; font-size:14px; border:none; cursor:pointer; font-family:'Syne',sans-serif; letter-spacing:0.05em; transition:all 0.2s; margin-top:8px; }
+        .btn:hover { filter:brightness(1.1); }
+        .btn:disabled { opacity:0.5; cursor:not-allowed; }
+        .login-link { text-align:center; margin-top:16px; font-size:13px; color:var(--text-muted); }
+        .login-link a { color:var(--gold); text-decoration:none; }
+        .toast { position:fixed; top:20px; right:20px; background:var(--dark-2); border:1px solid var(--border); padding:14px 20px; font-size:13px; z-index:9999; max-width:350px; animation:slideIn 0.3s; }
+        .toast.error { border-color:var(--red); color:var(--red); }
+        .toast.success { border-color:var(--green); color:var(--green); }
+        @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+        .referral-badge { background:var(--gold-dim); border:1px solid rgba(201,168,76,0.3); padding:10px 14px; margin-bottom:14px; font-size:12px; color:var(--gold); display:flex; align-items:center; gap:8px; }
+        .success-card { text-align:center; padding:40px 20px; }
+        .success-card .icon { font-size:48px; margin-bottom:16px; }
+        .success-card h3 { font-family:'Syne',sans-serif; font-size:20px; margin-bottom:10px; color:var(--green); }
+        .success-card p { font-size:13px; color:var(--text-muted); line-height:1.7; }
+        .success-card .ref-code { font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:var(--gold); background:var(--dark-3); padding:12px 20px; display:inline-block; margin:16px 0; border:2px dashed var(--gold); }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="logo">
+        <h1>SANSE CAPITAL</h1>
+        <p>Plataforma de Inversión y Financiamiento</p>
+    </div>
+
+    <div class="card" id="register-form">
+        <h2>Crear Cuenta</h2>
+        <p class="desc">Completa tus datos para registrarte. Tu cuenta será revisada por nuestro equipo.</p>
+
+        <div id="referral-banner"></div>
+
+        <div class="form-group">
+            <label>Nombre Completo *</label>
+            <input id="r-name" placeholder="Juan Pérez">
+        </div>
+        <div class="form-group">
+            <label>Correo Electrónico *</label>
+            <input id="r-email" type="email" placeholder="juan@email.com">
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Teléfono</label>
+                <input id="r-phone" placeholder="3101234567" maxlength="10" style="font-family:'JetBrains Mono',monospace;">
+            </div>
+            <div class="form-group">
+                <label>Cédula (CC)</label>
+                <input id="r-doc" placeholder="1234567890" style="font-family:'JetBrains Mono',monospace;">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Contraseña *</label>
+            <input id="r-pass" type="password" placeholder="Mín 8 caracteres">
+        </div>
+        <div class="form-group">
+            <label>Confirmar Contraseña *</label>
+            <input id="r-pass2" type="password" placeholder="Repite tu contraseña">
+        </div>
+        <div class="form-group">
+            <label>Código de Referido (opcional)</label>
+            <input id="r-referral" placeholder="SC-XXXXXX" style="font-family:'JetBrains Mono',monospace;text-transform:uppercase;">
+        </div>
+
+        <button class="btn" onclick="submitRegister()" id="btn-register">📝 Crear Cuenta</button>
+
+        <div class="login-link">¿Ya tienes cuenta? <a href="login.html">Iniciar sesión</a></div>
+    </div>
+
+    <div class="card" id="success-card" style="display:none;">
+        <div class="success-card">
+            <div class="icon">🎉</div>
+            <h3>¡Registro Exitoso!</h3>
+            <p>Tu cuenta ha sido creada. Nuestro equipo la revisará pronto.</p>
+            <p style="margin-top:10px;">Tu código de referido personal:</p>
+            <div class="ref-code" id="my-ref-code">—</div>
+            <p>Compártelo con amigos y gana <strong style="color:var(--gold);">5% de comisión</strong> sobre sus ganancias.</p>
+            <a href="login.html" class="btn" style="display:inline-block;text-decoration:none;margin-top:16px;text-align:center;">Ir a Iniciar Sesión →</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'https://sanse-capital-production.up.railway.app/api';
+
+    // Check for referral code in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+        document.getElementById('r-referral').value = refCode.toUpperCase();
+        document.getElementById('referral-banner').innerHTML = `
+            <div class="referral-badge">🔗 Fuiste invitado con el código <strong>${refCode.toUpperCase()}</strong></div>`;
+    }
+
+    function toast(msg, type = 'success') {
+        const t = document.createElement('div');
+        t.className = 'toast ' + type;
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 4000);
+    }
+
+    async function submitRegister() {
+        const fullName = document.getElementById('r-name').value.trim();
+        const email = document.getElementById('r-email').value.trim();
+        const phone = document.getElementById('r-phone').value.trim();
+        const documentNumber = document.getElementById('r-doc').value.trim();
+        const password = document.getElementById('r-pass').value;
+        const password2 = document.getElementById('r-pass2').value;
+        const referralCode = document.getElementById('r-referral').value.trim().toUpperCase();
+
+        if (!fullName || !email || !password) return toast('Completa nombre, email y contraseña', 'error');
+        if (password !== password2) return toast('Las contraseñas no coinciden', 'error');
+        if (password.length < 8) return toast('Contraseña mínimo 8 caracteres', 'error');
+
+        const btn = document.getElementById('btn-register');
+        btn.disabled = true; btn.textContent = 'Creando cuenta...';
+
+        try {
+            const res = await fetch(API_BASE + '/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fullName, email, password, phone: phone || undefined, documentNumber: documentNumber || undefined, referralCode: referralCode || undefined })
+            });
+            const data = await res.json();
+            if (!res.ok) return toast(data.error, 'error');
+
+            // Mostrar éxito
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('success-card').style.display = 'block';
+            document.getElementById('my-ref-code').textContent = data.referralCode;
+
+        } catch(e) { toast('Error de conexión', 'error'); }
+        finally { btn.disabled = false; btn.textContent = '📝 Crear Cuenta'; }
+    }
+</script>
+</body>
+</html>

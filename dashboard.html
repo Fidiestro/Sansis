@@ -305,6 +305,8 @@
             <a class="nav-item" href="#" onclick="showView('withdraw')"><span class="icon">📤</span> Retirar</a>
             <a class="nav-item" href="#" onclick="showView('movements')"><span class="icon">📋</span> Movimientos</a>
             <a class="nav-item" href="#" onclick="showView('points')"><span class="icon">⭐</span> Sanse Score</a>
+            <a class="nav-item" href="#" onclick="showView('referrals')"><span class="icon">🔗</span> Referidos</a>
+            <a class="nav-item" href="#" onclick="showView('profile')"><span class="icon">👤</span> Mi Perfil</a>
         </div>
         <div class="nav-section">
             <div class="nav-section-title">Más</div>
@@ -504,6 +506,8 @@
         else if (currentView === 'deposit') renderDepositView(content);
         else if (currentView === 'loans') renderLoansView(content);
         else if (currentView === 'points') renderPointsView(content);
+        else if (currentView === 'profile') renderProfileView(content);
+        else if (currentView === 'referrals') renderReferralsView(content);
     }
 
     // ══════ RENDER DASHBOARD ══════
@@ -1990,6 +1994,174 @@
                     <button onclick="logout()" style="background:transparent;border:1px solid var(--red);color:var(--red);margin-left:8px;">Cerrar sesión</button>
                 </div>`;
         }
+    }
+
+    // ══════ RENDER PROFILE VIEW ══════
+    let userProfile = null;
+    async function loadProfile() {
+        try {
+            const res = await apiFetch('/user/profile');
+            if (res && res.ok) userProfile = await res.json();
+        } catch(e) { console.error('Error loading profile', e); }
+    }
+
+    async function renderProfileView(container) {
+        await loadProfile();
+        if (!userProfile) { container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);">Error cargando perfil</div>'; return; }
+        const p = userProfile;
+
+        container.innerHTML = `
+        <div class="animate-in">
+            <div style="background:var(--dark-2);border:1px solid var(--border);padding:24px;margin-bottom:20px;">
+                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:16px;">👤 Mi Perfil</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                    <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Nombre Completo</label>
+                        <input id="prf-name" value="${p.full_name || ''}" style="width:100%;padding:10px 12px;background:var(--dark-3);border:1px solid var(--border);color:var(--text);font-size:14px;"></div>
+                    <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Correo (no editable)</label>
+                        <input value="${p.email}" disabled style="width:100%;padding:10px 12px;background:var(--dark-3);border:1px solid var(--border);color:var(--text-muted);font-size:14px;"></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                    <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Teléfono</label>
+                        <input id="prf-phone" value="${p.phone || ''}" placeholder="3101234567" style="width:100%;padding:10px 12px;background:var(--dark-3);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;"></div>
+                    <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Cédula</label>
+                        <input id="prf-doc" value="${p.document_number || ''}" placeholder="1234567890" style="width:100%;padding:10px 12px;background:var(--dark-3);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;"></div>
+                </div>
+                <button onclick="saveProfile()" id="btn-save-profile" style="padding:12px 24px;background:var(--gold);color:#0a0a0f;font-weight:700;font-size:13px;border:none;cursor:pointer;font-family:'Syne',sans-serif;">
+                    💾 Guardar Cambios
+                </button>
+            </div>
+
+            <!-- Cambiar contraseña -->
+            <div style="background:var(--dark-2);border:1px solid var(--border);padding:24px;margin-bottom:20px;">
+                <div style="font-size:13px;font-weight:600;margin-bottom:14px;">🔒 Cambiar Contraseña</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                    <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Contraseña Actual</label>
+                        <input id="prf-current-pass" type="password" style="width:100%;padding:10px 12px;background:var(--dark-3);border:1px solid var(--border);color:var(--text);font-size:14px;"></div>
+                    <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Nueva Contraseña</label>
+                        <input id="prf-new-pass" type="password" placeholder="Mín 8 caracteres" style="width:100%;padding:10px 12px;background:var(--dark-3);border:1px solid var(--border);color:var(--text);font-size:14px;"></div>
+                </div>
+                <button onclick="changePassword()" style="padding:12px 24px;background:var(--dark-3);border:1px solid var(--border);color:var(--text);font-size:13px;cursor:pointer;font-family:'Syne',sans-serif;">
+                    🔒 Cambiar Contraseña
+                </button>
+            </div>
+
+            <!-- Info referido -->
+            <div style="background:var(--dark-2);border:1px solid var(--border);padding:24px;">
+                <div style="font-size:13px;font-weight:600;margin-bottom:10px;">🔗 Mi Código de Referido</div>
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);">${p.referral_code || 'N/A'}</div>
+                    <button onclick="navigator.clipboard.writeText('${p.referral_code || ''}');toast('✅ Código copiado')" style="padding:6px 14px;background:var(--gold-dim);border:1px solid var(--border);color:var(--gold);font-size:11px;cursor:pointer;">📋 Copiar</button>
+                </div>
+                ${p.referrerName ? `<div style="font-size:12px;color:var(--text-muted);">Referido por: <strong style="color:var(--text);">${p.referrerName}</strong></div>` : ''}
+                <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Miembro desde: ${new Date(p.created_at).toLocaleDateString('es-CO', {day:'numeric', month:'long', year:'numeric'})}</div>
+            </div>
+        </div>`;
+    }
+
+    async function saveProfile() {
+        const btn = document.getElementById('btn-save-profile');
+        btn.disabled = true; btn.textContent = 'Guardando...';
+        try {
+            const res = await apiFetch('/user/profile', {
+                method: 'PUT',
+                body: JSON.stringify({
+                    fullName: document.getElementById('prf-name').value,
+                    phone: document.getElementById('prf-phone').value,
+                    documentNumber: document.getElementById('prf-doc').value,
+                })
+            });
+            const data = await res.json();
+            if (!res.ok) return toast(data.error, 'error');
+            toast('✅ Perfil actualizado');
+        } catch(e) { toast('Error de conexión', 'error'); }
+        finally { btn.disabled = false; btn.textContent = '💾 Guardar Cambios'; }
+    }
+
+    async function changePassword() {
+        const current = document.getElementById('prf-current-pass').value;
+        const newPass = document.getElementById('prf-new-pass').value;
+        if (!current || !newPass) return toast('Completa ambos campos', 'error');
+        try {
+            const res = await apiFetch('/user/password', {
+                method: 'PUT',
+                body: JSON.stringify({ currentPassword: current, newPassword: newPass })
+            });
+            const data = await res.json();
+            if (!res.ok) return toast(data.error, 'error');
+            toast('✅ Contraseña actualizada');
+            document.getElementById('prf-current-pass').value = '';
+            document.getElementById('prf-new-pass').value = '';
+        } catch(e) { toast('Error de conexión', 'error'); }
+    }
+
+    // ══════ RENDER REFERRALS VIEW ══════
+    let referralData = null;
+    async function loadReferralData() {
+        try {
+            const res = await apiFetch('/user/referrals');
+            if (res && res.ok) referralData = await res.json();
+        } catch(e) { console.error('Error loading referrals', e); }
+    }
+
+    async function renderReferralsView(container) {
+        await loadReferralData();
+        if (!referralData) { container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);">Error cargando referidos</div>'; return; }
+        const r = referralData;
+
+        container.innerHTML = `
+        <div class="animate-in">
+            <!-- Stats -->
+            <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-value" style="color:var(--gold);">${r.totalReferrals}</div>
+                    <div class="stat-label">Referidos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-value" style="color:var(--green);">${formatCOP(r.totalCommissions)}</div>
+                    <div class="stat-label">Comisiones Ganadas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-value">${r.commissionCount}</div>
+                    <div class="stat-label">Pagos Recibidos</div>
+                </div>
+            </div>
+
+            <!-- Compartir -->
+            <div style="background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(78,203,141,0.04));border:1px solid var(--border);padding:24px;margin-bottom:20px;">
+                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:10px;">🔗 Invita y Gana</div>
+                <div style="font-size:12px;color:var(--text-muted);line-height:1.8;margin-bottom:16px;">
+                    Comparte tu código con amigos. Cuando inviertan en SDTC, recibirás el <strong style="color:var(--gold);">5% de sus ganancias</strong>.
+                    Si solicitan un préstamo, recibirás el <strong style="color:var(--gold);">5% de los intereses</strong> que paguen.
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
+                    <div style="flex:1;background:var(--dark-3);border:2px dashed var(--gold);padding:14px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);">${r.referralCode}</div>
+                    <button onclick="navigator.clipboard.writeText('${r.referralCode}');toast('✅ Código copiado')" style="padding:14px 20px;background:var(--gold);color:#0a0a0f;font-weight:700;border:none;cursor:pointer;font-family:'Syne',sans-serif;">📋</button>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button onclick="navigator.clipboard.writeText('${r.referralLink}');toast('✅ Link copiado')" style="flex:1;padding:10px;background:var(--dark-3);border:1px solid var(--border);color:var(--text);font-size:12px;cursor:pointer;">🔗 Copiar Link de Registro</button>
+                    <button onclick="window.open('https://wa.me/?text='+encodeURIComponent('¡Únete a Sanse Capital! Usa mi código ${r.referralCode} al registrarte: ${r.referralLink}'),'_blank')" style="flex:1;padding:10px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.3);color:#25D366;font-size:12px;cursor:pointer;">💬 Compartir por WhatsApp</button>
+                </div>
+            </div>
+
+            <!-- Lista de referidos -->
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px;">👥 Mis Referidos</div>
+            ${r.referrals.length === 0 ? `
+                <div style="text-align:center;padding:40px;color:var(--text-muted);font-size:13px;">Aún no tienes referidos. ¡Comparte tu código y empieza a ganar!</div>
+            ` : r.referrals.map(ref => `
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:14px 18px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <div style="font-weight:600;font-size:14px;">${ref.firstName}</div>
+                        <div style="font-size:11px;color:var(--text-muted);">Miembro hace ${ref.months} mes${ref.months !== 1 ? 'es' : ''}</div>
+                    </div>
+                    <span style="font-size:12px;font-weight:600;color:${ref.isActive ? 'var(--green)' : 'var(--text-muted)'};">
+                        ${ref.isActive ? '🟢 Activo' : '⚪ ' + ref.lastActivity}
+                    </span>
+                </div>
+            `).join('')}
+        </div>`;
     }
 
     init();

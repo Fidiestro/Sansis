@@ -189,6 +189,7 @@
             <div class="tab" onclick="switchTab('sdtc_overview',this)">🔒 SDTC</div>
             <div class="tab" onclick="switchTab('loans',this)">🏦 Préstamos</div>
             <div class="tab" onclick="switchTab('deposits',this)">📥 Depósitos</div>
+            <div class="tab" onclick="switchTab('registrations',this)">📝 Registros</div>
             <div class="tab" onclick="switchTab('withdrawals',this)">📤 Retiros</div>
             <div class="tab" onclick="switchTab('users',this)">📋 Usuarios</div>
         </div>
@@ -410,6 +411,30 @@
             </div>
         </div>
 
+        <!-- ====== SOLICITUDES DE REGISTRO ====== -->
+        <div class="section" id="sec-registrations">
+            <div class="card">
+                <div class="card-title">📝 Solicitudes de Registro</div>
+                <div class="card-desc">Revisa las solicitudes de registro de nuevos usuarios. Aprueba o rechaza cada solicitud.</div>
+
+                <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+                    <button class="btn btn-sm btn-outline reg-filter-btn active" onclick="filterRegistrations('all', this)">Todas</button>
+                    <button class="btn btn-sm btn-outline reg-filter-btn" onclick="filterRegistrations('pending', this)">⏳ Pendientes</button>
+                    <button class="btn btn-sm btn-outline reg-filter-btn" onclick="filterRegistrations('approved', this)">✅ Aprobados</button>
+                    <button class="btn btn-sm btn-outline reg-filter-btn" onclick="filterRegistrations('rejected', this)">❌ Rechazados</button>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr>
+                            <th>Nombre</th><th>Email</th><th>Tel</th><th>CC</th><th>Referido por</th><th>Estado</th><th>Fecha</th><th>Acciones</th>
+                        </tr></thead>
+                        <tbody id="registrations-table"><tr><td colspan="8" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- ====== SOLICITUDES DE DEPÓSITO ====== -->
         <div class="section" id="sec-deposits">
             <div class="card">
@@ -536,6 +561,7 @@
             if (tab === 'returns') loadActiveInvestments();
             if (tab === 'withdrawals') loadAdminWithdrawals('all');
             if (tab === 'deposits') loadAdminDeposits('all');
+            if (tab === 'registrations') loadAdminRegistrations('all');
             if (tab === 'loans') loadAdminLoans('all');
             if (tab === 'sdtc_overview') loadSDTCOverview();
             if (tab === 'users') loadUsers();
@@ -1243,6 +1269,75 @@
                 toast(`✅ ${data.message}`);
                 loadAdminLoans(currentLnFilter);
                 loadStats();
+            } catch(e) { toast('Error: ' + e.message, 'error'); }
+        }
+
+        // ====== REGISTROS ADMIN ======
+        let currentRegFilter = 'all';
+
+        async function loadAdminRegistrations(status) {
+            currentRegFilter = status;
+            const tbody = document.getElementById('registrations-table');
+            tbody.innerHTML = '<tr><td colspan="8" style="color:var(--muted);text-align:center">Cargando...</td></tr>';
+
+            try {
+                const res = await apiFetch(`/admin/registrations?status=${status}`);
+                if (!res || !res.ok) { tbody.innerHTML = '<tr><td colspan="8" style="color:var(--red);text-align:center">Error</td></tr>'; return; }
+                const data = await res.json();
+
+                if (!data.length) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="color:var(--muted);text-align:center">No hay solicitudes</td></tr>';
+                    return;
+                }
+
+                const statusLabels = { pending: '⏳ Pendiente', approved: '✅ Aprobado', rejected: '❌ Rechazado' };
+                const statusBadge = { pending: 'badge-gold', approved: 'badge-green', rejected: 'badge-red' };
+
+                tbody.innerHTML = data.map(r => `
+                    <tr>
+                        <td style="font-weight:600;">${r.full_name}</td>
+                        <td style="font-size:12px;">${r.email}</td>
+                        <td class="mono" style="font-size:12px;">${r.phone || '—'}</td>
+                        <td class="mono" style="font-size:12px;">${r.document_number || '—'}</td>
+                        <td style="font-size:12px;">${r.referrer_name || '—'}</td>
+                        <td><span class="badge ${statusBadge[r.status]}">${statusLabels[r.status]}</span></td>
+                        <td style="color:var(--muted);font-size:12px;">${formatDate(r.created_at)}</td>
+                        <td>
+                            ${r.status === 'pending' ? `
+                                <button class="btn btn-sm btn-gold" onclick="processRegistration(${r.id}, 'approve')">✅ Aprobar</button>
+                                <button class="btn btn-sm btn-red" onclick="processRegistration(${r.id}, 'reject')" style="margin-top:4px;">❌ Rechazar</button>
+                            ` : '<span style="font-size:11px;color:var(--muted);">—</span>'}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="8" style="color:var(--red);text-align:center">Error: ' + e.message + '</td></tr>';
+            }
+        }
+
+        function filterRegistrations(status, btn) {
+            document.querySelectorAll('.reg-filter-btn').forEach(b => { b.classList.remove('active'); b.style.background=''; b.style.color=''; });
+            btn.classList.add('active'); btn.style.background = 'var(--gold)'; btn.style.color = '#0a0a0f';
+            loadAdminRegistrations(status);
+        }
+
+        async function processRegistration(id, action) {
+            let notes;
+            if (action === 'reject') {
+                notes = prompt('Motivo del rechazo:');
+                if (notes === null) return;
+            }
+            if (!confirm(`¿${action === 'approve' ? 'Aprobar' : 'Rechazar'} este registro?`)) return;
+
+            try {
+                const res = await apiFetch(`/admin/registrations/${id}/process`, {
+                    method: 'POST',
+                    body: JSON.stringify({ action, notes })
+                });
+                const data = await res.json();
+                if (!res.ok) return toast(data.error, 'error');
+                toast(`✅ ${data.message}`);
+                loadAdminRegistrations(currentRegFilter);
             } catch(e) { toast('Error: ' + e.message, 'error'); }
         }
 
