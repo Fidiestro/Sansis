@@ -1,593 +1,341 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso — Sanse Capital</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión — Sanse Capital</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --dark: #0a0a0f;
+      --dark-2: #12121a;
+      --dark-3: #1a1a24;
+      --border: rgba(255,255,255,0.06);
+      --text: #e8e6e3;
+      --text-muted: #7a7a85;
+      --gold: #C9A84C;
+      --gold-dim: rgba(201,168,76,0.12);
+      --gold-glow: rgba(201,168,76,0.25);
+      --green: #4ECB8D;
+      --red: #E74C5E;
+      --radius: 8px;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
 
-        :root {
-            --gold: #C9A84C;
-            --gold-light: #E8C96A;
-            --gold-dim: rgba(201,168,76,0.15);
-            --dark: #090909;
-            --dark-2: #111111;
-            --dark-3: #181818;
-            --text: #E8E4DC;
-            --text-muted: #7A7670;
-            --border: rgba(201,168,76,0.12);
-            --border-hover: rgba(201,168,76,0.35);
-            --danger: #e74c5e;
-            --success: #4ecb8d;
-        }
+    /* ═══ BACKGROUND ═══ */
+    .bg {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 600px 400px at 20% 30%, rgba(201,168,76,0.05) 0%, transparent 70%),
+        radial-gradient(ellipse 500px 500px at 80% 70%, rgba(201,168,76,0.03) 0%, transparent 70%),
+        var(--dark);
+    }
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
 
-        html { scroll-behavior: smooth; }
+    /* ═══ CARD ═══ */
+    .card {
+      position: relative; z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      margin: 24px;
+    }
+    .card-inner {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px 40px;
+    }
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: 2px;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .logo span { color: var(--gold); }
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 24px;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .card-sub {
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 36px;
+    }
 
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--dark);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+    /* ═══ FORM ═══ */
+    .field {
+      margin-bottom: 20px;
+    }
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .field input {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--dark-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: border 0.3s;
+    }
+    .field input:focus {
+      border-color: var(--gold);
+    }
+    .field input::placeholder {
+      color: rgba(255,255,255,0.2);
+    }
 
-        /* Noise texture */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.4;
-        }
+    .remember-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .remember-row label {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text-muted);
+      cursor: pointer;
+    }
+    .remember-row input[type="checkbox"] {
+      accent-color: var(--gold);
+      width: 16px; height: 16px;
+    }
+    .forgot-link {
+      font-size: 13px; color: var(--gold);
+      text-decoration: none;
+    }
+    .forgot-link:hover { text-decoration: underline; }
 
-        /* ══════ NAV ══════ */
-        nav {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 24px;
-            height: 64px;
-            background: rgba(9,9,9,0.85);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border);
-        }
-        .nav-logo {
-            font-family: 'Syne', sans-serif;
-            font-weight: 800;
-            font-size: 17px;
-            letter-spacing: 0.08em;
-            color: var(--text);
-            text-decoration: none;
-        }
-        .nav-logo span { color: var(--gold); }
-        .nav-back {
-            font-size: 13px;
-            color: var(--text-muted);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: color 0.2s;
-        }
-        .nav-back:hover { color: var(--gold); }
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      background: var(--gold);
+      color: #0a0a0f;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .btn-submit:hover {
+      background: #d9b35a;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px var(--gold-glow);
+    }
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-submit.loading {
+      color: transparent;
+    }
+    .btn-submit.loading::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 20px; height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid rgba(10,10,15,0.3);
+      border-top-color: #0a0a0f;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ══════ MAIN CONTAINER ══════ */
-        .login-wrapper {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 20px 40px;
-            position: relative;
-            z-index: 1;
-        }
+    /* ═══ ERROR ═══ */
+    .error-msg {
+      background: rgba(231,76,94,0.08);
+      border: 1px solid rgba(231,76,94,0.2);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--red);
+      margin-bottom: 20px;
+      display: none;
+    }
+    .error-msg.show { display: block; }
 
-        /* Glow effect */
-        .login-wrapper::before {
-            content: '';
-            position: absolute;
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            pointer-events: none;
-        }
+    /* ═══ LINKS ═══ */
+    .card-footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .card-footer a {
+      color: var(--gold);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .card-footer a:hover { text-decoration: underline; }
 
-        .login-container {
-            width: 100%;
-            max-width: 420px;
-            position: relative;
-            z-index: 2;
-        }
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 24px;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--text); }
 
-        /* ══════ CARD ══════ */
-        .login-card {
-            background: var(--dark-2);
-            border: 1px solid var(--border);
-            padding: 32px 24px;
-            position: relative;
-        }
-        .login-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-        }
-
-        /* Logo */
-        .login-logo {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-        .login-logo-text {
-            font-family: 'Syne', sans-serif;
-            font-size: 24px;
-            font-weight: 800;
-            letter-spacing: 0.1em;
-        }
-        .login-logo-text span { color: var(--gold); }
-        .login-logo-sub {
-            font-size: 11px;
-            color: var(--text-muted);
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            margin-top: 6px;
-        }
-
-        /* Tabs */
-        .login-tabs {
-            display: flex;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 28px;
-        }
-        .login-tab {
-            flex: 1;
-            padding: 14px;
-            text-align: center;
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            background: none;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-        }
-        .login-tab.active {
-            color: var(--gold);
-        }
-        .login-tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0; right: 0;
-            height: 2px;
-            background: var(--gold);
-        }
-        .login-tab:hover:not(.active) { color: var(--text); }
-
-        /* Error message */
-        .error-msg {
-            background: rgba(231,76,94,0.1);
-            border: 1px solid rgba(231,76,94,0.2);
-            padding: 12px 16px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            color: var(--danger);
-            display: none;
-            align-items: center;
-            gap: 8px;
-        }
-        .error-msg.show { display: flex; }
-
-        /* Form */
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-label {
-            display: block;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-muted);
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-        .form-input-wrap {
-            position: relative;
-        }
-        .form-input-wrap .icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 14px;
-            opacity: 0.4;
-            pointer-events: none;
-        }
-        .form-input {
-            width: 100%;
-            padding: 14px 16px 14px 42px;
-            background: var(--dark-3);
-            border: 1px solid var(--border);
-            color: var(--text);
-            font-family: 'DM Sans', sans-serif;
-            font-size: 15px;
-            transition: all 0.2s;
-            outline: none;
-        }
-        .form-input:focus {
-            border-color: var(--gold);
-            box-shadow: 0 0 0 3px var(--gold-dim);
-        }
-        .form-input::placeholder { color: var(--text-muted); }
-
-        .toggle-password {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 14px;
-            padding: 4px;
-        }
-        .toggle-password:hover { color: var(--gold); }
-
-        /* Remember row */
-        .remember-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-        .remember-check {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-        .remember-check input {
-            accent-color: var(--gold);
-            width: 16px;
-            height: 16px;
-        }
-        .forgot-link {
-            font-size: 12px;
-            color: var(--gold);
-            text-decoration: none;
-            opacity: 0.8;
-        }
-        .forgot-link:hover { opacity: 1; }
-
-        /* Submit button */
-        .btn-submit {
-            width: 100%;
-            padding: 16px;
-            background: var(--gold);
-            border: none;
-            color: var(--dark);
-            font-family: 'Syne', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-submit:hover {
-            background: var(--gold-light);
-            transform: translateY(-2px);
-        }
-        .btn-submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .btn-submit.loading .btn-text { display: none; }
-        .btn-submit.loading .spinner { display: inline-block; }
-        .btn-submit .spinner {
-            display: none;
-            width: 20px; height: 20px;
-            border: 2px solid rgba(9,9,9,0.3);
-            border-top-color: var(--dark);
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* WhatsApp register */
-        .register-panel {
-            display: none;
-            text-align: center;
-            padding: 20px 0;
-        }
-        .register-panel.active { display: block; }
-        .register-panel p {
-            font-size: 14px;
-            color: var(--text-muted);
-            line-height: 1.7;
-            margin-bottom: 24px;
-        }
-        .btn-whatsapp {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            padding: 16px;
-            background: #25D366;
-            color: #fff;
-            font-family: 'Syne', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-        .btn-whatsapp:hover {
-            background: #1ebe5d;
-            transform: translateY(-2px);
-        }
-        .register-info {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-        }
-        .register-info h4 {
-            font-family: 'Syne', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: var(--gold);
-        }
-        .register-info ul {
-            list-style: none;
-            text-align: left;
-        }
-        .register-info li {
-            font-size: 13px;
-            color: var(--text-muted);
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .register-info li:last-child { border-bottom: none; }
-        .register-info li span { font-size: 16px; }
-
-        /* Login form panel */
-        .login-panel { display: none; }
-        .login-panel.active { display: block; }
-
-        /* Footer */
-        .login-footer {
-            text-align: center;
-            margin-top: 24px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-        }
-        .login-footer p {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-        .login-footer a {
-            color: var(--gold);
-            text-decoration: none;
-        }
-
-        /* Legal note */
-        .legal-note {
-            font-size: 10px;
-            color: var(--text-muted);
-            text-align: center;
-            margin-top: 20px;
-            line-height: 1.6;
-            opacity: 0.7;
-        }
-        .legal-note a { color: var(--gold); text-decoration: none; }
-
-        /* ══════ RESPONSIVE ══════ */
-        @media (min-width: 480px) {
-            .login-card {
-                padding: 40px 36px;
-            }
-            nav {
-                padding: 0 48px;
-            }
-        }
-    </style>
+    /* ═══ TOAST ═══ */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      padding: 14px 24px;
+      border-radius: var(--radius);
+      font-size: 14px; font-weight: 600;
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+    }
+    .toast.error {
+      background: rgba(231,76,94,0.15);
+      border: 1px solid rgba(231,76,94,0.3);
+      color: var(--red);
+    }
+    @keyframes slideIn {
+      from { transform: translateX(100px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+  </style>
 </head>
 <body>
+  <div class="bg"></div>
+  <div class="bg-grid"></div>
 
-<nav>
-    <a class="nav-logo" href="index.html">SANSE <span>CAPITAL</span></a>
-    <a class="nav-back" href="index.html">← Volver</a>
-</nav>
+  <div class="card">
+    <div class="card-inner">
+      <div class="logo">SANSE <span>CAPITAL</span></div>
+      <h1 class="card-title">Bienvenido</h1>
+      <p class="card-sub">Ingresa a tu cuenta para acceder a tu dashboard</p>
 
-<div class="login-wrapper">
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-logo">
-                <div class="login-logo-text">SANSE <span>CAPITAL</span></div>
-                <div class="login-logo-sub">Fondo de Inversión</div>
-            </div>
+      <div class="error-msg" id="errorMsg"></div>
 
-            <!-- Tabs -->
-            <div class="login-tabs">
-                <button class="login-tab active" onclick="showPanel('login')">Iniciar Sesión</button>
-                <button class="login-tab" onclick="showPanel('register')">Registrarse</button>
-            </div>
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" id="login-email" placeholder="tu@correo.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+      </div>
 
-            <!-- Login Panel -->
-            <div class="login-panel active" id="panel-login">
-                <div class="error-msg" id="login-error">
-                    <span>⚠</span>
-                    <span id="login-error-text">Credenciales incorrectas</span>
-                </div>
+      <div class="remember-row">
+        <label>
+          <input type="checkbox" id="remember-me" checked> Recordarme
+        </label>
+      </div>
 
-                <div class="form-group">
-                    <label class="form-label">Correo electrónico</label>
-                    <div class="form-input-wrap">
-                        <span class="icon">✉</span>
-                        <input type="email" class="form-input" id="login-email" placeholder="tu@correo.com" autocomplete="email">
-                    </div>
-                </div>
+      <button class="btn-submit" id="loginBtn" onclick="handleLogin()">Iniciar Sesión</button>
 
-                <div class="form-group">
-                    <label class="form-label">Contraseña</label>
-                    <div class="form-input-wrap">
-                        <span class="icon">🔒</span>
-                        <input type="password" class="form-input" id="login-password" placeholder="••••••••" autocomplete="current-password">
-                        <button type="button" class="toggle-password" onclick="togglePass()">👁</button>
-                    </div>
-                </div>
-
-                <div class="remember-row">
-                    <label class="remember-check">
-                        <input type="checkbox" id="remember-me" checked>
-                        Recordarme
-                    </label>
-                    <a href="#" class="forgot-link" onclick="alert('Contacta vía WhatsApp para recuperar tu contraseña.'); return false;">¿Olvidaste tu clave?</a>
-                </div>
-
-                <button class="btn-submit" id="btn-login" onclick="handleLogin()">
-                    <span class="btn-text">Iniciar Sesión →</span>
-                    <div class="spinner"></div>
-                </button>
-            </div>
-
-            <!-- Register Panel -->
-            <div class="register-panel" id="panel-register">
-                <p>Para crear tu cuenta y empezar a invertir, contáctanos directamente por WhatsApp. Te guiaremos en todo el proceso.</p>
-                
-                <a href="https://wa.me/573194552890?text=Hola%2C%20quiero%20registrarme%20en%20Sanse%20Capital" target="_blank" class="btn-whatsapp">
-                    📱 Registrarme por WhatsApp
-                </a>
-
-                <div class="register-info">
-                    <h4>¿Qué necesitas?</h4>
-                    <ul>
-                        <li><span>📄</span> Cédula de ciudadanía</li>
-                        <li><span>📱</span> Número de celular</li>
-                        <li><span>🏦</span> Cuenta bancaria a tu nombre</li>
-                        <li><span>💰</span> Inversión mínima: $100.000 COP</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="login-footer">
-                <p>¿Necesitas ayuda? <a href="https://wa.me/573194552890" target="_blank">Escríbenos →</a></p>
-            </div>
-        </div>
-
-        <p class="legal-note">
-            Al iniciar sesión aceptas nuestros <a href="terminos.html">Términos y Condiciones</a>. 
-            Sanse Capital es un fondo privado entre particulares no vigilado por la SFC.
-        </p>
+      <div class="card-footer">
+        ¿No tienes cuenta? <a href="register.html">Regístrate aquí</a>
+      </div>
     </div>
-</div>
 
-<script>
-    const API_URL = 'https://sanse-backend-production.up.railway.app/api';
+    <a href="index.html" class="back-link">← Volver al inicio</a>
+  </div>
 
-    function showPanel(panel) {
-        document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.login-panel, .register-panel').forEach(p => p.classList.remove('active'));
-        
-        if (panel === 'login') {
-            document.querySelector('.login-tab:first-child').classList.add('active');
-            document.getElementById('panel-login').classList.add('active');
-        } else {
-            document.querySelector('.login-tab:last-child').classList.add('active');
-            document.getElementById('panel-register').classList.add('active');
-        }
-    }
-
-    function togglePass() {
-        const input = document.getElementById('login-password');
-        const btn = document.querySelector('.toggle-password');
-        if (input.type === 'password') {
-            input.type = 'text';
-            btn.textContent = '🙈';
-        } else {
-            input.type = 'password';
-            btn.textContent = '👁';
-        }
-    }
+  <script>
+    const API_BASE = 'https://sanse-capital-production.up.railway.app/api';
 
     async function handleLogin() {
-        const email = document.getElementById('login-email').value.trim();
-        const password = document.getElementById('login-password').value;
-        const errorEl = document.getElementById('login-error');
-        const errorText = document.getElementById('login-error-text');
-        const btn = document.getElementById('btn-login');
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const remember = document.getElementById('remember-me').checked;
+      const btn = document.getElementById('loginBtn');
+      const errorEl = document.getElementById('errorMsg');
 
-        errorEl.classList.remove('show');
+      errorEl.classList.remove('show');
 
-        if (!email || !password) {
-            errorText.textContent = 'Por favor completa todos los campos.';
-            errorEl.classList.add('show');
-            return;
+      if (!email || !password) {
+        errorEl.textContent = 'Ingresa tu correo y contraseña.';
+        errorEl.classList.add('show');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.classList.add('loading');
+
+      try {
+        const resp = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await resp.json();
+
+        if (!resp.ok) {
+          throw new Error(data.error || data.message || 'Credenciales inválidas');
         }
 
-        btn.classList.add('loading');
-        btn.disabled = true;
+        // Guardar tokens
+        const storage = remember ? localStorage : sessionStorage;
+        storage.setItem('sanse_access_token', data.accessToken);
+        storage.setItem('sanse_refresh_token', data.refreshToken);
+        storage.setItem('sanse_user', JSON.stringify(data.user));
 
-        try {
-            const response = await fetch(`${API_URL}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Error al iniciar sesión');
-            }
-
-            const storage = document.getElementById('remember-me').checked ? localStorage : sessionStorage;
-            storage.setItem('sanse_access_token', data.accessToken);
-            storage.setItem('sanse_refresh_token', data.refreshToken);
-            storage.setItem('sanse_user', JSON.stringify(data.user));
-
-            window.location.href = 'dashboard.html';
-
-        } catch (error) {
-            btn.classList.remove('loading');
-            btn.disabled = false;
-            errorText.textContent = error.message || 'Error de conexión con el servidor.';
-            errorEl.classList.add('show');
+        // Redirigir según rol
+        if (data.user.role === 'admin') {
+          window.location.href = 'admin.html';
+        } else {
+          window.location.href = 'dashboard.html';
         }
+
+      } catch (err) {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        errorEl.textContent = err.message || 'Error de conexión con el servidor.';
+        errorEl.classList.add('show');
+      }
     }
 
+    // Enter para submit
     document.getElementById('login-password').addEventListener('keydown', e => {
-        if (e.key === 'Enter') handleLogin();
+      if (e.key === 'Enter') handleLogin();
     });
     document.getElementById('login-email').addEventListener('keydown', e => {
-        if (e.key === 'Enter') document.getElementById('login-password').focus();
+      if (e.key === 'Enter') document.getElementById('login-password').focus();
     });
 
-    // Si ya tiene sesión, redirigir
+    // Si ya tiene sesión activa, redirigir
     const existingToken = localStorage.getItem('sanse_access_token') || sessionStorage.getItem('sanse_access_token');
     if (existingToken) window.location.href = 'dashboard.html';
-</script>
+  </script>
 </body>
 </html>
