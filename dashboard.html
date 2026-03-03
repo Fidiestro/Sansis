@@ -356,20 +356,20 @@
             <div style="margin-bottom:20px;">
                 <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:10px;">Plazo del contrato</label>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;" id="plan-selector">
-                    <div class="plan-opt" data-plan="cdtc_3m" data-months="3" data-min="2" data-max="3" onclick="selectPlan(this)">
+                    <div class="plan-opt" data-plan="sdtc_3m" data-months="3" data-min="2" data-max="3" onclick="selectPlan(this)">
                         <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--gold);">3</div>
                         <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">meses</div>
                         <div style="font-size:10px;color:var(--green);margin-top:6px;font-weight:600;">Rendimiento variable</div>
                         <div style="font-size:9px;color:var(--text-muted);margin-top:3px;">+ 🌱 Sanse Score</div>
                     </div>
-                    <div class="plan-opt selected" data-plan="cdtc_6m" data-months="6" data-min="2" data-max="4" onclick="selectPlan(this)">
+                    <div class="plan-opt selected" data-plan="sdtc_6m" data-months="6" data-min="2" data-max="4" onclick="selectPlan(this)">
                         <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--gold);">6</div>
                         <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">meses</div>
                         <div style="font-size:10px;color:var(--green);margin-top:6px;font-weight:600;">Rendimiento variable</div>
                         <div style="font-size:9px;background:var(--gold);color:var(--dark,#0a0a0f);padding:2px 6px;border-radius:99px;font-weight:700;margin-top:4px;display:inline-block;">POPULAR</div>
                         <div style="font-size:9px;color:var(--text-muted);margin-top:3px;">+ 🌿 Mayor Score</div>
                     </div>
-                    <div class="plan-opt" data-plan="cdtc_12m" data-months="12" data-min="2" data-max="4" onclick="selectPlan(this)">
+                    <div class="plan-opt" data-plan="sdtc_12m" data-months="12" data-min="2" data-max="4" onclick="selectPlan(this)">
                         <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--gold);">12</div>
                         <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">meses</div>
                         <div style="font-size:10px;color:var(--green);margin-top:6px;font-weight:600;">Rendimiento variable</div>
@@ -981,7 +981,7 @@
 
     function getSelectedPlan() {
         const el = document.querySelector('.plan-opt.selected');
-        if (!el) return { productId: 'cdtc_6m', months: 6, min: 2, max: 4 };
+        if (!el) return { productId: 'sdtc_6m', months: 6, min: 2, max: 4 };
         return {
             productId: el.dataset.plan,
             months: parseInt(el.dataset.months),
@@ -1025,7 +1025,7 @@
 
         // Reset plan selector to 6m default
         document.querySelectorAll('.plan-opt').forEach(e => e.classList.remove('selected'));
-        const defaultPlan = document.querySelector('.plan-opt[data-plan="cdtc_6m"]');
+        const defaultPlan = document.querySelector('.plan-opt[data-plan="sdtc_6m"]');
         if (defaultPlan) defaultPlan.classList.add('selected');
         document.getElementById('plan-note').style.display = 'none';
         document.getElementById('modal-rate-display').textContent = 'Variable 2% — 4% mensual';
