@@ -189,7 +189,6 @@
             <div class="tab" onclick="switchTab('sdtc_overview',this)">🔒 SDTC</div>
             <div class="tab" onclick="switchTab('loans',this)">🏦 Préstamos</div>
             <div class="tab" onclick="switchTab('create-loan',this)">➕ Crear Préstamo</div>
-            <div class="tab" onclick="switchTab('create-loan',this)">➕ Crear Préstamo</div>
             <div class="tab" onclick="switchTab('deposits',this)">📥 Depósitos</div>
             <div class="tab" onclick="switchTab('registrations',this)">📝 Registros</div>
             <div class="tab" onclick="switchTab('withdrawals',this)">📤 Retiros</div>
@@ -492,7 +491,7 @@
                 <div class="card-title">📋 Usuarios Registrados</div>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>CC</th><th>Rol</th><th>Estado</th><th>Creado</th><th>Acciones</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>CC</th><th>Tel</th><th>Referido</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
                         <tbody id="users-table"><tr><td colspan="8" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
                     </table>
                 </div>
@@ -686,6 +685,7 @@
             if (tab === 'loans') loadAdminLoans('all');
             if (tab === 'sdtc_overview') loadSDTCOverview();
             if (tab === 'users') loadUsers();
+            if (tab === 'create-loan') populateLoanUserSelect();
         }
 
         // ====== FORMAT ======
@@ -712,25 +712,33 @@
 
                 const tbody = document.getElementById('users-table');
                 if (!allUsers.length) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="color:var(--muted);text-align:center">No hay usuarios</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">No hay usuarios</td></tr>';
                 } else {
                     tbody.innerHTML = allUsers.map(u => {
                         const isBlocked = u.status === 'blocked';
-                        return `
-                        <tr style="${isBlocked ? 'opacity:0.6;background:rgba(239,68,68,0.05);' : ''}">
+                        const safeData = encodeURIComponent(JSON.stringify({
+                            id: u.id, full_name: u.full_name, email: u.email,
+                            phone: u.phone || '', document_number: u.document_number || '',
+                            role: u.role, status: u.status || 'active', referred_by: u.referred_by || null
+                        }));
+                        const referrerName = u.referred_by
+                            ? (allUsers.find(x => x.id === u.referred_by)?.full_name || 'ID:' + u.referred_by)
+                            : '—';
+                        return `<tr style="${isBlocked ? 'opacity:0.6;background:rgba(239,68,68,0.05);' : ''}">
                             <td class="mono">${u.id}</td>
                             <td style="font-weight:600">${u.full_name}</td>
-                            <td style="color:var(--text2)">${u.email}</td>
-                            <td class="mono">${u.document_number || '—'}</td>
+                            <td style="color:var(--text2);font-size:12px;">${u.email}</td>
+                            <td class="mono" style="font-size:12px;">${u.document_number || '—'}</td>
+                            <td style="color:var(--text2);font-size:12px;">${u.phone || '—'}</td>
+                            <td style="font-size:11px;color:var(--text2);">${referrerName}</td>
                             <td><span class="badge ${u.role==='admin'?'badge-gold':u.role==='institution'?'badge-purple':'badge-blue'}">${u.role}</span></td>
                             <td><span class="badge ${isBlocked?'badge-red':'badge-green'}">${isBlocked ? '🚫 Bloqueado' : '✅ Activo'}</span></td>
-                            <td style="color:var(--muted)">${formatDate(u.created_at)}</td>
-                            <td>
-                                ${u.role !== 'admin' ? `
-                                    <button class="btn btn-sm ${isBlocked ? 'btn-gold' : 'btn-red'}" onclick="toggleBlockUser(${u.id}, ${isBlocked}, '${u.full_name.replace(/'/g,"\\'")}')">
-                                        ${isBlocked ? '🔓 Desbloquear' : '🚫 Bloquear'}
-                                    </button>
-                                ` : '<span style="font-size:11px;color:var(--muted);">Admin</span>'}
+                            <td style="display:flex;gap:5px;flex-wrap:wrap;">
+                                <button class="btn btn-sm" style="background:rgba(201,168,76,0.15);color:#C9A84C;border:1px solid rgba(201,168,76,0.3);"
+                                    onclick='openEditModal(decodeURIComponent("${safeData}"))'>✏️</button>
+                                ${u.role !== 'admin' ? `<button class="btn btn-sm ${isBlocked?'btn-gold':'btn-red'}"
+                                    onclick="toggleBlockUser(${u.id},${isBlocked},'${u.full_name.replace(/'/g,"\'")}')">
+                                    ${isBlocked ? '🔓' : '🚫'}</button>` : ''}
                             </td>
                         </tr>`;
                     }).join('');
@@ -741,6 +749,7 @@
                     allUsers.map(u => `<option value="${u.id}">${u.full_name} — ${u.email}</option>`).join('');
 
                 document.getElementById('st-users').textContent = allUsers.length;
+                populateLoanUserSelect();
             } catch(e) { console.error('loadUsers error:', e); }
         }
 
@@ -1683,22 +1692,6 @@
         document.getElementById('t-date').valueAsDate = new Date();
         document.getElementById('cl-date').valueAsDate = new Date();
 
-        // Switch tab for create-loan
-        const _origSwitchTab = switchTab;
-        function switchTab(tab, el) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(t => { t.classList.remove('active'); t.style.background=''; t.style.color=''; });
-            const sec = document.getElementById('sec-' + tab);
-            if (sec) sec.classList.add('active');
-            if (el) { el.classList.add('active'); el.style.background='var(--gold)'; el.style.color='#0a0a0f'; }
-            if (tab === 'users') loadUsers();
-            if (tab === 'loans') loadAdminLoans('all');
-            if (tab === 'deposits') loadAdminDeposits('all');
-            if (tab === 'withdrawals') loadAdminWithdrawals('all');
-            if (tab === 'registrations') loadAdminRegistrations('all');
-            if (tab === 'create-loan') populateLoanUserSelect();
-        }
-
         // ══ EDIT USER MODAL ══════════════════════════════════════════
         function populateReferrerSelect(currentReferredById) {
             const sel = document.getElementById('eu-referrer');
@@ -1775,64 +1768,6 @@
         document.getElementById('edit-user-modal').addEventListener('click', function(e) {
             if (e.target === this) closeEditModal();
         });
-
-        // ══ EDIT BUTTON IN USER TABLE ═════════════════════════════════
-        // Override loadUsers to add edit button (runs after allUsers is set)
-        const _origLoadUsers = loadUsers;
-        async function loadUsers() {
-            try {
-                const res = await apiFetch('/auth/users');
-                if (!res || !res.ok) { console.error('Error loading users'); return; }
-                const data = await res.json();
-                allUsers = data.users || [];
-
-                const tbody = document.getElementById('users-table');
-                if (!allUsers.length) {
-                    tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">No hay usuarios</td></tr>';
-                } else {
-                    tbody.innerHTML = allUsers.map(u => {
-                        const isBlocked = u.status === 'blocked';
-                        const safeData = encodeURIComponent(JSON.stringify({
-                            id: u.id, full_name: u.full_name, email: u.email,
-                            phone: u.phone || '', document_number: u.document_number || '',
-                            role: u.role, status: u.status || 'active', referred_by: u.referred_by || null
-                        }));
-                        const referrerName = u.referred_by ? (allUsers.find(x => x.id === u.referred_by)?.full_name || 'ID:' + u.referred_by) : '—';
-                        return `<tr style="${isBlocked ? 'opacity:0.6;background:rgba(239,68,68,0.05);' : ''}">
-                            <td class="mono">${u.id}</td>
-                            <td style="font-weight:600">${u.full_name}</td>
-                            <td style="color:var(--text2);font-size:12px;">${u.email}</td>
-                            <td class="mono" style="font-size:12px;">${u.document_number || '—'}</td>
-                            <td style="color:var(--text2);font-size:12px;">${u.phone || '—'}</td>
-                            <td style="font-size:11px;color:var(--text2);">${referrerName}</td>
-                            <td><span class="badge ${u.role==='admin'?'badge-gold':u.role==='institution'?'badge-purple':'badge-blue'}">${u.role}</span></td>
-                            <td><span class="badge ${isBlocked?'badge-red':'badge-green'}">${isBlocked ? '🚫 Bloqueado' : '✅ Activo'}</span></td>
-                            <td style="display:flex;gap:6px;flex-wrap:wrap;">
-                                <button class="btn btn-sm" style="background:rgba(201,168,76,0.15);color:#C9A84C;border:1px solid rgba(201,168,76,0.3);"
-                                    onclick='openEditModal(decodeURIComponent("${safeData}"))'>✏️ Editar</button>
-                                ${u.role !== 'admin' ? `<button class="btn btn-sm ${isBlocked?'btn-gold':'btn-red'}"
-                                    onclick="toggleBlockUser(${u.id},${isBlocked},'${u.full_name.replace(/'/g,"\\'")}')">
-                                    ${isBlocked ? '🔓' : '🚫'}</button>` : ''}
-                            </td>
-                        </tr>`;
-                    }).join('');
-                }
-
-                // Also add Referido column header if not present
-                const thead = document.querySelector('#users-table')?.closest('table')?.querySelector('thead tr');
-                if (thead && thead.children.length < 9) {
-                    const th = document.createElement('th');
-                    th.textContent = 'Referido';
-                    thead.insertBefore(th, thead.children[5]);
-                }
-
-                const sel = document.getElementById('t-user');
-                sel.innerHTML = '<option value="">Seleccionar usuario...</option>' +
-                    allUsers.map(u => `<option value="${u.id}">${u.full_name} — ${u.email}</option>`).join('');
-                document.getElementById('st-users').textContent = allUsers.length;
-                populateLoanUserSelect();
-            } catch(e) { console.error('loadUsers error:', e); }
-        }
 
         // ══ CREATE LOAN ═══════════════════════════════════════════════
         function populateLoanUserSelect() {
