@@ -188,6 +188,8 @@
             <div class="tab" onclick="switchTab('returns',this)">📈 Rendimientos</div>
             <div class="tab" onclick="switchTab('sdtc_overview',this)">🔒 SDTC</div>
             <div class="tab" onclick="switchTab('loans',this)">🏦 Préstamos</div>
+            <div class="tab" onclick="switchTab('create-loan',this)">➕ Crear Préstamo</div>
+            <div class="tab" onclick="switchTab('create-loan',this)">➕ Crear Préstamo</div>
             <div class="tab" onclick="switchTab('deposits',this)">📥 Depósitos</div>
             <div class="tab" onclick="switchTab('registrations',this)">📝 Registros</div>
             <div class="tab" onclick="switchTab('withdrawals',this)">📤 Retiros</div>
@@ -498,29 +500,121 @@
         </div>
     </div>
 
+
     <!-- ══ MODAL WHATSAPP ══ -->
     <div id="wa-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
         <div style="background:#12121a;border:1px solid rgba(37,211,102,0.2);border-radius:14px;width:100%;max-width:500px;margin:20px;overflow:hidden;">
             <div style="padding:18px 24px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;background:rgba(37,211,102,0.05);">
                 <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:#25D366;">💬 Enviar WhatsApp</div>
-                <button onclick="closeWaModal()" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;">✕</button>
+                <button onclick="closeWaModal()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;line-height:1;">✕</button>
             </div>
             <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px;">
                 <div>
-                    <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Número de teléfono</label>
+                    <label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Número de teléfono</label>
                     <input id="wa-phone" type="tel" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-family:'JetBrains Mono',monospace;font-size:14px;outline:none;box-sizing:border-box;" placeholder="3194101127">
                 </div>
                 <div>
-                    <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Mensaje <span style="font-weight:400;color:rgba(255,255,255,0.3);">— editable antes de enviar</span></label>
+                    <label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Mensaje <span style="font-weight:400;color:rgba(255,255,255,0.3);">— editable antes de enviar</span></label>
                     <textarea id="wa-msg" rows="9" style="width:100%;padding:12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;font-family:inherit;"></textarea>
                 </div>
                 <div style="display:flex;gap:10px;">
-                    <button onclick="sendWaMessage()" style="flex:1;padding:13px;background:#25D366;color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;letter-spacing:0.05em;">
-                        📲 Abrir WhatsApp
-                    </button>
-                    <button onclick="closeWaModal()" style="padding:13px 20px;background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:13px;cursor:pointer;">Cancelar</button>
+                    <button onclick="sendWaMessage()" style="flex:1;padding:13px;background:#25D366;color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;">📲 Abrir WhatsApp</button>
+                    <button onclick="closeWaModal()" style="padding:13px 20px;background:rgba(255,255,255,0.05);color:#888;border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:13px;cursor:pointer;">Cancelar</button>
                 </div>
-                <p style="font-size:11px;color:var(--text2);margin:0;text-align:center;">Se abrirá WhatsApp Web con el mensaje prellenado. Puedes editarlo antes de enviar.</p>
+                <p style="font-size:11px;color:#666;margin:0;text-align:center;">Se abrirá WhatsApp Web con el mensaje prellenado. Puedes editarlo antes de enviar.</p>
+            </div>
+        </div>
+    </div>
+
+
+        <!-- ====== CREAR PRÉSTAMO DIRECTO ====== -->
+        <div class="section" id="sec-create-loan">
+            <div class="card">
+                <div class="card-title">🏦 Registrar Préstamo Directo</div>
+                <div class="card-desc">Crea un préstamo activo para un usuario. El monto se acreditará en su balance inmediatamente.</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Usuario *</label><select id="cl-user"><option value="">Seleccionar usuario...</option></select></div>
+                    <div class="form-group"><label>Monto (COP) *</label><input id="cl-amount" type="number" placeholder="1000000" min="100000" oninput="updateLoanPreview()"></div>
+                </div>
+                <div class="form-row cols-3">
+                    <div class="form-group"><label>Plazo *</label>
+                        <select id="cl-term" onchange="updateLoanPreview()">
+                            <option value="1">1 mes</option>
+                            <option value="2">2 meses</option>
+                            <option value="3" selected>3 meses</option>
+                            <option value="6">6 meses</option>
+                            <option value="12">12 meses</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Tasa mensual % *</label><input id="cl-rate" type="number" value="4" min="1" max="20" step="0.5" oninput="updateLoanPreview()"></div>
+                    <div class="form-group"><label>Fecha inicio</label><input id="cl-date" type="date"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Propósito</label><input id="cl-purpose" placeholder="Capital de trabajo, vehículo..."></div>
+                    <div class="form-group"><label>Notas internas</label><input id="cl-notes" placeholder="Notas para el expediente"></div>
+                </div>
+                <div id="cl-preview" style="display:none;background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.2);border-radius:10px;padding:16px;margin:16px 0;">
+                    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;">📋 Resumen del préstamo</div>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+                        <div><div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--gold);" id="clp-amount">$0</div><div style="font-size:10px;color:var(--muted);">Capital</div></div>
+                        <div><div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;" id="clp-rate">0%</div><div style="font-size:10px;color:var(--muted);">Tasa mensual</div></div>
+                        <div><div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--red);" id="clp-interest">$0</div><div style="font-size:10px;color:var(--muted);">Total intereses est.</div></div>
+                        <div><div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;" id="clp-due">—</div><div style="font-size:10px;color:var(--muted);">Vence el</div></div>
+                    </div>
+                </div>
+                <button class="btn btn-gold" onclick="submitCreateLoan()" id="btn-create-loan">🏦 Crear Préstamo</button>
+            </div>
+        </div>
+
+    <!-- ══ MODAL EDITAR USUARIO ══ -->
+    <div id="edit-user-modal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;overflow-y:auto;">
+        <div style="background:#12121a;border:1px solid rgba(255,255,255,0.08);border-radius:14px;width:100%;max-width:520px;margin:20px auto;">
+            <div style="padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;">✏️ Editar Usuario</div>
+                <button onclick="closeEditModal()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;line-height:1;">✕</button>
+            </div>
+            <div style="padding:24px;display:flex;flex-direction:column;gap:14px;">
+                <input type="hidden" id="eu-id">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div><label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Nombre completo</label>
+                        <input id="eu-name" type="text" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;"></div>
+                    <div><label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Email</label>
+                        <input id="eu-email" type="email" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;"></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div><label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Teléfono</label>
+                        <input id="eu-phone" type="tel" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;"></div>
+                    <div><label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Cédula</label>
+                        <input id="eu-doc" type="text" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;"></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div><label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Rol</label>
+                        <select id="eu-role" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
+                            <option value="client">client</option>
+                            <option value="p2p">p2p</option>
+                            <option value="admin">admin</option>
+                        </select></div>
+                    <div><label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Estado</label>
+                        <select id="eu-status" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
+                            <option value="active">✅ Activo</option>
+                            <option value="blocked">🚫 Bloqueado</option>
+                        </select></div>
+                </div>
+                <!-- Referido -->
+                <div><label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Referido por</label>
+                    <select id="eu-referrer" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
+                        <option value="none">Sin referido</option>
+                    </select></div>
+                <!-- Contraseña -->
+                <div><label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Nueva contraseña <span style="font-weight:400;text-transform:none;color:rgba(255,255,255,0.3);">(vacío = no cambiar)</span></label>
+                    <div style="position:relative;">
+                        <input id="eu-password" type="password" placeholder="••••••••" style="width:100%;padding:10px 40px 10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;font-family:'JetBrains Mono',monospace;outline:none;box-sizing:border-box;">
+                        <button onclick="togglePassVis()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:#888;padding:0;line-height:1;">👁️</button>
+                    </div></div>
+                <div style="display:flex;gap:10px;margin-top:4px;">
+                    <button onclick="saveEditUser()" id="eu-save-btn" style="flex:1;padding:12px;background:#C9A84C;color:#0a0a0f;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;">💾 Guardar Cambios</button>
+                    <button onclick="closeEditModal()" style="padding:12px 20px;background:rgba(255,255,255,0.05);color:#888;border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:13px;cursor:pointer;">Cancelar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1165,14 +1259,7 @@
                         <td style="font-size:12px;">${w.estimated_completion || '-'}</td>
                         <td style="color:var(--muted);font-size:12px;">${formatDate(w.created_at)}</td>
                         <td>
-                            ${w.status === 'pending' ? `
-                                <button class="btn btn-sm btn-gold" onclick="processWithdrawal(${w.id},'approve','${w.user_phone||w.pm_phone||''}','${w.user_name||''}',${w.amount},'${w.ref_id||''}')">Aprobar</button>
-                                <button class="btn btn-sm btn-red" onclick="processWithdrawal(${w.id},'reject')" style="margin-top:4px;">Rechazar</button>
-                            ` : w.status === 'approved' ? `
-                                <button class="btn btn-sm btn-gold" onclick="processWithdrawal(${w.id},'complete','${w.user_phone||w.pm_phone||''}','${w.user_name||''}',${w.amount},'${w.ref_id||''}')">Completar</button>
-                                <button class="btn btn-sm btn-red" onclick="processWithdrawal(${w.id},'reject')" style="margin-top:4px;">Rechazar</button>
-                                <button class="btn btn-sm" onclick="openWaModal('${w.user_phone||w.pm_phone||''}','retiro_aprobado','${w.user_name||''}',{amount:${w.amount},refId:'${w.ref_id||''}'})" style="margin-top:4px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.35);color:#25D366;">💬 WA</button>
-                            ` : `<span style="font-size:11px;color:var(--muted);">—</span>`}
+                            ${wrActionBtns(w)}
                         </td>
                     </tr>
                 `).join('');
@@ -1193,7 +1280,7 @@
         async function processWithdrawal(id, action, phone, userName, amount, refId) {
             const actionLabels = { approve: 'aprobar', reject: 'rechazar', complete: 'completar (transferencia realizada)' };
             const notes = action === 'reject' ? prompt('Motivo del rechazo (opcional):') : null;
-            if (notes === null && action === 'reject') return;
+            if (action === 'reject' && notes === null) return;
             if (!confirm(`¿Seguro que deseas ${actionLabels[action]} esta solicitud de retiro?`)) return;
 
             try {
@@ -1247,7 +1334,7 @@
                         <td style="color:var(--muted);font-size:12px;">${formatDate(l.created_at)}</td>
                         <td>
                             ${l.status === 'pending' ? `
-                                <button class="btn btn-sm btn-gold" onclick="processLoan(${l.id},'approve',${l.amount},'${(l.user_phone||'').replace(/'/g,String.fromCharCode(39))}','${(l.user_name||'').replace(/'/g,String.fromCharCode(39))}')">Aprobar</button>
+                                <button class="btn btn-sm btn-gold" onclick="processLoan(${l.id},'approve',${l.amount},String(l.user_phone||''),String(l.user_name||''))">Aprobar</button>
                                 <button class="btn btn-sm btn-red" onclick="processLoan(${l.id},'reject')" style="margin-top:4px;">Rechazar</button>
                             ` : l.status === 'active' ? `
                                 <button class="btn btn-sm btn-gold" onclick="processLoan(${l.id}, 'mark_paid')">✅ Pagado</button>
@@ -1334,12 +1421,7 @@
                         <td><span class="badge ${statusBadge[r.status]}">${statusLabels[r.status]}</span></td>
                         <td style="color:var(--muted);font-size:12px;">${formatDate(r.created_at)}</td>
                         <td>
-                            ${r.status === 'pending' ? `
-                                <button class="btn btn-sm btn-gold" onclick="processRegistration(${r.id},'approve','${r.phone||''}','${r.full_name||''}')">✅ Aprobar</button>
-                                <button class="btn btn-sm btn-red" onclick="processRegistration(${r.id},'reject')" style="margin-top:4px;">❌ Rechazar</button>
-                            ` : r.status==='approved' && r.phone ? `
-                                <button class="btn btn-sm" onclick="openWaModal('${r.phone||''}','registro','${r.full_name||''}',{})" style="background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.35);color:#25D366;">💬 WhatsApp</button>
-                            ` : '<span style="font-size:11px;color:var(--muted);">—</span>'
+                            ${regActionBtns(r)}
                         </td>
                     </tr>
                 `).join('');
@@ -1503,56 +1585,48 @@
             } catch(e) { toast('Error: ' + e.message, 'error'); }
         }
 
-        // ── WHATSAPP MODAL UNIFICADO ────────────────────────────────
+        // ══ WHATSAPP HELPERS ════════════════════════════════════════════
         const WA_TEMPLATES = {
-            registro: (name, _) =>
+            registro: (name) =>
                 `¡Hola ${name}! 👋\n\n` +
-                `Tu solicitud de registro en *Sanse Capital* ha sido *aprobada* ✅\n\n` +
-                `Ya puedes acceder a tu cuenta y comenzar a invertir.\n\n` +
-                `🌐 sansecapital.com\n\n` +
-                `Bienvenido/a a la familia Sanse 🚀`,
+                `Tu solicitud de registro en *Sanse Capital* fue *aprobada* ✅\n\n` +
+                `Ya puedes ingresar a tu cuenta y comenzar a invertir.\n\n` +
+                `🌐 sansecapital.co\n\nBienvenido/a a la familia Sanse 🚀`,
 
             deposito: (name, d) =>
                 `¡Hola ${name}! 👋\n\n` +
-                `Tu depósito en *Sanse Capital* ha sido *aprobado* ✅\n\n` +
+                `Tu depósito en *Sanse Capital* fue *aprobado* ✅\n\n` +
                 `💰 Monto: $${Math.round(d.amount||0).toLocaleString('es-CO')} COP\n` +
-                `🔖 Referencia: ${d.refId||'—'}\n\n` +
-                `Los fondos ya están disponibles en tu cuenta.\n\n` +
-                `Gracias por confiar en Sanse Capital 🏦`,
+                `🔖 Ref: ${d.refId||'—'}\n\n` +
+                `Los fondos ya están disponibles en tu cuenta.\n\nGracias por confiar en Sanse Capital 🏦`,
 
             retiro_aprobado: (name, d) =>
                 `¡Hola ${name}! 👋\n\n` +
-                `Tu solicitud de retiro en *Sanse Capital* ha sido *aprobada* ✅\n\n` +
+                `Tu solicitud de retiro fue *aprobada* ✅\n\n` +
                 `💸 Monto: $${Math.round(d.amount||0).toLocaleString('es-CO')} COP\n` +
-                `🔖 Referencia: ${d.refId||'—'}\n\n` +
-                `La transferencia está en proceso. Te notificaremos cuando se complete.\n\n` +
-                `Gracias por confiar en Sanse Capital 🏦`,
+                `🔖 Ref: ${d.refId||'—'}\n\n` +
+                `La transferencia está en proceso. Te avisaremos cuando se complete.\n\nGracias por confiar en Sanse Capital 🏦`,
 
             retiro_completado: (name, d) =>
                 `¡Hola ${name}! 👋\n\n` +
-                `Tu retiro de *Sanse Capital* ha sido *transferido* 💸✅\n\n` +
+                `Tu retiro de *Sanse Capital* fue *transferido* 💸✅\n\n` +
                 `💰 Monto: $${Math.round(d.amount||0).toLocaleString('es-CO')} COP\n` +
-                `🔖 Referencia: ${d.refId||'—'}\n\n` +
-                `El dinero ya está en camino a tu cuenta. Si tienes alguna duda, escríbenos.\n\n` +
-                `Gracias por confiar en Sanse Capital 🏦`,
+                `🔖 Ref: ${d.refId||'—'}\n\n` +
+                `El dinero ya está en camino a tu cuenta.\n\nGracias por confiar en Sanse Capital 🏦`,
 
             prestamo_aprobado: (name, d) =>
                 `¡Hola ${name}! 👋\n\n` +
-                `Tu solicitud de préstamo en *Sanse Capital* ha sido *aprobada* ✅\n\n` +
-                `💰 Monto aprobado: $${Math.round(d.amount||0).toLocaleString('es-CO')} COP\n` +
+                `Tu préstamo en *Sanse Capital* fue *aprobado* ✅\n\n` +
+                `💰 Monto: $${Math.round(d.amount||0).toLocaleString('es-CO')} COP\n` +
                 `📊 Tasa mensual: ${d.rate||4}%\n\n` +
-                `Los fondos serán acreditados en tu cuenta pronto.\n\n` +
-                `Gracias por confiar en Sanse Capital 🏦`,
+                `Los fondos serán acreditados en tu cuenta pronto.\n\nGracias por confiar en Sanse Capital 🏦`,
         };
 
-        let _waState = {};
-
         function openWaModal(phone, type, userName, data) {
-            if (!phone || phone === '—' || phone === 'undefined') {
+            if (!phone || phone === '—' || phone === 'undefined' || phone === '') {
                 toast('Este usuario no tiene teléfono registrado', 'error'); return;
             }
-            _waState = { phone, type, userName, data };
-            const tpl = WA_TEMPLATES[type] || WA_TEMPLATES['deposito'];
+            const tpl = WA_TEMPLATES[type] || WA_TEMPLATES.deposito;
             document.getElementById('wa-msg').value = tpl(userName, data);
             document.getElementById('wa-phone').value = phone;
             document.getElementById('wa-modal').style.display = 'flex';
@@ -1564,8 +1638,8 @@
             let phone = document.getElementById('wa-phone').value.replace(/[\s\-\+\(\)]/g, '');
             if (phone.startsWith('0')) phone = '57' + phone.slice(1);
             if (phone.length === 10 && phone.startsWith('3')) phone = '57' + phone;
-            const msg = document.getElementById('wa-msg').value;
-            if (!msg.trim()) { toast('El mensaje no puede estar vacío', 'error'); return; }
+            const msg = document.getElementById('wa-msg').value.trim();
+            if (!msg) { toast('El mensaje no puede estar vacío', 'error'); return; }
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
             closeWaModal();
         }
@@ -1575,8 +1649,264 @@
             openWaModal(phone, 'deposito', userName, { amount, refId });
         }
 
+        // ══ HELPER: Botones de acción para retiros (evita template literals anidados) ══
+        function wrActionBtns(w) {
+            const ph = encodeURIComponent(w.user_phone || w.pm_phone || '');
+            const nm = encodeURIComponent(w.user_name || '');
+            const ref = w.ref_id || '';
+            const amt = w.amount || 0;
+            if (w.status === 'pending') {
+                return `<button class="btn btn-sm btn-gold" onclick="processWithdrawal(${w.id},'approve',decodeURIComponent('${ph}'),decodeURIComponent('${nm}'),${amt},'${ref}')">Aprobar</button>
+                        <button class="btn btn-sm btn-red" style="margin-top:4px;" onclick="processWithdrawal(${w.id},'reject')">Rechazar</button>`;
+            } else if (w.status === 'approved') {
+                const waBtn = ph ? `<button class="btn btn-sm" style="margin-top:4px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.35);color:#25D366;" onclick="processWithdrawal(${w.id},'complete',decodeURIComponent('${ph}'),decodeURIComponent('${nm}'),${amt},'${ref}')">Completar</button>
+                        <button class="btn btn-sm" style="margin-top:4px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.35);color:#25D366;" onclick="openWaModal(decodeURIComponent('${ph}'),'retiro_aprobado',decodeURIComponent('${nm}'),{amount:${amt},refId:'${ref}'})">💬 WA</button>` : `<button class="btn btn-sm btn-gold" onclick="processWithdrawal(${w.id},'complete')">Completar</button>`;
+                return `${waBtn}<button class="btn btn-sm btn-red" style="margin-top:4px;" onclick="processWithdrawal(${w.id},'reject')">Rechazar</button>`;
+            }
+            return '<span style="font-size:11px;color:var(--muted);">—</span>';
+        }
+
+        // ══ HELPER: Botones de acción para registros ══════════════
+        function regActionBtns(r) {
+            const ph = encodeURIComponent(r.phone || '');
+            const nm = encodeURIComponent(r.full_name || '');
+            if (r.status === 'pending') {
+                return `<button class="btn btn-sm btn-gold" onclick="processRegistration(${r.id},'approve',decodeURIComponent('${ph}'),decodeURIComponent('${nm}'))">✅ Aprobar</button>
+                        <button class="btn btn-sm btn-red" style="margin-top:4px;" onclick="processRegistration(${r.id},'reject')">❌ Rechazar</button>`;
+            } else if (r.status === 'approved' && r.phone) {
+                return `<button class="btn btn-sm" style="background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.35);color:#25D366;" onclick="openWaModal(decodeURIComponent('${ph}'),'registro',decodeURIComponent('${nm}'),{})">💬 WhatsApp</button>`;
+            }
+            return '<span style="font-size:11px;color:var(--muted);">—</span>';
+        }
+
         // ====== INIT ======
         document.getElementById('t-date').valueAsDate = new Date();
+        document.getElementById('cl-date').valueAsDate = new Date();
+
+        // Switch tab for create-loan
+        const _origSwitchTab = switchTab;
+        function switchTab(tab, el) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => { t.classList.remove('active'); t.style.background=''; t.style.color=''; });
+            const sec = document.getElementById('sec-' + tab);
+            if (sec) sec.classList.add('active');
+            if (el) { el.classList.add('active'); el.style.background='var(--gold)'; el.style.color='#0a0a0f'; }
+            if (tab === 'users') loadUsers();
+            if (tab === 'loans') loadAdminLoans('all');
+            if (tab === 'deposits') loadAdminDeposits('all');
+            if (tab === 'withdrawals') loadAdminWithdrawals('all');
+            if (tab === 'registrations') loadAdminRegistrations('all');
+            if (tab === 'create-loan') populateLoanUserSelect();
+        }
+
+        // ══ EDIT USER MODAL ══════════════════════════════════════════
+        function populateReferrerSelect(currentReferredById) {
+            const sel = document.getElementById('eu-referrer');
+            sel.innerHTML = '<option value="none">Sin referido</option>';
+            allUsers.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.id;
+                opt.textContent = u.full_name + ' — ' + u.email;
+                if (u.id == currentReferredById) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        }
+
+        function openEditModal(jsonStr) {
+            const u = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
+            document.getElementById('eu-id').value       = u.id;
+            document.getElementById('eu-name').value     = u.full_name || '';
+            document.getElementById('eu-email').value    = u.email || '';
+            document.getElementById('eu-phone').value    = u.phone || '';
+            document.getElementById('eu-doc').value      = u.document_number || '';
+            document.getElementById('eu-role').value     = u.role || 'client';
+            document.getElementById('eu-status').value   = u.status || 'active';
+            document.getElementById('eu-password').value = '';
+            document.getElementById('eu-password').type  = 'password';
+            populateReferrerSelect(u.referred_by || null);
+            // Filter out self from referrer dropdown
+            const selfId = parseInt(u.id);
+            Array.from(document.getElementById('eu-referrer').options).forEach(opt => {
+                if (parseInt(opt.value) === selfId) opt.disabled = true;
+            });
+            const modal = document.getElementById('edit-user-modal');
+            modal.style.display = 'flex';
+        }
+
+        function closeEditModal() { document.getElementById('edit-user-modal').style.display = 'none'; }
+
+        function togglePassVis() {
+            const inp = document.getElementById('eu-password');
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+        }
+
+        async function saveEditUser() {
+            const id  = document.getElementById('eu-id').value;
+            const btn = document.getElementById('eu-save-btn');
+            const referredBy = document.getElementById('eu-referrer').value;
+            const body = {
+                fullName:       document.getElementById('eu-name').value.trim(),
+                email:          document.getElementById('eu-email').value.trim(),
+                phone:          document.getElementById('eu-phone').value.trim(),
+                documentNumber: document.getElementById('eu-doc').value.trim(),
+                role:           document.getElementById('eu-role').value,
+                status:         document.getElementById('eu-status').value,
+                referredBy:     referredBy === 'none' ? 'none' : referredBy,
+            };
+            const newPass = document.getElementById('eu-password').value;
+            if (newPass) {
+                if (newPass.length < 8) return toast('La contraseña debe tener al menos 8 caracteres', 'error');
+                body.password = newPass;
+            }
+            if (!body.fullName || !body.email) return toast('Nombre y email son obligatorios', 'error');
+
+            btn.disabled = true; btn.textContent = 'Guardando...';
+            try {
+                const res = await apiFetch(`/admin/users/${id}/edit`, { method: 'POST', body: JSON.stringify(body) });
+                const data = await res.json();
+                if (!res.ok) return toast(data.error || 'Error al guardar', 'error');
+                toast('✅ Usuario actualizado');
+                closeEditModal();
+                loadUsers();
+            } catch(e) { toast('Error: ' + e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = '💾 Guardar Cambios'; }
+        }
+
+        document.getElementById('edit-user-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeEditModal();
+        });
+
+        // ══ EDIT BUTTON IN USER TABLE ═════════════════════════════════
+        // Override loadUsers to add edit button (runs after allUsers is set)
+        const _origLoadUsers = loadUsers;
+        async function loadUsers() {
+            try {
+                const res = await apiFetch('/auth/users');
+                if (!res || !res.ok) { console.error('Error loading users'); return; }
+                const data = await res.json();
+                allUsers = data.users || [];
+
+                const tbody = document.getElementById('users-table');
+                if (!allUsers.length) {
+                    tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">No hay usuarios</td></tr>';
+                } else {
+                    tbody.innerHTML = allUsers.map(u => {
+                        const isBlocked = u.status === 'blocked';
+                        const safeData = encodeURIComponent(JSON.stringify({
+                            id: u.id, full_name: u.full_name, email: u.email,
+                            phone: u.phone || '', document_number: u.document_number || '',
+                            role: u.role, status: u.status || 'active', referred_by: u.referred_by || null
+                        }));
+                        const referrerName = u.referred_by ? (allUsers.find(x => x.id === u.referred_by)?.full_name || 'ID:' + u.referred_by) : '—';
+                        return `<tr style="${isBlocked ? 'opacity:0.6;background:rgba(239,68,68,0.05);' : ''}">
+                            <td class="mono">${u.id}</td>
+                            <td style="font-weight:600">${u.full_name}</td>
+                            <td style="color:var(--text2);font-size:12px;">${u.email}</td>
+                            <td class="mono" style="font-size:12px;">${u.document_number || '—'}</td>
+                            <td style="color:var(--text2);font-size:12px;">${u.phone || '—'}</td>
+                            <td style="font-size:11px;color:var(--text2);">${referrerName}</td>
+                            <td><span class="badge ${u.role==='admin'?'badge-gold':u.role==='institution'?'badge-purple':'badge-blue'}">${u.role}</span></td>
+                            <td><span class="badge ${isBlocked?'badge-red':'badge-green'}">${isBlocked ? '🚫 Bloqueado' : '✅ Activo'}</span></td>
+                            <td style="display:flex;gap:6px;flex-wrap:wrap;">
+                                <button class="btn btn-sm" style="background:rgba(201,168,76,0.15);color:#C9A84C;border:1px solid rgba(201,168,76,0.3);"
+                                    onclick='openEditModal(decodeURIComponent("${safeData}"))'>✏️ Editar</button>
+                                ${u.role !== 'admin' ? `<button class="btn btn-sm ${isBlocked?'btn-gold':'btn-red'}"
+                                    onclick="toggleBlockUser(${u.id},${isBlocked},'${u.full_name.replace(/'/g,"\\'")}')">
+                                    ${isBlocked ? '🔓' : '🚫'}</button>` : ''}
+                            </td>
+                        </tr>`;
+                    }).join('');
+                }
+
+                // Also add Referido column header if not present
+                const thead = document.querySelector('#users-table')?.closest('table')?.querySelector('thead tr');
+                if (thead && thead.children.length < 9) {
+                    const th = document.createElement('th');
+                    th.textContent = 'Referido';
+                    thead.insertBefore(th, thead.children[5]);
+                }
+
+                const sel = document.getElementById('t-user');
+                sel.innerHTML = '<option value="">Seleccionar usuario...</option>' +
+                    allUsers.map(u => `<option value="${u.id}">${u.full_name} — ${u.email}</option>`).join('');
+                document.getElementById('st-users').textContent = allUsers.length;
+                populateLoanUserSelect();
+            } catch(e) { console.error('loadUsers error:', e); }
+        }
+
+        // ══ CREATE LOAN ═══════════════════════════════════════════════
+        function populateLoanUserSelect() {
+            const sel = document.getElementById('cl-user');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">Seleccionar usuario...</option>' +
+                allUsers.map(u => `<option value="${u.id}">${u.full_name} — ${u.email}</option>`).join('');
+        }
+
+        function updateLoanPreview() {
+            const amount = parseFloat(document.getElementById('cl-amount').value) || 0;
+            const rate   = parseFloat(document.getElementById('cl-rate').value) || 0;
+            const term   = parseInt(document.getElementById('cl-term').value) || 0;
+            const preview = document.getElementById('cl-preview');
+
+            if (amount >= 100000 && rate > 0 && term > 0) {
+                const interest = amount * (rate / 100) * term;
+                const dueDate = new Date(document.getElementById('cl-date').value || new Date());
+                dueDate.setMonth(dueDate.getMonth() + term);
+
+                document.getElementById('clp-amount').textContent = formatCOP(amount);
+                document.getElementById('clp-rate').textContent = rate + '%';
+                document.getElementById('clp-interest').textContent = '+' + formatCOP(interest);
+                document.getElementById('clp-due').textContent = formatDate(dueDate);
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+
+        async function submitCreateLoan() {
+            const userId  = document.getElementById('cl-user').value;
+            const amount  = parseFloat(document.getElementById('cl-amount').value);
+            const term    = parseInt(document.getElementById('cl-term').value);
+            const rate    = parseFloat(document.getElementById('cl-rate').value);
+            const purpose = document.getElementById('cl-purpose').value.trim();
+            const notes   = document.getElementById('cl-notes').value.trim();
+            const date    = document.getElementById('cl-date').value;
+
+            if (!userId) return toast('Selecciona un usuario', 'error');
+            if (!amount || amount < 100000) return toast('Monto mínimo: $100.000 COP', 'error');
+            if (!rate || rate < 1) return toast('Ingresa una tasa mensual válida', 'error');
+
+            const userName = allUsers.find(u => u.id == userId)?.full_name || '';
+            if (!confirm(`¿Crear préstamo de ${formatCOP(amount)} COP para ${userName}?\n\nPlazo: ${term} meses | Tasa: ${rate}% mensual\n\nEl monto se acreditará inmediatamente en su balance.`)) return;
+
+            const btn = document.getElementById('btn-create-loan');
+            btn.disabled = true; btn.textContent = 'Creando...';
+            try {
+                const res = await apiFetch('/admin/loans/create', {
+                    method: 'POST',
+                    body: JSON.stringify({ userId, amount, termMonths: term, monthlyRate: rate, purpose, notes, startDate: date })
+                });
+                const data = await res.json();
+                if (!res.ok) return toast(data.error || 'Error creando préstamo', 'error');
+                toast(`✅ ${data.message}`);
+
+                // Limpiar form
+                document.getElementById('cl-amount').value = '';
+                document.getElementById('cl-purpose').value = '';
+                document.getElementById('cl-notes').value = '';
+                document.getElementById('cl-preview').style.display = 'none';
+                document.getElementById('cl-user').value = '';
+
+                // Preguntar si enviar WhatsApp
+                const phone = allUsers.find(u => u.id == userId)?.phone;
+                if (phone && confirm(`¿Enviar WhatsApp a ${userName} notificando el préstamo aprobado?`)) {
+                    openWaModal(phone, 'prestamo_aprobado', userName, { amount, rate });
+                }
+                loadStats();
+            } catch(e) { toast('Error: ' + e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = '🏦 Crear Préstamo'; }
+        }
+
         loadData();
     </script>
 </body>
