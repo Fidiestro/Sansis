@@ -527,41 +527,51 @@
 
 
         <!-- ====== CREAR PRÉSTAMO DIRECTO ====== -->
+        <!-- ====== CREAR PRÉSTAMO DIRECTO ====== -->
         <div class="section" id="sec-create-loan">
-            <div class="card">
+            <div class="card" style="max-width:680px;box-sizing:border-box;">
                 <div class="card-title">🏦 Registrar Préstamo Directo</div>
                 <div class="card-desc">Crea un préstamo activo para un usuario. El monto se acreditará en su balance inmediatamente.</div>
-                <div class="form-row">
-                    <div class="form-group"><label>Usuario *</label><select id="cl-user"><option value="">Seleccionar usuario...</option></select></div>
-                    <div class="form-group"><label>Monto (COP) *</label><input id="cl-amount" type="number" placeholder="1000000" min="100000" oninput="updateLoanPreview()"></div>
-                </div>
-                <div class="form-row cols-3">
-                    <div class="form-group"><label>Plazo *</label>
-                        <select id="cl-term" onchange="updateLoanPreview()">
-                            <option value="1">1 mes</option>
-                            <option value="2">2 meses</option>
-                            <option value="3" selected>3 meses</option>
-                            <option value="6">6 meses</option>
-                            <option value="12">12 meses</option>
-                        </select>
+                <div style="display:flex;flex-direction:column;gap:14px;margin-top:16px;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div class="form-group" style="margin:0;min-width:0;"><label>Usuario *</label>
+                            <select id="cl-user" style="width:100%;box-sizing:border-box;"><option value="">Seleccionar...</option></select>
+                        </div>
+                        <div class="form-group" style="margin:0;min-width:0;"><label>Monto (COP) *</label>
+                            <input id="cl-amount" type="number" placeholder="1000000" min="100000" oninput="updateLoanPreview()" style="width:100%;box-sizing:border-box;">
+                        </div>
                     </div>
-                    <div class="form-group"><label>Tasa mensual % *</label><input id="cl-rate" type="number" value="4" min="1" max="20" step="0.5" oninput="updateLoanPreview()"></div>
-                    <div class="form-group"><label>Fecha inicio</label><input id="cl-date" type="date"></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group"><label>Propósito</label><input id="cl-purpose" placeholder="Capital de trabajo, vehículo..."></div>
-                    <div class="form-group"><label>Notas internas</label><input id="cl-notes" placeholder="Notas para el expediente"></div>
-                </div>
-                <div id="cl-preview" style="display:none;background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.2);border-radius:10px;padding:16px;margin:16px 0;">
-                    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;">📋 Resumen del préstamo</div>
-                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
-                        <div><div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--gold);" id="clp-amount">$0</div><div style="font-size:10px;color:var(--muted);">Capital</div></div>
-                        <div><div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;" id="clp-rate">0%</div><div style="font-size:10px;color:var(--muted);">Tasa mensual</div></div>
-                        <div><div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--red);" id="clp-interest">$0</div><div style="font-size:10px;color:var(--muted);">Total intereses est.</div></div>
-                        <div><div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;" id="clp-due">—</div><div style="font-size:10px;color:var(--muted);">Vence el</div></div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                        <div class="form-group" style="margin:0;min-width:0;"><label>Plazo *</label>
+                            <select id="cl-term" onchange="updateLoanPreview()" style="width:100%;box-sizing:border-box;">
+                                <option value="1">1 mes</option><option value="2">2 meses</option>
+                                <option value="3" selected>3 meses</option><option value="6">6 meses</option><option value="12">12 meses</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin:0;min-width:0;"><label>Tasa mensual %</label>
+                            <input id="cl-rate" type="number" value="4" min="1" max="20" step="0.5" oninput="updateLoanPreview()" style="width:100%;box-sizing:border-box;">
+                        </div>
+                        <div class="form-group" style="margin:0;min-width:0;"><label>Fecha inicio</label>
+                            <input id="cl-date" type="date" style="width:100%;box-sizing:border-box;">
+                        </div>
                     </div>
+                    <div class="form-group" style="margin:0;"><label>Propósito</label>
+                        <input id="cl-purpose" placeholder="Capital de trabajo, vehículo..." style="width:100%;box-sizing:border-box;">
+                    </div>
+                    <div class="form-group" style="margin:0;"><label>Notas internas</label>
+                        <input id="cl-notes" placeholder="Notas para expediente (no visibles al cliente)" style="width:100%;box-sizing:border-box;">
+                    </div>
+                    <div id="cl-preview" style="display:none;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.25);border-radius:10px;padding:16px;">
+                        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;font-weight:600;">📋 Resumen</div>
+                        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;">
+                            <div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--gold);" id="clp-amount">$0</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">Capital</div></div>
+                            <div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;" id="clp-rate">0%</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">Tasa/mes</div></div>
+                            <div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--red);" id="clp-interest">$0</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">Intereses est.</div></div>
+                            <div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;" id="clp-due">—</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">Vence</div></div>
+                        </div>
+                    </div>
+                    <button class="btn btn-gold" onclick="submitCreateLoan()" id="btn-create-loan" style="align-self:flex-start;">🏦 Crear Préstamo</button>
                 </div>
-                <button class="btn btn-gold" onclick="submitCreateLoan()" id="btn-create-loan">🏦 Crear Préstamo</button>
             </div>
         </div>
 
