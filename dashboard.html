@@ -937,7 +937,7 @@
         // Check if user already has an active CDTC
         const activeCDTC = myInvestments.find(i => i.status === 'active' && i.type === 'CDTC');
         
-        if (activeSDTC) {
+        if (activeCDTC) {
             // Show warning with option to add capital instead
             const warningEl = document.getElementById('invest-active-warning');
             if (warningEl) {
@@ -946,11 +946,11 @@
                     <div style="background:rgba(91,141,239,0.1);border:1px solid rgba(91,141,239,0.3);padding:16px;margin-bottom:16px;">
                         <div style="font-weight:700;color:var(--blue);margin-bottom:8px;">⚠️ Ya tienes una inversión CDTC activa</div>
                         <div style="font-size:12px;color:var(--text-muted);line-height:1.6;">
-                            Tu inversión actual de <strong style="color:var(--gold)">${formatCOP(activeSDTC.amount)}</strong> vence el <strong>${formatDate(activeSDTC.lockEndDate || activeSDTC.endDate)}</strong>.<br>
+                            Tu inversión actual de <strong style="color:var(--gold)">${formatCOP(activeCDTC.amount)}</strong> vence el <strong>${formatDate(activeCDTC.lockEndDate || activeCDTC.endDate)}</strong>.<br>
                             Si creas una nueva, tendrá un <strong style="color:var(--red)">nuevo periodo de bloqueo de 6 meses</strong>.
                         </div>
                         <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
-                            <button onclick="closeInvestModal(); window._currentDetailInv = { id: ${activeSDTC.id}, amount: ${activeSDTC.amount}, lockEndDate: '${activeSDTC.lockEndDate || activeSDTC.endDate}', type: '${activeSDTC.type}' }; openAddCapitalModal();" 
+                            <button onclick="closeInvestModal(); window._currentDetailInv = { id: ${activeCDTC.id}, amount: ${activeCDTC.amount}, lockEndDate: '${activeCDTC.lockEndDate || activeCDTC.endDate}', type: '${activeCDTC.type}' }; openAddCapitalModal();" 
                                 style="padding:10px 20px;background:var(--blue);border:none;color:white;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;">
                                 ➕ Reinvertir en la Actual (mismo plazo)
                             </button>
