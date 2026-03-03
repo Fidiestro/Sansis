@@ -140,6 +140,10 @@
         .modal-close { background: none; border: 1px solid var(--border); color: var(--text-muted); width: 32px; height: 32px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
         .modal-close:hover { border-color: var(--red); color: var(--red); }
         .modal-body { padding: 24px; }
+        /* Plan selector chips */
+        .plan-opt { background: var(--dark-3,#1a1a24); border: 1px solid var(--border); border-radius: 10px; padding: 14px 10px; text-align: center; cursor: pointer; transition: all 0.25s; }
+        .plan-opt:hover { border-color: rgba(201,168,76,0.4); }
+        .plan-opt.selected { border-color: var(--gold); background: rgba(201,168,76,0.07); box-shadow: 0 0 16px rgba(201,168,76,0.12); }
         .modal-info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
         .modal-info-row .label { color: var(--text-muted); }
         .modal-info-row .value { font-weight: 600; color: var(--text); }
@@ -347,9 +351,38 @@
         </div>
         <div class="modal-body">
             <div id="invest-active-warning" style="display:none;"></div>
+
+            <!-- Selector de plazo -->
+            <div style="margin-bottom:20px;">
+                <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:10px;">Plazo del contrato</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;" id="plan-selector">
+                    <div class="plan-opt" data-plan="cdtc_3m" data-months="3" data-min="2" data-max="3" onclick="selectPlan(this)">
+                        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--gold);">3</div>
+                        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">meses</div>
+                        <div style="font-size:10px;color:var(--green);margin-top:6px;font-weight:600;">Rendimiento variable</div>
+                        <div style="font-size:9px;color:var(--text-muted);margin-top:3px;">+ 🌱 Sanse Score</div>
+                    </div>
+                    <div class="plan-opt selected" data-plan="cdtc_6m" data-months="6" data-min="2" data-max="4" onclick="selectPlan(this)">
+                        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--gold);">6</div>
+                        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">meses</div>
+                        <div style="font-size:10px;color:var(--green);margin-top:6px;font-weight:600;">Rendimiento variable</div>
+                        <div style="font-size:9px;background:var(--gold);color:var(--dark,#0a0a0f);padding:2px 6px;border-radius:99px;font-weight:700;margin-top:4px;display:inline-block;">POPULAR</div>
+                        <div style="font-size:9px;color:var(--text-muted);margin-top:3px;">+ 🌿 Mayor Score</div>
+                    </div>
+                    <div class="plan-opt" data-plan="cdtc_12m" data-months="12" data-min="2" data-max="4" onclick="selectPlan(this)">
+                        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--gold);">12</div>
+                        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">meses</div>
+                        <div style="font-size:10px;color:var(--green);margin-top:6px;font-weight:600;">Rendimiento variable</div>
+                        <div style="font-size:9px;color:var(--green);margin-top:3px;font-weight:600;">+ 🌳 Máximo Score</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nota dinámica por plan -->
+            <div id="plan-note" style="display:none;background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.15);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--text-muted);line-height:1.6;font-style:italic;"></div>
+
             <div class="modal-info-row"><span class="label">Producto</span><span class="value">Inversión CDTC</span></div>
-            <div class="modal-info-row"><span class="label">Plazo</span><span class="value">6 meses</span></div>
-            <div class="modal-info-row"><span class="label">Rendimiento mensual</span><span class="value gold">2% — 4% variable</span></div>
+            <div class="modal-info-row"><span class="label">Rendimiento</span><span class="value gold" id="modal-rate-display">Variable 2% — 4% mensual</span></div>
             <div class="modal-info-row"><span class="label">Monto mínimo</span><span class="value">$100.000 COP</span></div>
 
             <div class="invest-input-group">
@@ -364,13 +397,15 @@
             <div class="invest-preview" id="invest-preview" style="display:none;">
                 <div class="invest-preview-title">📋 Resumen de tu inversión</div>
                 <div class="invest-preview-row"><span class="label">Capital</span><span class="value" id="preview-capital">$0</span></div>
+                <div class="invest-preview-row"><span class="label">Plazo</span><span class="value" id="preview-plazo">—</span></div>
                 <div class="invest-preview-row"><span class="label">Desbloqueo estimado</span><span class="value" id="preview-unlock">—</span></div>
-                <div class="invest-preview-row"><span class="label">Ganancia mín. estimada (6m)</span><span class="value green" id="preview-min-gain">$0</span></div>
-                <div class="invest-preview-row"><span class="label">Ganancia máx. estimada (6m)</span><span class="value green" id="preview-max-gain">$0</span></div>
+                <div class="invest-preview-row"><span class="label">Ganancia mín. estimada*</span><span class="value green" id="preview-min-gain">$0</span></div>
+                <div class="invest-preview-row"><span class="label">Ganancia máx. estimada*</span><span class="value green" id="preview-max-gain">$0</span></div>
+                <div style="font-size:10px;color:var(--text-muted);margin-top:8px;line-height:1.5;">*Estimado con base en histórico 2%–4% mensual. No garantizado. Los rendimientos son variables.</div>
             </div>
 
             <button class="btn-invest" id="btn-invest" onclick="executeInvestment()" disabled>Confirmar Inversión →</button>
-            <p class="invest-disclaimer">⚠️ El capital quedará bloqueado por 6 meses. Los rendimientos son variables y no garantizados. Al confirmar, aceptas los Términos y Condiciones.</p>
+            <p class="invest-disclaimer" id="invest-disclaimer-text">⚠️ El capital quedará bloqueado por 6 meses. Los rendimientos son variables y no garantizados. Al confirmar, aceptas los Términos y Condiciones.</p>
         </div>
     </div>
 </div>
@@ -926,42 +961,76 @@
     }
 
     // ══════ INVEST MODAL ══════
+    // ══ PLAN SELECTOR ══
+    function selectPlan(el) {
+        document.querySelectorAll('.plan-opt').forEach(e => e.classList.remove('selected'));
+        el.classList.add('selected');
+        const months = el.dataset.months;
+        const noteEl = document.getElementById('plan-note');
+        if (months === '12') {
+            noteEl.style.display = 'block';
+            noteEl.textContent = 'Mayor compromiso = máximo puntaje Sanse Score y la mayor probabilidad histórica de capturar los mejores rendimientos del fondo. Los rendimientos son variables y no se garantizan.';
+        } else {
+            noteEl.style.display = 'none';
+        }
+        document.getElementById('modal-rate-display').textContent = 'Variable 2% — 4% mensual';
+        document.getElementById('invest-disclaimer-text').textContent =
+            `⚠️ El capital quedará bloqueado por ${months} meses. Los rendimientos son variables y no garantizados. Al confirmar, aceptas los Términos y Condiciones.`;
+        updateInvestPreview();
+    }
+
+    function getSelectedPlan() {
+        const el = document.querySelector('.plan-opt.selected');
+        if (!el) return { productId: 'cdtc_6m', months: 6, min: 2, max: 4 };
+        return {
+            productId: el.dataset.plan,
+            months: parseInt(el.dataset.months),
+            min: parseFloat(el.dataset.min),
+            max: parseFloat(el.dataset.max),
+        };
+    }
+
     function openInvestModal() {
-        // Check max 3 active
         const activeCount = myInvestments.filter(i => ['active','pending_deposit'].includes(i.status)).length;
         if (activeCount >= 3) {
             toast('Ya tienes 3 inversiones CDTC activas. Espera a que una termine o retírala.', 'error');
             return;
         }
 
-        // Check if user already has an active CDTC
         const activeCDTC = myInvestments.find(i => i.status === 'active' && i.type === 'CDTC');
-        
+        const warningEl = document.getElementById('invest-active-warning');
         if (activeCDTC) {
-            // Show warning with option to add capital instead
-            const warningEl = document.getElementById('invest-active-warning');
-            if (warningEl) {
-                warningEl.style.display = 'block';
-                warningEl.innerHTML = `
-                    <div style="background:rgba(91,141,239,0.1);border:1px solid rgba(91,141,239,0.3);padding:16px;margin-bottom:16px;">
-                        <div style="font-weight:700;color:var(--blue);margin-bottom:8px;">⚠️ Ya tienes una inversión CDTC activa</div>
-                        <div style="font-size:12px;color:var(--text-muted);line-height:1.6;">
-                            Tu inversión actual de <strong style="color:var(--gold)">${formatCOP(activeCDTC.amount)}</strong> vence el <strong>${formatDate(activeCDTC.lockEndDate || activeCDTC.endDate)}</strong>.<br>
-                            Si creas una nueva, tendrá un <strong style="color:var(--red)">nuevo periodo de bloqueo de 6 meses</strong>.
-                        </div>
-                        <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
-                            <button onclick="closeInvestModal(); window._currentDetailInv = { id: ${activeCDTC.id}, amount: ${activeCDTC.amount}, lockEndDate: '${activeCDTC.lockEndDate || activeCDTC.endDate}', type: '${activeCDTC.type}' }; openAddCapitalModal();" 
-                                style="padding:10px 20px;background:var(--blue);border:none;color:white;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;">
-                                ➕ Reinvertir en la Actual (mismo plazo)
-                            </button>
-                            <span style="font-size:11px;color:var(--text-muted);align-self:center;">o continúa abajo para crear una nueva</span>
-                        </div>
-                    </div>`;
-            }
+            const safeId = activeCDTC.id;
+            const safeAmt = activeCDTC.amount;
+            const safeLock = activeCDTC.lockEndDate || activeCDTC.endDate || '';
+            const safeType = activeCDTC.type || 'CDTC';
+            warningEl.style.display = 'block';
+            warningEl.innerHTML = `
+                <div style="background:rgba(91,141,239,0.1);border:1px solid rgba(91,141,239,0.3);padding:16px;margin-bottom:16px;border-radius:8px;">
+                    <div style="font-weight:700;color:var(--blue);margin-bottom:8px;">⚠️ Ya tienes una inversión CDTC activa</div>
+                    <div style="font-size:12px;color:var(--text-muted);line-height:1.6;">
+                        Tu inversión actual de <strong style="color:var(--gold)">${formatCOP(safeAmt)}</strong> vence el <strong>${formatDate(safeLock)}</strong>.
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+                        <button onclick="closeInvestModal(); window._currentDetailInv = { id: ${safeId}, amount: ${safeAmt}, lockEndDate: '${safeLock}', type: '${safeType}' }; openAddCapitalModal();"
+                            style="padding:10px 20px;background:var(--blue);border:none;color:white;border-radius:6px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;">
+                            ➕ Agregar capital a la actual
+                        </button>
+                        <span style="font-size:11px;color:var(--text-muted);align-self:center;">o crea una nueva abajo</span>
+                    </div>
+                </div>`;
         } else {
-            const warningEl = document.getElementById('invest-active-warning');
-            if (warningEl) warningEl.style.display = 'none';
+            warningEl.style.display = 'none';
         }
+
+        // Reset plan selector to 6m default
+        document.querySelectorAll('.plan-opt').forEach(e => e.classList.remove('selected'));
+        const defaultPlan = document.querySelector('.plan-opt[data-plan="cdtc_6m"]');
+        if (defaultPlan) defaultPlan.classList.add('selected');
+        document.getElementById('plan-note').style.display = 'none';
+        document.getElementById('modal-rate-display').textContent = 'Variable 2% — 4% mensual';
+        document.getElementById('invest-disclaimer-text').textContent =
+            '⚠️ El capital quedará bloqueado por 6 meses. Los rendimientos son variables y no garantizados. Al confirmar, aceptas los Términos y Condiciones.';
 
         document.getElementById('invest-available-display').textContent = formatCOP(balanceSummary.availableBalance);
         document.getElementById('invest-amount').value = '';
@@ -973,16 +1042,18 @@
 
     function updateInvestPreview() {
         const amount = parseFloat(document.getElementById('invest-amount').value) || 0;
+        const { months, min, max } = getSelectedPlan();
         const preview = document.getElementById('invest-preview');
         const btn = document.getElementById('btn-invest');
 
-        if (amount >= 100000 && amount <= balanceSummary.availableBalance) {
+        if (amount >= 100000 && amount <= (balanceSummary.availableBalance || Infinity)) {
             const unlockDate = new Date();
-            unlockDate.setMonth(unlockDate.getMonth() + 6);
-            const minGain = amount * 0.02 * 6;
-            const maxGain = amount * 0.04 * 6;
+            unlockDate.setMonth(unlockDate.getMonth() + months);
+            const minGain = amount * (min / 100) * months;
+            const maxGain = amount * (max / 100) * months;
 
             document.getElementById('preview-capital').textContent = formatCOP(amount);
+            document.getElementById('preview-plazo').textContent = `${months} meses`;
             document.getElementById('preview-unlock').textContent = formatDate(unlockDate);
             document.getElementById('preview-min-gain').textContent = '+' + formatCOP(minGain);
             document.getElementById('preview-max-gain').textContent = '+' + formatCOP(maxGain);
@@ -997,6 +1068,7 @@
 
     async function executeInvestment() {
         const amount = parseFloat(document.getElementById('invest-amount').value);
+        const { productId, months } = getSelectedPlan();
         const btn = document.getElementById('btn-invest');
         btn.disabled = true;
         btn.textContent = 'Procesando...';
@@ -1004,13 +1076,13 @@
         try {
             const res = await apiFetch('/investments/create', {
                 method: 'POST',
-                body: JSON.stringify({ productId: 'sdtc_6m', amount })
+                body: JSON.stringify({ productId, amount })
             });
             const data = await res.json();
             if (!res.ok) { toast(data.error || 'Error al invertir', 'error'); return; }
 
             closeInvestModal();
-            toast('✅ Inversión CDTC creada exitosamente');
+            toast(`✅ Inversión CDTC a ${months} meses creada exitosamente`);
             await loadAllData();
             renderCurrentView();
         } catch (e) {
