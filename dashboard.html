@@ -342,12 +342,12 @@
 <div class="modal-overlay" id="investModal">
     <div class="modal">
         <div class="modal-header">
-            <div class="modal-title">💰 Invertir en SDTC</div>
+            <div class="modal-title">💰 Invertir en CDTC</div>
             <button class="modal-close" onclick="closeInvestModal()">✕</button>
         </div>
         <div class="modal-body">
             <div id="invest-active-warning" style="display:none;"></div>
-            <div class="modal-info-row"><span class="label">Producto</span><span class="value">Inversión SDTC</span></div>
+            <div class="modal-info-row"><span class="label">Producto</span><span class="value">Inversión CDTC</span></div>
             <div class="modal-info-row"><span class="label">Plazo</span><span class="value">6 meses</span></div>
             <div class="modal-info-row"><span class="label">Rendimiento mensual</span><span class="value gold">2% — 4% variable</span></div>
             <div class="modal-info-row"><span class="label">Monto mínimo</span><span class="value">$100.000 COP</span></div>
@@ -383,7 +383,7 @@
             <button class="modal-close" onclick="closeAddCapitalModal()">✕</button>
         </div>
         <div class="modal-body">
-            <div class="modal-info-row"><span class="label">Inversión</span><span class="value" id="ac-inv-label">SDTC #—</span></div>
+            <div class="modal-info-row"><span class="label">Inversión</span><span class="value" id="ac-inv-label">CDTC #—</span></div>
             <div class="modal-info-row"><span class="label">Capital Actual</span><span class="value gold" id="ac-current">$0</span></div>
             <div class="modal-info-row"><span class="label">Fecha de Vencimiento</span><span class="value" id="ac-lock-date">—</span></div>
             <div style="background:var(--blue-bg);border:1px solid rgba(91,141,239,0.2);padding:12px 16px;margin-top:16px;font-size:12px;color:var(--blue);">
@@ -587,10 +587,10 @@
             <div style="background:linear-gradient(135deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 100%);border:1px solid rgba(201,168,76,0.15);padding:20px 24px;margin-bottom:16px;">
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
                     <span style="font-size:22px;">📜</span>
-                    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;">¿Qué es un SDTC?</div>
+                    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;">¿Qué es un CDTC?</div>
                 </div>
                 <div style="font-size:12px;color:var(--text-muted);line-height:1.7;">
-                    Un <strong style="color:var(--gold)">SDTC</strong> (Certificado de Depósito a Término — Sanse Capital) es un producto de inversión donde depositas un capital por un plazo fijo de <strong>6 meses</strong>. Durante ese tiempo tu dinero genera <strong style="color:var(--green)">rendimientos mensuales variables entre 2% y 4% (24% — 48% anual)</strong>, que se acumulan a tu inversión. Al vencer el plazo, puedes retirar tu capital más los rendimientos generados.
+                    Un <strong style="color:var(--gold)">CDTC</strong> (Certificado de Depósito a Término — Sanse Capital) es un producto de inversión donde depositas un capital por un plazo fijo de <strong>6 meses</strong>. Durante ese tiempo tu dinero genera <strong style="color:var(--green)">rendimientos mensuales variables entre 2% y 4% (24% — 48% anual)</strong>, que se acumulan a tu inversión. Al vencer el plazo, puedes retirar tu capital más los rendimientos generados.
                 </div>
             </div>
 
@@ -614,7 +614,7 @@
                 <div class="product-card-top">
                     <div class="product-header">
                         <div>
-                            <div class="product-name">Inversión SDTC</div>
+                            <div class="product-name">Inversión CDTC</div>
                             <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Certificado de Depósito a Término — Sanse Capital</div>
                         </div>
                         <span class="product-badge">${myInvestments.filter(i => ['active','pending_deposit'].includes(i.status)).length}/3 Activas</span>
@@ -679,7 +679,7 @@
                 <table class="data-table">
                     <thead><tr><th>Fecha</th><th>Tipo</th><th style="text-align:right">Monto</th></tr></thead>
                     <tbody>${d.transactions.slice(0, 8).map(tx => {
-                        const typeLabels = { deposit:'Depósito', profit:'Rendimiento', withdraw:'Retiro', payment:'Abono', interest:'Intereses', investment:'Inversión', investment_return:'Rendimiento SDTC', investment_withdrawal:'Retiro SDTC', loan:'Préstamo' };
+                        const typeLabels = { deposit:'Depósito', profit:'Rendimiento', withdraw:'Retiro', payment:'Abono', interest:'Intereses', investment:'Inversión', investment_return:'Rendimiento CDTC', investment_withdrawal:'Retiro CDTC', loan:'Préstamo' };
                         const badgeClass = { deposit:'badge-deposit', profit:'badge-profit', withdraw:'badge-withdraw', investment:'badge-investment', investment_return:'badge-deposit', investment_withdrawal:'badge-profit' };
                         const isNeg = tx.type === 'withdraw' || tx.type === 'investment';
                         return `<tr>
@@ -708,10 +708,10 @@
             <div style="background:linear-gradient(135deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 100%);border:1px solid rgba(201,168,76,0.15);padding:20px 24px;margin-bottom:16px;">
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
                     <span style="font-size:22px;">📜</span>
-                    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;">¿Qué es un SDTC?</div>
+                    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;">¿Qué es un CDTC?</div>
                 </div>
                 <div style="font-size:12px;color:var(--text-muted);line-height:1.7;">
-                    Un <strong style="color:var(--gold)">SDTC</strong> (Certificado de Depósito a Término — Sanse Capital) es un producto de inversión donde depositas un capital por un plazo fijo de <strong>6 meses</strong>. Durante ese tiempo tu dinero genera <strong style="color:var(--green)">rendimientos mensuales variables entre 2% y 4% (24% — 48% anual)</strong>, que se acumulan a tu inversión. Al vencer el plazo, puedes retirar tu capital más los rendimientos generados.
+                    Un <strong style="color:var(--gold)">CDTC</strong> (Certificado de Depósito a Término — Sanse Capital) es un producto de inversión donde depositas un capital por un plazo fijo de <strong>6 meses</strong>. Durante ese tiempo tu dinero genera <strong style="color:var(--green)">rendimientos mensuales variables entre 2% y 4% (24% — 48% anual)</strong>, que se acumulan a tu inversión. Al vencer el plazo, puedes retirar tu capital más los rendimientos generados.
                 </div>
             </div>
 
@@ -731,7 +731,7 @@
                 </div>
                 <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
                     <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--text);">${gs.totalActiveInvestments}</div>
-                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">📊 SDTC Activos</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">📊 CDTC Activos</div>
                 </div>
             </div>
 
@@ -739,7 +739,7 @@
                 <div class="product-card-top">
                     <div class="product-header">
                         <div>
-                            <div class="product-name">Inversión SDTC</div>
+                            <div class="product-name">Inversión CDTC</div>
                             <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Certificado de Depósito a Término — Sanse Capital</div>
                         </div>
                         <span class="product-badge">${activeCount}/3 Activas</span>
@@ -801,7 +801,7 @@
             <table class="data-table">
                 <thead><tr><th>Fecha</th><th>Descripción</th><th>Tipo</th><th style="text-align:right">Monto</th></tr></thead>
                 <tbody>${dashboardData.transactions.map(tx => {
-                    const typeLabels = { deposit:'Depósito', profit:'Rendimiento', withdraw:'Retiro', payment:'Abono', interest:'Intereses', investment:'Inversión', investment_return:'Rendimiento SDTC', investment_withdrawal:'Retiro SDTC', loan:'Préstamo' };
+                    const typeLabels = { deposit:'Depósito', profit:'Rendimiento', withdraw:'Retiro', payment:'Abono', interest:'Intereses', investment:'Inversión', investment_return:'Rendimiento CDTC', investment_withdrawal:'Retiro CDTC', loan:'Préstamo' };
                     const badgeClass = { deposit:'badge-deposit', profit:'badge-profit', withdraw:'badge-withdraw', investment:'badge-investment', investment_return:'badge-deposit', investment_withdrawal:'badge-profit' };
                     const isNeg = tx.type === 'withdraw' || tx.type === 'investment';
                     return `<tr>
@@ -930,12 +930,12 @@
         // Check max 3 active
         const activeCount = myInvestments.filter(i => ['active','pending_deposit'].includes(i.status)).length;
         if (activeCount >= 3) {
-            toast('Ya tienes 3 inversiones SDTC activas. Espera a que una termine o retírala.', 'error');
+            toast('Ya tienes 3 inversiones CDTC activas. Espera a que una termine o retírala.', 'error');
             return;
         }
 
-        // Check if user already has an active SDTC
-        const activeSDTC = myInvestments.find(i => i.status === 'active' && i.type === 'SDTC');
+        // Check if user already has an active CDTC
+        const activeCDTC = myInvestments.find(i => i.status === 'active' && i.type === 'CDTC');
         
         if (activeSDTC) {
             // Show warning with option to add capital instead
@@ -944,7 +944,7 @@
                 warningEl.style.display = 'block';
                 warningEl.innerHTML = `
                     <div style="background:rgba(91,141,239,0.1);border:1px solid rgba(91,141,239,0.3);padding:16px;margin-bottom:16px;">
-                        <div style="font-weight:700;color:var(--blue);margin-bottom:8px;">⚠️ Ya tienes una inversión SDTC activa</div>
+                        <div style="font-weight:700;color:var(--blue);margin-bottom:8px;">⚠️ Ya tienes una inversión CDTC activa</div>
                         <div style="font-size:12px;color:var(--text-muted);line-height:1.6;">
                             Tu inversión actual de <strong style="color:var(--gold)">${formatCOP(activeSDTC.amount)}</strong> vence el <strong>${formatDate(activeSDTC.lockEndDate || activeSDTC.endDate)}</strong>.<br>
                             Si creas una nueva, tendrá un <strong style="color:var(--red)">nuevo periodo de bloqueo de 6 meses</strong>.
@@ -1010,7 +1010,7 @@
             if (!res.ok) { toast(data.error || 'Error al invertir', 'error'); return; }
 
             closeInvestModal();
-            toast('✅ Inversión SDTC creada exitosamente');
+            toast('✅ Inversión CDTC creada exitosamente');
             await loadAllData();
             renderCurrentView();
         } catch (e) {
@@ -1078,7 +1078,7 @@
             if (!res.ok) { toast(data.error || 'Error al agregar capital', 'error'); return; }
 
             closeAddCapitalModal();
-            toast(`✅ ${formatCOP(amount)} agregado a tu inversión SDTC`);
+            toast(`✅ ${formatCOP(amount)} agregado a tu inversión CDTC`);
             await loadAllData();
             showInvestmentDetail(inv.id);
         } catch (e) {
@@ -1719,7 +1719,7 @@
             <div style="background:var(--dark-2);border:1px solid var(--border);padding:24px;margin-bottom:20px;">
                 <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:6px;">🏦 Solicitar Préstamo</div>
                 <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">
-                    Solicita un préstamo con base en tu Sanse Score. Monto: $100K — $10M COP. Plazo: 1, 2, 3 o 6 meses. Tasa: 4% mensual si tienes inversiones SDTC, 6% si no. Tu solicitud será revisada en 24-48 horas.
+                    Solicita un préstamo con base en tu Sanse Score. Monto: $100K — $10M COP. Plazo: 1, 2, 3 o 6 meses. Tasa: 4% mensual si tienes inversiones CDTC, 6% si no. Tu solicitud será revisada en 24-48 horas.
                 </div>
                 ${allLoans.some(l => l.status === 'pending') ? `
                     <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);padding:12px 16px;font-size:12px;color:var(--gold);">
@@ -1858,7 +1858,7 @@
             <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px;">📊 Desglose de Puntos</div>
             <div style="display:grid;gap:8px;margin-bottom:20px;">
                 ${Object.entries(bd).map(([key, val]) => {
-                    const labels = { antiguedad: '📅 Antigüedad', capital: '💰 Capital Depositado', inversiones: '🔒 Inversiones SDTC', prestamos: '🏦 Préstamos Pagados', actividad: '⚡ Actividad Reciente', balance: '💵 Balance Actual' };
+                    const labels = { antiguedad: '📅 Antigüedad', capital: '💰 Capital Depositado', inversiones: '🔒 Inversiones CDTC', prestamos: '🏦 Préstamos Pagados', actividad: '⚡ Actividad Reciente', balance: '💵 Balance Actual' };
                     const barPct = val.max > 0 ? Math.round((val.pts / val.max) * 100) : 0;
                     return `
                     <div style="background:var(--dark-2);border:1px solid var(--border);padding:14px 18px;">
@@ -1879,7 +1879,7 @@
                 <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:10px;">💡 Cómo Mejorar tu Score</div>
                 <div style="font-size:12px;color:var(--text-muted);line-height:2;">
                     ✅ Deposita capital regularmente (+20 pts por cada $500K)<br>
-                    ✅ Mantén inversiones SDTC activas (+50 pts cada una)<br>
+                    ✅ Mantén inversiones CDTC activas (+50 pts cada una)<br>
                     ✅ Paga tus préstamos a tiempo (+80 pts cada uno)<br>
                     ✅ Mantén un balance saludable (+20 pts por cada $1M)<br>
                     ✅ Usa la plataforma activamente (+10 pts por transacción reciente)<br>
@@ -2133,7 +2133,7 @@
             <div style="background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(78,203,141,0.04));border:1px solid var(--border);padding:24px;margin-bottom:20px;">
                 <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:10px;">🔗 Invita y Gana</div>
                 <div style="font-size:12px;color:var(--text-muted);line-height:1.8;margin-bottom:16px;">
-                    Comparte tu código con amigos. Cuando inviertan en SDTC, recibirás el <strong style="color:var(--gold);">5% de sus ganancias</strong>.
+                    Comparte tu código con amigos. Cuando inviertan en CDTC, recibirás el <strong style="color:var(--gold);">5% de sus ganancias</strong>.
                     Si solicitan un préstamo, recibirás el <strong style="color:var(--gold);">5% de los intereses</strong> que paguen.
                 </div>
                 <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
