@@ -356,20 +356,20 @@
             <div style="margin-bottom:20px;">
                 <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:10px;">Plazo del contrato</label>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;" id="plan-selector">
-                    <div class="plan-opt" data-plan="sdtc_3m" data-months="3" data-min="2" data-max="3" onclick="selectPlan(this)">
+                    <div class="plan-opt" data-plan="cdtc_3m" data-months="3" data-min="2" data-max="3" onclick="selectPlan(this)">
                         <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--gold);">3</div>
                         <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">meses</div>
                         <div style="font-size:10px;color:var(--green);margin-top:6px;font-weight:600;">Rendimiento variable</div>
                         <div style="font-size:9px;color:var(--text-muted);margin-top:3px;">+ 🌱 Sanse Score</div>
                     </div>
-                    <div class="plan-opt selected" data-plan="sdtc_6m" data-months="6" data-min="2" data-max="4" onclick="selectPlan(this)">
+                    <div class="plan-opt selected" data-plan="cdtc_6m" data-months="6" data-min="2" data-max="4" onclick="selectPlan(this)">
                         <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--gold);">6</div>
                         <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">meses</div>
                         <div style="font-size:10px;color:var(--green);margin-top:6px;font-weight:600;">Rendimiento variable</div>
                         <div style="font-size:9px;background:var(--gold);color:var(--dark,#0a0a0f);padding:2px 6px;border-radius:99px;font-weight:700;margin-top:4px;display:inline-block;">POPULAR</div>
                         <div style="font-size:9px;color:var(--text-muted);margin-top:3px;">+ 🌿 Mayor Score</div>
                     </div>
-                    <div class="plan-opt" data-plan="sdtc_12m" data-months="12" data-min="2" data-max="4" onclick="selectPlan(this)">
+                    <div class="plan-opt" data-plan="cdtc_12m" data-months="12" data-min="2" data-max="4" onclick="selectPlan(this)">
                         <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--gold);">12</div>
                         <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">meses</div>
                         <div style="font-size:10px;color:var(--green);margin-top:6px;font-weight:600;">Rendimiento variable</div>
@@ -618,7 +618,7 @@
         <div class="products-section animate-in delay-2">
             <div class="products-title">Productos de Inversión <span class="badge-new">Nuevo</span></div>
 
-            <!-- SDTC Explanation -->
+            <!-- CDTC Explanation -->
             <div style="background:linear-gradient(135deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 100%);border:1px solid rgba(201,168,76,0.15);padding:20px 24px;margin-bottom:16px;">
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
                     <span style="font-size:22px;">📜</span>
@@ -687,7 +687,7 @@
             ${myInvestments.filter(i => i.status === 'active' || i.status === 'pending_deposit').map(inv => `
                 <div class="inv-card" onclick="showInvestmentDetail(${inv.id})">
                     <div class="inv-card-header">
-                        <span class="inv-card-type">💰 ${inv.type} <span style="font-size:12px;color:var(--text-muted);font-weight:400;">— ${inv.durationMonths || 6} meses</span></span>
+                        <span class="inv-card-type">💰 CDTC <span style="font-size:12px;color:var(--text-muted);font-weight:400;">— ${inv.durationMonths || 6} meses</span></span>
                         <span class="inv-card-status ${inv.status}">${inv.status === 'pending_deposit' ? '⏳ En depósito' : 'Activa'}</span>
                     </div>
                     ${inv.status === 'pending_deposit' ? `<div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);padding:10px 14px;margin-bottom:12px;font-size:11px;color:#f59e0b;">⏱️ Período de depósito — Puedes cancelar en las próximas horas. <strong>Haz clic para ver opciones.</strong></div>` : ''}
@@ -739,7 +739,7 @@
         <div class="products-section animate-in">
             <div class="products-title">💰 Productos Disponibles</div>
 
-            <!-- SDTC Explanation -->
+            <!-- CDTC Explanation -->
             <div style="background:linear-gradient(135deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 100%);border:1px solid rgba(201,168,76,0.15);padding:20px 24px;margin-bottom:16px;">
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
                     <span style="font-size:22px;">📜</span>
@@ -810,7 +810,7 @@
             list.innerHTML = myInvestments.map(inv => `
                 <div class="inv-card" onclick="showInvestmentDetail(${inv.id})">
                     <div class="inv-card-header">
-                        <span class="inv-card-type">💰 ${inv.type} <span style="font-size:12px;color:var(--text-muted);font-weight:400;">— ${inv.durationMonths || 6} meses</span></span>
+                        <span class="inv-card-type">💰 CDTC <span style="font-size:12px;color:var(--text-muted);font-weight:400;">— ${inv.durationMonths || 6} meses</span></span>
                         <span class="inv-card-status ${inv.status}">${inv.status === 'pending_deposit' ? '⏳ En depósito' : inv.status === 'active' ? 'Activa' : inv.status === 'completed' ? 'Completada' : inv.status}</span>
                     </div>
                     ${inv.isPendingDeposit ? `<div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);padding:8px 12px;margin-bottom:10px;font-size:11px;color:#f59e0b;">⏱️ Período de depósito. Haz clic para cancelar o confirmar.</div>` : ''}
@@ -881,7 +881,7 @@
             <div class="detail-hero animate-in">
                 <div style="display:flex;justify-content:space-between;align-items:center;">
                     <div>
-                        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px;">Inversión ${inv.type}</div>
+                        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px;">Inversión CDTC</div>
                         <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--gold);">${formatCOP(inv.amount)}</div>
                     </div>
                     <span class="inv-card-status ${inv.status}" style="font-size:12px;padding:6px 14px;">${inv.status === 'active' ? '🟢 Activa' : inv.status === 'pending_deposit' ? '⏳ En depósito' : '✅ Completada'}</span>
@@ -981,7 +981,7 @@
 
     function getSelectedPlan() {
         const el = document.querySelector('.plan-opt.selected');
-        if (!el) return { productId: 'sdtc_6m', months: 6, min: 2, max: 4 };
+        if (!el) return { productId: 'cdtc_6m', months: 6, min: 2, max: 4 };
         return {
             productId: el.dataset.plan,
             months: parseInt(el.dataset.months),
@@ -997,13 +997,13 @@
             return;
         }
 
-        const activeCDTC = myInvestments.find(i => i.status === 'active' && i.type === 'CDTC');
+        const activeCDTC = myInvestments.find(i => i.status === 'active' && (i.type === 'CDTC' || i.type === 'SDTC'));
         const warningEl = document.getElementById('invest-active-warning');
         if (activeCDTC) {
             const safeId = activeCDTC.id;
             const safeAmt = activeCDTC.amount;
             const safeLock = activeCDTC.lockEndDate || activeCDTC.endDate || '';
-            const safeType = activeCDTC.type || 'CDTC';
+            const safeType = 'CDTC';
             warningEl.style.display = 'block';
             warningEl.innerHTML = `
                 <div style="background:rgba(91,141,239,0.1);border:1px solid rgba(91,141,239,0.3);padding:16px;margin-bottom:16px;border-radius:8px;">
@@ -1025,7 +1025,7 @@
 
         // Reset plan selector to 6m default
         document.querySelectorAll('.plan-opt').forEach(e => e.classList.remove('selected'));
-        const defaultPlan = document.querySelector('.plan-opt[data-plan="sdtc_6m"]');
+        const defaultPlan = document.querySelector('.plan-opt[data-plan="cdtc_6m"]');
         if (defaultPlan) defaultPlan.classList.add('selected');
         document.getElementById('plan-note').style.display = 'none';
         document.getElementById('modal-rate-display').textContent = 'Variable 2% — 4% mensual';

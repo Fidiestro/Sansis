@@ -186,7 +186,7 @@
             <div class="tab active" onclick="switchTab('register',this)">👤 Registrar</div>
             <div class="tab" onclick="switchTab('transactions',this)">💸 Transacción</div>
             <div class="tab" onclick="switchTab('returns',this)">📈 Rendimientos</div>
-            <div class="tab" onclick="switchTab('sdtc_overview',this)">🔒 SDTC</div>
+            <div class="tab" onclick="switchTab('sdtc_overview',this)">🔒 CDTC</div>
             <div class="tab" onclick="switchTab('loans',this)">🏦 Préstamos</div>
             <div class="tab" onclick="switchTab('create-loan',this)">➕ Crear Préstamo</div>
             <div class="tab" onclick="switchTab('deposits',this)">📥 Depósitos</div>
@@ -266,10 +266,10 @@
             </div>
         </div>
 
-        <!-- ====== RENDIMIENTOS SDTC ====== -->
+        <!-- ====== RENDIMIENTOS CDTC ====== -->
         <div class="section" id="sec-returns">
             <div class="card">
-                <div class="card-title">📈 Registrar Rendimiento SDTC</div>
+                <div class="card-title">📈 Registrar Rendimiento CDTC</div>
                 <div class="card-desc">
                     Selecciona una inversión activa y registra el rendimiento mensual. 
                     Se calculará automáticamente la ganancia y se reflejará en el dashboard del usuario.
@@ -336,10 +336,10 @@
             </div>
         </div>
 
-        <!-- ====== SDTC OVERVIEW ====== -->
+        <!-- ====== CDTC OVERVIEW ====== -->
         <div class="section" id="sec-sdtc_overview">
             <div class="card">
-                <div class="card-title">🔒 Panel SDTC — Vista General</div>
+                <div class="card-title">🔒 Panel CDTC — Vista General</div>
                 <div class="card-desc">Total de capital bloqueado, rentabilidad APY real, e inversiones próximas a vencer.</div>
 
                 <!-- Global Stats -->
@@ -373,7 +373,7 @@
                     </table>
                 </div>
 
-                <!-- All Active SDTC -->
+                <!-- All Active CDTC -->
                 <div style="margin:24px 0 16px;font-weight:700;font-size:15px;">📊 Todas las Inversiones Activas</div>
                 <div class="table-wrap">
                     <table>
@@ -785,7 +785,7 @@
                     tbody.innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center">No hay transacciones</td></tr>';
                     return;
                 }
-                const typeLabels = {deposit:'Depósito',withdraw:'Retiro',payment:'Abono',interest:'Intereses',profit:'Ganancias',loan:'Préstamo',investment:'Inversión',investment_return:'Rendimiento SDTC',investment_withdrawal:'Retiro SDTC'};
+                const typeLabels = {deposit:'Depósito',withdraw:'Retiro',payment:'Abono',interest:'Intereses',profit:'Ganancias',loan:'Préstamo',investment:'Inversión',investment_return:'Rendimiento CDTC',investment_withdrawal:'Retiro CDTC'};
                 const typeBadge = {deposit:'badge-green',withdraw:'badge-red',payment:'badge-blue',interest:'badge-gold',profit:'badge-green',loan:'badge-purple',investment:'badge-blue',investment_return:'badge-green',investment_withdrawal:'badge-gold'};
                 tbody.innerHTML = data.map(tx => `
                     <tr>
@@ -801,7 +801,7 @@
             } catch(e) { document.getElementById('tx-table').innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center">Sin datos</td></tr>'; }
         }
 
-        // ====== RENDIMIENTOS SDTC ======
+        // ====== RENDIMIENTOS CDTC ======
         async function loadActiveInvestments() {
             const container = document.getElementById('active-investments-list');
             const returnsTable = document.getElementById('returns-table');
@@ -815,7 +815,7 @@
                 activeInvestments = await res.json();
 
                 if (!activeInvestments.length) {
-                    container.innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px 0;">No hay inversiones activas. Los usuarios deben crear una inversión SDTC primero.</div>';
+                    container.innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px 0;">No hay inversiones activas. Los usuarios deben crear una inversión CDTC primero.</div>';
                     returnsTable.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">Sin rendimientos</td></tr>';
                     return;
                 }
@@ -1095,7 +1095,7 @@
             finally { btn.disabled = false; btn.textContent = '💸 Registrar Transacción'; }
         }
 
-        // ====== SDTC OVERVIEW ======
+        // ====== CDTC OVERVIEW ======
         async function loadSDTCOverview() {
             try {
                 // 1. Load global stats
@@ -1382,7 +1382,7 @@
             if (action === 'approve') {
                 approvedAmount = prompt(`Monto a aprobar (solicitado: $${Math.round(requestedAmount).toLocaleString('es-CO')}):`, requestedAmount);
                 if (approvedAmount === null) return;
-                approvedRate = prompt('Tasa mensual % (4 con inversiones SDTC, 6 sin inversiones):', '4');
+                approvedRate = prompt('Tasa mensual % (4 con inversiones CDTC, 6 sin inversiones):', '4');
                 if (approvedRate === null) return;
                 notes = prompt('Notas (opcional):');
             } else if (action === 'reject') {
