@@ -1636,9 +1636,12 @@
         let activeLoanHTML = '';
         if (activeLoans.length > 0) {
             const loan = activeLoans[0];
-            const capital = loan.approvedAmount || loan.amount;
+            const originalCapital = loan.amount; // Capital original del préstamo
+            const capital = (loan.approvedAmount != null && loan.approvedAmount >= 0) ? loan.approvedAmount : loan.amount; // Capital PENDIENTE
             const rate = loan.approvedRate || loan.monthlyRate || 3;
             const term = loan.term || 1;
+            const paidCapital = Math.max(0, originalCapital - capital);
+            const progressPct = originalCapital > 0 ? Math.min(100, Math.round((paidCapital / originalCapital) * 100)) : 0;
             const monthlyInterest = Math.round(capital * (rate / 100));
             const monthlyInstallment = Math.round(capital / term);
             const totalMonthlyPayment = monthlyInstallment + monthlyInterest;
@@ -1664,9 +1667,22 @@
                 </div>
 
                 <!-- Resumen del préstamo -->
+                <div style="background:var(--dark-3);padding:14px 16px;margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;">Progreso de Pago</div>
+                        <div style="font-size:11px;color:var(--green);font-weight:700;">${progressPct}% pagado</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.08);height:8px;border-radius:4px;overflow:hidden;margin-bottom:8px;">
+                        <div style="height:100%;width:${progressPct}%;background:linear-gradient(90deg,var(--green),#2ecc71);border-radius:4px;transition:width 0.5s;"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:11px;">
+                        <span style="color:var(--text-muted);">Pagado: <strong style="color:var(--green);font-family:'JetBrains Mono',monospace;">${formatCOP(paidCapital)}</strong></span>
+                        <span style="color:var(--text-muted);">Pendiente: <strong style="color:var(--gold);font-family:'JetBrains Mono',monospace;">${formatCOP(capital)}</strong></span>
+                    </div>
+                </div>
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
                     <div style="background:var(--dark-3);padding:12px;text-align:center;">
-                        <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Capital</div>
+                        <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Capital Pendiente</div>
                         <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--gold);">${formatCOP(capital)}</div>
                     </div>
                     <div style="background:var(--dark-3);padding:12px;text-align:center;">
@@ -1859,7 +1875,12 @@
             });
             const data = await res.json();
             if (!res.ok) return toast(data.error, 'error');
-            toast(`✅ Abono de ${formatCOP(amount)} registrado. ${data.message || ''}`);
+            if (data.payment?.isFullyPaid) {
+                toast(`🎉 ¡Préstamo pagado completamente! Felicitaciones.`, 'success');
+            } else {
+                const remaining = data.payment?.remainingCapital;
+                toast(`✅ Abono de ${formatCOP(amount)} registrado. Capital pendiente: ${formatCOP(remaining)}`);
+            }
             await loadAllData();
             renderLoansView(document.getElementById('dashboard-content'));
         } catch(e) { toast('Error de conexión', 'error'); }
