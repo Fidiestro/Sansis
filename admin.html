@@ -33,7 +33,7 @@
         .container { max-width:1100px; margin:0 auto; padding:32px 24px; }
 
         /* Stats */
-        .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+        .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:32px; }
         .stat-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:22px; text-align:center; }
         .stat-card .val { font-size:22px; font-weight:700; font-family:'JetBrains Mono',monospace; }
         .stat-card .val.green { color:var(--green); }
@@ -159,7 +159,6 @@
             .inv-card-details { gap:12px; }
         }
     </style>
-</head>
 <body>
     <div class="topbar">
         <div>
@@ -179,6 +178,8 @@
             <div class="stat-card"><div class="val green" id="st-balance">$0</div><div class="lbl">Balance en Ahorro</div></div>
             <div class="stat-card"><div class="val blue" id="st-loans">$0</div><div class="lbl">Préstamos Total</div></div>
             <div class="stat-card"><div class="val red" id="st-withdrawals">$0</div><div class="lbl">Retiros Total</div></div>
+            <div class="stat-card"><div class="val green" id="st-cdtc-earned">$0</div><div class="lbl">💰 Ganancias CDTC Pagadas</div></div>
+            <div class="stat-card"><div class="val gold" id="st-cdtc-locked">$0</div><div class="lbl">🔒 Capital CDTC Bloqueado</div></div>
         </div>
 
         <!-- TABS -->
@@ -381,6 +382,17 @@
                             <th>ID</th><th>Usuario</th><th>Capital</th><th>Tasa</th><th>Inicio</th><th>Vence</th><th>Progreso</th><th>Acciones</th>
                         </tr></thead>
                         <tbody id="sdtc-all-table"><tr><td colspan="8" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
+                    </table>
+                </div>
+
+                <!-- Ganancias por usuario -->
+                <div style="margin:24px 0 16px;font-weight:700;font-size:15px;">💰 Ganancias Otorgadas por Usuario</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr>
+                            <th>Usuario</th><th>Email</th><th>Capital Total</th><th>Inversiones</th><th>Rendimientos Pagados</th><th>Total Ganado</th><th>% Promedio</th>
+                        </tr></thead>
+                        <tbody id="sdtc-earnings-table"><tr><td colspan="7" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -699,8 +711,8 @@
         }
 
         // ====== FORMAT ======
-        function formatCOP(n) { return '$' + Math.round(Number(n)).toLocaleString('es-CO'); }
-        function formatDate(d) { return new Date(d).toLocaleDateString('es-CO', {day:'numeric',month:'short',year:'numeric'}); }
+        function formatCOP(n) { if (n === null || n === undefined || isNaN(Number(n))) return '—'; return '$' + Math.round(Number(n)).toLocaleString('es-CO'); }
+        function formatDate(d) { if (!d) return '—'; const dt = new Date(d); if (isNaN(dt.getTime())) return '—'; return dt.toLocaleDateString('es-CO', {day:'numeric',month:'short',year:'numeric'}); }
 
         // ====== DATA ======
         let allUsers = [];
@@ -773,6 +785,15 @@
                     document.getElementById('st-withdrawals').textContent = formatCOP(data.totalWithdrawals || 0);
                 }
             } catch(e) { console.log('Stats no disponibles aún'); }
+            // Cargar stats CDTC globales
+            try {
+                const gsRes = await apiFetch('/investments/global-stats');
+                if (gsRes && gsRes.ok) {
+                    const gs = await gsRes.json();
+                    document.getElementById('st-cdtc-earned').textContent = formatCOP(gs.totalEarnedGlobal || 0);
+                    document.getElementById('st-cdtc-locked').textContent = formatCOP(gs.totalLocked || 0);
+                }
+            } catch(e) { console.log('CDTC stats no disponibles'); }
         }
 
         async function loadRecentTransactions() {
@@ -1177,6 +1198,75 @@
                     }).join('');
                 }
             } catch(e) { console.error('loadSDTCOverview error:', e); }
+
+            // ── Tabla: Ganancias otorgadas por usuario ─────────────
+            try {
+                const invRes2 = await apiFetch('/admin/investments/active');
+                const earningsTbody = document.getElementById('sdtc-earnings-table');
+                if (!invRes2 || !invRes2.ok) {
+                    earningsTbody.innerHTML = '<tr><td colspan="7" style="color:var(--red);text-align:center">Error cargando datos</td></tr>';
+                    return;
+                }
+                const allInv = await invRes2.json();
+
+                if (!allInv.length) {
+                    earningsTbody.innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center">No hay inversiones</td></tr>';
+                    return;
+                }
+
+                // Agrupar por usuario
+                const byUser = {};
+                allInv.forEach(inv => {
+                    const uid = inv.user_id || inv.userId;
+                    if (!byUser[uid]) {
+                        byUser[uid] = {
+                            name: inv.user_name || inv.userName || ('ID:' + uid),
+                            email: inv.user_email || inv.userEmail || '—',
+                            totalCapital: 0,
+                            invCount: 0,
+                            totalReturns: 0,
+                            totalEarned: 0,
+                            rates: [],
+                        };
+                    }
+                    const u = byUser[uid];
+                    u.totalCapital += Number(inv.amount || 0);
+                    u.invCount++;
+                    const returns = inv.returns || [];
+                    u.totalReturns += returns.length;
+                    returns.forEach(r => {
+                        u.totalEarned += Number(r.earned || r.amountEarned || 0);
+                        if (r.rate) u.rates.push(Number(r.rate));
+                    });
+                    // totalEarned puede venir directo en el objeto
+                    if (!returns.length && inv.totalEarned) {
+                        u.totalEarned += Number(inv.totalEarned || 0);
+                    }
+                });
+
+                const rows = Object.values(byUser).sort((a, b) => b.totalEarned - a.totalEarned);
+
+                if (!rows.length) {
+                    earningsTbody.innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center">Sin datos</td></tr>';
+                    return;
+                }
+
+                earningsTbody.innerHTML = rows.map(u => {
+                    const avgRate = u.rates.length
+                        ? (u.rates.reduce((a, b) => a + b, 0) / u.rates.length).toFixed(2)
+                        : '—';
+                    return `<tr>
+                        <td style="font-weight:600">${u.name}</td>
+                        <td style="font-size:12px;color:var(--text2)">${u.email}</td>
+                        <td class="mono" style="color:var(--gold)">${formatCOP(u.totalCapital)}</td>
+                        <td style="text-align:center">${u.invCount}</td>
+                        <td style="text-align:center">${u.totalReturns}</td>
+                        <td class="mono" style="color:var(--green);font-weight:700">${formatCOP(u.totalEarned)}</td>
+                        <td><span class="badge badge-gold">${avgRate !== '—' ? avgRate + '%' : '—'}</span></td>
+                    </tr>`;
+                }).join('');
+
+            } catch(e) { console.error('sdtc earnings error:', e); }
         }
 
         async function adminCancelInvestment(invId, userName, amount) {
@@ -1353,7 +1443,7 @@
                         <td style="color:var(--muted);font-size:12px;">${formatDate(l.created_at)}</td>
                         <td>
                             ${l.status === 'pending' ? `
-                                <button class="btn btn-sm btn-gold" onclick="processLoan(${l.id},'approve',${l.amount},String(l.user_phone||''),String(l.user_name||''))">Aprobar</button>
+                                <button class="btn btn-sm btn-gold" onclick="processLoan(${l.id},'approve',${l.amount},'${(l.user_phone||'').replace(/'/g,"\\'")}','${(l.user_name||'').replace(/'/g,"\\'")}')">Aprobar</button>
                                 <button class="btn btn-sm btn-red" onclick="processLoan(${l.id},'reject')" style="margin-top:4px;">Rechazar</button>
                             ` : l.status === 'active' ? `
                                 <button class="btn btn-sm btn-gold" onclick="processLoan(${l.id}, 'mark_paid')">✅ Pagado</button>
@@ -1517,7 +1607,7 @@
                                 <button class="btn btn-sm btn-gold" onclick="processDeposit(${d.id}, 'approve', '${(d.user_phone||'').replace(/'/g,"\\'")}', '${(d.user_name||'').replace(/'/g,"\\'")}', ${d.amount}, '${d.ref_id}')">✅ Aprobar</button>
                                 <button class="btn btn-sm btn-red" onclick="processDeposit(${d.id}, 'reject')" style="margin-top:4px;">❌ Rechazar</button>
                             ` : d.status === 'approved' && d.user_phone ? `
-                                <button class="btn btn-sm btn-outline" onclick="sendDepositWhatsApp('${d.user_phone}', '${(d.user_name||'').replace(/'/g,"\\'")}', ${d.amount}, '${d.ref_id}')" style="background:rgba(37,211,102,0.1);border-color:rgba(37,211,102,0.3);color:#25D366;">💬 WhatsApp</button>
+                                <button class="btn btn-sm btn-outline" onclick="sendDepositWhatsApp('${(d.user_phone||'').replace(/'/g,"\\'")}', '${(d.user_name||'').replace(/'/g,"\\'")}', ${d.amount}, '${d.ref_id}')" style="background:rgba(37,211,102,0.1);border-color:rgba(37,211,102,0.3);color:#25D366;">💬 WhatsApp</button>
                             ` : '<span style="font-size:11px;color:var(--muted);">—</span>'}
                         </td>
                     </tr>
@@ -1746,7 +1836,11 @@
         async function saveEditUser() {
             const id  = document.getElementById('eu-id').value;
             const btn = document.getElementById('eu-save-btn');
-            const referredBy = document.getElementById('eu-referrer').value;
+            const referredByRaw = document.getElementById('eu-referrer').value;
+            // 'none' → null para limpiar el referido; cualquier ID → número entero
+            const referredBy = (referredByRaw === 'none' || referredByRaw === '' || referredByRaw === null)
+                ? null
+                : parseInt(referredByRaw, 10);
             const body = {
                 fullName:       document.getElementById('eu-name').value.trim(),
                 email:          document.getElementById('eu-email').value.trim(),
@@ -1754,7 +1848,7 @@
                 documentNumber: document.getElementById('eu-doc').value.trim(),
                 role:           document.getElementById('eu-role').value,
                 status:         document.getElementById('eu-status').value,
-                referredBy:     referredBy === 'none' ? 'none' : referredBy,
+                referredBy:     referredBy,
             };
             const newPass = document.getElementById('eu-password').value;
             if (newPass) {
