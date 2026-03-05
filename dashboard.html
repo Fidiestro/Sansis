@@ -469,7 +469,6 @@
             if (ok) { config.headers['Authorization'] = `Bearer ${getToken()}`; res = await fetch(`${API_URL}${endpoint}`, config); }
             else { logout(); return null; }
         }
-        // Usuario bloqueado
         if (res.status === 403) {
             try {
                 const data = await res.clone().json();
@@ -618,7 +617,6 @@
         <div class="products-section animate-in delay-2">
             <div class="products-title">Productos de Inversión <span class="badge-new">Nuevo</span></div>
 
-            <!-- CDTC Explanation -->
             <div style="background:linear-gradient(135deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 100%);border:1px solid rgba(201,168,76,0.15);padding:20px 24px;margin-bottom:16px;">
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
                     <span style="font-size:22px;">📜</span>
@@ -629,7 +627,6 @@
                 </div>
             </div>
 
-            <!-- Global Stats Bar -->
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
                 <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
                     <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);">${formatCOP(globalStats.totalLocked)}</div>
@@ -727,7 +724,6 @@
             </div>
         </div>`;
 
-        // Draw chart
         setTimeout(() => drawChart(d.balanceHistory), 100);
     }
 
@@ -739,7 +735,6 @@
         <div class="products-section animate-in">
             <div class="products-title">💰 Productos Disponibles</div>
 
-            <!-- CDTC Explanation -->
             <div style="background:linear-gradient(135deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 100%);border:1px solid rgba(201,168,76,0.15);padding:20px 24px;margin-bottom:16px;">
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
                     <span style="font-size:22px;">📜</span>
@@ -750,7 +745,6 @@
                 </div>
             </div>
 
-            <!-- Global Stats -->
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
                 <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
                     <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--gold);">${formatCOP(gs.totalLocked)}</div>
@@ -871,7 +865,6 @@
             const isActive = inv.status === 'active';
             const isPendingDeposit = inv.status === 'pending_deposit';
 
-            // Store for add-capital modal
             window._currentDetailInv = { id: invId, amount: inv.amount, lockEndDate: inv.lockEndDate || inv.endDate, type: inv.type };
 
             const content = document.getElementById('dashboard-content');
@@ -961,7 +954,6 @@
     }
 
     // ══════ INVEST MODAL ══════
-    // ══ PLAN SELECTOR ══
     function selectPlan(el) {
         document.querySelectorAll('.plan-opt').forEach(e => e.classList.remove('selected'));
         el.classList.add('selected');
@@ -1023,7 +1015,6 @@
             warningEl.style.display = 'none';
         }
 
-        // Reset plan selector to 6m default
         document.querySelectorAll('.plan-opt').forEach(e => e.classList.remove('selected'));
         const defaultPlan = document.querySelector('.plan-opt[data-plan="cdtc_6m"]');
         if (defaultPlan) defaultPlan.classList.add('selected');
@@ -1345,7 +1336,6 @@
         const statusLabels = { pending: '⏳ Pendiente', approved: '✅ Aprobado', rejected: '❌ Rechazado', completed: '💰 Completado' };
         const statusBadge = { pending: 'badge-profit', approved: 'badge-deposit', rejected: 'badge-withdraw', completed: 'badge-investment' };
 
-        // Calcular limite mensual usado
         const now = new Date();
         const thisMonthWithdrawals = userWithdrawals.filter(w => {
             const d = new Date(w.created_at);
@@ -1355,7 +1345,6 @@
         const monthlyRemaining = Math.max(0, 2000000 - monthlyUsed);
 
         container.innerHTML = `
-        <!-- Info Cards -->
         <div class="stats-grid animate-in" style="grid-template-columns:repeat(3,1fr);">
             <div class="stat-card">
                 <div class="stat-icon">💰</div>
@@ -1374,7 +1363,6 @@
             </div>
         </div>
 
-        <!-- Avisos -->
         <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px 20px;margin-bottom:20px;" class="animate-in delay-1">
             <div style="font-size:12px;color:var(--text-muted);line-height:1.8;">
                 ⏱️ <strong style="color:var(--text)">Retiros hasta $2.000.000/mes</strong> se procesan en <strong style="color:var(--gold)">24 horas o menos</strong><br>
@@ -1383,7 +1371,6 @@
             </div>
         </div>
 
-        <!-- Métodos de Pago -->
         <div style="background:var(--dark-2);border:1px solid var(--border);padding:24px;margin-bottom:20px;" class="animate-in delay-1">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                 <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;">💳 Métodos de Pago</div>
@@ -1405,7 +1392,6 @@
                 `).join('') : '<div style="text-align:center;padding:30px;color:var(--text-muted);font-size:13px;">No tienes métodos de pago registrados. Agrega uno para poder retirar.</div>'}
             </div>
 
-            <!-- Add payment method form (hidden) -->
             <div id="add-pm-form" style="display:none;margin-top:16px;padding:20px;background:var(--dark-3);border:1px solid var(--border);">
                 <div style="font-weight:700;font-size:14px;margin-bottom:16px;">Nuevo Método de Pago</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
@@ -1456,7 +1442,6 @@
             </div>
         </div>
 
-        <!-- Formulario de Retiro -->
         <div style="background:var(--dark-2);border:1px solid var(--border);padding:24px;margin-bottom:20px;" class="animate-in delay-2">
             <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;">📤 Solicitar Retiro</div>
             
@@ -1492,7 +1477,6 @@
             `}
         </div>
 
-        <!-- Historial de Retiros -->
         ${userWithdrawals.length > 0 ? `
         <div class="table-card animate-in delay-3">
             <div class="table-header"><span class="table-title">📋 Historial de Retiros</span></div>
@@ -1625,6 +1609,63 @@
         }
     }
 
+    // ══════════════════════════════════════════════════════════════
+    // PATCH FIX #4 — Cálculo seguro de datos de préstamos
+    // loan.approvedAmount puede ser null antes de aprobación
+    // term puede ser undefined → división por cero en monthlyInstallment
+    // ══════════════════════════════════════════════════════════════
+
+    function getLoanDisplayData(loan) {
+        const status = loan.status || 'pending';
+
+        // Capital solicitado original
+        const originalAmount = parseFloat(loan.amount) || 0;
+
+        // Capital pendiente: solo disponible si está activo/pagado y fue aprobado
+        // FIX: approved_amount es null mientras está 'pending' o 'rejected'
+        const pendingCapital = (loan.approvedAmount !== null && loan.approvedAmount !== undefined)
+            ? parseFloat(loan.approvedAmount)
+            : (status === 'active' || status === 'overdue' ? originalAmount : null);
+
+        // Tasa mensual efectiva
+        const monthlyRate = parseFloat(loan.approvedRate || loan.monthlyRate || 0);
+
+        // Plazo en meses — FIX: term puede ser undefined
+        const term = parseInt(loan.term) || 0;
+
+        // Interés mensual sobre el capital pendiente
+        const monthlyInterest = (pendingCapital !== null && monthlyRate > 0)
+            ? Math.round(pendingCapital * (monthlyRate / 100))
+            : 0;
+
+        // Cuota mensual estimada (capital / meses restantes + interés)
+        // FIX: evitar división por cero cuando term === 0
+        const monthlyInstallment = (pendingCapital !== null && term > 0)
+            ? Math.round(pendingCapital / term + monthlyInterest)
+            : null;
+
+        // Porcentaje pagado
+        const paidPercent = (originalAmount > 0 && pendingCapital !== null)
+            ? Math.max(0, Math.min(100, Math.round((1 - pendingCapital / originalAmount) * 100)))
+            : 0;
+
+        return {
+            originalAmount,
+            pendingCapital,
+            monthlyRate,
+            term,
+            monthlyInterest,
+            monthlyInstallment,
+            paidPercent,
+        };
+    }
+
+    // Helper de formateo COP seguro (acepta null/undefined → '—')
+    function formatCOPSafe(value) {
+        if (value === null || value === undefined || isNaN(value)) return '—';
+        return '$' + Math.round(value).toLocaleString('es-CO') + ' COP';
+    }
+
     // ══════ RENDER LOANS VIEW ══════
     function renderLoansView(container) {
         const allLoans = [...myLoans.loanRequests];
@@ -1632,21 +1673,22 @@
         const sc = creditScore || { total: 0, tier: 'Inicial' };
         const tierColors = { Platino: 'var(--purple)', Oro: 'var(--gold)', Plata: '#aaa', Bronce: '#cd7f32', Inicial: 'var(--text-muted)' };
 
-        // Calcular detalles de préstamo activo
         let activeLoanHTML = '';
         if (activeLoans.length > 0) {
             const loan = activeLoans[0];
-            const originalCapital = loan.amount; // Capital original del préstamo
-            const capital = (loan.approvedAmount != null && loan.approvedAmount >= 0) ? loan.approvedAmount : loan.amount; // Capital PENDIENTE
-            const rate = loan.approvedRate || loan.monthlyRate || 3;
-            const term = loan.term || 1;
+
+            // ── Usar getLoanDisplayData para cálculos seguros ──
+            const d = getLoanDisplayData(loan);
+            const originalCapital = d.originalAmount;
+            const capital = d.pendingCapital !== null ? d.pendingCapital : 0;
+            const rate = d.monthlyRate || 3;
+            const term = d.term || 1;
             const paidCapital = Math.max(0, originalCapital - capital);
-            const progressPct = originalCapital > 0 ? Math.min(100, Math.round((paidCapital / originalCapital) * 100)) : 0;
-            const monthlyInterest = Math.round(capital * (rate / 100));
-            const monthlyInstallment = Math.round(capital / term);
+            const progressPct = d.paidPercent;
+            const monthlyInterest = d.monthlyInterest;
+            const monthlyInstallment = d.monthlyInstallment !== null ? d.monthlyInstallment - monthlyInterest : Math.round(capital / term);
             const totalMonthlyPayment = monthlyInstallment + monthlyInterest;
 
-            // Calcular meses transcurridos y mora
             const startDate = loan.startDate ? new Date(loan.startDate) : new Date(loan.createdAt);
             const now = new Date();
             const monthsElapsed = Math.max(0, Math.floor((now - startDate) / (1000*60*60*24*30)));
@@ -1654,7 +1696,6 @@
             const isOverdue = loan.status === 'overdue' || (dueDate && now > dueDate);
             const daysLate = dueDate && now > dueDate ? Math.ceil((now - dueDate) / (1000*60*60*24)) : 0;
 
-            // Mora: 1% adicional sobre capital por cada mes de atraso
             const moraRate = isOverdue ? Math.ceil(daysLate / 30) : 0;
             const moraAmount = Math.round(capital * 0.01 * moraRate);
             const totalOwedThisMonth = isOverdue ? totalMonthlyPayment + moraAmount : totalMonthlyPayment;
@@ -1666,7 +1707,6 @@
                     <span style="font-size:12px;font-weight:600;color:${isOverdue ? 'var(--red)' : 'var(--green)'};">${isOverdue ? `${daysLate} días de atraso` : 'Al día'}</span>
                 </div>
 
-                <!-- Resumen del préstamo -->
                 <div style="background:var(--dark-3);padding:14px 16px;margin-bottom:12px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
                         <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;">Progreso de Pago</div>
@@ -1680,6 +1720,7 @@
                         <span style="color:var(--text-muted);">Pendiente: <strong style="color:var(--gold);font-family:'JetBrains Mono',monospace;">${formatCOP(capital)}</strong></span>
                     </div>
                 </div>
+
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
                     <div style="background:var(--dark-3);padding:12px;text-align:center;">
                         <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Capital Pendiente</div>
@@ -1687,39 +1728,38 @@
                     </div>
                     <div style="background:var(--dark-3);padding:12px;text-align:center;">
                         <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Tasa Mensual</div>
-                        <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--text);">${rate}%</div>
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--text);">${rate > 0 ? rate + '%' : '—'}</div>
                     </div>
                     <div style="background:var(--dark-3);padding:12px;text-align:center;">
                         <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Plazo</div>
-                        <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--text);">${term} mes${term>1?'es':''}</div>
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--text);">${term > 0 ? term + ' mes' + (term > 1 ? 'es' : '') : '—'}</div>
                     </div>
                 </div>
 
-                <!-- Desglose de pago mensual -->
                 <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;margin-bottom:16px;">
                     <div style="font-size:13px;font-weight:600;margin-bottom:10px;">💳 Desglose de Pago Este Mes</div>
                     <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);">
-                        <span style="color:var(--text-muted);">Cuota capital (${formatCOP(capital)} ÷ ${term})</span>
-                        <span style="font-family:'JetBrains Mono',monospace;">${formatCOP(monthlyInstallment)}</span>
+                        <span style="color:var(--text-muted);">Cuota capital (${formatCOP(capital)} ÷ ${term > 0 ? term : '—'})</span>
+                        <span style="font-family:'JetBrains Mono',monospace;">${term > 0 ? formatCOP(monthlyInstallment) : '—'}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);">
-                        <span style="color:var(--text-muted);">Intereses (${rate}% de ${formatCOP(capital)})</span>
-                        <span style="font-family:'JetBrains Mono',monospace;color:var(--gold);">${formatCOP(monthlyInterest)}</span>
+                        <span style="color:var(--text-muted);">Intereses (${rate > 0 ? rate + '%' : '—'} de ${formatCOP(capital)})</span>
+                        <span style="font-family:'JetBrains Mono',monospace;color:var(--gold);">${rate > 0 ? formatCOP(monthlyInterest) : '—'}</span>
                     </div>
                     ${isOverdue ? `
                     <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);">
-                        <span style="color:var(--red);">⚠️ Mora (1% × ${moraRate} mes${moraRate>1?'es':''})</span>
+                        <span style="color:var(--red);">⚠️ Mora (1% × ${moraRate} mes${moraRate > 1 ? 'es' : ''})</span>
                         <span style="font-family:'JetBrains Mono',monospace;color:var(--red);font-weight:700;">+${formatCOP(moraAmount)}</span>
                     </div>` : ''}
                     <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;font-weight:700;">
                         <span>TOTAL A PAGAR</span>
-                        <span style="font-family:'JetBrains Mono',monospace;color:${isOverdue ? 'var(--red)' : 'var(--green)'};">${formatCOP(totalOwedThisMonth)}</span>
+                        <span style="font-family:'JetBrains Mono',monospace;color:${isOverdue ? 'var(--red)' : 'var(--green)'};">${d.monthlyInstallment !== null ? formatCOP(totalOwedThisMonth) : '—'}</span>
                     </div>
                 </div>
 
-                <!-- Tabla de cuotas -->
                 <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;margin-bottom:16px;">
                     <div style="font-size:13px;font-weight:600;margin-bottom:10px;">📅 Plan de Cuotas</div>
+                    ${term > 0 ? `
                     <div style="overflow-x:auto;">
                     <table style="width:100%;border-collapse:collapse;font-size:12px;">
                         <thead><tr style="border-bottom:1px solid var(--border);">
@@ -1752,21 +1792,20 @@
                             <td></td>
                         </tr></tfoot>
                     </table>
-                    </div>
+                    </div>` : '<div style="padding:16px;color:var(--text-muted);font-size:12px;">Plazo no disponible aún.</div>'}
                 </div>
 
                 ${dueDate ? `<div style="font-size:11px;color:var(--text-muted);margin-bottom:16px;">📆 Fecha límite de pago total: <strong style="color:var(--text);">${dueDate.toLocaleDateString('es-CO', {day:'numeric', month:'long', year:'numeric'})}</strong></div>` : ''}
 
-                <!-- Opciones de abono -->
                 <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;margin-bottom:12px;">
                     <div style="font-size:13px;font-weight:600;margin-bottom:10px;">💰 Abonar a Préstamo</div>
                     <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;">Elige cuánto abonar: solo intereses, cuota completa, o un monto personalizado.</div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
                         <button onclick="setLoanPayment(${monthlyInterest})" style="padding:12px;background:var(--dark-3);border:1px solid var(--border);color:var(--gold);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">
-                            💡 Solo Intereses<br><strong style="font-family:'JetBrains Mono',monospace;font-size:14px;">${formatCOP(monthlyInterest)}</strong>
+                            💡 Solo Intereses<br><strong style="font-family:'JetBrains Mono',monospace;font-size:14px;">${rate > 0 ? formatCOP(monthlyInterest) : '—'}</strong>
                         </button>
                         <button onclick="setLoanPayment(${totalOwedThisMonth})" style="padding:12px;background:var(--dark-3);border:1px solid var(--border);color:var(--green);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">
-                            ✅ Cuota Completa${isOverdue ? ' + Mora' : ''}<br><strong style="font-family:'JetBrains Mono',monospace;font-size:14px;">${formatCOP(totalOwedThisMonth)}</strong>
+                            ✅ Cuota Completa${isOverdue ? ' + Mora' : ''}<br><strong style="font-family:'JetBrains Mono',monospace;font-size:14px;">${d.monthlyInstallment !== null ? formatCOP(totalOwedThisMonth) : '—'}</strong>
                         </button>
                     </div>
                     <div style="display:flex;gap:8px;">
@@ -1787,7 +1826,6 @@
 
         container.innerHTML = `
         <div class="animate-in">
-            <!-- Score mini -->
             <div style="background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(201,168,76,0.02));border:1px solid var(--border);padding:20px 24px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
                 <div>
                     <div style="font-size:13px;color:var(--text-muted);">Tu Sanse Score</div>
@@ -1802,7 +1840,6 @@
 
             ${activeLoanHTML}
 
-            <!-- Solicitar préstamo -->
             ${activeLoans.length === 0 ? `
             <div style="background:var(--dark-2);border:1px solid var(--border);padding:24px;margin-bottom:20px;">
                 <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:6px;">🏦 Solicitar Préstamo</div>
@@ -1832,23 +1869,24 @@
                 `}
             </div>` : ''}
 
-            <!-- Historial de préstamos (no activos) -->
             ${allLoans.filter(l => !['active','overdue'].includes(l.status)).length > 0 ? `
             <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px;">📋 Historial de Préstamos</div>
             ${allLoans.filter(l => !['active','overdue'].includes(l.status)).map(l => {
                 const statusLabels = { pending: '⏳ En Revisión', rejected: '❌ Rechazado', paid: '✅ Pagado', cancelled: '⚪ Cancelado' };
                 const statusColors = { pending: 'var(--gold)', rejected: 'var(--red)', paid: 'var(--blue)', cancelled: 'var(--text-muted)' };
-                const amt = l.approvedAmount || l.amount;
-                const rate = l.approvedRate || l.monthlyRate || 0;
+                // Usar getLoanDisplayData para mostrar montos de forma segura
+                const ld = getLoanDisplayData(l);
+                const displayAmt = ld.pendingCapital !== null ? ld.pendingCapital : ld.originalAmount;
+                const displayRate = ld.monthlyRate;
                 return `
                 <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px 20px;margin-bottom:10px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                        <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);">${formatCOP(amt)}</div>
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);">${formatCOP(displayAmt)}</div>
                         <span style="font-size:12px;font-weight:600;color:${statusColors[l.status]};">${statusLabels[l.status] || l.status}</span>
                     </div>
                     <div style="display:flex;gap:20px;font-size:12px;color:var(--text-muted);">
-                        ${rate ? `<span>📈 ${rate}% mensual</span>` : ''}
-                        <span>📅 ${l.term || '—'} meses</span>
+                        ${displayRate > 0 ? `<span>📈 ${displayRate}% mensual</span>` : ''}
+                        <span>📅 ${ld.term > 0 ? ld.term + ' meses' : '—'}</span>
                         <span>🔖 ${l.createdAt ? formatDate(l.createdAt) : '—'}</span>
                     </div>
                     ${l.adminNotes && l.status === 'rejected' ? `<div style="margin-top:8px;font-size:11px;color:var(--red);background:var(--red-bg);padding:8px 12px;">💬 ${l.adminNotes}</div>` : ''}
@@ -1918,7 +1956,6 @@
 
         container.innerHTML = `
         <div class="animate-in">
-            <!-- Hero Score -->
             <div style="background:linear-gradient(135deg,rgba(201,168,76,0.1) 0%,rgba(167,139,250,0.05) 100%);border:1px solid var(--border);padding:32px;text-align:center;margin-bottom:20px;">
                 <div style="font-size:14px;color:var(--text-muted);margin-bottom:8px;">Tu Sanse Score</div>
                 <div style="font-family:'JetBrains Mono',monospace;font-size:56px;font-weight:800;color:${tierColors[sc.tier]};line-height:1;">${sc.total}</div>
@@ -1929,7 +1966,6 @@
                 <div style="font-size:16px;font-weight:700;color:${tierColors[sc.tier]};">${tierEmojis[sc.tier]} Nivel ${sc.tier}</div>
             </div>
 
-            <!-- Airdrop Banner -->
             <div style="background:linear-gradient(135deg,rgba(78,203,141,0.08),rgba(91,141,239,0.05));border:1px solid rgba(78,203,141,0.2);padding:24px;margin-bottom:20px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;">
                     <div>
@@ -1947,7 +1983,6 @@
                 </div>
             </div>
 
-            <!-- Breakdown -->
             <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px;">📊 Desglose de Puntos</div>
             <div style="display:grid;gap:8px;margin-bottom:20px;">
                 ${Object.entries(bd).map(([key, val]) => {
@@ -1967,7 +2002,6 @@
                 }).join('')}
             </div>
 
-            <!-- Tips -->
             <div style="background:var(--dark-2);border:1px solid var(--border);padding:20px 24px;">
                 <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:10px;">💡 Cómo Mejorar tu Score</div>
                 <div style="font-size:12px;color:var(--text-muted);line-height:2;">
@@ -2029,7 +2063,6 @@
             if (loanRes && loanRes.ok) myLoans = await loanRes.json();
             if (scoreRes && scoreRes.ok) creditScore = await scoreRes.json();
 
-            // Fallback: si balance-summary no funciona todavía, calcular del dashboard
             if (!balRes || !balRes.ok) {
                 if (dashboardData) {
                     const totalInv = dashboardData.investments.filter(i => i.status === 'active').reduce((s, i) => s + i.amount, 0);
@@ -2042,7 +2075,6 @@
                 }
             }
 
-            // Fallback: si investments/my no funciona, usar del dashboard
             if (!invRes || !invRes.ok) {
                 if (dashboardData) {
                     myInvestments = dashboardData.investments.map(inv => ({
@@ -2124,7 +2156,6 @@
                 </button>
             </div>
 
-            <!-- Cambiar contraseña -->
             <div style="background:var(--dark-2);border:1px solid var(--border);padding:24px;margin-bottom:20px;">
                 <div style="font-size:13px;font-weight:600;margin-bottom:14px;">🔒 Cambiar Contraseña</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
@@ -2138,7 +2169,6 @@
                 </button>
             </div>
 
-            <!-- Info referido -->
             <div style="background:var(--dark-2);border:1px solid var(--border);padding:24px;">
                 <div style="font-size:13px;font-weight:600;margin-bottom:10px;">🔗 Mi Código de Referido</div>
                 <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
@@ -2203,7 +2233,6 @@
 
         container.innerHTML = `
         <div class="animate-in">
-            <!-- Stats -->
             <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
                 <div class="stat-card">
                     <div class="stat-icon">👥</div>
@@ -2222,7 +2251,6 @@
                 </div>
             </div>
 
-            <!-- Compartir -->
             <div style="background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(78,203,141,0.04));border:1px solid var(--border);padding:24px;margin-bottom:20px;">
                 <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:10px;">🔗 Invita y Gana</div>
                 <div style="font-size:12px;color:var(--text-muted);line-height:1.8;margin-bottom:16px;">
@@ -2239,7 +2267,6 @@
                 </div>
             </div>
 
-            <!-- Lista de referidos -->
             <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px;">👥 Mis Referidos</div>
             ${r.referrals.length === 0 ? `
                 <div style="text-align:center;padding:40px;color:var(--text-muted);font-size:13px;">Aún no tienes referidos. ¡Comparte tu código y empieza a ganar!</div>
