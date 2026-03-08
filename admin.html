@@ -159,6 +159,7 @@
             .inv-card-details { gap:12px; }
         }
     </style>
+</head>
 <body>
     <div class="topbar">
         <div>
@@ -653,7 +654,7 @@
 
         if (!getToken()) window.location.href = 'login.html';
         const userData = getUserData();
-        if (userData && userData.role !== 'admin') { alert('Acceso denegado. Solo administradores.'); window.location.href = 'dashboard.html'; }
+        if (userData && userData.role !== 'admin' && userData.role !== 'p2p') { alert('Acceso denegado. Solo administradores.'); window.location.href = 'dashboard.html'; }
 
         function logout() {
             ['sanse_access_token','sanse_refresh_token','sanse_user'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
@@ -875,7 +876,7 @@
                             </div>
                             <div class="inv-card-detail">
                                 <span class="label">Meses Pagados</span>
-                                <span class="value">${inv.returnsCount} / 6</span>
+                                <span class="value">${inv.returnsCount} / ${inv.durationMonths || inv.duration_months || '—'}</span>
                             </div>
                         </div>
                         ${inv.returns.length > 0 ? `
@@ -1064,10 +1065,6 @@
                 if (!res.ok) return toast(data.error, 'error');
 
                 if (initialBalance > 0) {
-                    await apiFetch('/admin/balance', {
-                        method:'POST',
-                        body: JSON.stringify({ userId: data.userId, balance: initialBalance })
-                    });
                     await apiFetch('/admin/transactions', {
                         method:'POST',
                         body: JSON.stringify({ userId: data.userId, type:'deposit', amount:initialBalance, description:'Balance inicial' })
@@ -1182,9 +1179,9 @@
                             <td class="mono">${inv.id}</td>
                             <td><strong>${inv.user_name || 'ID:'+inv.user_id}</strong></td>
                             <td class="mono" style="color:var(--gold);">${formatCOP(inv.amount)}</td>
-                            <td style="font-size:12px;">${inv.min_monthly_rate || 2}%—${inv.max_monthly_rate || 4}%</td>
-                            <td style="color:var(--muted)">${formatDate(inv.start_date)}</td>
-                            <td>${formatDate(inv.lock_end_date || inv.end_date)}</td>
+                            <td style="font-size:12px;">${inv.minMonthlyRate || 2}%—${inv.maxMonthlyRate || 4}%</td>
+                            <td style="color:var(--muted)">${formatDate(inv.startDate)}</td>
+                            <td>${formatDate(inv.lockEndDate || inv.endDate)}</td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:8px;">
                                     <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
@@ -1356,16 +1353,13 @@
                             <div style="font-size:11px;color:var(--text2);">${w.user_email || ''}</div>
                         </td>
                         <td class="mono" style="color:var(--red);font-weight:600;">-${formatCOP(w.amount)}</td>
-                        <td>${pmTypeNames[w.pm_type] || '—'}<br><span style="font-size:10px;color:var(--text2);">${w.pm_label || ''}</span></td>
+                        <td>🏦 ${w.bank_name || '—'}<br><span style="font-size:10px;color:var(--text2);">${w.account_type || ''}</span></td>
                         <td style="font-size:11px;font-family:'JetBrains Mono',monospace;">
-                            ${w.pm_phone ? '📱 ' + w.pm_phone : ''}
-                            ${w.pm_account ? '🏦 ' + w.pm_account : ''}
-                            ${w.pm_account_type ? ' (' + w.pm_account_type + ')' : ''}
-                            ${w.pm_holder ? '<br>👤 ' + w.pm_holder : ''}
-                            ${w.pm_holder_doc ? ' — CC ' + w.pm_holder_doc : ''}
+                            ${w.account_number ? '🔢 ' + w.account_number : ''}
+                            ${w.account_holder ? '<br>👤 ' + w.account_holder : ''}
                         </td>
                         <td><span class="badge ${statusBadge[w.status] || 'badge-gold'}">${statusLabels[w.status] || w.status}</span></td>
-                        <td style="font-size:12px;">${w.estimated_completion || '-'}</td>
+                        <td style="font-size:12px;color:var(--muted);">${w.status === 'pending' ? '24-48h' : w.status === 'approved' ? 'En proceso' : '—'}</td>
                         <td style="color:var(--muted);font-size:12px;">${formatDate(w.created_at)}</td>
                         <td>
                             ${wrActionBtns(w)}
