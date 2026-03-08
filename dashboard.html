@@ -1380,18 +1380,22 @@
             </div>
             
             <div id="payment-methods-list">
-                ${userPaymentMethods.length > 0 ? userPaymentMethods.map(pm => `
+                ${userPaymentMethods.length > 0 ? userPaymentMethods.map(pm => {
+                    const pmIcon = pm.type === 'nequi' ? '💜' : pm.type === 'daviplata' ? '🟢' : pm.type === 'bancolombia' ? '💛' : '🏦';
+                    const pmName = pm.type === 'nequi' ? 'Nequi' : pm.type === 'daviplata' ? 'Daviplata' : pm.type === 'bancolombia' ? 'Bancolombia' : 'Otro';
+                    const pmDetail = pm.phone || pm.account_number || '';
+                    return `
                     <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--dark-3);border:1px solid var(--border);margin-bottom:8px;${pm.is_default ? 'border-color:var(--gold);' : ''}">
                         <div style="display:flex;align-items:center;gap:12px;">
-                            <span style="font-size:20px;">🏦</span>
+                            <span style="font-size:20px;">${pmIcon}</span>
                             <div>
-                                <div style="font-weight:600;font-size:14px;">${pm.bank_name || pm.label || '—'} ${pm.is_default ? '<span style="font-size:10px;color:var(--gold);background:var(--gold-dim);padding:2px 8px;">DEFAULT</span>' : ''}</div>
-                                <div style="font-size:12px;color:var(--text-muted);">${pm.account_type || 'Ahorros'} · ${pm.account_number || pm.phone || ''} · ${pm.account_holder || ''}</div>
+                                <div style="font-weight:600;font-size:14px;">${pm.label} ${pm.is_default ? '<span style="font-size:10px;color:var(--gold);background:var(--gold-dim);padding:2px 8px;">DEFAULT</span>' : ''}</div>
+                                <div style="font-size:12px;color:var(--text-muted);">${pmName} · ${pmDetail} ${pm.account_type ? '(' + pm.account_type + ')' : ''}</div>
                             </div>
                         </div>
                         <button onclick="deletePaymentMethod(${pm.id})" style="background:none;border:1px solid var(--border);color:var(--text-muted);padding:6px 12px;font-size:11px;cursor:pointer;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">Eliminar</button>
-                    </div>
-                `).join('') : '<div style="text-align:center;padding:30px;color:var(--text-muted);font-size:13px;">No tienes métodos de pago registrados. Agrega uno para poder retirar.</div>'}
+                    </div>`;
+                }).join('') : '<div style="text-align:center;padding:30px;color:var(--text-muted);font-size:13px;">No tienes métodos de pago registrados. Agrega uno para poder retirar.</div>'}
             </div>
 
             <div id="add-pm-form" style="display:none;margin-top:16px;padding:20px;background:var(--dark-3);border:1px solid var(--border);">
@@ -1456,7 +1460,10 @@
                     <div style="display:flex;flex-direction:column;gap:6px;">
                         <label style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Método de Pago *</label>
                         <select id="wr-pm" style="padding:12px;background:var(--dark-3);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;outline:none;">
-                            ${userPaymentMethods.map(pm => `<option value="${pm.id}">🏦 ${pm.bank_name || pm.label || '—'} — ${pm.account_number || pm.phone || ''} (${pm.account_holder || ''})</option>`).join('')}
+                            ${userPaymentMethods.map(pm => {
+                                const pmIcon = pm.type === 'nequi' ? '💜' : pm.type === 'daviplata' ? '🟢' : pm.type === 'bancolombia' ? '💛' : '🏦';
+                                return `<option value="${pm.id}">${pmIcon} ${pm.label} — ${pm.phone || pm.account_number || ''}</option>`;
+                            }).join('')}
                         </select>
                     </div>
                     <div style="display:flex;flex-direction:column;gap:6px;">
@@ -1490,7 +1497,7 @@
                         <td style="font-family:'JetBrains Mono',monospace;color:var(--red);">-${formatCOP(w.amount)}</td>
                         <td>🏦 ${w.bankName || w.bank_name || '—'}</td>
                         <td><span class="badge ${statusBadge[w.status] || 'badge-profit'}">${statusLabels[w.status] || w.status}</span></td>
-                        <td style="font-size:12px;color:var(--text-muted);">${w.status === 'pending' ? '24-48h' : w.status === 'approved' ? 'En proceso' : '—'}</td>
+                        <td style="font-size:12px;color:var(--text-muted);">${w.status === 'pending' ? '24-48h' : w.status === 'approved' ? 'En proceso' : w.status === 'completed' ? '✅' : '—'}</td>
                         <td style="color:var(--text-muted)">${formatDate(w.createdAt || w.created_at)}</td>
                     </tr>
                 `).join('')}</tbody>
@@ -1521,21 +1528,17 @@
         const label = document.getElementById('pm-label').value.trim();
         if (!label) return toast('Ingresa un nombre para el método', 'error');
 
-        // Construir body compatible con el backend (bankName, accountNumber, accountType, accountHolder)
-        const body = {};
+        // Enviar campos nativos de la tabla payment_methods
+        const body = { type, label };
         if (type === 'nequi' || type === 'daviplata') {
-            const phone = document.getElementById('pm-phone').value.trim();
-            if (!phone || phone.length !== 10) return toast('Teléfono debe tener 10 dígitos', 'error');
-            body.bankName = type === 'nequi' ? 'Nequi' : 'Daviplata';
-            body.accountNumber = phone;
-            body.accountType = 'savings';
-            body.accountHolder = label;
+            body.phone = document.getElementById('pm-phone').value.trim();
+            if (!body.phone || body.phone.length !== 10) return toast('Teléfono debe tener 10 dígitos', 'error');
         } else if (type === 'bancolombia') {
             body.accountNumber = document.getElementById('pm-account').value.trim();
             body.accountType = document.getElementById('pm-account-type').value;
-            body.accountHolder = document.getElementById('pm-holder').value.trim();
-            body.bankName = 'Bancolombia';
-            if (!body.accountNumber || !body.accountHolder) return toast('Completa los datos de la cuenta', 'error');
+            body.holderName = document.getElementById('pm-holder').value.trim();
+            body.holderDocument = document.getElementById('pm-holder-doc').value.trim();
+            if (!body.accountNumber || !body.holderName) return toast('Completa los datos de la cuenta', 'error');
         }
 
         try {
@@ -1603,13 +1606,14 @@
         btn.textContent = 'Procesando...';
 
         try {
-            // El backend espera bankName, accountNumber, accountType, accountHolder
+            // Mapear campos nativos de payment_methods → campos que withdrawal_requests espera
+            const pmTypeName = pm.type === 'nequi' ? 'Nequi' : pm.type === 'daviplata' ? 'Daviplata' : pm.type === 'bancolombia' ? 'Bancolombia' : pm.label;
             const body = {
                 amount,
-                bankName: pm.bank_name || pm.label || 'Sin especificar',
+                bankName: pmTypeName,
                 accountNumber: pm.account_number || pm.phone || '',
                 accountType: pm.account_type || 'savings',
-                accountHolder: pm.account_holder || pm.holder_name || pm.label || '',
+                accountHolder: pm.holder_name || pm.label || '',
             };
             const res = await apiFetch('/withdrawals/request', {
                 method: 'POST',
