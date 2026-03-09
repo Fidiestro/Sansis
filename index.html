@@ -1,10 +1,71 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" prefix="og: https://ogp.me/ns#">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sanse Capital — Gestión Responsable de Inversiones</title>
-  <meta name="description" content="Sanse Capital SAS · Sociedad de gestión de inversiones privadas en Colombia. Gestión responsable del riesgo con trazabilidad on-chain.">
+
+  <!-- ═══ SEO PRIMARIO ═══ -->
+  <title>Sanse Capital — Inversiones Privadas con Rendimientos Verificables en Colombia</title>
+  <meta name="description" content="Sanse Capital SAS: sociedad de gestión de inversiones privadas en Bogotá, Colombia. Rendimientos históricos del 13.5% al 42% anual, trazabilidad 100% on-chain y contratos de mandato civil. Abre tu cuenta hoy.">
+  <meta name="keywords" content="inversiones privadas Colombia, fondo de inversión Bogotá, rendimientos cripto Colombia, CDTC inversión, préstamos privados Colombia, Sanse Capital">
+  <meta name="author" content="Sanse Capital SAS">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="googlebot" content="index, follow">
+  <link rel="canonical" href="https://sansecapital.com/">
+
+  <!-- ═══ OPEN GRAPH (Facebook, WhatsApp, LinkedIn) ═══ -->
+  <meta property="og:type"        content="website">
+  <meta property="og:url"         content="https://sansecapital.com/">
+  <meta property="og:title"       content="Sanse Capital — Inversiones Privadas en Colombia">
+  <meta property="og:description" content="Gestión transparente de inversiones privadas con rendimientos verificables en blockchain. Desde 13.5% hasta 42% anual histórico. Bogotá, Colombia.">
+  <meta property="og:image"       content="https://sansecapital.com/favicon-192.png">
+  <meta property="og:image:width" content="192">
+  <meta property="og:image:height"content="192">
+  <meta property="og:image:alt"   content="Logo Sanse Capital">
+  <meta property="og:locale"      content="es_CO">
+  <meta property="og:site_name"   content="Sanse Capital">
+
+  <!-- ═══ TWITTER CARD ═══ -->
+  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:title"       content="Sanse Capital — Inversiones Privadas en Colombia">
+  <meta name="twitter:description" content="Gestión transparente con trazabilidad on-chain. Rendimientos históricos del 13.5% al 42% anual.">
+  <meta name="twitter:image"       content="https://sansecapital.com/favicon-192.png">
+
+  <!-- ═══ SCHEMA.ORG — Datos estructurados para Google ═══ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FinancialService",
+    "name": "Sanse Capital SAS",
+    "url": "https://sansecapital.com",
+    "logo": "https://sansecapital.com/favicon-192.png",
+    "description": "Sociedad de gestión de inversiones privadas en Colombia con trazabilidad on-chain y contratos de mandato civil.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Bogotá",
+      "addressCountry": "CO"
+    },
+    "areaServed": "CO",
+    "serviceType": ["Inversiones privadas", "Préstamos entre particulares", "Gestión de activos digitales"],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "availableLanguage": "Spanish"
+    }
+  }
+  </script>
+
+  <!-- ═══ FAVICONS ═══ -->
+  <link rel="icon"             type="image/x-icon"   href="favicon.ico">
+  <link rel="icon"             type="image/png" sizes="32x32"   href="favicon-32.png">
+  <link rel="icon"             type="image/png" sizes="192x192" href="favicon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192"                  href="favicon-192.png">
+
+  <!-- ═══ PERFORMANCE ═══ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://rpc.ankr.com">
+  <link rel="dns-prefetch" href="https://api.coingecko.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <style>
     /* ═══ RESET & VARIABLES ═══ */
@@ -752,7 +813,7 @@
 <body>
 
 <!-- ══════════════ NAV ══════════════ -->
-<nav>
+<nav role="navigation" aria-label="Navegación principal">
   <a class="nav-logo" href="#inicio">SANSE <span>CAPITAL</span></a>
   <ul class="nav-links">
     <li><a href="#inicio">Inicio</a></li>
@@ -786,8 +847,8 @@
   </div>
 </div>
 
-<!-- ══════════════ HERO ══════════════ -->
-<section id="inicio" style="padding-top:0;">
+<main id="main-content">
+<section id="inicio" aria-label="Inicio" style="padding-top:0;">
   <div class="hero">
     <p class="hero-label">Sanse Capital SAS · Bogotá, Colombia</p>
     <h1>Gestión<br/>Responsable<br/>de <em>Inversiones</em></h1>
@@ -831,7 +892,7 @@
 </div>
 
 <!-- ══════════════ ACTIVOS ══════════════ -->
-<section id="wallet">
+<section id="wallet" aria-label="Activos del Fondo">
   <div class="section-inner fade-in">
     <p class="section-label">Transparencia en Vivo</p>
     <h2 class="section-title">Activos del <em>Fondo</em></h2>
@@ -879,7 +940,7 @@
 </section>
 
 <!-- ══════════════ MODELO ══════════════ -->
-<section id="modelo">
+<section id="modelo" aria-label="Cómo Funciona">
   <div class="section-inner fade-in">
     <p class="section-label">Nuestro Modelo</p>
     <h2 class="section-title">Cómo <em>Funciona</em></h2>
@@ -919,7 +980,7 @@
 </section>
 
 <!-- ══════════════ SERVICIOS ══════════════ -->
-<section id="servicios">
+<section id="servicios" aria-label="Servicios">
   <div class="section-inner fade-in">
     <p class="section-label">Nuestros Servicios</p>
     <h2 class="section-title">Productos <em>Disponibles</em></h2>
@@ -979,7 +1040,7 @@
 </section>
 
 <!-- ══════════════ QUIÉNES SOMOS ══════════════ -->
-<section id="quienes">
+<section id="quienes" aria-label="Quiénes Somos">
   <div class="section-inner fade-in">
     <p class="section-label">Nuestro Equipo</p>
     <h2 class="section-title">Quiénes <em>Somos</em></h2>
@@ -1039,7 +1100,7 @@
 </section>
 
 <!-- ══════════════ CALCULADORA ══════════════ -->
-<section id="calculadora">
+<section id="calculadora" aria-label="Calculadora de Rendimientos">
   <div class="section-inner fade-in">
     <p class="section-label">Herramienta</p>
     <h2 class="section-title">Calculadora de <em>Rendimientos</em></h2>
@@ -1079,7 +1140,7 @@
 </section>
 
 <!-- ══════════════ FAQ ══════════════ -->
-<section id="faq">
+<section id="faq" aria-label="Preguntas Frecuentes">
   <div class="section-inner fade-in" style="max-width:760px;">
     <p class="section-label">Preguntas Frecuentes</p>
     <h2 class="section-title">Resolvemos tus <em>Dudas</em></h2>
@@ -1131,8 +1192,10 @@
   </div>
 </section>
 
+</main>
+
 <!-- ══════════════ FOOTER ══════════════ -->
-<footer>
+<footer role="contentinfo">
   <div class="footer-row">
     <div>
       <a class="nav-logo" href="#inicio">SANSE <span>CAPITAL</span></a>
