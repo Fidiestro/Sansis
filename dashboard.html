@@ -551,6 +551,10 @@
         const b = balanceSummary;
         const investedPct = b.totalBalance > 0 ? Math.round((b.totalInvested / b.totalBalance) * 100) : 0;
         const availablePct = 100 - investedPct;
+        const activeInvList = myInvestments.filter(i => i.status === 'active' || i.status === 'pending_deposit');
+        // APY promedio real basado en rendimientos pagados
+        const gs = globalStats;
+        const apyDisplay = gs.apyReal > 0 ? gs.apyReal.toFixed(1) + '% APY Real' : (gs.apyMin || 26.8) + '% — ' + (gs.apyMax || 60.1) + '% APY Est.';
 
         container.innerHTML = `
         <!-- Balance Hero -->
@@ -594,94 +598,38 @@
             </div>
         </div>
 
-        <!-- Stats -->
-        <div class="stats-grid animate-in delay-1">
+        <!-- Acciones Rápidas -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;" class="animate-in delay-1">
+            <button onclick="showView('deposit')" style="padding:18px 16px;background:var(--dark-2);border:1px solid rgba(78,203,141,0.25);color:var(--green);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;text-align:center;" onmouseover="this.style.background='var(--green)';this.style.color='var(--dark)'" onmouseout="this.style.background='var(--dark-2)';this.style.color='var(--green)'">
+                📥 Depositar
+            </button>
+            <button onclick="showView('withdraw')" style="padding:18px 16px;background:var(--dark-2);border:1px solid rgba(231,76,94,0.25);color:var(--red);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;text-align:center;" onmouseover="this.style.background='var(--red)';this.style.color='white'" onmouseout="this.style.background='var(--dark-2)';this.style.color='var(--red)'">
+                📤 Retirar
+            </button>
+            <button onclick="showView('loans')" style="padding:18px 16px;background:var(--dark-2);border:1px solid rgba(91,141,239,0.25);color:var(--blue);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;text-align:center;" onmouseover="this.style.background='var(--blue)';this.style.color='white'" onmouseout="this.style.background='var(--dark-2)';this.style.color='var(--blue)'">
+                🏦 Préstamo
+            </button>
+        </div>
+
+        <!-- Stats (sin meses invirtiendo) -->
+        <div class="stats-grid animate-in delay-1" style="grid-template-columns:repeat(2,1fr);">
             <div class="stat-card">
                 <div class="stat-icon">📈</div>
                 <div class="stat-value" style="color:var(--green)">+${formatCOP(b.totalEarnings)}</div>
                 <div class="stat-label">Rendimientos Totales</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">📅</div>
-                <div class="stat-value">${d.monthsInvesting}</div>
-                <div class="stat-label">Meses Invirtiendo</div>
-            </div>
-            <div class="stat-card">
                 <div class="stat-icon">💎</div>
-                <div class="stat-value">${myInvestments.filter(i => i.status === 'active').length}</div>
+                <div class="stat-value">${activeInvList.length}</div>
                 <div class="stat-label">Inversiones Activas</div>
             </div>
         </div>
 
-        <!-- Product Card -->
-        <div class="products-section animate-in delay-2">
-            <div class="products-title">Productos de Inversión <span class="badge-new">Nuevo</span></div>
-
-            <div style="background:linear-gradient(135deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 100%);border:1px solid rgba(201,168,76,0.15);padding:20px 24px;margin-bottom:16px;">
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-                    <span style="font-size:22px;">📜</span>
-                    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;">¿Qué es un CDTC?</div>
-                </div>
-                <div style="font-size:12px;color:var(--text-muted);line-height:1.7;">
-                    Un <strong style="color:var(--gold)">CDTC</strong> (Certificado de Depósito a Término — Sanse Capital) es un producto de inversión donde depositas un capital por un plazo fijo de <strong>6 meses</strong>. Durante ese tiempo tu dinero genera <strong style="color:var(--green)">rendimientos mensuales variables entre 2% y 4% (24% — 48% anual)</strong>, que se acumulan a tu inversión. Al vencer el plazo, puedes retirar tu capital más los rendimientos generados.
-                </div>
-            </div>
-
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
-                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
-                    <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);">${formatCOP(globalStats.totalLocked)}</div>
-                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">🔒 Total Bloqueado</div>
-                </div>
-                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
-                    <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--green);">${globalStats.apyReal > 0 ? (globalStats.apyReal * 12).toFixed(0) + '%' : (globalStats.apyMin * 12) + '% — ' + (globalStats.apyMax * 12) + '%'}</div>
-                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">📈 Rendimiento Anual ${globalStats.apyReal > 0 ? 'Real' : 'Est.'}</div>
-                </div>
-                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
-                    <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--blue);">${globalStats.totalInvestors}</div>
-                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">👥 Inversionistas</div>
-                </div>
-            </div>
-
-            <div class="product-card" onclick="openInvestModal()">
-                <div class="product-card-top">
-                    <div class="product-header">
-                        <div>
-                            <div class="product-name">Inversión CDTC</div>
-                            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Certificado de Depósito a Término — Sanse Capital</div>
-                        </div>
-                        <span class="product-badge">${myInvestments.filter(i => ['active','pending_deposit'].includes(i.status)).length}/3 Activas</span>
-                    </div>
-                    <div class="product-rates">
-                        <div class="product-rate">
-                            <div class="product-rate-val">24% — 48%</div>
-                            <div class="product-rate-label">Rendimiento Anual</div>
-                        </div>
-                        <div class="product-rate">
-                            <div class="product-rate-val">6</div>
-                            <div class="product-rate-label">Meses de Plazo</div>
-                        </div>
-                        <div class="product-rate">
-                            <div class="product-rate-val">$100K</div>
-                            <div class="product-rate-label">Inversión Mínima</div>
-                        </div>
-                    </div>
-                    <div class="product-features">
-                        <span class="product-feature">📅 Plazo fijo 6 meses</span>
-                        <span class="product-feature">📈 Rendimiento variable</span>
-                        <span class="product-feature">🔒 Capital bloqueado</span>
-                        <span class="product-feature">⏱️ 12h para cancelar</span>
-                        <span class="product-feature">🔄 Máx. 3 activas</span>
-                    </div>
-                </div>
-                <button class="product-cta">${myInvestments.filter(i => ['active','pending_deposit'].includes(i.status)).length >= 3 ? '🔒 Límite Alcanzado (3/3)' : '✨ Invertir Ahora →'}</button>
-            </div>
-        </div>
-
-        <!-- Active Investments -->
-        ${myInvestments.filter(i => i.status === 'active' || i.status === 'pending_deposit').length > 0 ? `
-        <div class="my-investments animate-in delay-3">
+        <!-- Mis Inversiones Activas (PRIMERO) -->
+        ${activeInvList.length > 0 ? `
+        <div class="my-investments animate-in delay-2">
             <div class="inv-list-title">📊 Mis Inversiones Activas</div>
-            ${myInvestments.filter(i => i.status === 'active' || i.status === 'pending_deposit').map(inv => `
+            ${activeInvList.map(inv => `
                 <div class="inv-card" onclick="showInvestmentDetail(${inv.id})">
                     <div class="inv-card-header">
                         <span class="inv-card-type">💰 CDTC <span style="font-size:12px;color:var(--text-muted);font-weight:400;">— ${inv.durationMonths || 6} meses</span></span>
@@ -699,6 +647,60 @@
                 </div>
             `).join('')}
         </div>` : ''}
+
+        <!-- Crear Nueva Inversión (DESPUÉS de las activas) -->
+        <div class="products-section animate-in ${activeInvList.length > 0 ? 'delay-3' : 'delay-2'}">
+            <div class="products-title">Invertir en CDTC <span class="badge-new">Nuevo</span></div>
+
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);">${formatCOP(gs.totalLocked)}</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">🔒 Capital Bloqueado</div>
+                </div>
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--green);">${apyDisplay}</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">📈 Rendimiento Anual Promedio</div>
+                </div>
+                <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--blue);">${gs.totalInvestors}</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">👥 Inversionistas</div>
+                </div>
+            </div>
+
+            <div class="product-card" onclick="openInvestModal()">
+                <div class="product-card-top">
+                    <div class="product-header">
+                        <div>
+                            <div class="product-name">Inversión CDTC</div>
+                            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Certificado de Depósito a Término — Sanse Capital</div>
+                        </div>
+                        <span class="product-badge">${activeInvList.length}/3 Activas</span>
+                    </div>
+                    <div class="product-rates">
+                        <div class="product-rate">
+                            <div class="product-rate-val">${gs.apyReal > 0 ? gs.apyReal.toFixed(0) + '%' : '24% — 48%'}</div>
+                            <div class="product-rate-label">${gs.apyReal > 0 ? 'APY Promedio Real' : 'Rendimiento Anual Est.'}</div>
+                        </div>
+                        <div class="product-rate">
+                            <div class="product-rate-val">3–12</div>
+                            <div class="product-rate-label">Meses de Plazo</div>
+                        </div>
+                        <div class="product-rate">
+                            <div class="product-rate-val">$100K</div>
+                            <div class="product-rate-label">Inversión Mínima</div>
+                        </div>
+                    </div>
+                    <div class="product-features">
+                        <span class="product-feature">📅 Plazo fijo 3, 6 o 12 meses</span>
+                        <span class="product-feature">📈 Rendimiento variable</span>
+                        <span class="product-feature">🔒 Capital bloqueado</span>
+                        <span class="product-feature">⏱️ 12h para cancelar</span>
+                        <span class="product-feature">🔄 Máx. 3 activas</span>
+                    </div>
+                </div>
+                <button class="product-cta">${activeInvList.length >= 3 ? '🔒 Límite Alcanzado (3/3)' : '✨ Crear Nueva Inversión →'}</button>
+            </div>
+        </div>
 
         <!-- Chart & Transactions -->
         <div class="grid-2 animate-in delay-3">
@@ -729,30 +731,60 @@
 
     // ══════ RENDER INVESTMENTS VIEW ══════
     function renderInvestmentsView(container) {
-        const activeCount = myInvestments.filter(i => ['active','pending_deposit'].includes(i.status)).length;
+        const activeInvs = myInvestments.filter(i => ['active','pending_deposit'].includes(i.status));
+        const completedInvs = myInvestments.filter(i => i.status === 'completed' || i.status === 'cancelled');
+        const activeCount = activeInvs.length;
         const gs = globalStats;
-        container.innerHTML = `
-        <div class="products-section animate-in">
-            <div class="products-title">💰 Productos Disponibles</div>
+        const apyDisplay = gs.apyReal > 0 ? gs.apyReal.toFixed(1) + '% APY Real' : (gs.apyMin || 26.8) + '% — ' + (gs.apyMax || 60.1) + '% APY Est.';
 
+        container.innerHTML = `
+        <!-- Mis inversiones activas PRIMERO -->
+        ${activeInvs.length > 0 ? `
+        <div class="my-investments animate-in">
+            <div class="inv-list-title">📊 Mis Inversiones Activas (${activeCount})</div>
+            ${activeInvs.map(inv => `
+                <div class="inv-card" onclick="showInvestmentDetail(${inv.id})">
+                    <div class="inv-card-header">
+                        <span class="inv-card-type">💰 CDTC <span style="font-size:12px;color:var(--text-muted);font-weight:400;">— ${inv.durationMonths || 6} meses</span></span>
+                        <span class="inv-card-status ${inv.status}">${inv.status === 'pending_deposit' ? '⏳ En depósito' : 'Activa'}</span>
+                    </div>
+                    ${inv.isPendingDeposit ? `<div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);padding:8px 12px;margin-bottom:10px;font-size:11px;color:#f59e0b;">⏱️ Período de depósito. Haz clic para cancelar o confirmar.</div>` : ''}
+                    <div class="inv-card-body">
+                        <div class="inv-card-stat"><div class="inv-card-stat-val gold">${formatCOP(inv.amount)}</div><div class="inv-card-stat-label">Capital</div></div>
+                        <div class="inv-card-stat"><div class="inv-card-stat-val">${inv.minMonthlyRate}%-${inv.maxMonthlyRate}%</div><div class="inv-card-stat-label">Tasa</div></div>
+                        <div class="inv-card-stat"><div class="inv-card-stat-val" style="color:var(--green)">+${formatCOP(inv.totalEarned)}</div><div class="inv-card-stat-label">Ganado</div></div>
+                        <div class="inv-card-stat"><div class="inv-card-stat-val">${inv.daysRemaining}d</div><div class="inv-card-stat-label">Restantes</div></div>
+                    </div>
+                    <div class="inv-progress-bar"><div class="inv-progress-fill" style="width:${inv.progressPct}%"></div></div>
+                    <div class="inv-progress-info"><span>${formatDate(inv.startDate)}</span><span>${inv.progressPct}%</span><span>🔓 ${formatDate(inv.lockEndDate || inv.endDate)}</span></div>
+                </div>
+            `).join('')}
+        </div>` : ''}
+
+        <!-- Crear nueva inversión DESPUÉS -->
+        <div class="products-section animate-in ${activeInvs.length > 0 ? 'delay-1' : ''}">
+            <div class="products-title">💰 ${activeInvs.length > 0 ? 'Crear Nueva Inversión' : 'Productos Disponibles'}</div>
+
+            ${activeInvs.length === 0 ? `
             <div style="background:linear-gradient(135deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 100%);border:1px solid rgba(201,168,76,0.15);padding:20px 24px;margin-bottom:16px;">
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
                     <span style="font-size:22px;">📜</span>
                     <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;">¿Qué es un CDTC?</div>
                 </div>
                 <div style="font-size:12px;color:var(--text-muted);line-height:1.7;">
-                    Un <strong style="color:var(--gold)">CDTC</strong> (Certificado de Depósito a Término — Sanse Capital) es un producto de inversión donde depositas un capital por un plazo fijo de <strong>6 meses</strong>. Durante ese tiempo tu dinero genera <strong style="color:var(--green)">rendimientos mensuales variables entre 2% y 4% (24% — 48% anual)</strong>, que se acumulan a tu inversión. Al vencer el plazo, puedes retirar tu capital más los rendimientos generados.
+                    Un <strong style="color:var(--gold)">CDTC</strong> (Certificado de Depósito a Término — Sanse Capital) es un producto de inversión donde depositas un capital por un plazo fijo. 
+                    Durante ese tiempo tu dinero genera <strong style="color:var(--green)">rendimientos mensuales variables entre 2% y 4%</strong>, que se acumulan a tu inversión.
                 </div>
-            </div>
+            </div>` : ''}
 
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
                 <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
                     <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--gold);">${formatCOP(gs.totalLocked)}</div>
-                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">🔒 Total Bloqueado</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">🔒 Capital Bloqueado</div>
                 </div>
                 <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
-                    <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--green);">${gs.apyReal > 0 ? (gs.apyReal * 12).toFixed(0) + '%' : (gs.apyMin * 12) + '% — ' + (gs.apyMax * 12) + '%'}</div>
-                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">📈 Rendimiento Anual ${gs.apyReal > 0 ? 'Real' : 'Est.'}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--green);">${apyDisplay}</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">📈 APY Promedio Anual</div>
                 </div>
                 <div style="background:var(--dark-2);border:1px solid var(--border);padding:16px;text-align:center;">
                     <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--blue);">${gs.totalInvestors}</div>
@@ -774,51 +806,45 @@
                         <span class="product-badge">${activeCount}/3 Activas</span>
                     </div>
                     <div class="product-rates">
-                        <div class="product-rate"><div class="product-rate-val">24% — 48%</div><div class="product-rate-label">Rendimiento Anual</div></div>
-                        <div class="product-rate"><div class="product-rate-val">6</div><div class="product-rate-label">Meses de Plazo</div></div>
+                        <div class="product-rate">
+                            <div class="product-rate-val">${gs.apyReal > 0 ? gs.apyReal.toFixed(0) + '%' : '24% — 48%'}</div>
+                            <div class="product-rate-label">${gs.apyReal > 0 ? 'APY Promedio Real' : 'Rendimiento Anual Est.'}</div>
+                        </div>
+                        <div class="product-rate"><div class="product-rate-val">3–12</div><div class="product-rate-label">Meses de Plazo</div></div>
                         <div class="product-rate"><div class="product-rate-val">$100K</div><div class="product-rate-label">Inversión Mínima</div></div>
                     </div>
                     <div class="product-features">
-                        <span class="product-feature">📅 Plazo fijo 6 meses</span>
+                        <span class="product-feature">📅 Plazo 3, 6 o 12 meses</span>
                         <span class="product-feature">📈 Rendimiento variable</span>
                         <span class="product-feature">🔒 Capital bloqueado</span>
                         <span class="product-feature">⏱️ 12h para cancelar</span>
-                        <span class="product-feature">🔄 Máx. 3 activas</span>
                     </div>
                 </div>
-                <button class="product-cta">${activeCount >= 3 ? '🔒 Límite Alcanzado (3/3)' : '✨ Invertir Ahora →'}</button>
+                <button class="product-cta">${activeCount >= 3 ? '🔒 Límite Alcanzado (3/3)' : '✨ Crear Nueva Inversión →'}</button>
             </div>
         </div>
 
-        <div class="my-investments animate-in delay-1">
-            <div class="inv-list-title">📊 Todas Mis Inversiones</div>
-            <div id="all-investments-list"></div>
-        </div>
-
-        <div class="detail-panel" id="investment-detail-panel"></div>`;
-
-        const list = document.getElementById('all-investments-list');
-        if (!myInvestments.length) {
-            list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">Aún no tienes inversiones. ¡Comienza invirtiendo arriba!</div>';
-        } else {
-            list.innerHTML = myInvestments.map(inv => `
-                <div class="inv-card" onclick="showInvestmentDetail(${inv.id})">
+        <!-- Historial de inversiones completadas -->
+        ${completedInvs.length > 0 ? `
+        <div class="my-investments animate-in delay-2">
+            <div class="inv-list-title">📋 Historial de Inversiones</div>
+            ${completedInvs.map(inv => `
+                <div class="inv-card" onclick="showInvestmentDetail(${inv.id})" style="opacity:0.7;">
                     <div class="inv-card-header">
                         <span class="inv-card-type">💰 CDTC <span style="font-size:12px;color:var(--text-muted);font-weight:400;">— ${inv.durationMonths || 6} meses</span></span>
-                        <span class="inv-card-status ${inv.status}">${inv.status === 'pending_deposit' ? '⏳ En depósito' : inv.status === 'active' ? 'Activa' : inv.status === 'completed' ? 'Completada' : inv.status}</span>
+                        <span class="inv-card-status ${inv.status}">${inv.status === 'completed' ? '✅ Completada' : '⚪ Cancelada'}</span>
                     </div>
-                    ${inv.isPendingDeposit ? `<div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);padding:8px 12px;margin-bottom:10px;font-size:11px;color:#f59e0b;">⏱️ Período de depósito. Haz clic para cancelar o confirmar.</div>` : ''}
                     <div class="inv-card-body">
                         <div class="inv-card-stat"><div class="inv-card-stat-val gold">${formatCOP(inv.amount)}</div><div class="inv-card-stat-label">Capital</div></div>
                         <div class="inv-card-stat"><div class="inv-card-stat-val">${inv.minMonthlyRate}%-${inv.maxMonthlyRate}%</div><div class="inv-card-stat-label">Tasa</div></div>
                         <div class="inv-card-stat"><div class="inv-card-stat-val" style="color:var(--green)">+${formatCOP(inv.totalEarned)}</div><div class="inv-card-stat-label">Ganado</div></div>
-                        <div class="inv-card-stat"><div class="inv-card-stat-val">${inv.daysRemaining}d</div><div class="inv-card-stat-label">Restantes</div></div>
+                        <div class="inv-card-stat"><div class="inv-card-stat-val" style="color:var(--text-muted);">—</div><div class="inv-card-stat-label">Finalizada</div></div>
                     </div>
-                    <div class="inv-progress-bar"><div class="inv-progress-fill" style="width:${inv.progressPct}%"></div></div>
-                    <div class="inv-progress-info"><span>${formatDate(inv.startDate)}</span><span>${inv.progressPct}%</span><span>🔓 ${formatDate(inv.lockEndDate || inv.endDate)}</span></div>
                 </div>
-            `).join('');
-        }
+            `).join('')}
+        </div>` : ''}
+
+        <div class="detail-panel" id="investment-detail-panel"></div>`; 
     }
 
     // ══════ RENDER MOVEMENTS VIEW ══════
