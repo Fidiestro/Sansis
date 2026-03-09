@@ -1491,16 +1491,18 @@
             <div class="table-header"><span class="table-title">📋 Historial de Retiros</span></div>
             <table class="data-table">
                 <thead><tr><th>Ref</th><th>Monto</th><th>Método</th><th>Estado</th><th>Tiempo Est.</th><th>Fecha</th></tr></thead>
-                <tbody>${userWithdrawals.map(w => `
+                <tbody>${userWithdrawals.map(w => {
+                    const pmIcon = w.pmType === 'nequi' ? '💜' : w.pmType === 'daviplata' ? '🟢' : w.pmType === 'bancolombia' ? '💛' : '🏦';
+                    return `
                     <tr>
-                        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${w.refId || w.ref_id || '-'}</td>
+                        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${w.refId || '-'}</td>
                         <td style="font-family:'JetBrains Mono',monospace;color:var(--red);">-${formatCOP(w.amount)}</td>
-                        <td>🏦 ${w.bankName || w.bank_name || '—'}</td>
+                        <td>${pmIcon} ${w.pmLabel || '—'}</td>
                         <td><span class="badge ${statusBadge[w.status] || 'badge-profit'}">${statusLabels[w.status] || w.status}</span></td>
-                        <td style="font-size:12px;color:var(--text-muted);">${w.status === 'pending' ? '24-48h' : w.status === 'approved' ? 'En proceso' : w.status === 'completed' ? '✅' : '—'}</td>
-                        <td style="color:var(--text-muted)">${formatDate(w.createdAt || w.created_at)}</td>
-                    </tr>
-                `).join('')}</tbody>
+                        <td style="font-size:12px;color:var(--text-muted);">${w.estimatedCompletion || '—'}</td>
+                        <td style="color:var(--text-muted)">${formatDate(w.createdAt)}</td>
+                    </tr>`;
+                }).join('')}</tbody>
             </table>
         </div>` : ''}`;
     }
@@ -1598,31 +1600,21 @@
         const paymentMethodId = parseInt(document.getElementById('wr-pm').value);
         const btn = document.getElementById('btn-withdraw-request');
 
-        // Buscar el método de pago seleccionado para enviar los datos reales
-        const pm = userPaymentMethods.find(p => p.id === paymentMethodId);
-        if (!pm) return toast('Selecciona un método de pago válido', 'error');
+        if (!paymentMethodId) return toast('Selecciona un método de pago', 'error');
 
         btn.disabled = true;
         btn.textContent = 'Procesando...';
 
         try {
-            // Mapear campos nativos de payment_methods → campos que withdrawal_requests espera
-            const pmTypeName = pm.type === 'nequi' ? 'Nequi' : pm.type === 'daviplata' ? 'Daviplata' : pm.type === 'bancolombia' ? 'Bancolombia' : pm.label;
-            const body = {
-                amount,
-                bankName: pmTypeName,
-                accountNumber: pm.account_number || pm.phone || '',
-                accountType: pm.account_type || 'savings',
-                accountHolder: pm.holder_name || pm.label || '',
-            };
+            // El backend usa payment_method_id directamente (FK a payment_methods)
             const res = await apiFetch('/withdrawals/request', {
                 method: 'POST',
-                body: JSON.stringify(body)
+                body: JSON.stringify({ amount, paymentMethodId })
             });
             const data = await res.json();
             if (!res.ok) return toast(data.error, 'error');
 
-            toast(`✅ Solicitud de retiro por ${formatCOP(amount)} creada. Será procesada en 24-48 horas.`);
+            toast(`✅ Solicitud de retiro por ${formatCOP(amount)} creada. ${data.withdrawal?.estimatedCompletion || 'Será procesada en 24-48 horas.'}`);
             await loadAllData();
             renderWithdrawView(document.getElementById('dashboard-content'));
         } catch(e) {

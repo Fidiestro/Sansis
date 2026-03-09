@@ -1345,6 +1345,8 @@
                 const statusBadge = { pending: 'badge-gold', approved: 'badge-green', rejected: 'badge-red', completed: 'badge-blue' };
                 const pmTypeNames = { nequi: '💜 Nequi', bancolombia: '💛 Bancol.', daviplata: '🟢 Daviplata', otro: '🏦 Otro' };
 
+                const pmTypeNames = { nequi: '💜 Nequi', bancolombia: '💛 Bancol.', daviplata: '🟢 Daviplata', otro: '🏦 Otro' };
+
                 tbody.innerHTML = data.map(w => `
                     <tr>
                         <td class="mono" style="font-size:11px;">${w.ref_id || '-'}</td>
@@ -1353,13 +1355,16 @@
                             <div style="font-size:11px;color:var(--text2);">${w.user_email || ''}</div>
                         </td>
                         <td class="mono" style="color:var(--red);font-weight:600;">-${formatCOP(w.amount)}</td>
-                        <td>🏦 ${w.bank_name || '—'}<br><span style="font-size:10px;color:var(--text2);">${w.account_type || ''}</span></td>
+                        <td>${pmTypeNames[w.pm_type] || '🏦 —'}<br><span style="font-size:10px;color:var(--text2);">${w.pm_label || ''}</span></td>
                         <td style="font-size:11px;font-family:'JetBrains Mono',monospace;">
-                            ${w.account_number ? '🔢 ' + w.account_number : ''}
-                            ${w.account_holder ? '<br>👤 ' + w.account_holder : ''}
+                            ${w.pm_phone ? '📱 ' + w.pm_phone : ''}
+                            ${w.pm_account ? '🏦 ' + w.pm_account : ''}
+                            ${w.pm_account_type ? ' (' + w.pm_account_type + ')' : ''}
+                            ${w.pm_holder ? '<br>👤 ' + w.pm_holder : ''}
+                            ${w.pm_holder_doc ? ' — CC ' + w.pm_holder_doc : ''}
                         </td>
                         <td><span class="badge ${statusBadge[w.status] || 'badge-gold'}">${statusLabels[w.status] || w.status}</span></td>
-                        <td style="font-size:12px;color:var(--muted);">${w.status === 'pending' ? '24-48h' : w.status === 'approved' ? 'En proceso' : '—'}</td>
+                        <td style="font-size:12px;color:var(--muted);">${w.estimated_completion || '—'}</td>
                         <td style="color:var(--muted);font-size:12px;">${formatDate(w.created_at)}</td>
                         <td>
                             ${wrActionBtns(w)}
