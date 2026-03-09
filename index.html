@@ -1179,63 +1179,193 @@
   }
   calcular();
 
-  // ── WALLET / DEBANK
+  // ── WALLET / MULTI-CHAIN (Ankr API — sin API key, CORS ok)
   const WALLET = '0x25E6997CD1037E03662996E63875C99704f8F38D';
-  const TRM = 3766.30; // TRM del día — actualizar periódicamente
   const PRESTAMOS_COP = 30253250;
   let allAssets = [];
   let currentChain = 'all';
-
-  function formatCOP(n) {
-    return '$' + Math.round(n).toLocaleString('es-CO');
-  }
+  let TRM = 4200; // fallback; se actualiza desde API
 
   const chainNames = {
-    arb: { label: 'Arbitrum' },
-    eth: { label: 'Ethereum' },
-    bsc: { label: 'BNB Chain' },
-    matic: { label: 'Polygon' },
-    op:  { label: 'Optimism' },
-    base: { label: 'Base' },
-    avax: { label: 'Avalanche' },
+    arbitrum:  { label: 'Arbitrum',   color: '#28a0f0' },
+    eth:       { label: 'Ethereum',   color: '#627eea' },
+    bsc:       { label: 'BNB Chain',  color: '#f0b90b' },
+    polygon:   { label: 'Polygon',    color: '#8247e5' },
+    optimism:  { label: 'Optimism',   color: '#ff0420' },
+    base:      { label: 'Base',       color: '#0052ff' },
+    avalanche: { label: 'Avalanche',  color: '#e84142' },
+    fantom:    { label: 'Fantom',     color: '#1969ff' },
+    gnosis:    { label: 'Gnosis',     color: '#04795b' },
+    linea:     { label: 'Linea',      color: '#ffffff' },
   };
+
+  // Obtener TRM USD/COP desde ExchangeRate API (gratis, CORS ok)
+  async function fetchTRM() {
+    try {
+      const r = await fetch('https://open.er-api.com/v6/latest/USD');
+      const d = await r.json();
+      if (d?.rates?.COP) {
+        TRM = d.rates.COP;
+        document.getElementById('trmVal').textContent = 'TRM: $' + Math.round(TRM).toLocaleString('es-CO');
+      }
+    } catch(e) {
+      document.getElementById('trmVal').textContent = 'TRM: $' + Math.round(TRM).toLocaleString('es-CO') + ' (est.)';
+    }
+  }
 
   async function fetchAssets() {
     const tbody = document.getElementById('assetsBody');
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted);">
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;">
+        <div style="width:16px;height:16px;border:2px solid var(--gold);border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+        Escaneando todas las redes...
+      </div>
+    </td></tr>`;
+
+    // Añadir animación de carga si no existe
+    if (!document.getElementById('spin-style')) {
+      const s = document.createElement('style');
+      s.id = 'spin-style';
+      s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+      document.head.appendChild(s);
+    }
+
+    await fetchTRM();
+
     try {
-      const resp = await fetch(`https://api.debank.com/token/balance_list?user_addr=${WALLET}&is_all=true`);
-      const json = await resp.json();
-      const tokens = json.data || [];
-
-      allAssets = tokens
-        .filter(t => t.amount * t.price > 0.01)
-        .sort((a, b) => (b.amount * b.price) - (a.amount * a.price));
-
-      const totalUSD = allAssets.reduce((s, t) => s + t.amount * t.price, 0);
-      const totalCOP = totalUSD * TRM;
-      const capitalTotal = totalCOP + PRESTAMOS_COP;
-
-      document.getElementById('totalBalance').textContent = '$' + totalUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      document.getElementById('totalBalanceCOP').textContent = '≈ ' + formatCOP(totalCOP) + ' COP';
-      document.getElementById('totalCapital').textContent = formatCOP(capitalTotal);
-      document.getElementById('trmVal').textContent = 'TRM: ' + formatCOP(TRM);
-      document.getElementById('totalTokens').textContent = allAssets.length;
-
-      // Chains
-      const chains = [...new Set(allAssets.map(t => t.chain))];
-      document.getElementById('totalChains').textContent = chains.length;
-
-      const tabsEl = document.getElementById('chainTabs');
-      tabsEl.innerHTML = '<button class="chain-tab active" onclick="filterChain(\'all\')">Todas</button>';
-      chains.forEach(c => {
-        const name = chainNames[c]?.label || c.toUpperCase();
-        tabsEl.innerHTML += `<button class="chain-tab" onclick="filterChain('${c}')">${name}</button>`;
+      // Ankr ankr_getAccountBalance — todas las chains, sin API key
+      const resp = await fetch('https://rpc.ankr.com/multichain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'ankr_getAccountBalance',
+          params: {
+            walletAddress: WALLET,
+            onlyWhitelisted: false,   // incluir todos los tokens
+            pageSize: 100
+          },
+          id: 1
+        })
       });
 
+      const json = await resp.json();
+      const assets = json?.result?.assets || [];
+
+      // Normalizar y filtrar activos con valor > $0.01
+      allAssets = assets
+        .map(t => ({
+          symbol:    t.tokenSymbol || '?',
+          name:      t.tokenName   || '',
+          chain:     t.blockchain  || 'unknown',
+          amount:    parseFloat(t.balance) || 0,
+          price:     parseFloat(t.tokenPrice) || 0,
+          valueUSD:  parseFloat(t.balanceUsd) || 0,
+          thumbnail: t.thumbnail   || '',
+          type:      t.tokenType   || 'ERC20',
+        }))
+        .filter(t => t.valueUSD > 0.01)
+        .sort((a, b) => b.valueUSD - a.valueUSD);
+
+      if (!allAssets.length) {
+        // Fallback: intentar solo con Arbitrum explícitamente
+        await fetchArbitrumFallback();
+        return;
+      }
+
+      renderStats();
+      renderChainTabs();
       renderAssets('all');
+
     } catch (err) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted);">Error al cargar activos. Intenta de nuevo más tarde.</td></tr>';
+      console.warn('Ankr falló, intentando fallback Arbitrum:', err);
+      await fetchArbitrumFallback();
     }
+  }
+
+  // Fallback: Arbitrum One via Ankr endpoint específico
+  async function fetchArbitrumFallback() {
+    const tbody = document.getElementById('assetsBody');
+    try {
+      const resp = await fetch('https://rpc.ankr.com/multichain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'ankr_getAccountBalance',
+          params: {
+            blockchain: ['arbitrum', 'eth', 'bsc', 'polygon', 'optimism', 'base', 'avalanche'],
+            walletAddress: WALLET,
+            onlyWhitelisted: false,
+            pageSize: 50
+          },
+          id: 1
+        })
+      });
+      const json = await resp.json();
+      const assets = json?.result?.assets || [];
+
+      allAssets = assets
+        .map(t => ({
+          symbol:   t.tokenSymbol || '?',
+          name:     t.tokenName   || '',
+          chain:    t.blockchain  || 'unknown',
+          amount:   parseFloat(t.balance) || 0,
+          price:    parseFloat(t.tokenPrice) || 0,
+          valueUSD: parseFloat(t.balanceUsd) || 0,
+          thumbnail:t.thumbnail   || '',
+        }))
+        .filter(t => t.valueUSD > 0.01)
+        .sort((a, b) => b.valueUSD - a.valueUSD);
+
+      if (!allAssets.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted);">
+          <div>Sin activos detectados en las redes escaneadas.</div>
+          <div style="margin-top:8px;font-size:11px;">
+            <a href="https://arbiscan.io/address/${WALLET}" target="_blank" 
+               style="color:var(--gold);text-decoration:underline;">Ver en Arbiscan ↗</a>
+          </div>
+        </td></tr>`;
+        return;
+      }
+
+      renderStats();
+      renderChainTabs();
+      renderAssets('all');
+
+    } catch(e) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted);">
+        Error al cargar activos. 
+        <a href="https://arbiscan.io/address/${WALLET}" target="_blank" 
+           style="color:var(--gold);">Ver en Arbiscan ↗</a>
+      </td></tr>`;
+    }
+  }
+
+  function renderStats() {
+    const totalUSD = allAssets.reduce((s, t) => s + t.valueUSD, 0);
+    const totalCOP = totalUSD * TRM;
+    const capitalTotal = totalCOP + PRESTAMOS_COP;
+    const chains = [...new Set(allAssets.map(t => t.chain))];
+
+    document.getElementById('totalBalance').textContent = '$' + totalUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    document.getElementById('totalBalanceCOP').textContent = '≈ ' + '$' + Math.round(totalCOP).toLocaleString('es-CO') + ' COP';
+    document.getElementById('totalCapital').textContent = '$' + Math.round(capitalTotal).toLocaleString('es-CO');
+    document.getElementById('totalTokens').textContent = allAssets.length;
+    document.getElementById('totalChains').textContent = chains.length;
+  }
+
+  function renderChainTabs() {
+    const chains = [...new Set(allAssets.map(t => t.chain))];
+    const tabsEl = document.getElementById('chainTabs');
+    tabsEl.innerHTML = `<button class="chain-tab active" onclick="filterChain('all')">🌐 Todas</button>`;
+    chains.forEach(c => {
+      const info = chainNames[c] || { label: c.toUpperCase(), color: '#aaa' };
+      tabsEl.innerHTML += `<button class="chain-tab" onclick="filterChain('${c}')" 
+        style="--chain-color:${info.color}">
+        ${info.label}
+      </button>`;
+    });
   }
 
   function renderAssets(chain) {
@@ -1244,32 +1374,44 @@
     const filtered = chain === 'all' ? allAssets : allAssets.filter(t => t.chain === chain);
 
     document.querySelectorAll('.chain-tab').forEach(tab => {
-      tab.classList.toggle('active', tab.textContent === 'Todas' ? chain === 'all' : tab.onclick.toString().includes(`'${chain}'`));
+      const isAll = chain === 'all' && tab.textContent.includes('Todas');
+      const isChain = tab.onclick?.toString().includes(`'${chain}'`) && !tab.textContent.includes('Todas');
+      tab.classList.toggle('active', isAll || isChain);
     });
 
-    if (filtered.length === 0) {
+    if (!filtered.length) {
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted);">Sin activos en esta cadena.</td></tr>';
       return;
     }
 
     tbody.innerHTML = filtered.map(t => {
-      const valUSD = t.amount * t.price;
-      const valCOP = valUSD * TRM;
-      const chainLabel = chainNames[t.chain]?.label || t.chain.toUpperCase();
+      const valCOP = t.valueUSD * TRM;
+      const chainInfo = chainNames[t.chain] || { label: t.chain.toUpperCase(), color: '#aaa' };
+      const initials = t.symbol.substring(0, 2).toUpperCase();
+
+      // Icono: thumbnail si existe, sino iniciales con color
+      const iconHtml = t.thumbnail
+        ? `<img src="${t.thumbnail}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" onerror="this.outerHTML='<div class=\\'token-icon\\'>${initials}</div>'">`
+        : `<div class="token-icon" style="background:linear-gradient(135deg,rgba(201,168,76,0.3),rgba(201,168,76,0.1));">${initials}</div>`;
+
       return `<tr>
         <td>
           <div class="token-name">
-            <div class="token-icon">${(t.optimized_symbol || t.symbol || '?').substring(0, 2)}</div>
+            ${iconHtml}
             <div>
-              <div style="font-weight:600;">${t.optimized_symbol || t.symbol}</div>
-              <div class="token-chain">${t.name || ''}</div>
+              <div style="font-weight:600;">${t.symbol}</div>
+              <div class="token-chain">${t.name}</div>
             </div>
           </div>
         </td>
-        <td class="mono" style="font-size:13px;">${t.amount.toLocaleString('en-US', { maximumFractionDigits: 4 })}</td>
-        <td class="mono" style="font-size:13px;color:var(--green);">$${valUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-        <td class="mono" style="font-size:13px;color:var(--gold);">${formatCOP(valCOP)}</td>
-        <td><span style="font-size:11px;background:var(--dark-3);padding:4px 10px;border-radius:4px;color:var(--text-muted);">${chainLabel}</span></td>
+        <td class="mono" style="font-size:13px;">${t.amount < 0.0001 ? t.amount.toExponential(3) : t.amount.toLocaleString('en-US', { maximumFractionDigits: 4 })}</td>
+        <td class="mono" style="font-size:13px;color:var(--green);">$${t.valueUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        <td class="mono" style="font-size:13px;color:var(--gold);">$${Math.round(valCOP).toLocaleString('es-CO')}</td>
+        <td>
+          <span style="font-size:11px;background:var(--dark-3);padding:4px 10px;border-radius:4px;color:${chainInfo.color};border:1px solid ${chainInfo.color}22;">
+            ${chainInfo.label}
+          </span>
+        </td>
       </tr>`;
     }).join('');
   }
