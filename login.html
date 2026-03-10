@@ -189,6 +189,26 @@
       display: none;
     }
     .error-msg.show { display: block; }
+    .error-msg.pending {
+      background: rgba(201,168,76,0.10);
+      border: 1px solid rgba(201,168,76,0.3);
+      color: var(--gold);
+    }
+    .error-msg.pending .pending-icon {
+      display: inline-block;
+      margin-bottom: 8px;
+      font-size: 24px;
+    }
+    .error-msg.pending .pending-title {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .error-msg.pending .pending-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
 
     /* ═══ LINKS ═══ */
     .card-footer {
@@ -281,7 +301,7 @@
       const btn = document.getElementById('loginBtn');
       const errorEl = document.getElementById('errorMsg');
 
-      errorEl.classList.remove('show');
+      errorEl.classList.remove('show', 'pending');
 
       if (!email || !password) {
         errorEl.textContent = 'Ingresa tu correo y contraseña.';
@@ -301,6 +321,32 @@
         const data = await resp.json();
 
         if (!resp.ok) {
+          const isPending = data.pending === true;
+          const isBlocked = data.blocked === true;
+
+          if (isPending) {
+            errorEl.classList.remove('pending');
+            void errorEl.offsetWidth;
+            errorEl.innerHTML = `
+              <div class="pending-icon">⏳</div>
+              <div class="pending-title">Cuenta en revisión</div>
+              <div class="pending-sub">Tu registro está siendo revisado por el equipo de Sanse Capital. Te notificaremos cuando tu cuenta sea aprobada. Esto puede tomar hasta 24 horas hábiles.</div>
+            `;
+            errorEl.classList.add('show', 'pending');
+            btn.classList.remove('loading');
+            btn.disabled = false;
+            return;
+          }
+
+          if (isBlocked) {
+            errorEl.classList.remove('pending');
+            errorEl.textContent = '🚫 Tu cuenta ha sido suspendida. Contacta al administrador.';
+            errorEl.classList.add('show');
+            btn.classList.remove('loading');
+            btn.disabled = false;
+            return;
+          }
+
           throw new Error(data.error || data.message || 'Credenciales inválidas');
         }
 
@@ -320,6 +366,7 @@
       } catch (err) {
         btn.classList.remove('loading');
         btn.disabled = false;
+        errorEl.classList.remove('pending');
         errorEl.textContent = err.message || 'Error de conexión con el servidor.';
         errorEl.classList.add('show');
       }
