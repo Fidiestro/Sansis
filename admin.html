@@ -452,6 +452,80 @@
                     </table>
                 </div>
             </div>
+
+            <!-- ====== KPIs GANANCIAS PRÉSTAMOS ====== -->
+            <div class="card">
+                <div class="card-title">💰 Ganancias por Préstamos</div>
+                <div class="card-desc">Control de ingresos generados por intereses cobrados en préstamos.</div>
+
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+                    <div style="text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+                        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Ganancia Total (Intereses)</div>
+                        <div id="lp-total-interest" style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--green);">$0</div>
+                    </div>
+                    <div style="text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+                        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Ganancia Este Mes</div>
+                        <div id="lp-month-interest" style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--gold);">$0</div>
+                    </div>
+                    <div style="text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+                        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Capital Prestado Activo</div>
+                        <div id="lp-active-capital" style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--text);">$0</div>
+                    </div>
+                    <div style="text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+                        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Tasa Promedio</div>
+                        <div id="lp-avg-rate" style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--gold);">0%</div>
+                    </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+                    <div style="text-align:center;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
+                        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Total Recibido</div>
+                        <div id="lp-total-received" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;">$0</div>
+                    </div>
+                    <div style="text-align:center;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
+                        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Capital Recuperado</div>
+                        <div id="lp-capital-recovered" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;">$0</div>
+                    </div>
+                    <div style="text-align:center;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
+                        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Pagos Recibidos</div>
+                        <div id="lp-payment-count" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;">0</div>
+                    </div>
+                    <div style="text-align:center;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
+                        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Préstamos Pagados</div>
+                        <div id="lp-paid-count" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--green);">0</div>
+                    </div>
+                    <div style="text-align:center;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
+                        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">En Mora</div>
+                        <div id="lp-overdue-count" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--red);">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== TABLA DETALLADA DE PAGOS ====== -->
+            <div class="card">
+                <div class="card-title">📋 Historial de Pagos Recibidos</div>
+                <div class="card-desc">Cada abono recibido con desglose de interés (ganancia) vs capital.</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Usuario</th>
+                                <th>Préstamo</th>
+                                <th style="text-align:right;">Total Abono</th>
+                                <th style="text-align:right;color:var(--green);">Interés (Ganancia)</th>
+                                <th style="text-align:right;">Capital</th>
+                                <th style="text-align:right;">Pendiente</th>
+                                <th>Tasa</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="loan-payments-table">
+                            <tr><td colspan="9" style="color:var(--muted);text-align:center">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
         <!-- ====== SOLICITUDES DE REGISTRO ====== -->
@@ -741,7 +815,7 @@
             if (tab === 'withdrawals') loadAdminWithdrawals('all');
             if (tab === 'deposits') loadAdminDeposits('all');
             if (tab === 'registrations') loadAdminRegistrations('all');
-            if (tab === 'loans') loadAdminLoans('all');
+            if (tab === 'loans') { loadAdminLoans('all'); loadLoanProfitStats(); loadLoanPayments(); }
             if (tab === 'sdtc_overview') loadSDTCOverview();
             if (tab === 'users') loadUsers();
             if (tab === 'create-loan') populateLoanUserSelect();
@@ -1660,9 +1734,56 @@
                 toast(`✅ ${data.message}`);
                 loadAdminLoans(currentLnFilter);
                 loadStats();
+                loadLoanProfitStats();
+                loadLoanPayments();
                 if (action === 'approve' && phone)
                     openWaModal(phone, 'prestamo_aprobado', userName, { amount: parseFloat(approvedAmount||requestedAmount), rate: parseFloat(approvedRate||4) });
             } catch(e) { toast('Error: ' + e.message, 'error'); }
+        }
+        // ====== GANANCIAS PRÉSTAMOS ======
+        async function loadLoanProfitStats() {
+            try {
+                const res = await apiFetch('/admin/loans/profit-stats');
+                if (!res || !res.ok) return;
+                const s = await res.json();
+                document.getElementById('lp-total-interest').textContent    = formatCOP(s.totalInterestEarned);
+                document.getElementById('lp-month-interest').textContent    = formatCOP(s.monthInterest);
+                document.getElementById('lp-active-capital').textContent    = formatCOP(s.activeLoanCapital);
+                document.getElementById('lp-avg-rate').textContent          = s.weightedAvgRate > 0 ? s.weightedAvgRate + '%' : '—';
+                document.getElementById('lp-total-received').textContent    = formatCOP(s.totalPaymentsReceived);
+                document.getElementById('lp-capital-recovered').textContent = formatCOP(s.totalCapitalRecovered);
+                document.getElementById('lp-payment-count').textContent     = s.totalPaymentCount;
+                document.getElementById('lp-paid-count').textContent        = s.paidLoanCount;
+                document.getElementById('lp-overdue-count').textContent     = s.overdueLoanCount;
+            } catch(e) { console.log('Loan profit stats no disponibles:', e.message); }
+        }
+
+        async function loadLoanPayments() {
+            const tbody = document.getElementById('loan-payments-table');
+            tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">Cargando...</td></tr>';
+            try {
+                const res = await apiFetch('/admin/loans/payments');
+                if (!res || !res.ok) { tbody.innerHTML = '<tr><td colspan="9" style="color:var(--red);text-align:center">Error cargando pagos</td></tr>'; return; }
+                const data = await res.json();
+                if (!data.length) { tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">No hay pagos registrados aún</td></tr>'; return; }
+
+                tbody.innerHTML = data.map(p => {
+                    const date = new Date(p.created_at).toLocaleDateString('es-CO', { day:'2-digit', month:'short', year:'numeric' });
+                    const time = new Date(p.created_at).toLocaleTimeString('es-CO', { hour:'2-digit', minute:'2-digit' });
+                    const interestPct = p.amount > 0 ? Math.round((p.interest_amount / p.amount) * 100) : 0;
+                    return `<tr>
+                        <td style="font-size:12px;"><div>${date}</div><div style="font-size:10px;color:var(--muted);">${time}</div></td>
+                        <td><div style="font-weight:600;font-size:13px;">${p.user_name || 'ID:'+p.user_id}</div><div style="font-size:10px;color:var(--text2);">${p.user_email || ''}</div></td>
+                        <td><div class="mono" style="font-size:11px;">${p.loan_ref_id || p.ref_id || '-'}</div><div style="font-size:10px;color:var(--muted);">${p.loan_status === 'paid' ? '✅ Pagado' : p.loan_status === 'active' ? '🟢 Activo' : p.loan_status === 'overdue' ? '🔴 Mora' : p.loan_status || ''}</div></td>
+                        <td class="mono" style="text-align:right;font-weight:600;">${formatCOP(p.amount)}</td>
+                        <td class="mono" style="text-align:right;color:var(--green);font-weight:700;">${formatCOP(p.interest_amount)}<div style="font-size:10px;color:var(--muted);font-weight:400;">${interestPct}% del abono</div></td>
+                        <td class="mono" style="text-align:right;">${formatCOP(p.capital_amount)}</td>
+                        <td class="mono" style="text-align:right;color:${p.remaining_capital <= 0 ? 'var(--green)' : 'var(--text)'};">${p.remaining_capital <= 0 ? '✅ $0' : formatCOP(p.remaining_capital)}</td>
+                        <td class="mono" style="font-size:12px;color:var(--gold);font-weight:600;">${p.loan_rate}%</td>
+                        <td>${p.is_fully_paid ? '<span class="badge badge-green">Liquidado</span>' : '<span class="badge badge-blue">Abono</span>'}</td>
+                    </tr>`;
+                }).join('');
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="9" style="color:var(--red);text-align:center">Error: '+e.message+'</td></tr>'; }
         }
 
         // ====== REGISTROS ADMIN ======
