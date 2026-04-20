@@ -1,2239 +1,875 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sanse Capital — Admin Panel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #0a0a0f; --bg2: #111118; --card: #14141d; --input: #1c1c28;
-            --gold: #d4a843; --gold-light: #e8c56d; --gold-dark: #b8922e;
-            --text: #f0ede6; --text2: #8a8a9a; --muted: #55556a; --border: #222233;
-            --green: #4ecb8d; --red: #e74c5e; --blue: #5b8def; --purple: #a78bfa;
-        }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Sanse Capital</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0e1a;--bg2:#0f1322;--bg3:#131729;--sur:rgba(255,255,255,0.03);
+    --bd:rgba(255,255,255,0.06);--bdh:rgba(255,255,255,0.1);
+    --text:#e8eaf0;--mut:#6b7280;--dim:#374151;
+    --blu:#4f8ef7;--blud:rgba(79,142,247,0.08);--pur:#7c5cfc;
+    --tea:#2dd4bf;--grn:#10b981;--grnd:rgba(16,185,129,0.08);
+    --amb:#f59e0b;--ambd:rgba(245,158,11,0.08);--red:#ef4444;--redd:rgba(239,68,68,0.08);
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
 
-        /* Topbar */
-        .topbar {
-            background:var(--bg2); border-bottom:1px solid var(--border); padding:16px 32px;
-            display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:50;
-        }
-        .topbar h1 {
-            font-family:'Playfair Display',serif; font-size:20px;
-            background:linear-gradient(135deg,var(--gold-light),var(--gold));
-            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-        }
-        .topbar-sub { font-size:11px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; }
-        .topbar-right { display:flex; gap:12px; align-items:center; }
-        .topbar-right a { color:var(--text2); text-decoration:none; font-size:13px; padding:8px 16px; border:1px solid var(--border); border-radius:8px; transition:all 0.2s; }
-        .topbar-right a:hover { border-color:var(--gold); color:var(--gold); }
+  /* ─── TOPBAR ─── */
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(11,14,26,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--bd);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .tb-left{display:flex;align-items:center;gap:10px;min-width:0}
+  .tb-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--blu),var(--pur));border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .tb-logo-icon svg{width:14px;height:14px;fill:white}
+  .tb-title{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;line-height:1.2}
+  .tb-title span{color:var(--blu)}
+  .tb-sub{font-size:10px;color:var(--mut);letter-spacing:.5px;text-transform:uppercase;margin-top:2px}
+  .tb-right{display:flex;gap:8px;align-items:center}
+  .tb-btn{font-size:12px;color:var(--mut);padding:7px 12px;border:1px solid var(--bd);border-radius:7px;transition:all .15s;white-space:nowrap}
+  .tb-btn:hover{color:var(--text);border-color:var(--bdh)}
+  .tb-btn.red:hover{color:var(--red);border-color:rgba(239,68,68,.3)}
 
-        .container { max-width:1100px; margin:0 auto; padding:32px 24px; }
+  /* ─── CONTAINER ─── */
+  .container{padding:16px;max-width:1280px;margin:0 auto}
 
-        /* Stats */
-        .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
-        .stat-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:22px; text-align:center; }
-        .stat-card .val { font-size:22px; font-weight:700; font-family:'JetBrains Mono',monospace; }
-        .stat-card .val.green { color:var(--green); }
-        .stat-card .val.red { color:var(--red); }
-        .stat-card .val.blue { color:var(--blue); }
-        .stat-card .val.gold { color:var(--gold); }
-        .stat-card .lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:6px; }
+  /* ─── STATS ─── */
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+  .stat{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px;position:relative;overflow:hidden}
+  .stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--blu);opacity:.6}
+  .stat.grn::before{background:var(--grn)}
+  .stat.amb::before{background:var(--amb)}
+  .stat.red::before{background:var(--red)}
+  .stat.pur::before{background:var(--pur)}
+  .stat-lbl{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;line-height:1.3}
+  .stat-val{font-family:'Space Mono',monospace;font-size:17px;font-weight:700;line-height:1.2}
+  .stat-val.grn{color:var(--grn)}
+  .stat-val.blu{color:var(--blu)}
+  .stat-val.amb{color:var(--amb)}
+  .stat-val.red{color:var(--red)}
+  .stat-val.pur{color:var(--pur)}
 
-        /* Tabs */
-        .tabs { display:flex; gap:4px; margin-bottom:28px; background:var(--bg2); border-radius:12px; padding:4px; border:1px solid var(--border); }
-        .tab { flex:1; padding:12px; text-align:center; border-radius:10px; cursor:pointer; font-size:14px; font-weight:600; color:var(--text2); transition:all 0.2s; }
-        .tab:hover { color:var(--text); }
-        .tab.active { background:var(--gold); color:#0a0a0f; }
+  /* ─── TABS (scrollable mobile) ─── */
+  .tabs{display:flex;gap:6px;overflow-x:auto;padding:0 0 10px;margin-bottom:16px;border-bottom:1px solid var(--bd);-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{padding:9px 14px;font-size:12px;font-weight:600;color:var(--mut);background:var(--bg2);border:1px solid var(--bd);border-radius:7px;white-space:nowrap;transition:all .15s;flex-shrink:0}
+  .tab:hover{color:var(--text);border-color:var(--bdh)}
+  .tab.active{background:var(--blud);border-color:var(--blu);color:var(--blu)}
 
-        /* Sections */
-        .section { display:none; }
-        .section.active { display:block; }
+  /* ─── SECTIONS ─── */
+  .section{display:none}
+  .section.active{display:block}
 
-        /* Cards */
-        .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; margin-bottom:24px; }
-        .card-title { font-size:18px; font-weight:700; margin-bottom:20px; display:flex; align-items:center; gap:10px; }
-        .card-desc { color:var(--text2); font-size:13px; margin-bottom:20px; line-height:1.5; }
+  /* ─── CARDS ─── */
+  .card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:20px;margin-bottom:14px}
+  .card-ttl{font-size:15px;font-weight:700;margin-bottom:4px}
+  .card-desc{font-size:12px;color:var(--mut);margin-bottom:16px;line-height:1.6}
 
-        /* Forms */
-        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
-        .form-row.cols-3 { grid-template-columns:1fr 1fr 1fr; }
-        .form-group { display:flex; flex-direction:column; gap:6px; }
-        .form-group.full { grid-column:1/-1; }
-        label { font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; }
-        input, select, textarea {
-            padding:12px 14px; background:var(--input); border:1px solid var(--border); border-radius:10px;
-            color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; outline:none; transition:border 0.2s;
-        }
-        input:focus, select:focus { border-color:var(--gold); }
-        select { cursor:pointer; }
-        input::placeholder { color:var(--muted); }
+  /* ─── FORMS ─── */
+  .form-row{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:12px}
+  .fg label{display:block;font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .fg input,.fg select,.fg textarea{width:100%;padding:11px 13px;background:var(--sur);border:1px solid var(--bd);border-radius:8px;color:var(--text);font-size:14px;font-family:'Space Grotesk',sans-serif;outline:none;transition:border-color .15s}
+  .fg input:focus,.fg select:focus{border-color:rgba(79,142,247,.5)}
+  .fg input[type=number],.fg input.mono{font-family:'Space Mono',monospace}
 
-        /* Buttons */
-        .btn {
-            padding:12px 28px; border:none; border-radius:10px; font-family:'DM Sans',sans-serif;
-            font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; display:inline-flex; align-items:center; gap:8px;
-        }
-        .btn-gold { background:linear-gradient(135deg,var(--gold),var(--gold-dark)); color:#0a0a0f; }
-        .btn-gold:hover { box-shadow:0 4px 20px rgba(212,168,67,0.3); transform:translateY(-1px); }
-        .btn-gold:disabled { opacity:0.5; cursor:not-allowed; transform:none; box-shadow:none; }
-        .btn-outline { background:transparent; color:var(--text2); border:1px solid var(--border); }
-        .btn-outline:hover { border-color:var(--gold); color:var(--gold); }
-        .btn-sm { padding:6px 14px; font-size:12px; border-radius:8px; }
-        .btn-red { background:rgba(231,76,94,0.12); color:var(--red); border:1px solid rgba(231,76,94,0.25); }
+  /* ─── BUTTONS ─── */
+  .btn{padding:11px 18px;font-size:13px;font-weight:600;border:1px solid var(--bd);background:var(--sur);color:var(--text);border-radius:8px;transition:all .15s;font-family:'Space Grotesk',sans-serif}
+  .btn:hover{border-color:var(--bdh)}
+  .btn-primary{background:linear-gradient(135deg,var(--blu),var(--pur));border:none;color:white}
+  .btn-primary:hover{opacity:.9}
+  .btn-grn{background:var(--grn);border:none;color:white}
+  .btn-grn:hover{opacity:.9}
+  .btn-red{background:var(--red);border:none;color:white}
+  .btn-red:hover{opacity:.9}
+  .btn-amb{background:var(--amb);border:none;color:white}
+  .btn-amb:hover{opacity:.9}
+  .btn-sm{padding:6px 12px;font-size:11px}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
 
-        /* Table */
-        .table-wrap { overflow-x:auto; margin-top:16px; }
-        table { width:100%; border-collapse:collapse; }
-        th { text-align:left; padding:10px 14px; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border); }
-        td { padding:12px 14px; font-size:13px; border-bottom:1px solid rgba(34,34,51,0.5); }
-        tr:hover td { background:rgba(212,168,67,0.02); }
-        .mono { font-family:'JetBrains Mono',monospace; font-weight:500; }
-        .badge { display:inline-block; padding:3px 10px; border-radius:100px; font-size:11px; font-weight:600; }
-        .badge-green { color:var(--green); background:rgba(78,203,141,0.1); }
-        .badge-gold { color:var(--gold); background:rgba(212,168,67,0.1); }
-        .badge-red { color:var(--red); background:rgba(231,76,94,0.1); }
-        .badge-blue { color:var(--blue); background:rgba(91,141,239,0.1); }
-        .badge-purple { color:var(--purple); background:rgba(167,139,250,0.1); }
+  /* ─── FILTERS ─── */
+  .filters{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .filters::-webkit-scrollbar{display:none}
+  .fbtn{padding:6px 12px;font-size:11px;font-weight:500;background:var(--sur);border:1px solid var(--bd);border-radius:6px;color:var(--mut);white-space:nowrap;transition:all .15s;flex-shrink:0}
+  .fbtn:hover{color:var(--text)}
+  .fbtn.active{background:var(--blud);border-color:var(--blu);color:var(--blu)}
 
-        /* Toast */
-        .toast { position:fixed; bottom:24px; right:24px; padding:14px 24px; border-radius:12px; font-size:13px; font-weight:600; z-index:999; transform:translateY(100px); opacity:0; transition:all 0.3s; }
-        .toast.show { transform:translateY(0); opacity:1; }
-        .toast-success { background:var(--green); color:#0a0a0f; }
-        .toast-error { background:var(--red); color:white; }
+  /* ─── TABLES ─── */
+  .table-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--bd);-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;min-width:640px}
+  th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);padding:10px 14px;border-bottom:1px solid var(--bd);font-weight:600;background:var(--bg);position:sticky;top:0}
+  td{padding:11px 14px;font-size:13px;border-bottom:1px solid var(--bd);vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:var(--sur)}
+  td.mono{font-family:'Space Mono',monospace;font-size:12px}
+  td.grn{color:var(--grn)}
+  td.red{color:var(--red)}
+  td.blu{color:var(--blu)}
 
-        /* Users list */
-        .user-list { display:grid; gap:8px; margin-top:16px; }
-        .user-row {
-            display:flex; align-items:center; justify-content:space-between; padding:14px 18px;
-            background:var(--input); border-radius:12px; border:1px solid transparent; transition:all 0.2s;
-        }
-        .user-row:hover { border-color:var(--border); }
-        .user-row-left { display:flex; align-items:center; gap:14px; }
-        .user-avatar-sm {
-            width:36px; height:36px; border-radius:8px; background:linear-gradient(135deg,var(--gold),var(--gold-dark));
-            display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; color:#0a0a0f;
-        }
-        .user-row-name { font-size:14px; font-weight:600; }
-        .user-row-email { font-size:12px; color:var(--text2); }
-        .user-row-right { display:flex; align-items:center; gap:12px; }
+  /* ─── BADGES ─── */
+  .badge{display:inline-block;font-size:10px;padding:3px 9px;border-radius:12px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+  .badge.grn{background:var(--grnd);color:var(--grn)}
+  .badge.blu{background:var(--blud);color:var(--blu)}
+  .badge.amb{background:var(--ambd);color:var(--amb)}
+  .badge.red{background:var(--redd);color:var(--red)}
+  .badge.pur{background:rgba(124,92,252,.1);color:var(--pur)}
+  .badge.mut{background:var(--sur);color:var(--mut)}
 
-        /* Investment cards for returns section */
-        .inv-card {
-            background:var(--input); border:1px solid var(--border); border-radius:14px; padding:20px;
-            margin-bottom:12px; cursor:pointer; transition:all 0.2s;
-        }
-        .inv-card:hover { border-color:var(--gold); }
-        .inv-card.selected { border-color:var(--gold); background:rgba(212,168,67,0.05); box-shadow:0 0 0 1px var(--gold); }
-        .inv-card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-        .inv-card-user { font-weight:600; font-size:15px; }
-        .inv-card-type { font-size:12px; color:var(--gold); font-weight:600; }
-        .inv-card-details { display:flex; gap:24px; flex-wrap:wrap; }
-        .inv-card-detail { display:flex; flex-direction:column; gap:2px; }
-        .inv-card-detail .label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
-        .inv-card-detail .value { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; }
-        .inv-card-returns { margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
-        .inv-card-returns-title { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
-        .return-tag { display:inline-block; padding:3px 10px; border-radius:8px; font-size:11px; margin:2px 4px 2px 0; background:rgba(78,203,141,0.1); color:var(--green); font-family:'JetBrains Mono',monospace; }
+  /* ─── INV CARDS (returns) ─── */
+  .ic{background:var(--sur);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .15s}
+  .ic:hover{border-color:var(--bdh)}
+  .ic.selected{border-color:var(--blu);background:var(--blud)}
+  .ic-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:10px;flex-wrap:wrap}
+  .ic-user{font-weight:600;font-size:14px}
+  .ic-type{font-size:11px;color:var(--blu);font-weight:600;font-family:'Space Mono',monospace}
+  .ic-details{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ic-d .l{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
+  .ic-d .v{font-family:'Space Mono',monospace;font-size:13px;font-weight:600;margin-top:2px}
 
-        /* Preview box */
-        .preview-box {
-            background:rgba(212,168,67,0.06); border:1px solid rgba(212,168,67,0.2); border-radius:12px;
-            padding:20px; margin:16px 0;
-        }
-        .preview-box h4 { font-size:13px; color:var(--gold); margin-bottom:12px; text-transform:uppercase; letter-spacing:1px; }
-        .preview-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
-        .preview-item .label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
-        .preview-item .value { font-family:'JetBrains Mono',monospace; font-size:18px; font-weight:600; color:var(--text); margin-top:4px; }
-        .preview-item .value.green { color:var(--green); }
+  /* ─── PREVIEW BOX ─── */
+  .pbox{background:var(--blud);border:1px solid rgba(79,142,247,.2);border-radius:10px;padding:16px;margin:14px 0}
+  .pbox h4{font-size:11px;color:var(--blu);margin-bottom:12px;text-transform:uppercase;letter-spacing:.8px;font-weight:700}
+  .pbox-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .pbox-i .l{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+  .pbox-i .v{font-family:'Space Mono',monospace;font-size:16px;font-weight:700}
+  .pbox-i .v.grn{color:var(--grn)}
+  .pbox-i .v.blu{color:var(--blu)}
 
-        @media(max-width:768px) {
-            .form-row, .form-row.cols-3 { grid-template-columns:1fr; }
-            .stats-row { grid-template-columns:1fr 1fr; }
-            .tabs { flex-wrap:wrap; }
-            .container { padding:16px; }
-            .topbar { padding:12px 16px; }
-            .preview-grid { grid-template-columns:1fr; }
-            .inv-card-details { gap:12px; }
-        }
-    </style>
+  /* ─── MODAL ─── */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:200;display:none;align-items:flex-end;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--bg2);border:1px solid var(--bd);border-radius:16px 16px 0 0;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:var(--bg2);z-index:2}
+  .modal-ttl{font-size:15px;font-weight:700}
+  .modal-close{width:28px;height:28px;background:var(--sur);border:1px solid var(--bd);border-radius:6px;color:var(--mut);display:flex;align-items:center;justify-content:center;font-size:15px}
+  .modal-body{padding:20px}
+
+  /* ─── TOAST ─── */
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:300;opacity:0;transition:all .25s;max-width:90%;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.success{background:var(--grn);color:white}
+  .toast.error{background:var(--red);color:white}
+
+  /* ─── EMPTY / LOADING ─── */
+  .empty{text-align:center;padding:40px 20px;color:var(--mut);font-size:13px}
+  .empty-ic{font-size:28px;margin-bottom:10px;opacity:.5;display:block}
+  .loading-cell{color:var(--mut);text-align:center;padding:30px}
+
+  /* ─── RESPONSIVE ─── */
+  @media(min-width:640px){
+    .stats{grid-template-columns:repeat(3,1fr)}
+    .form-row{grid-template-columns:1fr 1fr}
+    .form-row.cols-3{grid-template-columns:repeat(3,1fr)}
+    .ic-details{grid-template-columns:repeat(4,1fr)}
+    .pbox-grid{grid-template-columns:repeat(3,1fr)}
+    .container{padding:20px}
+  }
+  @media(min-width:1024px){
+    .stats{grid-template-columns:repeat(7,1fr)}
+    .topbar{padding:16px 32px}
+    .modal-overlay{align-items:center;padding:20px}
+    .modal{border-radius:16px;max-width:560px}
+  }
+
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+</style>
 </head>
 <body>
-    <div class="topbar">
-        <div>
-            <h1>SANSE CAPITAL</h1>
-            <div class="topbar-sub">Panel de Administración</div>
+
+<!-- ═══ TOPBAR ═══ -->
+<div class="topbar">
+  <div class="tb-left">
+    <div class="tb-logo-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+    <div>
+      <div class="tb-title">SANSE <span>CAPITAL</span></div>
+      <div class="tb-sub">Panel de Administración</div>
+    </div>
+  </div>
+  <div class="tb-right">
+    <a href="dashboard.html" class="tb-btn">← Dashboard</a>
+    <button class="tb-btn red" onclick="logout()">Salir</button>
+  </div>
+</div>
+
+<div class="container">
+  <!-- ═══ STATS ═══ -->
+  <div class="stats">
+    <div class="stat"><div class="stat-lbl">Total Usuarios</div><div class="stat-val blu" id="st-users">0</div></div>
+    <div class="stat grn"><div class="stat-lbl">Balance Total</div><div class="stat-val grn" id="st-balance">$0</div></div>
+    <div class="stat"><div class="stat-lbl">Préstamos Total</div><div class="stat-val blu" id="st-loans">$0</div></div>
+    <div class="stat red"><div class="stat-lbl">Retiros Total</div><div class="stat-val red" id="st-withdrawals">$0</div></div>
+    <div class="stat grn"><div class="stat-lbl">Ganancias CDTC</div><div class="stat-val grn" id="st-cdtc-earned">$0</div></div>
+    <div class="stat amb"><div class="stat-lbl">CDTC Bloqueado</div><div class="stat-val amb" id="st-cdtc-locked">$0</div></div>
+    <div class="stat grn"><div class="stat-lbl">Capital Libre</div><div class="stat-val grn" id="st-total-available">$0</div></div>
+  </div>
+
+  <!-- ═══ TABS ═══ -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('register',this)">Registrar</button>
+    <button class="tab" onclick="switchTab('transactions',this)">Transacciones</button>
+    <button class="tab" onclick="switchTab('returns',this)">Rendimientos</button>
+    <button class="tab" onclick="switchTab('sdtc',this)">CDTC</button>
+    <button class="tab" onclick="switchTab('loans',this)">Préstamos</button>
+    <button class="tab" onclick="switchTab('deposits',this)">Depósitos</button>
+    <button class="tab" onclick="switchTab('registrations',this)">Registros</button>
+    <button class="tab" onclick="switchTab('withdrawals',this)">Retiros</button>
+    <button class="tab" onclick="switchTab('users',this)">Usuarios</button>
+  </div>
+
+  <!-- ═══ REGISTRAR USUARIO ═══ -->
+  <div class="section active" id="sec-register">
+    <div class="card">
+      <div class="card-ttl">Nuevo Usuario</div>
+      <div class="card-desc">Registra un nuevo cliente, administrador o institución.</div>
+      <div class="form-row">
+        <div class="fg"><label>Nombre Completo *</label><input id="u-name" placeholder="Juan Pérez"></div>
+        <div class="fg"><label>Correo Electrónico *</label><input id="u-email" type="email" placeholder="juan@email.com"></div>
+      </div>
+      <div class="form-row cols-3">
+        <div class="fg"><label>Cédula</label><input id="u-cc" class="mono" placeholder="1234567890"></div>
+        <div class="fg"><label>Teléfono</label><input id="u-phone" class="mono" placeholder="3001234567"></div>
+        <div class="fg"><label>Rol *</label>
+          <select id="u-role">
+            <option value="client">Cliente</option>
+            <option value="admin">Administrador</option>
+            <option value="p2p">P2P</option>
+          </select>
         </div>
-        <div class="topbar-right">
-            <a href="dashboard.html">← Dashboard</a>
-            <a href="#" onclick="logout()">Cerrar Sesión</a>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Contraseña *</label><input id="u-pass" type="password" placeholder="Mín 8 chars, 1 mayúscula, 1 número"></div>
+        <div class="fg"><label>Balance Inicial (COP)</label><input id="u-balance" type="number" value="0"></div>
+      </div>
+      <button class="btn btn-primary" onclick="createUser()" id="btn-cu">Crear Usuario</button>
+    </div>
+  </div>
+
+  <!-- ═══ TRANSACCIONES ═══ -->
+  <div class="section" id="sec-transactions">
+    <div class="card">
+      <div class="card-ttl">Nueva Transacción</div>
+      <div class="card-desc">Registra depósitos, retiros, intereses, ganancias, abonos o préstamos.</div>
+      <div class="form-row">
+        <div class="fg"><label>Usuario *</label><select id="t-user"><option value="">Seleccionar...</option></select></div>
+        <div class="fg"><label>Tipo *</label>
+          <select id="t-type">
+            <option value="deposit">Depósito</option>
+            <option value="withdraw">Retiro</option>
+            <option value="payment">Abono</option>
+            <option value="interest">Intereses</option>
+            <option value="profit">Ganancias</option>
+            <option value="loan">Préstamo</option>
+          </select>
         </div>
+      </div>
+      <div class="form-row cols-3">
+        <div class="fg"><label>Monto (COP) *</label><input id="t-amount" type="number" placeholder="2000000"></div>
+        <div class="fg"><label>Fecha</label><input id="t-date" type="date"></div>
+        <div class="fg"><label>Descripción</label><input id="t-desc" placeholder="Opcional"></div>
+      </div>
+      <button class="btn btn-primary" onclick="createTransaction()" id="btn-ct">Registrar Transacción</button>
     </div>
 
-    <div class="container">
-        <!-- STATS -->
-        <div class="stats-row">
-            <div class="stat-card"><div class="val gold" id="st-users">0</div><div class="lbl">Total Usuarios</div></div>
-            <div class="stat-card"><div class="val green" id="st-balance">$0</div><div class="lbl">Balance en Ahorro</div></div>
-            <div class="stat-card"><div class="val blue" id="st-loans">$0</div><div class="lbl">Préstamos Total</div></div>
-            <div class="stat-card"><div class="val red" id="st-withdrawals">$0</div><div class="lbl">Retiros Total</div></div>
-            <div class="stat-card"><div class="val green" id="st-cdtc-earned">$0</div><div class="lbl">💰 Ganancias CDTC Pagadas</div></div>
-            <div class="stat-card"><div class="val gold" id="st-cdtc-locked">$0</div><div class="lbl">🔒 Capital CDTC Bloqueado</div></div>
-            <div class="stat-card" style="border-color:rgba(78,203,141,0.3);background:rgba(78,203,141,0.04);"><div class="val green" id="st-total-available">$0</div><div class="lbl">🟢 Capital Libre Total</div></div>
-        </div>
-
-        <!-- TABS -->
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('register',this)">👤 Registrar</div>
-            <div class="tab" onclick="switchTab('transactions',this)">💸 Transacción</div>
-            <div class="tab" onclick="switchTab('returns',this)">📈 Rendimientos</div>
-            <div class="tab" onclick="switchTab('sdtc_overview',this)">🔒 CDTC</div>
-            <div class="tab" onclick="switchTab('loans',this)">🏦 Préstamos</div>
-            <div class="tab" onclick="switchTab('create-loan',this)">➕ Crear Préstamo</div>
-            <div class="tab" onclick="switchTab('deposits',this)">📥 Depósitos</div>
-            <div class="tab" onclick="switchTab('registrations',this)">📝 Registros</div>
-            <div class="tab" onclick="switchTab('withdrawals',this)">📤 Retiros</div>
-            <div class="tab" onclick="switchTab('users',this)">📋 Usuarios</div>
-        </div>
-
-        <!-- ====== REGISTRAR USUARIO ====== -->
-        <div class="section active" id="sec-register">
-            <div class="card">
-                <div class="card-title">👤 Nuevo Usuario</div>
-                <div class="card-desc">Registra un nuevo cliente, administrador o institución en la plataforma.</div>
-
-                <div class="form-row">
-                    <div class="form-group"><label>Nombre Completo *</label><input id="u-name" placeholder="Santiago Rubiano"></div>
-                    <div class="form-group"><label>Correo Electrónico *</label><input id="u-email" type="email" placeholder="santiago@email.com"></div>
-                </div>
-                <div class="form-row cols-3">
-                    <div class="form-group"><label>Cédula (CC)</label><input id="u-cc" placeholder="1234567890"></div>
-                    <div class="form-group"><label>Teléfono</label><input id="u-phone" placeholder="3194101127"></div>
-                    <div class="form-group"><label>Rol *</label>
-                        <select id="u-role">
-                            <option value="client">Cliente</option>
-                            <option value="admin">Administrador</option>
-                            <option value="institution">Institución</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group"><label>Contraseña *</label><input id="u-pass" type="password" placeholder="Mín 8 chars, 1 mayúscula, 1 número"></div>
-                    <div class="form-group"><label>Balance Inicial (COP)</label><input id="u-balance" type="number" placeholder="0" value="0"></div>
-                </div>
-                <button class="btn btn-gold" onclick="createUser()" id="btn-create-user">👤 Crear Usuario</button>
-            </div>
-        </div>
-
-        <!-- ====== REGISTRAR TRANSACCIÓN ====== -->
-        <div class="section" id="sec-transactions">
-            <div class="card">
-                <div class="card-title">💸 Nueva Transacción</div>
-                <div class="card-desc">Registra depósitos, retiros, intereses, ganancias, abonos o préstamos para un usuario.</div>
-
-                <div class="form-row">
-                    <div class="form-group"><label>Usuario *</label><select id="t-user"><option value="">Seleccionar usuario...</option></select></div>
-                    <div class="form-group"><label>Tipo de Transacción *</label>
-                        <select id="t-type">
-                            <option value="deposit">💰 Depósito</option>
-                            <option value="withdraw">📤 Retiro</option>
-                            <option value="payment">💳 Abono</option>
-                            <option value="interest">📈 Intereses</option>
-                            <option value="profit">🏆 Ganancias</option>
-                            <option value="loan">🏦 Préstamo</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row cols-3">
-                    <div class="form-group"><label>Monto (COP) *</label><input id="t-amount" type="number" placeholder="2000000"></div>
-                    <div class="form-group"><label>Fecha</label><input id="t-date" type="date"></div>
-                    <div class="form-group"><label>ID Transacción</label><input id="t-ref" placeholder="Auto" disabled style="opacity:0.5"></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group full"><label>Descripción (opcional)</label><input id="t-desc" placeholder="Ej: Aporte mensual enero 2026"></div>
-                </div>
-                <button class="btn btn-gold" onclick="createTransaction()" id="btn-create-tx">💸 Registrar Transacción</button>
-            </div>
-
-            <!-- Todas las transacciones con filtros y paginación -->
-            <div class="card">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
-                    <div class="card-title" style="margin:0;">📋 Todas las Transacciones <span id="tx-count" style="font-size:13px;color:var(--muted);font-weight:400;"></span></div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                        <select id="tx-filter-type" onchange="txPage=1;fetchAndRenderTx()" style="padding:7px 10px;background:var(--input);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;">
-                            <option value="">Todos los tipos</option>
-                            <option value="deposit">💰 Depósito</option>
-                            <option value="withdraw">📤 Retiro</option>
-                            <option value="payment">💳 Abono</option>
-                            <option value="interest">📈 Intereses</option>
-                            <option value="profit">🏆 Ganancias</option>
-                            <option value="loan">🏦 Préstamo</option>
-                            <option value="investment">📊 Inversión</option>
-                            <option value="investment_return">🔒 Rend. CDTC</option>
-                        </select>
-                        <input id="tx-date-from" type="date" onchange="txPage=1;fetchAndRenderTx()"
-                            style="padding:7px 10px;background:var(--input);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;" title="Desde">
-                        <span style="color:var(--muted);font-size:12px;">→</span>
-                        <input id="tx-date-to" type="date" onchange="txPage=1;fetchAndRenderTx()"
-                            style="padding:7px 10px;background:var(--input);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;" title="Hasta">
-                        <input id="tx-search" placeholder="🔍 Usuario / Ref / Desc..."
-                            oninput="clearTimeout(txSearchTimer);txSearchTimer=setTimeout(()=>{txPage=1;fetchAndRenderTx();},400)"
-                            style="padding:7px 10px;background:var(--input);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;width:180px;">
-                        <button class="btn btn-sm btn-outline" onclick="clearTxFilters()" title="Limpiar filtros">✕ Limpiar</button>
-                    </div>
-                </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr><th>ID</th><th>Usuario</th><th>Tipo</th><th>Monto</th><th>Descripción</th><th>Fecha</th><th></th></tr></thead>
-                        <tbody id="tx-table"><tr><td colspan="7" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
-                    </table>
-                </div>
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:wrap;gap:8px;">
-                    <div style="font-size:12px;color:var(--muted);" id="tx-page-info"></div>
-                    <div style="display:flex;gap:5px;flex-wrap:wrap;" id="tx-page-btns"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ====== RENDIMIENTOS CDTC ====== -->
-        <div class="section" id="sec-returns">
-            <div class="card">
-                <div class="card-title">📈 Registrar Rendimiento CDTC</div>
-                <div class="card-desc">
-                    Selecciona una inversión activa y registra el rendimiento mensual. 
-                    Se calculará automáticamente la ganancia y se reflejará en el dashboard del usuario.
-                </div>
-
-                <!-- Lista de inversiones activas -->
-                <div id="active-investments-list" style="margin-bottom:20px;">
-                    <div style="color:var(--muted);text-align:center;padding:40px 0;">Cargando inversiones activas...</div>
-                </div>
-
-                <!-- Formulario de rendimiento (oculto hasta seleccionar inversión) -->
-                <div id="return-form" style="display:none;">
-                    <div style="height:1px;background:var(--border);margin:20px 0;"></div>
-                    
-                    <div class="card-title" style="font-size:15px;">💰 Nuevo Rendimiento para: <span id="rf-inv-label" style="color:var(--gold);"></span></div>
-
-                    <div class="form-row cols-3">
-                        <div class="form-group">
-                            <label>Tasa Mensual (%) *</label>
-                            <input id="rf-rate" type="number" step="0.01" min="0" max="100" placeholder="3.5" oninput="updateReturnPreview()">
-                        </div>
-                        <div class="form-group">
-                            <label>Mes del Rendimiento *</label>
-                            <input id="rf-month" type="month" oninput="updateReturnPreview()">
-                        </div>
-                        <div class="form-group">
-                            <label>Notas (opcional)</label>
-                            <input id="rf-notes" placeholder="Ej: Rendimiento marzo 2026">
-                        </div>
-                    </div>
-
-                    <!-- Preview de la ganancia -->
-                    <div class="preview-box" id="return-preview" style="display:none;">
-                        <h4>📊 Vista Previa del Rendimiento</h4>
-                        <div class="preview-grid">
-                            <div class="preview-item">
-                                <div class="label">Capital Invertido</div>
-                                <div class="value" id="rp-capital">$0</div>
-                            </div>
-                            <div class="preview-item">
-                                <div class="label">Tasa Aplicada</div>
-                                <div class="value" id="rp-rate">0%</div>
-                            </div>
-                            <div class="preview-item">
-                                <div class="label">Ganancia Generada</div>
-                                <div class="value green" id="rp-earned">$0</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button class="btn btn-gold" onclick="registerReturn()" id="btn-register-return" disabled>📈 Registrar Rendimiento</button>
-                </div>
-            </div>
-
-            <!-- Historial de rendimientos registrados -->
-            <div class="card">
-                <div class="card-title">📋 Últimos Rendimientos Registrados</div>
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr><th>Inversión</th><th>Usuario</th><th>Mes</th><th>Tasa</th><th>Ganancia</th><th>Capital</th></tr></thead>
-                        <tbody id="returns-table"><tr><td colspan="6" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ====== CDTC OVERVIEW ====== -->
-        <div class="section" id="sec-sdtc_overview">
-            <div class="card">
-                <div class="card-title">🔒 Panel CDTC — Vista General</div>
-                <div class="card-desc">Total de capital bloqueado, rentabilidad APY real, e inversiones próximas a vencer.</div>
-
-                <!-- Global Stats -->
-                <div id="sdtc-global-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">
-                    <div style="text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
-                        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">🔒 Capital Bloqueado</div>
-                        <div id="sdtc-total-locked" class="mono" style="font-size:22px;font-weight:700;color:var(--gold);">—</div>
-                    </div>
-                    <div style="text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
-                        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">📈 APY Real</div>
-                        <div id="sdtc-apy" class="mono" style="font-size:22px;font-weight:700;color:var(--green);">—</div>
-                    </div>
-                    <div style="text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
-                        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">👥 Inversionistas</div>
-                        <div id="sdtc-investors" class="mono" style="font-size:22px;font-weight:700;">—</div>
-                    </div>
-                    <div style="text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
-                        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">💰 Total Rendimientos Pagados</div>
-                        <div id="sdtc-total-earned" class="mono" style="font-size:22px;font-weight:700;color:var(--green);">—</div>
-                    </div>
-                </div>
-
-                <!-- Expiring Soon -->
-                <div style="margin-bottom:16px;font-weight:700;font-size:15px;">⏰ Inversiones Próximas a Vencer (30 días)</div>
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr>
-                            <th>ID</th><th>Usuario</th><th>Capital</th><th>Inicio</th><th>Vence</th><th>Días Restantes</th><th>Estado</th><th>Acciones</th>
-                        </tr></thead>
-                        <tbody id="sdtc-expiring-table"><tr><td colspan="8" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
-                    </table>
-                </div>
-
-                <!-- All Active CDTC -->
-                <div style="margin:24px 0 16px;font-weight:700;font-size:15px;">📊 Todas las Inversiones Activas</div>
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr>
-                            <th>ID</th><th>Usuario</th><th>Capital</th><th>Tasa</th><th>Inicio</th><th>Vence</th><th>Progreso</th><th>Acciones</th>
-                        </tr></thead>
-                        <tbody id="sdtc-all-table"><tr><td colspan="8" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
-                    </table>
-                </div>
-
-                <!-- Ganancias por usuario -->
-                <div style="margin:24px 0 16px;font-weight:700;font-size:15px;">💰 Ganancias Otorgadas por Usuario</div>
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr>
-                            <th>Usuario</th><th>Email</th><th>Capital Total</th><th>Inversiones</th><th>Rendimientos Pagados</th><th>Total Ganado</th><th>% Promedio</th>
-                        </tr></thead>
-                        <tbody id="sdtc-earnings-table"><tr><td colspan="7" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ====== PRÉSTAMOS (ADMIN) ====== -->
-        <div class="section" id="sec-loans">
-            <div class="card">
-                <div class="card-title">🏦 Solicitudes de Préstamo</div>
-                <div class="card-desc">Gestiona las solicitudes de préstamo. Puedes aprobar (definiendo monto y tasa), rechazar, o marcar como pagado/mora.</div>
-
-                <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
-                    <button class="btn btn-sm btn-outline ln-filter-btn active" onclick="filterLoans('all', this)">Todas</button>
-                    <button class="btn btn-sm btn-outline ln-filter-btn" onclick="filterLoans('pending', this)">⏳ Pendientes</button>
-                    <button class="btn btn-sm btn-outline ln-filter-btn" onclick="filterLoans('active', this)">🟢 Activos</button>
-                    <button class="btn btn-sm btn-outline ln-filter-btn" onclick="filterLoans('paid', this)">✅ Pagados</button>
-                    <button class="btn btn-sm btn-outline ln-filter-btn" onclick="filterLoans('overdue', this)">🔴 En Mora</button>
-                    <button class="btn btn-sm btn-outline ln-filter-btn" onclick="filterLoans('rejected', this)">❌ Rechazados</button>
-                </div>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr>
-                            <th>Ref</th><th>Usuario</th><th>Monto Sol.</th><th>Plazo</th><th>Score</th><th>Propósito</th><th>Estado</th><th>Fecha</th><th>Acciones</th>
-                        </tr></thead>
-                        <tbody id="loans-table"><tr><td colspan="9" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- ====== KPIs GANANCIAS PRÉSTAMOS ====== -->
-            <div class="card">
-                <div class="card-title">💰 Ganancias por Préstamos</div>
-                <div class="card-desc">Control de ingresos generados por intereses cobrados en préstamos.</div>
-
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
-                    <div style="text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
-                        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Ganancia Total (Intereses)</div>
-                        <div id="lp-total-interest" style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--green);">$0</div>
-                    </div>
-                    <div style="text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
-                        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Ganancia Este Mes</div>
-                        <div id="lp-month-interest" style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--gold);">$0</div>
-                    </div>
-                    <div style="text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
-                        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Capital Prestado Activo</div>
-                        <div id="lp-active-capital" style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--text);">$0</div>
-                    </div>
-                    <div style="text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
-                        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Tasa Promedio</div>
-                        <div id="lp-avg-rate" style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--gold);">0%</div>
-                    </div>
-                </div>
-
-                <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
-                    <div style="text-align:center;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
-                        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Total Recibido</div>
-                        <div id="lp-total-received" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;">$0</div>
-                    </div>
-                    <div style="text-align:center;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
-                        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Capital Recuperado</div>
-                        <div id="lp-capital-recovered" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;">$0</div>
-                    </div>
-                    <div style="text-align:center;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
-                        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Pagos Recibidos</div>
-                        <div id="lp-payment-count" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;">0</div>
-                    </div>
-                    <div style="text-align:center;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
-                        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Préstamos Pagados</div>
-                        <div id="lp-paid-count" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--green);">0</div>
-                    </div>
-                    <div style="text-align:center;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
-                        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">En Mora</div>
-                        <div id="lp-overdue-count" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--red);">0</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ====== TABLA DETALLADA DE PAGOS ====== -->
-            <div class="card">
-                <div class="card-title">📋 Historial de Pagos Recibidos</div>
-                <div class="card-desc">Cada abono recibido con desglose de interés (ganancia) vs capital.</div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Usuario</th>
-                                <th>Préstamo</th>
-                                <th style="text-align:right;">Total Abono</th>
-                                <th style="text-align:right;color:var(--green);">Interés (Ganancia)</th>
-                                <th style="text-align:right;">Capital</th>
-                                <th style="text-align:right;">Pendiente</th>
-                                <th>Tasa</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="loan-payments-table">
-                            <tr><td colspan="9" style="color:var(--muted);text-align:center">Cargando...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ====== SOLICITUDES DE REGISTRO ====== -->
-        <div class="section" id="sec-registrations">
-            <div class="card">
-                <div class="card-title">📝 Solicitudes de Registro</div>
-                <div class="card-desc">Revisa las solicitudes de registro de nuevos usuarios. Aprueba o rechaza cada solicitud.</div>
-
-                <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
-                    <button class="btn btn-sm btn-outline reg-filter-btn active" onclick="filterRegistrations('all', this)">Todas</button>
-                    <button class="btn btn-sm btn-outline reg-filter-btn" onclick="filterRegistrations('pending', this)">⏳ Pendientes</button>
-                    <button class="btn btn-sm btn-outline reg-filter-btn" onclick="filterRegistrations('approved', this)">✅ Aprobados</button>
-                    <button class="btn btn-sm btn-outline reg-filter-btn" onclick="filterRegistrations('rejected', this)">❌ Rechazados</button>
-                </div>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr>
-                            <th>Nombre</th><th>Email</th><th>Tel</th><th>CC</th><th>Referido por</th><th>Estado</th><th>Fecha</th><th>Acciones</th>
-                        </tr></thead>
-                        <tbody id="registrations-table"><tr><td colspan="8" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ====== SOLICITUDES DE DEPÓSITO ====== -->
-        <div class="section" id="sec-deposits">
-            <div class="card">
-                <div class="card-title">📥 Solicitudes de Depósito</div>
-                <div class="card-desc">Revisa los comprobantes de depósito, aprueba para acreditar fondos, o rechaza si no es válido. Al aprobar puedes enviar WhatsApp al usuario.</div>
-
-                <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
-                    <button class="btn btn-sm btn-outline dep-filter-btn active" onclick="filterDeposits('all', this)">Todas</button>
-                    <button class="btn btn-sm btn-outline dep-filter-btn" onclick="filterDeposits('pending', this)">⏳ Pendientes</button>
-                    <button class="btn btn-sm btn-outline dep-filter-btn" onclick="filterDeposits('approved', this)">✅ Aprobados</button>
-                    <button class="btn btn-sm btn-outline dep-filter-btn" onclick="filterDeposits('rejected', this)">❌ Rechazados</button>
-                </div>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr>
-                            <th>Ref</th><th>Usuario</th><th>Tel</th><th>Monto</th><th>Comprobante</th><th>Nota</th><th>Estado</th><th>Fecha</th><th>Acciones</th>
-                        </tr></thead>
-                        <tbody id="deposits-table"><tr><td colspan="9" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ====== SOLICITUDES DE RETIRO ====== -->
-        <div class="section" id="sec-withdrawals">
-            <div class="card">
-                <div class="card-title">📤 Solicitudes de Retiro</div>
-                <div class="card-desc">Gestiona las solicitudes de retiro de los usuarios. Puedes aprobar, completar o rechazar cada solicitud.</div>
-
-                <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
-                    <button class="btn btn-sm btn-outline wr-filter-btn active" onclick="filterWithdrawals('all', this)">Todas</button>
-                    <button class="btn btn-sm btn-outline wr-filter-btn" onclick="filterWithdrawals('pending', this)">⏳ Pendientes</button>
-                    <button class="btn btn-sm btn-outline wr-filter-btn" onclick="filterWithdrawals('approved', this)">✅ Aprobadas</button>
-                    <button class="btn btn-sm btn-outline wr-filter-btn" onclick="filterWithdrawals('completed', this)">💰 Completadas</button>
-                    <button class="btn btn-sm btn-outline wr-filter-btn" onclick="filterWithdrawals('rejected', this)">❌ Rechazadas</button>
-                </div>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr>
-                            <th>Ref</th><th>Usuario</th><th>Monto</th><th>Método</th><th>Detalle Pago</th><th>Estado</th><th>Tiempo Est.</th><th>Fecha</th><th>Acciones</th>
-                        </tr></thead>
-                        <tbody id="wr-table"><tr><td colspan="9" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ====== VER USUARIOS ====== -->
-        <div class="section" id="sec-users">
-            <div class="card">
-                <div class="card-title">📋 Usuarios Registrados</div>
-                <div style="font-size:12px;color:var(--text2);margin-bottom:16px;">Vista completa con información financiera de cada usuario.</div>
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr>
-                            <th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th>
-                            <th style="text-align:right">💰 Balance</th>
-                            <th style="text-align:right;color:var(--green);background:rgba(78,203,141,0.06);">🟢 Capital Libre</th>
-                            <th style="text-align:right">🔵 Invertido</th><th style="text-align:right">🏦 Préstamo</th>
-                            <th>Acciones</th>
-                        </tr></thead>
-                        <tbody id="users-table"><tr><td colspan="10" style="color:var(--muted);text-align:center">Cargando...</td></tr></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+    <div class="card">
+      <div class="card-ttl">Últimas Transacciones</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Fecha</th><th>Usuario</th><th>Tipo</th><th>Monto</th><th>Descripción</th></tr></thead>
+          <tbody id="tx-recent"><tr><td colspan="5" class="loading-cell">Cargando...</td></tr></tbody>
+        </table>
+      </div>
     </div>
+  </div>
 
+  <!-- ═══ RENDIMIENTOS ═══ -->
+  <div class="section" id="sec-returns">
+    <div class="card">
+      <div class="card-ttl">Registrar Rendimiento</div>
+      <div class="card-desc">Selecciona una inversión activa y registra el rendimiento mensual.</div>
+      <div id="active-invs-list"><div class="loading-cell">Cargando inversiones activas...</div></div>
 
-    <!-- ══ MODAL WHATSAPP ══ -->
-    <div id="wa-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
-        <div style="background:#12121a;border:1px solid rgba(37,211,102,0.2);border-radius:14px;width:100%;max-width:500px;margin:20px;overflow:hidden;">
-            <div style="padding:18px 24px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;background:rgba(37,211,102,0.05);">
-                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:#25D366;">💬 Enviar WhatsApp</div>
-                <button onclick="closeWaModal()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;line-height:1;">✕</button>
-            </div>
-            <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px;">
-                <div>
-                    <label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Número de teléfono</label>
-                    <input id="wa-phone" type="tel" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-family:'JetBrains Mono',monospace;font-size:14px;outline:none;box-sizing:border-box;" placeholder="3194101127">
-                </div>
-                <div>
-                    <label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Mensaje <span style="font-weight:400;color:rgba(255,255,255,0.3);">— editable antes de enviar</span></label>
-                    <textarea id="wa-msg" rows="9" style="width:100%;padding:12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;font-family:inherit;"></textarea>
-                </div>
-                <div style="display:flex;gap:10px;">
-                    <button onclick="sendWaMessage()" style="flex:1;padding:13px;background:#25D366;color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;">📲 Abrir WhatsApp</button>
-                    <button onclick="closeWaModal()" style="padding:13px 20px;background:rgba(255,255,255,0.05);color:#888;border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:13px;cursor:pointer;">Cancelar</button>
-                </div>
-                <p style="font-size:11px;color:#666;margin:0;text-align:center;">Se abrirá WhatsApp Web con el mensaje prellenado. Puedes editarlo antes de enviar.</p>
-            </div>
+      <div id="return-form" style="display:none">
+        <div style="height:1px;background:var(--bd);margin:20px 0"></div>
+        <div class="card-ttl" style="font-size:14px">Rendimiento para: <span id="rf-label" style="color:var(--blu)"></span></div>
+        <div class="form-row cols-3">
+          <div class="fg"><label>Tasa Mensual (%) *</label><input id="rf-rate" type="number" step="0.01" min="0" placeholder="2.1" oninput="updateReturnPreview()"></div>
+          <div class="fg"><label>Mes *</label><input id="rf-month" type="month" oninput="updateReturnPreview()"></div>
+          <div class="fg"><label>Notas</label><input id="rf-notes" placeholder="Opcional"></div>
         </div>
+        <div class="pbox" id="return-preview" style="display:none">
+          <h4>Vista Previa</h4>
+          <div class="pbox-grid">
+            <div class="pbox-i"><div class="l">Capital</div><div class="v" id="rp-cap">$0</div></div>
+            <div class="pbox-i"><div class="l">Tasa</div><div class="v blu" id="rp-rate">0%</div></div>
+            <div class="pbox-i"><div class="l">Ganancia</div><div class="v grn" id="rp-earn">$0</div></div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="registerReturn()" id="btn-rr" disabled>Registrar Rendimiento</button>
+      </div>
     </div>
+  </div>
 
-
-        <!-- ====== CREAR PRÉSTAMO DIRECTO ====== -->
-        <!-- ====== CREAR PRÉSTAMO DIRECTO ====== -->
-        <div class="section" id="sec-create-loan">
-            <div class="card" style="max-width:680px;box-sizing:border-box;">
-                <div class="card-title">🏦 Registrar Préstamo Directo</div>
-                <div class="card-desc">Crea un préstamo activo para un usuario. El monto se acreditará en su balance inmediatamente.</div>
-                <div style="display:flex;flex-direction:column;gap:14px;margin-top:16px;">
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                        <div class="form-group" style="margin:0;min-width:0;"><label>Usuario *</label>
-                            <select id="cl-user" style="width:100%;box-sizing:border-box;"><option value="">Seleccionar...</option></select>
-                        </div>
-                        <div class="form-group" style="margin:0;min-width:0;"><label>Monto (COP) *</label>
-                            <input id="cl-amount" type="number" placeholder="1000000" min="100000" oninput="updateLoanPreview()" style="width:100%;box-sizing:border-box;">
-                        </div>
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-                        <div class="form-group" style="margin:0;min-width:0;"><label>Plazo *</label>
-                            <select id="cl-term" onchange="updateLoanPreview()" style="width:100%;box-sizing:border-box;">
-                                <option value="1">1 mes</option><option value="2">2 meses</option>
-                                <option value="3" selected>3 meses</option><option value="6">6 meses</option><option value="12">12 meses</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="margin:0;min-width:0;"><label>Tasa mensual %</label>
-                            <input id="cl-rate" type="number" value="4" min="1" max="20" step="0.5" oninput="updateLoanPreview()" style="width:100%;box-sizing:border-box;">
-                        </div>
-                        <div class="form-group" style="margin:0;min-width:0;"><label>Fecha inicio</label>
-                            <input id="cl-date" type="date" style="width:100%;box-sizing:border-box;">
-                        </div>
-                    </div>
-                    <div class="form-group" style="margin:0;"><label>Propósito</label>
-                        <input id="cl-purpose" placeholder="Capital de trabajo, vehículo..." style="width:100%;box-sizing:border-box;">
-                    </div>
-                    <div class="form-group" style="margin:0;"><label>Notas internas</label>
-                        <input id="cl-notes" placeholder="Notas para expediente (no visibles al cliente)" style="width:100%;box-sizing:border-box;">
-                    </div>
-                    <div id="cl-preview" style="display:none;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.25);border-radius:10px;padding:16px;">
-                        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;font-weight:600;">📋 Resumen</div>
-                        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;">
-                            <div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--gold);" id="clp-amount">$0</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">Capital</div></div>
-                            <div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;" id="clp-rate">0%</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">Tasa/mes</div></div>
-                            <div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--red);" id="clp-interest">$0</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">Intereses est.</div></div>
-                            <div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;" id="clp-due">—</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">Vence</div></div>
-                        </div>
-                    </div>
-                    <button class="btn btn-gold" onclick="submitCreateLoan()" id="btn-create-loan" style="align-self:flex-start;">🏦 Crear Préstamo</button>
-                </div>
-            </div>
-        </div>
-
-    <!-- ══ MODAL EDITAR USUARIO ══ -->
-    <div id="edit-user-modal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;overflow-y:auto;">
-        <div style="background:#12121a;border:1px solid rgba(255,255,255,0.08);border-radius:14px;width:100%;max-width:520px;margin:20px auto;">
-            <div style="padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;">
-                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;">✏️ Editar Usuario</div>
-                <button onclick="closeEditModal()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;line-height:1;">✕</button>
-            </div>
-            <div style="padding:24px;display:flex;flex-direction:column;gap:14px;">
-                <input type="hidden" id="eu-id">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                    <div><label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Nombre completo</label>
-                        <input id="eu-name" type="text" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;"></div>
-                    <div><label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Email</label>
-                        <input id="eu-email" type="email" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;"></div>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                    <div><label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Teléfono</label>
-                        <input id="eu-phone" type="tel" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;"></div>
-                    <div><label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Cédula</label>
-                        <input id="eu-doc" type="text" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;"></div>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                    <div><label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Rol</label>
-                        <select id="eu-role" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
-                            <option value="client">client</option>
-                            <option value="p2p">p2p</option>
-                            <option value="admin">admin</option>
-                        </select></div>
-                    <div><label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Estado</label>
-                        <select id="eu-status" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
-                            <option value="active">✅ Activo</option>
-                            <option value="blocked">🚫 Bloqueado</option>
-                        </select></div>
-                </div>
-                <!-- Referido -->
-                <div><label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Referido por</label>
-                    <select id="eu-referrer" style="width:100%;padding:10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;outline:none;box-sizing:border-box;">
-                        <option value="none">Sin referido</option>
-                    </select></div>
-                <!-- Contraseña -->
-                <div><label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Nueva contraseña <span style="font-weight:400;text-transform:none;color:rgba(255,255,255,0.3);">(vacío = no cambiar)</span></label>
-                    <div style="position:relative;">
-                        <input id="eu-password" type="password" placeholder="••••••••" style="width:100%;padding:10px 40px 10px 12px;background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#e8e6e3;font-size:13px;font-family:'JetBrains Mono',monospace;outline:none;box-sizing:border-box;">
-                        <button onclick="togglePassVis()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:#888;padding:0;line-height:1;">👁️</button>
-                    </div></div>
-                <div style="display:flex;gap:10px;margin-top:4px;">
-                    <button onclick="saveEditUser()" id="eu-save-btn" style="flex:1;padding:12px;background:#C9A84C;color:#0a0a0f;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;">💾 Guardar Cambios</button>
-                    <button onclick="closeEditModal()" style="padding:12px 20px;background:rgba(255,255,255,0.05);color:#888;border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:13px;cursor:pointer;">Cancelar</button>
-                </div>
-            </div>
-        </div>
+  <!-- ═══ CDTC ═══ -->
+  <div class="section" id="sec-sdtc">
+    <div class="card">
+      <div class="card-ttl">Panel CDTC — Vista General</div>
+      <div class="card-desc">Total de capital bloqueado, rentabilidad APY real, e inversiones próximas a vencer.</div>
+      <div id="sdtc-content"><div class="loading-cell">Cargando CDTC...</div></div>
     </div>
+  </div>
 
-    <!-- Toast -->
-    <div class="toast" id="toast"></div>
+  <!-- ═══ PRÉSTAMOS ═══ -->
+  <div class="section" id="sec-loans">
+    <div class="card">
+      <div class="card-ttl">Solicitudes de Préstamo</div>
+      <div class="card-desc">Aprueba, rechaza, o marca como pagado/mora.</div>
+      <div class="filters" id="loan-filters">
+        <button class="fbtn active" onclick="filterLoans('all',this)">Todas</button>
+        <button class="fbtn" onclick="filterLoans('pending',this)">Pendientes</button>
+        <button class="fbtn" onclick="filterLoans('active',this)">Activos</button>
+        <button class="fbtn" onclick="filterLoans('paid',this)">Pagados</button>
+        <button class="fbtn" onclick="filterLoans('overdue',this)">En Mora</button>
+        <button class="fbtn" onclick="filterLoans('rejected',this)">Rechazados</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Ref</th><th>Usuario</th><th>Monto</th><th>Plazo</th><th>Propósito</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
+          <tbody id="loans-tbl"><tr><td colspan="8" class="loading-cell">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-    <script>
-        const API_URL = 'https://sanse-backend-production.up.railway.app/api';
+  <!-- ═══ DEPÓSITOS ═══ -->
+  <div class="section" id="sec-deposits">
+    <div class="card">
+      <div class="card-ttl">Solicitudes de Depósito</div>
+      <div class="card-desc">Revisa comprobantes, aprueba para acreditar fondos, o rechaza.</div>
+      <div class="filters">
+        <button class="fbtn active" onclick="filterDeposits('all',this)">Todas</button>
+        <button class="fbtn" onclick="filterDeposits('pending',this)">Pendientes</button>
+        <button class="fbtn" onclick="filterDeposits('approved',this)">Aprobadas</button>
+        <button class="fbtn" onclick="filterDeposits('rejected',this)">Rechazadas</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Ref</th><th>Usuario</th><th>Monto</th><th>Método</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
+          <tbody id="deposits-tbl"><tr><td colspan="7" class="loading-cell">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-        // ====== AUTH ======
-        function getToken() { return localStorage.getItem('sanse_access_token') || sessionStorage.getItem('sanse_access_token'); }
-        function getStorage() { return localStorage.getItem('sanse_access_token') ? localStorage : sessionStorage; }
-        function getUserData() { const d = localStorage.getItem('sanse_user') || sessionStorage.getItem('sanse_user'); return d ? JSON.parse(d) : null; }
+  <!-- ═══ REGISTROS ═══ -->
+  <div class="section" id="sec-registrations">
+    <div class="card">
+      <div class="card-ttl">Solicitudes de Registro</div>
+      <div class="card-desc">Aprueba o rechaza solicitudes de nuevos usuarios.</div>
+      <div class="filters">
+        <button class="fbtn active" onclick="filterRegs('all',this)">Todas</button>
+        <button class="fbtn" onclick="filterRegs('pending',this)">Pendientes</button>
+        <button class="fbtn" onclick="filterRegs('approved',this)">Aprobados</button>
+        <button class="fbtn" onclick="filterRegs('rejected',this)">Rechazados</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nombre</th><th>Email</th><th>Tel</th><th>CC</th><th>Referido</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
+          <tbody id="regs-tbl"><tr><td colspan="8" class="loading-cell">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-        if (!getToken()) window.location.href = 'login.html';
-        const userData = getUserData();
-        if (userData && userData.role !== 'admin' && userData.role !== 'p2p') { alert('Acceso denegado. Solo administradores.'); window.location.href = 'dashboard.html'; }
+  <!-- ═══ RETIROS ═══ -->
+  <div class="section" id="sec-withdrawals">
+    <div class="card">
+      <div class="card-ttl">Solicitudes de Retiro</div>
+      <div class="card-desc">Aprueba, completa o rechaza solicitudes de retiro.</div>
+      <div class="filters">
+        <button class="fbtn active" onclick="filterWithdrawals('all',this)">Todas</button>
+        <button class="fbtn" onclick="filterWithdrawals('pending',this)">Pendientes</button>
+        <button class="fbtn" onclick="filterWithdrawals('approved',this)">Aprobadas</button>
+        <button class="fbtn" onclick="filterWithdrawals('completed',this)">Completadas</button>
+        <button class="fbtn" onclick="filterWithdrawals('rejected',this)">Rechazadas</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Ref</th><th>Usuario</th><th>Monto</th><th>Método</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
+          <tbody id="wr-tbl"><tr><td colspan="7" class="loading-cell">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-        function logout() {
-            ['sanse_access_token','sanse_refresh_token','sanse_user'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
-            window.location.href = 'login.html';
+  <!-- ═══ USUARIOS ═══ -->
+  <div class="section" id="sec-users">
+    <div class="card">
+      <div class="card-ttl">Usuarios Registrados</div>
+      <div class="card-desc">Vista completa con información financiera de cada usuario.</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Balance</th><th>Estado</th><th>Creado</th><th>Acciones</th></tr></thead>
+          <tbody id="users-tbl"><tr><td colspan="7" class="loading-cell">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_URL='https://sanse-backend-production.up.railway.app/api';
+
+function getToken(){return localStorage.getItem('sanse_access_token')||sessionStorage.getItem('sanse_access_token')}
+function getUserData(){const d=localStorage.getItem('sanse_user')||sessionStorage.getItem('sanse_user');return d?JSON.parse(d):null}
+function getStorage(){return localStorage.getItem('sanse_access_token')?localStorage:sessionStorage}
+
+if(!getToken())window.location.href='login.html';
+const userData=getUserData();
+if(userData&&userData.role!=='admin'&&userData.role!=='p2p'){alert('Acceso denegado');window.location.href='dashboard.html'}
+
+function logout(){['sanse_access_token','sanse_refresh_token','sanse_user'].forEach(k=>{localStorage.removeItem(k);sessionStorage.removeItem(k)});window.location.href='login.html'}
+
+async function apiFetch(endpoint,options={}){
+  const token=getToken();
+  const config={...options,headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`,...options.headers}};
+  let res=await fetch(`${API_URL}${endpoint}`,config);
+  if(res.status===401){const ok=await refreshTokenFn();if(ok){config.headers['Authorization']=`Bearer ${getToken()}`;res=await fetch(`${API_URL}${endpoint}`,config)}else{logout();return null}}
+  return res;
+}
+
+async function refreshTokenFn(){
+  try{
+    const rt=localStorage.getItem('sanse_refresh_token')||sessionStorage.getItem('sanse_refresh_token');
+    if(!rt)return false;
+    const res=await fetch(`${API_URL}/auth/refresh`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refreshToken:rt})});
+    if(!res.ok)return false;
+    const data=await res.json();
+    const s=getStorage();
+    s.setItem('sanse_access_token',data.accessToken);
+    s.setItem('sanse_refresh_token',data.refreshToken);
+    return true;
+  }catch{return false}
+}
+
+function toast(msg,type='success'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className=`toast ${type} show`;
+  setTimeout(()=>el.classList.remove('show'),3500);
+}
+
+function switchTab(tab,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(`sec-${tab}`).classList.add('active');
+  if(tab==='returns')loadActiveInvestments();
+  if(tab==='withdrawals')loadWithdrawals('all');
+  if(tab==='deposits')loadDeposits('all');
+  if(tab==='registrations')loadRegs('all');
+  if(tab==='loans')loadLoans('all');
+  if(tab==='sdtc')loadSDTC();
+  if(tab==='users')loadUsers();
+  if(tab==='transactions')loadRecentTx();
+}
+
+function formatCOP(n){if(n===null||n===undefined||isNaN(Number(n)))return '—';return '$'+Math.round(Number(n)).toLocaleString('es-CO')}
+function formatDate(d){if(!d)return '—';const dt=new Date(d);if(isNaN(dt.getTime()))return '—';return dt.toLocaleDateString('es-CO',{day:'numeric',month:'short',year:'numeric'})}
+
+let allUsers=[],activeInvestments=[],selectedInvestment=null;
+
+// ═══ STATS & USERS ═══
+async function loadData(){await loadUsers();await loadStats();loadRecentTx()}
+
+async function loadUsers(){
+  try{
+    const res=await apiFetch('/auth/users');
+    if(!res||!res.ok)return;
+    const data=await res.json();
+    allUsers=data.users||[];
+
+    const financials={};
+    await Promise.all(allUsers.filter(u=>u.role!=='admin').map(async u=>{
+      try{
+        const dr=await apiFetch(`/admin/users/${u.id}/details`);
+        if(dr&&dr.ok){
+          const d=await dr.json();
+          const bal=d.balanceHistory?.length?parseFloat(d.balanceHistory[d.balanceHistory.length-1].amount):0;
+          const inv=d.investments?.filter(i=>['active','pending_deposit'].includes(i.status)).reduce((s,i)=>s+parseFloat(i.amount),0)||0;
+          financials[u.id]={balance:bal,available:Math.max(0,bal-inv)};
         }
-
-        async function apiFetch(endpoint, options = {}) {
-            const token = getToken();
-            const config = { ...options, headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}`, ...options.headers } };
-            let res = await fetch(`${API_URL}${endpoint}`, config);
-            if (res.status === 401) {
-                const ok = await refreshTokenFn();
-                if (ok) { config.headers['Authorization'] = `Bearer ${getToken()}`; res = await fetch(`${API_URL}${endpoint}`, config); }
-                else { logout(); return null; }
-            }
-            return res;
-        }
-
-        async function refreshTokenFn() {
-            try {
-                const rt = localStorage.getItem('sanse_refresh_token') || sessionStorage.getItem('sanse_refresh_token');
-                if (!rt) return false;
-                const res = await fetch(`${API_URL}/auth/refresh`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({refreshToken:rt}) });
-                if (!res.ok) return false;
-                const data = await res.json();
-                const s = getStorage();
-                s.setItem('sanse_access_token', data.accessToken);
-                s.setItem('sanse_refresh_token', data.refreshToken);
-                return true;
-            } catch { return false; }
-        }
-
-        // ====== TOAST ======
-        function toast(msg, type='success') {
-            const el = document.getElementById('toast');
-            el.textContent = msg; el.className = `toast toast-${type} show`;
-            setTimeout(() => el.classList.remove('show'), 3500);
-        }
-
-        // ====== TABS ======
-        function switchTab(tab, el) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            el.classList.add('active');
-            document.getElementById(`sec-${tab}`).classList.add('active');
-            // Cargar inversiones activas al entrar a la pestaña de rendimientos
-            if (tab === 'returns') loadActiveInvestments();
-            if (tab === 'withdrawals') loadAdminWithdrawals('all');
-            if (tab === 'deposits') loadAdminDeposits('all');
-            if (tab === 'registrations') loadAdminRegistrations('all');
-            if (tab === 'loans') { loadAdminLoans('all'); loadLoanProfitStats(); loadLoanPayments(); }
-            if (tab === 'sdtc_overview') loadSDTCOverview();
-            if (tab === 'users') loadUsers();
-            if (tab === 'create-loan') populateLoanUserSelect();
-        }
-
-        // ====== FORMAT ======
-        function formatCOP(n) { if (n === null || n === undefined || isNaN(Number(n))) return '—'; return '$' + Math.round(Number(n)).toLocaleString('es-CO'); }
-        function formatDate(d) { if (!d) return '—'; const dt = new Date(d); if (isNaN(dt.getTime())) return '—'; return dt.toLocaleDateString('es-CO', {day:'numeric',month:'short',year:'numeric'}); }
-
-        // ====== DATA ======
-        let allUsers = [];
-        let activeInvestments = [];
-        let selectedInvestment = null;
-
-        async function loadData() {
-            await loadUsers();
-            await loadStats();
-            loadRecentTransactions();
-        }
-
-        async function loadUsers() {
-            try {
-                const res = await apiFetch('/auth/users');
-                if (!res || !res.ok) { console.error('Error loading users'); return; }
-                const data = await res.json();
-                allUsers = data.users || [];
-
-                // Cargar info financiera de cada usuario en paralelo
-                const userFinancials = {};
-                await Promise.all(allUsers.filter(u => u.role !== 'admin').map(async (u) => {
-                    try {
-                        const detRes = await apiFetch(`/admin/users/${u.id}/details`);
-                        if (detRes && detRes.ok) {
-                            const det = await detRes.json();
-                            const balance = det.balanceHistory?.length > 0
-                                ? parseFloat(det.balanceHistory[det.balanceHistory.length - 1].amount || 0)
-                                : 0;
-                            const invested = det.investments
-                                ?.filter(i => i.status === 'active' || i.status === 'pending_deposit')
-                                .reduce((s, i) => s + parseFloat(i.amount || 0), 0) || 0;
-                            const available = Math.max(0, balance - invested);
-                            // Préstamos activos/en mora
-                            const activeLoan = det.transactions
-                                ?.filter(t => t.type === 'loan')
-                                .reduce((s, t) => s + parseFloat(t.amount || 0), 0) || 0;
-                            userFinancials[u.id] = { balance, invested, available, activeLoan };
-                        }
-                    } catch(e) { /* silenciar errores individuales */ }
-                }));
-
-                const tbody = document.getElementById('users-table');
-                if (!allUsers.length) {
-                    tbody.innerHTML = '<tr><td colspan="10" style="color:var(--muted);text-align:center">No hay usuarios</td></tr>';
-                } else {
-                    tbody.innerHTML = allUsers.map(u => {
-                        const isBlocked = u.status === 'blocked';
-                        const safeData = encodeURIComponent(JSON.stringify({
-                            id: u.id, full_name: u.full_name, email: u.email,
-                            phone: u.phone || '', document_number: u.document_number || '',
-                            role: u.role, status: u.status || 'active', referred_by: u.referred_by || null
-                        }));
-                        const fin = userFinancials[u.id] || { balance: 0, invested: 0, available: 0, activeLoan: 0 };
-                        return `<tr style="${isBlocked ? 'opacity:0.6;background:rgba(239,68,68,0.05);' : ''}">
-                            <td class="mono">${u.id}</td>
-                            <td>
-                                <div style="font-weight:600">${u.full_name}</div>
-                                <div style="font-size:10px;color:var(--muted);">${u.phone || '—'} · CC: ${u.document_number || '—'}</div>
-                            </td>
-                            <td style="color:var(--text2);font-size:12px;">${u.email}</td>
-                            <td><span class="badge ${u.role==='admin'?'badge-gold':u.role==='p2p'?'badge-purple':'badge-blue'}">${u.role}</span></td>
-                            <td><span class="badge ${isBlocked?'badge-red':'badge-green'}">${isBlocked ? '🚫' : '✅'}</span></td>
-                            <td class="mono" style="text-align:right;color:var(--gold);font-weight:600;">${formatCOP(fin.balance)}</td>
-                            <td class="mono" style="text-align:right;color:var(--green);font-weight:700;background:rgba(78,203,141,0.06);font-size:14px;">${formatCOP(fin.available)}</td>
-                            <td class="mono" style="text-align:right;color:var(--blue);">${fin.invested > 0 ? formatCOP(fin.invested) : '—'}</td>
-                            <td class="mono" style="text-align:right;${fin.activeLoan > 0 ? 'color:var(--red);font-weight:600;' : 'color:var(--muted);'}">${fin.activeLoan > 0 ? formatCOP(fin.activeLoan) : '—'}</td>
-                            <td style="display:flex;gap:5px;flex-wrap:wrap;">
-                                <button class="btn btn-sm" style="background:rgba(201,168,76,0.15);color:#C9A84C;border:1px solid rgba(201,168,76,0.3);"
-                                    onclick='openEditModal(decodeURIComponent("${safeData}"))'>✏️</button>
-                                ${u.role !== 'admin' ? `<button class="btn btn-sm ${isBlocked?'btn-gold':'btn-red'}"
-                                    onclick="toggleBlockUser(${u.id},${isBlocked},'${u.full_name.replace(/'/g,"\'")}')">
-                                    ${isBlocked ? '🔓' : '🚫'}</button>` : ''}
-                            </td>
-                        </tr>`;
-                    }).join('');
-                }
-
-                const sel = document.getElementById('t-user');
-                sel.innerHTML = '<option value="">Seleccionar usuario...</option>' +
-                    allUsers.map(u => `<option value="${u.id}">${u.full_name} — ${u.email}</option>`).join('');
-
-                document.getElementById('st-users').textContent = allUsers.length;
-
-                // Calcular y mostrar capital libre total
-                const totalAvailable = Object.values(userFinancials).reduce((sum, f) => sum + (f.available || 0), 0);
-                document.getElementById('st-total-available').textContent = formatCOP(totalAvailable);
-
-                populateLoanUserSelect();
-            } catch(e) { console.error('loadUsers error:', e); }
-        }
-
-        async function loadStats() {
-            try {
-                const res = await apiFetch('/admin/stats');
-                if (res && res.ok) {
-                    const data = await res.json();
-                    document.getElementById('st-balance').textContent = formatCOP(data.totalBalance || 0);
-                    document.getElementById('st-loans').textContent = formatCOP(data.totalLoans || 0);
-                    document.getElementById('st-withdrawals').textContent = formatCOP(data.totalWithdrawals || 0);
-                }
-            } catch(e) { console.log('Stats no disponibles aún'); }
-            // Cargar stats CDTC globales
-            try {
-                const gsRes = await apiFetch('/investments/global-stats');
-                if (gsRes && gsRes.ok) {
-                    const gs = await gsRes.json();
-                    document.getElementById('st-cdtc-earned').textContent = formatCOP(gs.totalEarnedGlobal || 0);
-                    document.getElementById('st-cdtc-locked').textContent = formatCOP(gs.totalLocked || 0);
-                }
-            } catch(e) { console.log('CDTC stats no disponibles'); }
-        }
-
-        // ====== TRANSACCIONES CON FILTROS, FECHAS Y PAGINACIÓN ======
-        let txPage = 1;
-        let txSearchTimer = null;
-        const TX_PER_PAGE = 25;
-        const TX_LABELS = {deposit:'Depósito',withdraw:'Retiro',payment:'Abono',interest:'Intereses',profit:'Ganancias',loan:'Préstamo',investment:'Inversión',investment_return:'Rendimiento CDTC',investment_withdrawal:'Retiro CDTC'};
-        const TX_BADGE  = {deposit:'badge-green',withdraw:'badge-red',payment:'badge-blue',interest:'badge-gold',profit:'badge-green',loan:'badge-purple',investment:'badge-blue',investment_return:'badge-green',investment_withdrawal:'badge-gold'};
-        const TX_MINUS  = new Set(['withdraw','investment']);
-
-        // Alias para compatibilidad con llamada original en initAdmin
-        async function loadRecentTransactions() { await fetchAndRenderTx(); }
-
-        async function fetchAndRenderTx() {
-            const tbody    = document.getElementById('tx-table');
-            const type     = document.getElementById('tx-filter-type')?.value || '';
-            const dateFrom = document.getElementById('tx-date-from')?.value   || '';
-            const dateTo   = document.getElementById('tx-date-to')?.value     || '';
-            const search   = document.getElementById('tx-search')?.value      || '';
-
-            // Spinner
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted);">
-                <span style="display:inline-flex;align-items:center;gap:8px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5">
-                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-                    </svg> Cargando...
-                </span></td></tr>`;
-
-            try {
-                const params = new URLSearchParams({ page: txPage, limit: TX_PER_PAGE });
-                if (type)     params.set('type',     type);
-                if (dateFrom) params.set('dateFrom', dateFrom);
-                if (dateTo)   params.set('dateTo',   dateTo);
-                if (search)   params.set('search',   search);
-
-                const res = await apiFetch(`/admin/transactions/all?${params}`);
-
-                // Fallback a /recent si el endpoint /all todavía no está en el router
-                if (!res || res.status === 404) {
-                    const res2 = await apiFetch('/admin/transactions/recent');
-                    if (!res2 || !res2.ok) throw new Error('Sin datos');
-                    const data2 = await res2.json();
-                    renderTxRows(data2);
-                    document.getElementById('tx-count').textContent = `— ${data2.length} (últimas 30 · registra la ruta /all para ver todas)`;
-                    document.getElementById('tx-page-info').textContent = '';
-                    document.getElementById('tx-page-btns').innerHTML  = '';
-                    return;
-                }
-                if (!res.ok) throw new Error('Error ' + res.status);
-
-                const { transactions, total, page, pages } = await res.json();
-
-                document.getElementById('tx-count').textContent =
-                    `— ${total.toLocaleString('es-CO')} en total`;
-
-                renderTxRows(transactions);
-
-                const start = (page - 1) * TX_PER_PAGE + 1;
-                const end   = Math.min(page * TX_PER_PAGE, total);
-                document.getElementById('tx-page-info').textContent =
-                    total ? `Mostrando ${start}–${end} de ${total}` : '';
-
-                renderTxPagination(page, pages);
-
-            } catch(e) {
-                tbody.innerHTML = '<tr><td colspan="7" style="color:var(--red);text-align:center;padding:32px;">Error al cargar transacciones</td></tr>';
-                console.error('fetchAndRenderTx:', e);
-            }
-        }
-
-        function renderTxRows(rows) {
-            const tbody = document.getElementById('tx-table');
-            if (!rows || !rows.length) {
-                tbody.innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:32px;">Sin transacciones para estos filtros</td></tr>';
-                return;
-            }
-            tbody.innerHTML = rows.map(tx => `
-                <tr>
-                    <td class="mono" style="font-size:11px;color:var(--muted);">${tx.ref_id || tx.id}</td>
-                    <td style="font-size:13px;font-weight:500;">${tx.user_name || '<span style="color:var(--muted)">ID:'+tx.user_id+'</span>'}</td>
-                    <td><span class="badge ${TX_BADGE[tx.type]||'badge-blue'}">${TX_LABELS[tx.type]||tx.type}</span></td>
-                    <td class="mono" style="font-weight:700;color:${TX_MINUS.has(tx.type)?'var(--red)':'var(--green)'};">
-                        ${TX_MINUS.has(tx.type)?'−':'+'}${formatCOP(tx.amount)}
-                    </td>
-                    <td style="color:var(--text2);font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
-                        title="${(tx.description||'').replace(/"/g,'&quot;')}">${tx.description||'—'}</td>
-                    <td style="color:var(--muted);font-size:12px;white-space:nowrap;">${formatDate(tx.created_at)}</td>
-                    <td><button class="btn btn-sm btn-red" onclick="deleteTransaction(${tx.id},'${(tx.description||'').replace(/'/g,"\\'")}')">🗑️</button></td>
-                </tr>
-            `).join('');
-        }
-
-        function renderTxPagination(current, total) {
-            const btns = document.getElementById('tx-page-btns');
-            if (total <= 1) { btns.innerHTML = ''; return; }
-
-            const range = (cur, tot) => {
-                if (tot <= 7) return Array.from({length:tot},(_,i)=>i+1);
-                const r = [1];
-                if (cur > 3) r.push('…');
-                for (let p=Math.max(2,cur-1); p<=Math.min(tot-1,cur+1); p++) r.push(p);
-                if (cur < tot-2) r.push('…');
-                r.push(tot);
-                return r;
-            };
-
-            let html = `<button class="btn btn-sm btn-outline" onclick="goTxPage(${current-1})" ${current===1?'disabled':''}>‹</button>`;
-            range(current, total).forEach(p => {
-                html += p === '…'
-                    ? `<span style="padding:6px 3px;color:var(--muted);">…</span>`
-                    : `<button class="btn btn-sm ${p===current?'btn-gold':'btn-outline'}" onclick="goTxPage(${p})">${p}</button>`;
-            });
-            html += `<button class="btn btn-sm btn-outline" onclick="goTxPage(${current+1})" ${current===total?'disabled':''}>›</button>`;
-            btns.innerHTML = html;
-        }
-
-        function goTxPage(p) {
-            txPage = p;
-            fetchAndRenderTx();
-            document.getElementById('tx-table').closest('.card').scrollIntoView({behavior:'smooth',block:'start'});
-        }
-
-        function clearTxFilters() {
-            document.getElementById('tx-filter-type').value = '';
-            document.getElementById('tx-date-from').value   = '';
-            document.getElementById('tx-date-to').value     = '';
-            document.getElementById('tx-search').value      = '';
-            txPage = 1;
-            fetchAndRenderTx();
-        }
-
-        // ====== RENDIMIENTOS CDTC ======
-        async function loadActiveInvestments() {
-            const container = document.getElementById('active-investments-list');
-            const returnsTable = document.getElementById('returns-table');
-            
-            try {
-                const res = await apiFetch('/admin/investments/active');
-                if (!res || !res.ok) {
-                    container.innerHTML = '<div style="color:var(--red);text-align:center;padding:20px;">Error cargando inversiones. Verifica que el backend esté actualizado.</div>';
-                    return;
-                }
-                activeInvestments = await res.json();
-
-                if (!activeInvestments.length) {
-                    container.innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px 0;">No hay inversiones activas. Los usuarios deben crear una inversión CDTC primero.</div>';
-                    returnsTable.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">Sin rendimientos</td></tr>';
-                    return;
-                }
-
-                // Render investment cards
-                container.innerHTML = activeInvestments.map(inv => `
-                    <div class="inv-card ${selectedInvestment && selectedInvestment.id === inv.id ? 'selected' : ''}" 
-                         onclick="selectInvestment(${inv.id})" id="inv-card-${inv.id}">
-                        <div class="inv-card-header">
-                            <div>
-                                <div class="inv-card-user">${inv.userName}</div>
-                                <div style="font-size:12px;color:var(--text2)">${inv.userEmail}</div>
-                            </div>
-                            <div class="inv-card-type">${inv.type} — ID #${inv.id}</div>
-                        </div>
-                        <div class="inv-card-details">
-                            <div class="inv-card-detail">
-                                <span class="label">Capital</span>
-                                <span class="value" style="color:var(--gold)">${formatCOP(inv.amount)}</span>
-                            </div>
-                            <div class="inv-card-detail">
-                                <span class="label">Tasa</span>
-                                <span class="value">${inv.minMonthlyRate}% — ${inv.maxMonthlyRate}%</span>
-                            </div>
-                            <div class="inv-card-detail">
-                                <span class="label">Inicio</span>
-                                <span class="value">${formatDate(inv.startDate)}</span>
-                            </div>
-                            <div class="inv-card-detail">
-                                <span class="label">Vence</span>
-                                <span class="value">${formatDate(inv.lockEndDate || inv.endDate)}</span>
-                            </div>
-                            <div class="inv-card-detail">
-                                <span class="label">Ganancia Total</span>
-                                <span class="value" style="color:var(--green)">${formatCOP(inv.totalEarned)}</span>
-                            </div>
-                            <div class="inv-card-detail">
-                                <span class="label">Meses Pagados</span>
-                                <span class="value">${inv.returnsCount} / ${inv.durationMonths || inv.duration_months || '—'}</span>
-                            </div>
-                        </div>
-                        ${inv.returns.length > 0 ? `
-                            <div class="inv-card-returns">
-                                <div class="inv-card-returns-title">Rendimientos registrados</div>
-                                ${inv.returns.map(r => `<span class="return-tag">${r.month.slice(0,7)} → ${r.rate}% → ${formatCOP(r.earned)}</span>`).join('')}
-                            </div>
-                        ` : ''}
-                    </div>
-                `).join('');
-
-                // Build returns history table from all investments
-                const allReturns = [];
-                activeInvestments.forEach(inv => {
-                    inv.returns.forEach(r => {
-                        allReturns.push({
-                            invId: inv.id,
-                            userName: inv.userName,
-                            month: r.month,
-                            rate: r.rate,
-                            earned: r.earned,
-                            capital: inv.amount,
-                        });
-                    });
-                });
-
-                if (allReturns.length > 0) {
-                    allReturns.sort((a, b) => b.month.localeCompare(a.month));
-                    returnsTable.innerHTML = allReturns.map(r => `
-                        <tr>
-                            <td class="mono">#${r.invId}</td>
-                            <td style="font-weight:600">${r.userName}</td>
-                            <td class="mono">${r.month.slice(0,7)}</td>
-                            <td><span class="badge badge-gold">${r.rate}%</span></td>
-                            <td class="mono" style="color:var(--green)">+${formatCOP(r.earned)}</td>
-                            <td class="mono" style="color:var(--text2)">${formatCOP(r.capital)}</td>
-                        </tr>
-                    `).join('');
-                } else {
-                    returnsTable.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">Aún no se han registrado rendimientos</td></tr>';
-                }
-
-            } catch(e) {
-                console.error('loadActiveInvestments error:', e);
-                container.innerHTML = '<div style="color:var(--red);text-align:center;padding:20px;">Error: ' + e.message + '</div>';
-            }
-        }
-
-        function selectInvestment(invId) {
-            const inv = activeInvestments.find(i => i.id === invId);
-            if (!inv) return;
-
-            selectedInvestment = inv;
-
-            // Update card styles
-            document.querySelectorAll('.inv-card').forEach(c => c.classList.remove('selected'));
-            document.getElementById(`inv-card-${invId}`).classList.add('selected');
-
-            // Show form
-            const form = document.getElementById('return-form');
-            form.style.display = 'block';
-            document.getElementById('rf-inv-label').textContent = `${inv.userName} — ${inv.type} #${inv.id} — ${formatCOP(inv.amount)}`;
-
-            // Set default month to next unpaid month
-            const paidMonths = inv.returns.map(r => r.month.slice(0, 7));
-            const startDate = new Date(inv.startDate);
-            let nextMonth = null;
-            for (let i = 0; i < 6; i++) {
-                const d = new Date(startDate);
-                d.setMonth(d.getMonth() + i + 1);
-                const monthStr = d.toISOString().slice(0, 7);
-                if (!paidMonths.includes(monthStr)) {
-                    nextMonth = monthStr;
-                    break;
-                }
-            }
-            if (nextMonth) {
-                document.getElementById('rf-month').value = nextMonth;
-            }
-
-            // Clear rate
-            document.getElementById('rf-rate').value = '';
-            document.getElementById('rf-notes').value = '';
-            document.getElementById('return-preview').style.display = 'none';
-            document.getElementById('btn-register-return').disabled = true;
-
-            // Scroll to form
-            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        function updateReturnPreview() {
-            if (!selectedInvestment) return;
-
-            const rate = parseFloat(document.getElementById('rf-rate').value);
-            const month = document.getElementById('rf-month').value;
-            const preview = document.getElementById('return-preview');
-            const btn = document.getElementById('btn-register-return');
-
-            if (!rate || rate <= 0 || !month) {
-                preview.style.display = 'none';
-                btn.disabled = true;
-                return;
-            }
-
-            const capital = selectedInvestment.amount;
-            const earned = Math.round(capital * (rate / 100));
-
-            document.getElementById('rp-capital').textContent = formatCOP(capital);
-            document.getElementById('rp-rate').textContent = rate + '%';
-            document.getElementById('rp-earned').textContent = '+' + formatCOP(earned);
-
-            preview.style.display = 'block';
-            btn.disabled = false;
-        }
-
-        async function registerReturn() {
-            if (!selectedInvestment) return toast('Selecciona una inversión primero', 'error');
-
-            const rate = parseFloat(document.getElementById('rf-rate').value);
-            const month = document.getElementById('rf-month').value;
-            const notes = document.getElementById('rf-notes').value.trim();
-
-            if (!rate || rate <= 0) return toast('Ingresa una tasa válida', 'error');
-            if (!month) return toast('Selecciona el mes del rendimiento', 'error');
-
-            const btn = document.getElementById('btn-register-return');
-            btn.disabled = true;
-            btn.textContent = 'Registrando...';
-
-            try {
-                const periodMonth = month + '-01'; // Convert "2026-03" to "2026-03-01"
-
-                const res = await apiFetch(`/admin/investments/${selectedInvestment.id}/return`, {
-                    method: 'POST',
-                    body: JSON.stringify({ rate, periodMonth, notes: notes || undefined }),
-                });
-
-                if (!res) return;
-                const data = await res.json();
-
-                if (!res.ok) {
-                    toast(data.error || 'Error registrando rendimiento', 'error');
-                    return;
-                }
-
-                toast(`✅ Rendimiento de ${formatCOP(data.return.amountEarned)} registrado para ${selectedInvestment.userName}`);
-
-                // Reset form
-                selectedInvestment = null;
-                document.getElementById('return-form').style.display = 'none';
-                document.getElementById('return-preview').style.display = 'none';
-
-                // Reload data
-                await loadActiveInvestments();
-                loadRecentTransactions();
-                loadStats();
-
-            } catch(e) {
-                toast('Error: ' + e.message, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '📈 Registrar Rendimiento';
-            }
-        }
-
-        // ====== CREATE USER ======
-        async function createUser() {
-            const btn = document.getElementById('btn-create-user');
-            const body = {
-                email: document.getElementById('u-email').value.trim(),
-                password: document.getElementById('u-pass').value,
-                fullName: document.getElementById('u-name').value.trim(),
-                phone: document.getElementById('u-phone').value.trim() || undefined,
-                documentNumber: document.getElementById('u-cc').value.trim() || undefined,
-                role: document.getElementById('u-role').value,
-            };
-            const initialBalance = parseFloat(document.getElementById('u-balance').value) || 0;
-
-            if (!body.email || !body.password || !body.fullName) return toast('Completa nombre, email y contraseña', 'error');
-
-            btn.disabled = true; btn.textContent = 'Creando...';
-            try {
-                const res = await apiFetch('/auth/users', { method:'POST', body:JSON.stringify(body) });
-                if (!res) return;
-                const data = await res.json();
-                if (!res.ok) return toast(data.error, 'error');
-
-                if (initialBalance > 0) {
-                    await apiFetch('/admin/transactions', {
-                        method:'POST',
-                        body: JSON.stringify({ userId: data.userId, type:'deposit', amount:initialBalance, description:'Balance inicial' })
-                    });
-                }
-
-                toast(`✅ ${body.fullName} creado exitosamente`);
-                ['u-name','u-email','u-pass','u-phone','u-cc'].forEach(id => document.getElementById(id).value = '');
-                document.getElementById('u-balance').value = '0';
-                loadData();
-            } catch(e) { toast('Error: ' + e.message, 'error'); }
-            finally { btn.disabled = false; btn.textContent = '👤 Crear Usuario'; }
-        }
-
-        // ====== CREATE TRANSACTION ======
-        async function createTransaction() {
-            const btn = document.getElementById('btn-create-tx');
-            const userId = parseInt(document.getElementById('t-user').value);
-            const type = document.getElementById('t-type').value;
-            const amount = parseFloat(document.getElementById('t-amount').value);
-            const date = document.getElementById('t-date').value;
-            const desc = document.getElementById('t-desc').value.trim();
-
-            if (!userId) return toast('Selecciona un usuario', 'error');
-            if (!amount || amount <= 0) return toast('Ingresa un monto válido', 'error');
-
-            btn.disabled = true; btn.textContent = 'Registrando...';
-            try {
-                const body = {
-                    userId, type, amount,
-                    description: desc || undefined,
-                    date: date ? new Date(date).toISOString() : undefined,
-                };
-
-                const res = await apiFetch('/admin/transactions', { method:'POST', body:JSON.stringify(body) });
-                if (!res) return;
-                const data = await res.json();
-                if (!res.ok) return toast(data.error, 'error');
-
-                const typeLabels = {deposit:'Depósito',withdraw:'Retiro',payment:'Abono',interest:'Intereses',profit:'Ganancias',loan:'Préstamo'};
-                toast(`✅ ${typeLabels[type]} de ${formatCOP(amount)} registrado`);
-                ['t-amount','t-desc'].forEach(id => document.getElementById(id).value = '');
-                loadRecentTransactions();
-                loadStats();
-            } catch(e) { toast('Error: ' + e.message, 'error'); }
-            finally { btn.disabled = false; btn.textContent = '💸 Registrar Transacción'; }
-        }
-
-        // ====== CDTC OVERVIEW ======
-        async function loadSDTCOverview() {
-            try {
-                // 1. Load global stats
-                const gsRes = await apiFetch('/investments/global-stats');
-                if (gsRes && gsRes.ok) {
-                    const gs = await gsRes.json();
-                    document.getElementById('sdtc-total-locked').textContent = formatCOP(gs.totalLocked);
-                    document.getElementById('sdtc-apy').textContent = gs.apyReal > 0 ? gs.apyReal + '% APY Real' : gs.apyMin + '% — ' + gs.apyMax + '% APY Est.';
-                    document.getElementById('sdtc-investors').textContent = gs.totalInvestors;
-                    document.getElementById('sdtc-total-earned').textContent = formatCOP(gs.totalEarnedGlobal);
-                }
-
-                // 2. Load all active investments
-                const invRes = await apiFetch('/admin/investments/active');
-                if (!invRes || !invRes.ok) return;
-                const investments = await invRes.json();
-
-                const now = new Date();
-
-                // Separate expiring (within 30 days) and all active
-                const expiring = investments.filter(inv => {
-                    const lockEnd = new Date(inv.lock_end_date || inv.end_date);
-                    const daysLeft = Math.ceil((lockEnd - now) / (1000 * 60 * 60 * 24));
-                    return daysLeft <= 30 && daysLeft >= 0 && inv.status === 'active';
-                }).sort((a, b) => new Date(a.lock_end_date || a.end_date) - new Date(b.lock_end_date || b.end_date));
-
-                // Render expiring table
-                const expiringTbody = document.getElementById('sdtc-expiring-table');
-                if (!expiring.length) {
-                    expiringTbody.innerHTML = '<tr><td colspan="8" style="color:var(--muted);text-align:center">✅ No hay inversiones por vencer en los próximos 30 días</td></tr>';
-                } else {
-                    expiringTbody.innerHTML = expiring.map(inv => {
-                        const lockEnd = new Date(inv.lock_end_date || inv.end_date);
-                        const daysLeft = Math.max(0, Math.ceil((lockEnd - now) / (1000 * 60 * 60 * 24)));
-                        const urgency = daysLeft <= 7 ? 'color:var(--red);font-weight:700;' : daysLeft <= 15 ? 'color:var(--gold);font-weight:600;' : '';
-                        return `<tr>
-                            <td class="mono">${inv.id}</td>
-                            <td><strong>${inv.user_name || 'ID:'+inv.user_id}</strong><br><span style="font-size:11px;color:var(--text2)">${inv.user_email || ''}</span></td>
-                            <td class="mono" style="color:var(--gold);font-weight:600;">${formatCOP(inv.amount)}</td>
-                            <td style="color:var(--muted)">${formatDate(inv.start_date)}</td>
-                            <td style="font-weight:600">${formatDate(inv.lock_end_date || inv.end_date)}</td>
-                            <td style="${urgency}">${daysLeft === 0 ? '🔴 HOY' : daysLeft + ' días'}</td>
-                            <td><span class="badge badge-green">Activa</span></td>
-                            <td><button class="btn btn-sm btn-red" onclick="adminCancelInvestment(${inv.id}, '${(inv.user_name||'').replace(/'/g,"\\'")}', ${inv.amount})">❌ Cancelar</button></td>
-                        </tr>`;
-                    }).join('');
-                }
-
-                // Render all active table
-                const allTbody = document.getElementById('sdtc-all-table');
-                if (!investments.length) {
-                    allTbody.innerHTML = '<tr><td colspan="8" style="color:var(--muted);text-align:center">No hay inversiones activas</td></tr>';
-                } else {
-                    allTbody.innerHTML = investments.map(inv => {
-                        const lockEnd = new Date(inv.lock_end_date || inv.end_date);
-                        const start = new Date(inv.start_date);
-                        const totalDays = Math.max(1, (lockEnd - start) / (1000*60*60*24));
-                        const elapsed = Math.max(0, (now - start) / (1000*60*60*24));
-                        const pct = Math.min(100, Math.round((elapsed / totalDays) * 100));
-                        const statusBadge = inv.status === 'pending_deposit' ? 'badge-gold' : 'badge-green';
-                        const statusLabel = inv.status === 'pending_deposit' ? '⏳ Depósito' : '🟢 Activa';
-                        return `<tr>
-                            <td class="mono">${inv.id}</td>
-                            <td><strong>${inv.user_name || 'ID:'+inv.user_id}</strong></td>
-                            <td class="mono" style="color:var(--gold);">${formatCOP(inv.amount)}</td>
-                            <td style="font-size:12px;">${inv.minMonthlyRate || 2}%—${inv.maxMonthlyRate || 4}%</td>
-                            <td style="color:var(--muted)">${formatDate(inv.startDate)}</td>
-                            <td>${formatDate(inv.lockEndDate || inv.endDate)}</td>
-                            <td>
-                                <div style="display:flex;align-items:center;gap:8px;">
-                                    <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
-                                        <div style="height:100%;width:${pct}%;background:${pct >= 90 ? 'var(--gold)' : 'var(--green)'};"></div>
-                                    </div>
-                                    <span style="font-size:11px;color:var(--muted);">${pct}%</span>
-                                </div>
-                            </td>
-                            <td><button class="btn btn-sm btn-red" onclick="adminCancelInvestment(${inv.id}, '${(inv.user_name||'').replace(/'/g,"\\'")}', ${inv.amount})">❌</button></td>
-                        </tr>`;
-                    }).join('');
-                }
-            } catch(e) { console.error('loadSDTCOverview error:', e); }
-
-            // ── Tabla: Ganancias otorgadas por usuario ─────────────
-            try {
-                const invRes2 = await apiFetch('/admin/investments/active');
-                const earningsTbody = document.getElementById('sdtc-earnings-table');
-                if (!invRes2 || !invRes2.ok) {
-                    earningsTbody.innerHTML = '<tr><td colspan="7" style="color:var(--red);text-align:center">Error cargando datos</td></tr>';
-                    return;
-                }
-                const allInv = await invRes2.json();
-
-                if (!allInv.length) {
-                    earningsTbody.innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center">No hay inversiones</td></tr>';
-                    return;
-                }
-
-                // Agrupar por usuario
-                const byUser = {};
-                allInv.forEach(inv => {
-                    const uid = inv.user_id || inv.userId;
-                    if (!byUser[uid]) {
-                        byUser[uid] = {
-                            name: inv.user_name || inv.userName || ('ID:' + uid),
-                            email: inv.user_email || inv.userEmail || '—',
-                            totalCapital: 0,
-                            invCount: 0,
-                            totalReturns: 0,
-                            totalEarned: 0,
-                            rates: [],
-                        };
-                    }
-                    const u = byUser[uid];
-                    u.totalCapital += Number(inv.amount || 0);
-                    u.invCount++;
-                    const returns = inv.returns || [];
-                    u.totalReturns += returns.length;
-                    returns.forEach(r => {
-                        u.totalEarned += Number(r.earned || r.amountEarned || 0);
-                        if (r.rate) u.rates.push(Number(r.rate));
-                    });
-                    // totalEarned puede venir directo en el objeto
-                    if (!returns.length && inv.totalEarned) {
-                        u.totalEarned += Number(inv.totalEarned || 0);
-                    }
-                });
-
-                const rows = Object.values(byUser).sort((a, b) => b.totalEarned - a.totalEarned);
-
-                if (!rows.length) {
-                    earningsTbody.innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center">Sin datos</td></tr>';
-                    return;
-                }
-
-                earningsTbody.innerHTML = rows.map(u => {
-                    const avgRate = u.rates.length
-                        ? (u.rates.reduce((a, b) => a + b, 0) / u.rates.length).toFixed(2)
-                        : '—';
-                    return `<tr>
-                        <td style="font-weight:600">${u.name}</td>
-                        <td style="font-size:12px;color:var(--text2)">${u.email}</td>
-                        <td class="mono" style="color:var(--gold)">${formatCOP(u.totalCapital)}</td>
-                        <td style="text-align:center">${u.invCount}</td>
-                        <td style="text-align:center">${u.totalReturns}</td>
-                        <td class="mono" style="color:var(--green);font-weight:700">${formatCOP(u.totalEarned)}</td>
-                        <td><span class="badge badge-gold">${avgRate !== '—' ? avgRate + '%' : '—'}</span></td>
-                    </tr>`;
-                }).join('');
-
-            } catch(e) { console.error('sdtc earnings error:', e); }
-        }
-
-        async function adminCancelInvestment(invId, userName, amount) {
-            const reason = prompt(`¿Cancelar inversión #${invId} de ${userName}?\nCapital: ${formatCOP(amount)}\n\nMotivo de cancelación:`);
-            if (reason === null) return; // cancelled prompt
-
-            try {
-                const res = await apiFetch(`/admin/investments/${invId}/cancel`, {
-                    method: 'POST',
-                    body: JSON.stringify({ reason: reason || 'Cancelado por administrador' })
-                });
-                const data = await res.json();
-                if (!res.ok) return toast(data.error || 'Error', 'error');
-
-                toast('✅ Inversión cancelada. Capital devuelto al usuario.');
-                loadSDTCOverview();
-                loadStats();
-            } catch(e) { toast('Error: ' + e.message, 'error'); }
-        }
-
-        // ====== BLOCK/UNBLOCK USER ======
-        async function toggleBlockUser(userId, isCurrentlyBlocked, userName) {
-            const action = isCurrentlyBlocked ? 'desbloquear' : 'bloquear';
-            let reason = '';
-            if (!isCurrentlyBlocked) {
-                reason = prompt(`¿Bloquear a ${userName}?\n\nMotivo del bloqueo:`);
-                if (reason === null) return;
-            } else {
-                if (!confirm(`¿Desbloquear a ${userName}?`)) return;
-            }
-
-            try {
-                const res = await apiFetch(`/admin/users/${userId}/toggle-block`, {
-                    method: 'POST',
-                    body: JSON.stringify({ reason: reason || undefined })
-                });
-                const data = await res.json();
-                if (!res.ok) return toast(data.error || 'Error', 'error');
-
-                toast(`✅ Usuario ${action === 'bloquear' ? 'bloqueado' : 'desbloqueado'}`);
-                loadUsers();
-            } catch(e) { toast('Error: ' + e.message, 'error'); }
-        }
-
-        // ====== DELETE TRANSACTION ======
-        async function deleteTransaction(txId, desc) {
-            if (!confirm(`¿Eliminar esta transacción?\n\n"${desc}"\n\nEsta acción no se puede deshacer y recalculará el balance del usuario.`)) return;
-
-            try {
-                const res = await apiFetch(`/admin/transactions/${txId}`, { method: 'DELETE' });
-                const data = await res.json();
-                if (!res.ok) return toast(data.error || 'Error eliminando', 'error');
-
-                toast('✅ Transacción eliminada y balance recalculado');
-                loadRecentTransactions();
-                loadStats();
-            } catch(e) { toast('Error: ' + e.message, 'error'); }
-        }
-
-        // ====== ADMIN WITHDRAWALS ======
-        let currentWrFilter = 'all';
-
-        async function loadAdminWithdrawals(status) {
-            currentWrFilter = status;
-            const tbody = document.getElementById('wr-table');
-            tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">Cargando...</td></tr>';
-
-            try {
-                const res = await apiFetch(`/admin/withdrawals?status=${status}`);
-                if (!res || !res.ok) { tbody.innerHTML = '<tr><td colspan="9" style="color:var(--red);text-align:center">Error cargando retiros</td></tr>'; return; }
-                const data = await res.json();
-
-                if (!data.length) {
-                    tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">No hay solicitudes de retiro</td></tr>';
-                    return;
-                }
-
-                const statusLabels = { pending: '⏳ Pendiente', approved: '✅ Aprobado', rejected: '❌ Rechazado', completed: '💰 Completado' };
-                const statusBadge = { pending: 'badge-gold', approved: 'badge-green', rejected: 'badge-red', completed: 'badge-blue' };
-                const pmTypeNames = { nequi: '💜 Nequi', bancolombia: '💛 Bancol.', daviplata: '🟢 Daviplata', otro: '🏦 Otro' };
-
-                tbody.innerHTML = data.map(w => `
-                    <tr>
-                        <td class="mono" style="font-size:11px;">${w.ref_id || '-'}</td>
-                        <td>
-                            <div style="font-weight:600;font-size:13px;">${w.user_name || 'ID:'+w.user_id}</div>
-                            <div style="font-size:11px;color:var(--text2);">${w.user_email || ''}</div>
-                        </td>
-                        <td class="mono" style="color:var(--red);font-weight:600;">-${formatCOP(w.amount)}</td>
-                        <td>${pmTypeNames[w.pm_type] || '🏦 —'}<br><span style="font-size:10px;color:var(--text2);">${w.pm_label || ''}</span></td>
-                        <td style="font-size:11px;font-family:'JetBrains Mono',monospace;">
-                            ${w.pm_phone ? '📱 ' + w.pm_phone : ''}
-                            ${w.pm_account ? '🏦 ' + w.pm_account : ''}
-                            ${w.pm_account_type ? ' (' + w.pm_account_type + ')' : ''}
-                            ${w.pm_holder ? '<br>👤 ' + w.pm_holder : ''}
-                            ${w.pm_holder_doc ? ' — CC ' + w.pm_holder_doc : ''}
-                        </td>
-                        <td><span class="badge ${statusBadge[w.status] || 'badge-gold'}">${statusLabels[w.status] || w.status}</span></td>
-                        <td style="font-size:12px;color:var(--muted);">${w.estimated_completion || '—'}</td>
-                        <td style="color:var(--muted);font-size:12px;">${formatDate(w.created_at)}</td>
-                        <td>
-                            ${wrActionBtns(w)}
-                        </td>
-                    </tr>
-                `).join('');
-            } catch(e) {
-                console.error('loadAdminWithdrawals error:', e);
-                tbody.innerHTML = '<tr><td colspan="9" style="color:var(--red);text-align:center">Error: ' + e.message + '</td></tr>';
-            }
-        }
-
-        function filterWithdrawals(status, btn) {
-            document.querySelectorAll('.wr-filter-btn').forEach(b => { b.classList.remove('active'); b.style.background=''; b.style.color=''; });
-            btn.classList.add('active');
-            btn.style.background = 'var(--gold)';
-            btn.style.color = '#0a0a0f';
-            loadAdminWithdrawals(status);
-        }
-
-        async function processWithdrawal(id, action, phone, userName, amount, refId) {
-            const actionLabels = { approve: 'aprobar', reject: 'rechazar', complete: 'completar (transferencia realizada)' };
-            const notes = action === 'reject' ? prompt('Motivo del rechazo (opcional):') : null;
-            if (action === 'reject' && notes === null) return;
-            if (!confirm(`¿Seguro que deseas ${actionLabels[action]} esta solicitud de retiro?`)) return;
-
-            try {
-                const res = await apiFetch(`/admin/withdrawals/${id}/process`, {
-                    method: 'POST',
-                    body: JSON.stringify({ action, notes: notes || undefined })
-                });
-                const data = await res.json();
-                if (!res.ok) return toast(data.error, 'error');
-                toast(`✅ Solicitud ${data.status === 'approved' ? 'aprobada' : data.status === 'rejected' ? 'rechazada' : 'completada'}`);
-                loadAdminWithdrawals(currentWrFilter);
-                loadStats();
-                if ((action === 'approve' || action === 'complete') && phone)
-                    openWaModal(phone, action === 'complete' ? 'retiro_completado' : 'retiro_aprobado', userName, { amount, refId });
-            } catch(e) { toast('Error: ' + e.message, 'error'); }
-        }
-
-        // ====== ADMIN LOANS ======
-        let currentLnFilter = 'all';
-
-        async function loadAdminLoans(status) {
-            currentLnFilter = status;
-            const tbody = document.getElementById('loans-table');
-            tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">Cargando...</td></tr>';
-
-            try {
-                const res = await apiFetch(`/admin/loans?status=${status}`);
-                if (!res || !res.ok) { tbody.innerHTML = '<tr><td colspan="9" style="color:var(--red);text-align:center">Error cargando préstamos</td></tr>'; return; }
-                const data = await res.json();
-
-                if (!data.length) {
-                    tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">No hay solicitudes de préstamo</td></tr>';
-                    return;
-                }
-
-                const statusLabels = { pending: '⏳ Pendiente', active: '🟢 Activo', rejected: '❌ Rechazado', paid: '✅ Pagado', overdue: '🔴 Mora', cancelled: '⚪ Cancelado' };
-                const statusBadge = { pending: 'badge-gold', active: 'badge-green', rejected: 'badge-red', paid: 'badge-blue', overdue: 'badge-red', cancelled: '' };
-
-                tbody.innerHTML = data.map(l => `
-                    <tr>
-                        <td class="mono" style="font-size:11px;">${l.ref_id || '-'}</td>
-                        <td>
-                            <div style="font-weight:600;font-size:13px;">${l.user_name || 'ID:'+l.user_id}</div>
-                            <div style="font-size:11px;color:var(--text2);">${l.user_email || ''}</div>
-                        </td>
-                        <td class="mono" style="color:var(--gold);font-weight:600;">${formatCOP(l.amount)}${l.approved_amount && l.approved_amount != l.amount ? '<br><span style="color:var(--green);font-size:10px;">Aprobado: '+formatCOP(l.approved_amount)+'</span>' : ''}</td>
-                        <td>${l.term_months} mes${l.term_months>1?'es':''}</td>
-                        <td><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:${l.credit_score >= 600 ? 'var(--green)' : l.credit_score >= 400 ? 'var(--gold)' : 'var(--red)'};">${l.credit_score || 0}</span></td>
-                        <td style="font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.purpose || '—'}</td>
-                        <td><span class="badge ${statusBadge[l.status] || 'badge-gold'}">${statusLabels[l.status] || l.status}</span></td>
-                        <td style="color:var(--muted);font-size:12px;">${formatDate(l.created_at)}</td>
-                        <td>
-                            ${l.status === 'pending' ? `
-                                <button class="btn btn-sm btn-gold" onclick="processLoan(${l.id},'approve',${l.amount},'${(l.user_phone||'').replace(/'/g,"\\'")}','${(l.user_name||'').replace(/'/g,"\\'")}')">Aprobar</button>
-                                <button class="btn btn-sm btn-red" onclick="processLoan(${l.id},'reject')" style="margin-top:4px;">Rechazar</button>
-                            ` : l.status === 'active' ? `
-                                <button class="btn btn-sm btn-gold" onclick="processLoan(${l.id}, 'mark_paid')">✅ Pagado</button>
-                                <button class="btn btn-sm btn-red" onclick="processLoan(${l.id}, 'mark_overdue')" style="margin-top:4px;">🔴 Mora</button>
-                            ` : l.status === 'overdue' ? `
-                                <button class="btn btn-sm btn-gold" onclick="processLoan(${l.id}, 'mark_paid')">✅ Pagado</button>
-                            ` : '<span style="font-size:11px;color:var(--muted);">—</span>'}
-                        </td>
-                    </tr>
-                `).join('');
-            } catch(e) {
-                console.error('loadAdminLoans error:', e);
-                tbody.innerHTML = '<tr><td colspan="9" style="color:var(--red);text-align:center">Error: ' + e.message + '</td></tr>';
-            }
-        }
-
-        function filterLoans(status, btn) {
-            document.querySelectorAll('.ln-filter-btn').forEach(b => { b.classList.remove('active'); b.style.background=''; b.style.color=''; });
-            btn.classList.add('active'); btn.style.background = 'var(--gold)'; btn.style.color = '#0a0a0f';
-            loadAdminLoans(status);
-        }
-
-        async function processLoan(id, action, requestedAmount, phone, userName) {
-            let approvedAmount, approvedRate, notes;
-
-            if (action === 'approve') {
-                approvedAmount = prompt(`Monto a aprobar (solicitado: $${Math.round(requestedAmount).toLocaleString('es-CO')}):`, requestedAmount);
-                if (approvedAmount === null) return;
-                approvedRate = prompt('Tasa mensual % (4 con inversiones CDTC, 6 sin inversiones):', '4');
-                if (approvedRate === null) return;
-                notes = prompt('Notas (opcional):');
-            } else if (action === 'reject') {
-                notes = prompt('Motivo del rechazo:');
-                if (notes === null) return;
-            } else if (action === 'mark_overdue') {
-                notes = prompt('Detalle de la mora (opcional):');
-            }
-
-            if (!confirm(`¿Confirmar acción "${action}" para este préstamo?`)) return;
-
-            try {
-                const res = await apiFetch(`/admin/loans/${id}/process`, {
-                    method: 'POST',
-                    body: JSON.stringify({ action, approvedAmount: approvedAmount ? parseFloat(approvedAmount) : undefined, approvedRate: approvedRate ? parseFloat(approvedRate) : undefined, notes })
-                });
-                const data = await res.json();
-                if (!res.ok) return toast(data.error, 'error');
-                toast(`✅ ${data.message}`);
-                loadAdminLoans(currentLnFilter);
-                loadStats();
-                loadLoanProfitStats();
-                loadLoanPayments();
-                if (action === 'approve' && phone)
-                    openWaModal(phone, 'prestamo_aprobado', userName, { amount: parseFloat(approvedAmount||requestedAmount), rate: parseFloat(approvedRate||4) });
-            } catch(e) { toast('Error: ' + e.message, 'error'); }
-        }
-        // ====== GANANCIAS PRÉSTAMOS ======
-        async function loadLoanProfitStats() {
-            try {
-                const res = await apiFetch('/admin/loans/profit-stats');
-                if (!res || !res.ok) return;
-                const s = await res.json();
-                document.getElementById('lp-total-interest').textContent    = formatCOP(s.totalInterestEarned);
-                document.getElementById('lp-month-interest').textContent    = formatCOP(s.monthInterest);
-                document.getElementById('lp-active-capital').textContent    = formatCOP(s.activeLoanCapital);
-                document.getElementById('lp-avg-rate').textContent          = s.weightedAvgRate > 0 ? s.weightedAvgRate + '%' : '—';
-                document.getElementById('lp-total-received').textContent    = formatCOP(s.totalPaymentsReceived);
-                document.getElementById('lp-capital-recovered').textContent = formatCOP(s.totalCapitalRecovered);
-                document.getElementById('lp-payment-count').textContent     = s.totalPaymentCount;
-                document.getElementById('lp-paid-count').textContent        = s.paidLoanCount;
-                document.getElementById('lp-overdue-count').textContent     = s.overdueLoanCount;
-            } catch(e) { console.log('Loan profit stats no disponibles:', e.message); }
-        }
-
-        async function loadLoanPayments() {
-            const tbody = document.getElementById('loan-payments-table');
-            tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">Cargando...</td></tr>';
-            try {
-                const res = await apiFetch('/admin/loans/payments');
-                if (!res || !res.ok) { tbody.innerHTML = '<tr><td colspan="9" style="color:var(--red);text-align:center">Error cargando pagos</td></tr>'; return; }
-                const data = await res.json();
-                if (!data.length) { tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">No hay pagos registrados aún</td></tr>'; return; }
-
-                tbody.innerHTML = data.map(p => {
-                    const date = new Date(p.created_at).toLocaleDateString('es-CO', { day:'2-digit', month:'short', year:'numeric' });
-                    const time = new Date(p.created_at).toLocaleTimeString('es-CO', { hour:'2-digit', minute:'2-digit' });
-                    const interestPct = p.amount > 0 ? Math.round((p.interest_amount / p.amount) * 100) : 0;
-                    return `<tr>
-                        <td style="font-size:12px;"><div>${date}</div><div style="font-size:10px;color:var(--muted);">${time}</div></td>
-                        <td><div style="font-weight:600;font-size:13px;">${p.user_name || 'ID:'+p.user_id}</div><div style="font-size:10px;color:var(--text2);">${p.user_email || ''}</div></td>
-                        <td><div class="mono" style="font-size:11px;">${p.loan_ref_id || p.ref_id || '-'}</div><div style="font-size:10px;color:var(--muted);">${p.loan_status === 'paid' ? '✅ Pagado' : p.loan_status === 'active' ? '🟢 Activo' : p.loan_status === 'overdue' ? '🔴 Mora' : p.loan_status || ''}</div></td>
-                        <td class="mono" style="text-align:right;font-weight:600;">${formatCOP(p.amount)}</td>
-                        <td class="mono" style="text-align:right;color:var(--green);font-weight:700;">${formatCOP(p.interest_amount)}<div style="font-size:10px;color:var(--muted);font-weight:400;">${interestPct}% del abono</div></td>
-                        <td class="mono" style="text-align:right;">${formatCOP(p.capital_amount)}</td>
-                        <td class="mono" style="text-align:right;color:${p.remaining_capital <= 0 ? 'var(--green)' : 'var(--text)'};">${p.remaining_capital <= 0 ? '✅ $0' : formatCOP(p.remaining_capital)}</td>
-                        <td class="mono" style="font-size:12px;color:var(--gold);font-weight:600;">${p.loan_rate}%</td>
-                        <td>${p.is_fully_paid ? '<span class="badge badge-green">Liquidado</span>' : '<span class="badge badge-blue">Abono</span>'}</td>
-                    </tr>`;
-                }).join('');
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="9" style="color:var(--red);text-align:center">Error: '+e.message+'</td></tr>'; }
-        }
-
-        // ====== REGISTROS ADMIN ======
-        let currentRegFilter = 'all';
-
-        async function loadAdminRegistrations(status) {
-            currentRegFilter = status;
-            const tbody = document.getElementById('registrations-table');
-            tbody.innerHTML = '<tr><td colspan="8" style="color:var(--muted);text-align:center">Cargando...</td></tr>';
-
-            try {
-                const res = await apiFetch(`/admin/registrations?status=${status}`);
-                if (!res || !res.ok) { tbody.innerHTML = '<tr><td colspan="8" style="color:var(--red);text-align:center">Error</td></tr>'; return; }
-                const data = await res.json();
-
-                if (!data.length) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="color:var(--muted);text-align:center">No hay solicitudes</td></tr>';
-                    return;
-                }
-
-                const statusLabels = { pending: '⏳ Pendiente', approved: '✅ Aprobado', rejected: '❌ Rechazado' };
-                const statusBadge = { pending: 'badge-gold', approved: 'badge-green', rejected: 'badge-red' };
-
-                tbody.innerHTML = data.map(r => `
-                    <tr>
-                        <td style="font-weight:600;">${r.full_name}</td>
-                        <td style="font-size:12px;">${r.email}</td>
-                        <td class="mono" style="font-size:12px;">${r.phone || '—'}</td>
-                        <td class="mono" style="font-size:12px;">${r.document_number || '—'}</td>
-                        <td style="font-size:12px;">${r.referrer_name || '—'}</td>
-                        <td><span class="badge ${statusBadge[r.status]}">${statusLabels[r.status]}</span></td>
-                        <td style="color:var(--muted);font-size:12px;">${formatDate(r.created_at)}</td>
-                        <td>
-                            ${regActionBtns(r)}
-                        </td>
-                    </tr>
-                `).join('');
-            } catch(e) {
-                tbody.innerHTML = '<tr><td colspan="8" style="color:var(--red);text-align:center">Error: ' + e.message + '</td></tr>';
-            }
-        }
-
-        function filterRegistrations(status, btn) {
-            document.querySelectorAll('.reg-filter-btn').forEach(b => { b.classList.remove('active'); b.style.background=''; b.style.color=''; });
-            btn.classList.add('active'); btn.style.background = 'var(--gold)'; btn.style.color = '#0a0a0f';
-            loadAdminRegistrations(status);
-        }
-
-        async function processRegistration(id, action, phone, userName) {
-            let notes;
-            if (action === 'reject') {
-                notes = prompt('Motivo del rechazo:');
-                if (notes === null) return;
-            }
-            if (!confirm(`¿${action === 'approve' ? 'Aprobar' : 'Rechazar'} este registro?`)) return;
-
-            try {
-                const res = await apiFetch(`/admin/registrations/${id}/process`, {
-                    method: 'POST',
-                    body: JSON.stringify({ action, notes })
-                });
-                const data = await res.json();
-                if (!res.ok) return toast(data.error, 'error');
-                toast(`✅ ${data.message}`);
-                loadAdminRegistrations(currentRegFilter);
-                if (action === 'approve' && phone) openWaModal(phone, 'registro', userName, {});
-            } catch(e) { toast('Error: ' + e.message, 'error'); }
-        }
-
-        // ====== DEPÓSITOS ADMIN ======
-        let currentDepFilter = 'all';
-
-        async function loadAdminDeposits(status) {
-            currentDepFilter = status;
-            const tbody = document.getElementById('deposits-table');
-            tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">Cargando...</td></tr>';
-
-            try {
-                const res = await apiFetch(`/admin/deposits?status=${status}`);
-                if (!res || !res.ok) { tbody.innerHTML = '<tr><td colspan="9" style="color:var(--red);text-align:center">Error cargando depósitos</td></tr>'; return; }
-                const data = await res.json();
-
-                if (!data.length) {
-                    tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center">No hay solicitudes de depósito</td></tr>';
-                    return;
-                }
-
-                const statusLabels = { pending: '⏳ Pendiente', approved: '✅ Aprobado', rejected: '❌ Rechazado' };
-                const statusBadge = { pending: 'badge-gold', approved: 'badge-green', rejected: 'badge-red' };
-
-                tbody.innerHTML = data.map(d => `
-                    <tr>
-                        <td class="mono" style="font-size:11px;">${d.ref_id || '-'}</td>
-                        <td>
-                            <div style="font-weight:600;font-size:13px;">${d.user_name || 'ID:'+d.user_id}</div>
-                            <div style="font-size:11px;color:var(--text2);">${d.user_email || ''}</div>
-                        </td>
-                        <td class="mono" style="font-size:12px;">${d.user_phone || '—'}</td>
-                        <td class="mono" style="color:var(--green);font-weight:600;">${formatCOP(d.amount)}</td>
-                        <td>
-                            ${d.proof_image ? `<button class="btn btn-sm btn-outline" onclick="showProofImage('${d.id}')">📷 Ver</button>` : '—'}
-                        </td>
-                        <td style="font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.note || '—'}</td>
-                        <td><span class="badge ${statusBadge[d.status] || 'badge-gold'}">${statusLabels[d.status] || d.status}</span></td>
-                        <td style="color:var(--muted);font-size:12px;">${formatDate(d.created_at)}</td>
-                        <td>
-                            ${d.status === 'pending' ? `
-                                <button class="btn btn-sm btn-gold" onclick="processDeposit(${d.id}, 'approve', '${(d.user_phone||'').replace(/'/g,"\\'")}', '${(d.user_name||'').replace(/'/g,"\\'")}', ${d.amount}, '${d.ref_id}')">✅ Aprobar</button>
-                                <button class="btn btn-sm btn-red" onclick="processDeposit(${d.id}, 'reject')" style="margin-top:4px;">❌ Rechazar</button>
-                            ` : d.status === 'approved' && d.user_phone ? `
-                                <button class="btn btn-sm btn-outline" onclick="sendDepositWhatsApp('${(d.user_phone||'').replace(/'/g,"\\'")}', '${(d.user_name||'').replace(/'/g,"\\'")}', ${d.amount}, '${d.ref_id}')" style="background:rgba(37,211,102,0.1);border-color:rgba(37,211,102,0.3);color:#25D366;">💬 WhatsApp</button>
-                            ` : '<span style="font-size:11px;color:var(--muted);">—</span>'}
-                        </td>
-                    </tr>
-                `).join('');
-            } catch(e) {
-                console.error('loadAdminDeposits error:', e);
-                tbody.innerHTML = '<tr><td colspan="9" style="color:var(--red);text-align:center">Error: ' + e.message + '</td></tr>';
-            }
-        }
-
-        function filterDeposits(status, btn) {
-            document.querySelectorAll('.dep-filter-btn').forEach(b => { b.classList.remove('active'); b.style.background=''; b.style.color=''; });
-            btn.classList.add('active'); btn.style.background = 'var(--gold)'; btn.style.color = '#0a0a0f';
-            loadAdminDeposits(status);
-        }
-
-        // Almacenar imágenes para modal
-        let depositProofCache = {};
-
-        async function showProofImage(depositId) {
-            // Si ya está cacheada, mostrar directo
-            if (depositProofCache[depositId]) {
-                openProofModal(depositProofCache[depositId]);
-                return;
-            }
-            // Buscar en los datos cargados (hacemos otra llamada para obtener la imagen)
-            try {
-                const res = await apiFetch(`/admin/deposits?status=all`);
-                if (res && res.ok) {
-                    const data = await res.json();
-                    const dep = data.find(d => d.id == depositId);
-                    if (dep && dep.proof_image) {
-                        depositProofCache[depositId] = dep.proof_image;
-                        openProofModal(dep.proof_image);
-                    } else {
-                        toast('Comprobante no encontrado', 'error');
-                    }
-                }
-            } catch(e) { toast('Error cargando comprobante', 'error'); }
-        }
-
-        function openProofModal(imageData) {
-            const modal = document.createElement('div');
-            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:9999;cursor:pointer;';
-            modal.onclick = () => modal.remove();
-            modal.innerHTML = `
-                <div style="max-width:90vw;max-height:90vh;position:relative;" onclick="event.stopPropagation()">
-                    <img src="${imageData}" style="max-width:90vw;max-height:85vh;border:2px solid var(--gold);border-radius:8px;">
-                    <button onclick="this.parentElement.parentElement.remove()" style="position:absolute;top:-12px;right:-12px;width:30px;height:30px;border-radius:50%;background:var(--red);color:white;border:none;font-size:16px;cursor:pointer;font-weight:700;">✕</button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        async function processDeposit(id, action, phone, userName, amount, refId) {
-            let notes;
-
-            if (action === 'approve') {
-                if (!confirm(`¿Aprobar depósito de $${Math.round(amount).toLocaleString('es-CO')} COP?\n\nEsto acreditará los fondos en la cuenta del usuario.`)) return;
-                notes = prompt('Notas (opcional):');
-            } else if (action === 'reject') {
-                notes = prompt('Motivo del rechazo:');
-                if (notes === null) return;
-                if (!confirm('¿Confirmar rechazo del depósito?')) return;
-            }
-
-            try {
-                const res = await apiFetch(`/admin/deposits/${id}/process`, {
-                    method: 'POST',
-                    body: JSON.stringify({ action, notes })
-                });
-                const data = await res.json();
-                if (!res.ok) return toast(data.error, 'error');
-                toast(`✅ ${data.message}`);
-                loadAdminDeposits(currentDepFilter);
-                loadStats();
-
-                // Si se aprobó y hay teléfono, preguntar si quiere enviar WhatsApp
-                if (action === 'approve' && phone && phone !== '—' && phone !== 'null') {
-                    if (confirm(`¿Enviar WhatsApp a ${userName} notificando la aprobación?`)) {
-                        sendDepositWhatsApp(phone, userName, amount, refId);
-                    }
-                }
-            } catch(e) { toast('Error: ' + e.message, 'error'); }
-        }
-
-        // ══ WHATSAPP HELPERS ════════════════════════════════════════════
-        const WA_TEMPLATES = {
-            registro: (name) =>
-                `¡Hola ${name}! 👋\n\n` +
-                `Tu solicitud de registro en *Sanse Capital* fue *aprobada* ✅\n\n` +
-                `Ya puedes ingresar a tu cuenta y comenzar a invertir.\n\n` +
-                `🌐 sansecapital.co\n\nBienvenido/a a la familia Sanse 🚀`,
-
-            deposito: (name, d) =>
-                `¡Hola ${name}! 👋\n\n` +
-                `Tu depósito en *Sanse Capital* fue *aprobado* ✅\n\n` +
-                `💰 Monto: $${Math.round(d.amount||0).toLocaleString('es-CO')} COP\n` +
-                `🔖 Ref: ${d.refId||'—'}\n\n` +
-                `Los fondos ya están disponibles en tu cuenta.\n\nGracias por confiar en Sanse Capital 🏦`,
-
-            retiro_aprobado: (name, d) =>
-                `¡Hola ${name}! 👋\n\n` +
-                `Tu solicitud de retiro fue *aprobada* ✅\n\n` +
-                `💸 Monto: $${Math.round(d.amount||0).toLocaleString('es-CO')} COP\n` +
-                `🔖 Ref: ${d.refId||'—'}\n\n` +
-                `La transferencia está en proceso. Te avisaremos cuando se complete.\n\nGracias por confiar en Sanse Capital 🏦`,
-
-            retiro_completado: (name, d) =>
-                `¡Hola ${name}! 👋\n\n` +
-                `Tu retiro de *Sanse Capital* fue *transferido* 💸✅\n\n` +
-                `💰 Monto: $${Math.round(d.amount||0).toLocaleString('es-CO')} COP\n` +
-                `🔖 Ref: ${d.refId||'—'}\n\n` +
-                `El dinero ya está en camino a tu cuenta.\n\nGracias por confiar en Sanse Capital 🏦`,
-
-            prestamo_aprobado: (name, d) =>
-                `¡Hola ${name}! 👋\n\n` +
-                `Tu préstamo en *Sanse Capital* fue *aprobado* ✅\n\n` +
-                `💰 Monto: $${Math.round(d.amount||0).toLocaleString('es-CO')} COP\n` +
-                `📊 Tasa mensual: ${d.rate||4}%\n\n` +
-                `Los fondos serán acreditados en tu cuenta pronto.\n\nGracias por confiar en Sanse Capital 🏦`,
-        };
-
-        function openWaModal(phone, type, userName, data) {
-            if (!phone || phone === '—' || phone === 'undefined' || phone === '') {
-                toast('Este usuario no tiene teléfono registrado', 'error'); return;
-            }
-            const tpl = WA_TEMPLATES[type] || WA_TEMPLATES.deposito;
-            document.getElementById('wa-msg').value = tpl(userName, data);
-            document.getElementById('wa-phone').value = phone;
-            document.getElementById('wa-modal').style.display = 'flex';
-        }
-
-        function closeWaModal() { document.getElementById('wa-modal').style.display = 'none'; }
-
-        function sendWaMessage() {
-            let phone = document.getElementById('wa-phone').value.replace(/[\s\-\+\(\)]/g, '');
-            if (phone.startsWith('0')) phone = '57' + phone.slice(1);
-            if (phone.length === 10 && phone.startsWith('3')) phone = '57' + phone;
-            const msg = document.getElementById('wa-msg').value.trim();
-            if (!msg) { toast('El mensaje no puede estar vacío', 'error'); return; }
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-            closeWaModal();
-        }
-
-        // Mantener compatibilidad con botón existente de depósito
-        function sendDepositWhatsApp(phone, userName, amount, refId) {
-            openWaModal(phone, 'deposito', userName, { amount, refId });
-        }
-
-        // ══ HELPER: Botones de acción para retiros (evita template literals anidados) ══
-        function wrActionBtns(w) {
-            const ph = encodeURIComponent(w.user_phone || w.pm_phone || '');
-            const nm = encodeURIComponent(w.user_name || '');
-            const ref = w.ref_id || '';
-            const amt = w.amount || 0;
-            if (w.status === 'pending') {
-                return `<button class="btn btn-sm btn-gold" onclick="processWithdrawal(${w.id},'approve',decodeURIComponent('${ph}'),decodeURIComponent('${nm}'),${amt},'${ref}')">Aprobar</button>
-                        <button class="btn btn-sm btn-red" style="margin-top:4px;" onclick="processWithdrawal(${w.id},'reject')">Rechazar</button>`;
-            } else if (w.status === 'approved') {
-                const waBtn = ph ? `<button class="btn btn-sm" style="margin-top:4px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.35);color:#25D366;" onclick="processWithdrawal(${w.id},'complete',decodeURIComponent('${ph}'),decodeURIComponent('${nm}'),${amt},'${ref}')">Completar</button>
-                        <button class="btn btn-sm" style="margin-top:4px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.35);color:#25D366;" onclick="openWaModal(decodeURIComponent('${ph}'),'retiro_aprobado',decodeURIComponent('${nm}'),{amount:${amt},refId:'${ref}'})">💬 WA</button>` : `<button class="btn btn-sm btn-gold" onclick="processWithdrawal(${w.id},'complete')">Completar</button>`;
-                return `${waBtn}<button class="btn btn-sm btn-red" style="margin-top:4px;" onclick="processWithdrawal(${w.id},'reject')">Rechazar</button>`;
-            }
-            return '<span style="font-size:11px;color:var(--muted);">—</span>';
-        }
-
-        // ══ HELPER: Botones de acción para registros ══════════════
-        function regActionBtns(r) {
-            const ph = encodeURIComponent(r.phone || '');
-            const nm = encodeURIComponent(r.full_name || '');
-            if (r.status === 'pending') {
-                return `<button class="btn btn-sm btn-gold" onclick="processRegistration(${r.id},'approve',decodeURIComponent('${ph}'),decodeURIComponent('${nm}'))">✅ Aprobar</button>
-                        <button class="btn btn-sm btn-red" style="margin-top:4px;" onclick="processRegistration(${r.id},'reject')">❌ Rechazar</button>`;
-            } else if (r.status === 'approved' && r.phone) {
-                return `<button class="btn btn-sm" style="background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.35);color:#25D366;" onclick="openWaModal(decodeURIComponent('${ph}'),'registro',decodeURIComponent('${nm}'),{})">💬 WhatsApp</button>`;
-            }
-            return '<span style="font-size:11px;color:var(--muted);">—</span>';
-        }
-
-        // ====== INIT ======
-        document.getElementById('t-date').valueAsDate = new Date();
-        document.getElementById('cl-date').valueAsDate = new Date();
-
-        // ══ EDIT USER MODAL ══════════════════════════════════════════
-        function populateReferrerSelect(currentReferredById) {
-            const sel = document.getElementById('eu-referrer');
-            sel.innerHTML = '<option value="none">Sin referido</option>';
-            allUsers.forEach(u => {
-                const opt = document.createElement('option');
-                opt.value = u.id;
-                opt.textContent = u.full_name + ' — ' + u.email;
-                if (u.id == currentReferredById) opt.selected = true;
-                sel.appendChild(opt);
-            });
-        }
-
-        function openEditModal(jsonStr) {
-            const u = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
-            document.getElementById('eu-id').value       = u.id;
-            document.getElementById('eu-name').value     = u.full_name || '';
-            document.getElementById('eu-email').value    = u.email || '';
-            document.getElementById('eu-phone').value    = u.phone || '';
-            document.getElementById('eu-doc').value      = u.document_number || '';
-            document.getElementById('eu-role').value     = u.role || 'client';
-            document.getElementById('eu-status').value   = u.status || 'active';
-            document.getElementById('eu-password').value = '';
-            document.getElementById('eu-password').type  = 'password';
-            populateReferrerSelect(u.referred_by || null);
-            // Filter out self from referrer dropdown
-            const selfId = parseInt(u.id);
-            Array.from(document.getElementById('eu-referrer').options).forEach(opt => {
-                if (parseInt(opt.value) === selfId) opt.disabled = true;
-            });
-            const modal = document.getElementById('edit-user-modal');
-            modal.style.display = 'flex';
-        }
-
-        function closeEditModal() { document.getElementById('edit-user-modal').style.display = 'none'; }
-
-        function togglePassVis() {
-            const inp = document.getElementById('eu-password');
-            inp.type = inp.type === 'password' ? 'text' : 'password';
-        }
-
-        async function saveEditUser() {
-            const id  = document.getElementById('eu-id').value;
-            const btn = document.getElementById('eu-save-btn');
-            const referredByRaw = document.getElementById('eu-referrer').value;
-            // 'none' → null para limpiar el referido; cualquier ID → número entero
-            const referredBy = (referredByRaw === 'none' || referredByRaw === '' || referredByRaw === null)
-                ? null
-                : parseInt(referredByRaw, 10);
-            const body = {
-                fullName:       document.getElementById('eu-name').value.trim(),
-                email:          document.getElementById('eu-email').value.trim(),
-                phone:          document.getElementById('eu-phone').value.trim(),
-                documentNumber: document.getElementById('eu-doc').value.trim(),
-                role:           document.getElementById('eu-role').value,
-                status:         document.getElementById('eu-status').value,
-                referredBy:     referredBy,
-            };
-            const newPass = document.getElementById('eu-password').value;
-            if (newPass) {
-                if (newPass.length < 8) return toast('La contraseña debe tener al menos 8 caracteres', 'error');
-                body.password = newPass;
-            }
-            if (!body.fullName || !body.email) return toast('Nombre y email son obligatorios', 'error');
-
-            btn.disabled = true; btn.textContent = 'Guardando...';
-            try {
-                const res = await apiFetch(`/admin/users/${id}/edit`, { method: 'POST', body: JSON.stringify(body) });
-                const data = await res.json();
-                if (!res.ok) return toast(data.error || 'Error al guardar', 'error');
-                toast('✅ Usuario actualizado');
-                closeEditModal();
-                loadUsers();
-            } catch(e) { toast('Error: ' + e.message, 'error'); }
-            finally { btn.disabled = false; btn.textContent = '💾 Guardar Cambios'; }
-        }
-
-        document.getElementById('edit-user-modal').addEventListener('click', function(e) {
-            if (e.target === this) closeEditModal();
-        });
-
-        // ══ CREATE LOAN ═══════════════════════════════════════════════
-        function populateLoanUserSelect() {
-            const sel = document.getElementById('cl-user');
-            if (!sel) return;
-            sel.innerHTML = '<option value="">Seleccionar usuario...</option>' +
-                allUsers.map(u => `<option value="${u.id}">${u.full_name} — ${u.email}</option>`).join('');
-        }
-
-        function updateLoanPreview() {
-            const amount = parseFloat(document.getElementById('cl-amount').value) || 0;
-            const rate   = parseFloat(document.getElementById('cl-rate').value) || 0;
-            const term   = parseInt(document.getElementById('cl-term').value) || 0;
-            const preview = document.getElementById('cl-preview');
-
-            if (amount >= 100000 && rate > 0 && term > 0) {
-                const interest = amount * (rate / 100) * term;
-                const dueDate = new Date(document.getElementById('cl-date').value || new Date());
-                dueDate.setMonth(dueDate.getMonth() + term);
-
-                document.getElementById('clp-amount').textContent = formatCOP(amount);
-                document.getElementById('clp-rate').textContent = rate + '%';
-                document.getElementById('clp-interest').textContent = '+' + formatCOP(interest);
-                document.getElementById('clp-due').textContent = formatDate(dueDate);
-                preview.style.display = 'block';
-            } else {
-                preview.style.display = 'none';
-            }
-        }
-
-        async function submitCreateLoan() {
-            const userId  = document.getElementById('cl-user').value;
-            const amount  = parseFloat(document.getElementById('cl-amount').value);
-            const term    = parseInt(document.getElementById('cl-term').value);
-            const rate    = parseFloat(document.getElementById('cl-rate').value);
-            const purpose = document.getElementById('cl-purpose').value.trim();
-            const notes   = document.getElementById('cl-notes').value.trim();
-            const date    = document.getElementById('cl-date').value;
-
-            if (!userId) return toast('Selecciona un usuario', 'error');
-            if (!amount || amount < 100000) return toast('Monto mínimo: $100.000 COP', 'error');
-            if (!rate || rate < 1) return toast('Ingresa una tasa mensual válida', 'error');
-
-            const userName = allUsers.find(u => u.id == userId)?.full_name || '';
-            if (!confirm(`¿Crear préstamo de ${formatCOP(amount)} COP para ${userName}?\n\nPlazo: ${term} meses | Tasa: ${rate}% mensual\n\nEl monto se acreditará inmediatamente en su balance.`)) return;
-
-            const btn = document.getElementById('btn-create-loan');
-            btn.disabled = true; btn.textContent = 'Creando...';
-            try {
-                const res = await apiFetch('/admin/loans/create', {
-                    method: 'POST',
-                    body: JSON.stringify({ userId, amount, termMonths: term, monthlyRate: rate, purpose, notes, startDate: date })
-                });
-                const data = await res.json();
-                if (!res.ok) return toast(data.error || 'Error creando préstamo', 'error');
-                toast(`✅ ${data.message}`);
-
-                // Limpiar form
-                document.getElementById('cl-amount').value = '';
-                document.getElementById('cl-purpose').value = '';
-                document.getElementById('cl-notes').value = '';
-                document.getElementById('cl-preview').style.display = 'none';
-                document.getElementById('cl-user').value = '';
-
-                // Preguntar si enviar WhatsApp
-                const phone = allUsers.find(u => u.id == userId)?.phone;
-                if (phone && confirm(`¿Enviar WhatsApp a ${userName} notificando el préstamo aprobado?`)) {
-                    openWaModal(phone, 'prestamo_aprobado', userName, { amount, rate });
-                }
-                loadStats();
-            } catch(e) { toast('Error: ' + e.message, 'error'); }
-            finally { btn.disabled = false; btn.textContent = '🏦 Crear Préstamo'; }
-        }
-
-        loadData();
-    </script>
+      }catch(e){}
+    }));
+
+    // Populate users table
+    document.getElementById('users-tbl').innerHTML=allUsers.map(u=>{
+      const f=financials[u.id]||{balance:0};
+      const isBlocked=u.status==='blocked';
+      return `<tr>
+        <td>${u.full_name||'—'}</td>
+        <td style="color:var(--mut);font-size:12px">${u.email}</td>
+        <td><span class="badge ${u.role==='admin'?'pur':u.role==='p2p'?'blu':'mut'}">${u.role}</span></td>
+        <td class="mono ${f.balance>0?'grn':''}">${formatCOP(f.balance)}</td>
+        <td><span class="badge ${isBlocked?'red':'grn'}">${isBlocked?'Bloqueado':'Activo'}</span></td>
+        <td class="mono" style="font-size:11px;color:var(--mut)">${formatDate(u.created_at)}</td>
+        <td>${u.role!=='admin'?`<button class="btn btn-sm ${isBlocked?'btn-grn':'btn-red'}" onclick="toggleBlockUser(${u.id},${isBlocked})">${isBlocked?'Desbloquear':'Bloquear'}</button>`:''}</td>
+      </tr>`;
+    }).join('');
+
+    const sel=document.getElementById('t-user');
+    sel.innerHTML='<option value="">Seleccionar...</option>'+allUsers.map(u=>`<option value="${u.id}">${u.full_name} — ${u.email}</option>`).join('');
+    document.getElementById('st-users').textContent=allUsers.length;
+    const totalAvail=Object.values(financials).reduce((s,f)=>s+(f.available||0),0);
+    document.getElementById('st-total-available').textContent=formatCOP(totalAvail);
+  }catch(e){console.error(e)}
+}
+
+async function loadStats(){
+  try{
+    const res=await apiFetch('/admin/stats');
+    if(res&&res.ok){
+      const d=await res.json();
+      document.getElementById('st-balance').textContent=formatCOP(d.totalBalance||0);
+      document.getElementById('st-loans').textContent=formatCOP(d.totalLoans||0);
+      document.getElementById('st-withdrawals').textContent=formatCOP(d.totalWithdrawals||0);
+    }
+  }catch(e){}
+  try{
+    const r=await apiFetch('/investments/global-stats');
+    if(r&&r.ok){
+      const g=await r.json();
+      document.getElementById('st-cdtc-earned').textContent=formatCOP(g.totalEarnedGlobal||0);
+      document.getElementById('st-cdtc-locked').textContent=formatCOP(g.totalLocked||0);
+    }
+  }catch(e){}
+}
+
+async function loadRecentTx(){
+  try{
+    const res=await apiFetch('/admin/transactions/recent');
+    if(!res||!res.ok)return;
+    const d=await res.json();
+    const txs=d.transactions||d||[];
+    document.getElementById('tx-recent').innerHTML=txs.length?txs.slice(0,20).map(t=>{
+      const labels={deposit:'Depósito',withdraw:'Retiro',payment:'Abono',interest:'Intereses',profit:'Ganancias',loan:'Préstamo',investment:'Inversión',investment_return:'Rendimiento'};
+      const badges={deposit:'grn',withdraw:'red',payment:'blu',interest:'blu',profit:'pur',loan:'amb',investment:'pur',investment_return:'grn'};
+      const neg=['withdraw','investment'].includes(t.type);
+      return `<tr>
+        <td class="mono" style="font-size:11px;color:var(--mut)">${formatDate(t.created_at)}</td>
+        <td>${t.user_name||'—'}</td>
+        <td><span class="badge ${badges[t.type]||'mut'}">${labels[t.type]||t.type}</span></td>
+        <td class="mono ${neg?'red':'grn'}">${neg?'-':'+'}${formatCOP(t.amount)}</td>
+        <td style="color:var(--mut);font-size:12px">${t.description||'—'}</td>
+      </tr>`;
+    }).join(''):'<tr><td colspan="5" class="empty"><span class="empty-ic">📋</span>Sin transacciones</td></tr>';
+  }catch(e){}
+}
+
+// ═══ ACTIONS: USER ═══
+async function createUser(){
+  const body={
+    fullName:document.getElementById('u-name').value.trim(),
+    email:document.getElementById('u-email').value.trim(),
+    password:document.getElementById('u-pass').value,
+    phone:document.getElementById('u-phone').value.trim()||undefined,
+    documentNumber:document.getElementById('u-cc').value.trim()||undefined,
+    role:document.getElementById('u-role').value
+  };
+  const initialBalance=parseFloat(document.getElementById('u-balance').value)||0;
+  if(!body.fullName||!body.email||!body.password)return toast('Completa los campos requeridos','error');
+  const btn=document.getElementById('btn-cu');btn.disabled=true;btn.textContent='Creando...';
+  try{
+    const res=await apiFetch('/auth/users',{method:'POST',body:JSON.stringify(body)});
+    const d=await res.json();
+    if(!res.ok)return toast(d.error,'error');
+    if(initialBalance>0){
+      await apiFetch('/admin/transactions',{method:'POST',body:JSON.stringify({userId:d.userId,type:'deposit',amount:initialBalance,description:'Balance inicial'})});
+    }
+    toast(`✅ ${body.fullName} creado`);
+    ['u-name','u-email','u-pass','u-phone','u-cc'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('u-balance').value='0';
+    loadData();
+  }catch(e){toast('Error: '+e.message,'error')}
+  finally{btn.disabled=false;btn.textContent='Crear Usuario'}
+}
+
+async function toggleBlockUser(id,isBlocked){
+  if(!confirm(isBlocked?'¿Desbloquear usuario?':'¿Bloquear usuario?'))return;
+  try{
+    const res=await apiFetch(`/admin/users/${id}/toggle-block`,{method:'POST'});
+    if(!res.ok)return toast('Error','error');
+    toast(isBlocked?'✅ Desbloqueado':'✅ Bloqueado');
+    loadUsers();
+  }catch(e){toast('Error','error')}
+}
+
+async function createTransaction(){
+  const userId=parseInt(document.getElementById('t-user').value);
+  const type=document.getElementById('t-type').value;
+  const amount=parseFloat(document.getElementById('t-amount').value);
+  const date=document.getElementById('t-date').value;
+  const desc=document.getElementById('t-desc').value.trim();
+  if(!userId)return toast('Selecciona un usuario','error');
+  if(!amount||amount<=0)return toast('Monto inválido','error');
+  const btn=document.getElementById('btn-ct');btn.disabled=true;btn.textContent='Registrando...';
+  try{
+    const res=await apiFetch('/admin/transactions',{method:'POST',body:JSON.stringify({userId,type,amount,description:desc||undefined,date:date?new Date(date).toISOString():undefined})});
+    const d=await res.json();
+    if(!res.ok)return toast(d.error,'error');
+    toast(`✅ Transacción de ${formatCOP(amount)} registrada`);
+    ['t-amount','t-desc'].forEach(id=>document.getElementById(id).value='');
+    loadRecentTx();loadStats();
+  }catch(e){toast('Error','error')}
+  finally{btn.disabled=false;btn.textContent='Registrar Transacción'}
+}
+
+// ═══ RETURNS ═══
+async function loadActiveInvestments(){
+  try{
+    const res=await apiFetch('/admin/investments/active');
+    if(!res||!res.ok)return;
+    activeInvestments=await res.json();
+    const c=document.getElementById('active-invs-list');
+    if(!activeInvestments.length){c.innerHTML='<div class="empty"><span class="empty-ic">📊</span>No hay inversiones activas</div>';return}
+    c.innerHTML=activeInvestments.map(inv=>{
+      const returnsHTML=(inv.returns||[]).map(r=>`<span class="badge grn" style="margin-right:4px">${formatDate(r.period_month)}: ${r.rate_applied}%</span>`).join('');
+      return `<div class="ic" data-id="${inv.id}" onclick="selectInvestment(${inv.id})">
+        <div class="ic-head">
+          <div><div class="ic-user">${inv.user_name}</div><div style="font-size:11px;color:var(--mut)">${inv.user_email}</div></div>
+          <div class="ic-type">${inv.type} · ${inv.duration_months||6}m</div>
+        </div>
+        <div class="ic-details">
+          <div class="ic-d"><div class="l">Capital</div><div class="v blu">${formatCOP(inv.amount)}</div></div>
+          <div class="ic-d"><div class="l">Inicio</div><div class="v">${formatDate(inv.start_date)}</div></div>
+          <div class="ic-d"><div class="l">Tasa</div><div class="v">${inv.min_monthly_rate||2}–${inv.max_monthly_rate||4}%</div></div>
+          <div class="ic-d"><div class="l">Estado</div><div class="v grn">${inv.status}</div></div>
+        </div>
+        ${returnsHTML?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)"><div style="font-size:10px;color:var(--mut);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Rendimientos registrados</div>${returnsHTML}</div>`:''}
+      </div>`;
+    }).join('');
+  }catch(e){}
+}
+
+function selectInvestment(id){
+  selectedInvestment=activeInvestments.find(i=>i.id===id);
+  document.querySelectorAll('.ic').forEach(c=>c.classList.remove('selected'));
+  document.querySelector(`.ic[data-id="${id}"]`)?.classList.add('selected');
+  document.getElementById('return-form').style.display='block';
+  document.getElementById('rf-label').textContent=`${selectedInvestment.user_name} — ${formatCOP(selectedInvestment.amount)}`;
+  document.getElementById('rf-rate').value='';
+  document.getElementById('rf-month').value='';
+  document.getElementById('rf-notes').value='';
+  document.getElementById('return-preview').style.display='none';
+  document.getElementById('btn-rr').disabled=true;
+}
+
+function updateReturnPreview(){
+  if(!selectedInvestment)return;
+  const rate=parseFloat(document.getElementById('rf-rate').value);
+  const month=document.getElementById('rf-month').value;
+  const prev=document.getElementById('return-preview');
+  const btn=document.getElementById('btn-rr');
+  if(!rate||rate<=0||!month){prev.style.display='none';btn.disabled=true;return}
+  const cap=selectedInvestment.amount;
+  const earn=Math.round(cap*(rate/100));
+  document.getElementById('rp-cap').textContent=formatCOP(cap);
+  document.getElementById('rp-rate').textContent=rate+'%';
+  document.getElementById('rp-earn').textContent='+'+formatCOP(earn);
+  prev.style.display='block';btn.disabled=false;
+}
+
+async function registerReturn(){
+  if(!selectedInvestment)return toast('Selecciona una inversión','error');
+  const rate=parseFloat(document.getElementById('rf-rate').value);
+  const month=document.getElementById('rf-month').value;
+  const notes=document.getElementById('rf-notes').value.trim();
+  if(!rate||rate<=0)return toast('Tasa inválida','error');
+  if(!month)return toast('Selecciona un mes','error');
+  const btn=document.getElementById('btn-rr');btn.disabled=true;btn.textContent='Registrando...';
+  try{
+    const periodMonth=month+'-01';
+    const res=await apiFetch(`/admin/investments/${selectedInvestment.id}/return`,{method:'POST',body:JSON.stringify({rate,periodMonth,notes:notes||undefined})});
+    const d=await res.json();
+    if(!res.ok)return toast(d.error,'error');
+    toast(`✅ Rendimiento registrado: +${formatCOP(d.return.amountEarned)}`);
+    selectedInvestment=null;
+    document.getElementById('return-form').style.display='none';
+    loadActiveInvestments();loadStats();
+  }catch(e){toast('Error','error')}
+  finally{btn.disabled=false;btn.textContent='Registrar Rendimiento'}
+}
+
+// ═══ WITHDRAWALS ═══
+async function loadWithdrawals(status){
+  try{
+    const q=status==='all'?'':`?status=${status}`;
+    const res=await apiFetch(`/admin/withdrawals${q}`);
+    if(!res||!res.ok)return;
+    const d=await res.json();
+    const wr=d.withdrawals||d||[];
+    document.getElementById('wr-tbl').innerHTML=wr.length?wr.map(w=>`<tr>
+      <td class="mono" style="font-size:11px">${w.ref_id||w.id}</td>
+      <td>${w.user_name||'—'}</td>
+      <td class="mono red">${formatCOP(w.amount)}</td>
+      <td style="font-size:12px">${w.payment_method_type||w.method||'—'}</td>
+      <td><span class="badge ${w.status==='pending'?'amb':w.status==='approved'?'blu':w.status==='completed'?'grn':'red'}">${w.status}</span></td>
+      <td class="mono" style="font-size:11px;color:var(--mut)">${formatDate(w.created_at)}</td>
+      <td>${w.status==='pending'?`<button class="btn btn-sm btn-grn" onclick="processWithdrawal(${w.id},'approve')">Aprobar</button> <button class="btn btn-sm btn-red" onclick="processWithdrawal(${w.id},'reject')">Rechazar</button>`:w.status==='approved'?`<button class="btn btn-sm btn-primary" onclick="processWithdrawal(${w.id},'complete')">Completar</button>`:'—'}</td>
+    </tr>`).join(''):'<tr><td colspan="7" class="empty"><span class="empty-ic">📤</span>Sin retiros</td></tr>';
+  }catch(e){}
+}
+
+function filterWithdrawals(status,el){document.querySelectorAll('#sec-withdrawals .fbtn').forEach(b=>b.classList.remove('active'));el.classList.add('active');loadWithdrawals(status)}
+
+async function processWithdrawal(id,action){
+  if(!confirm(`¿Confirmar acción: ${action}?`))return;
+  try{
+    const res=await apiFetch(`/admin/withdrawals/${id}/process`,{method:'POST',body:JSON.stringify({action})});
+    if(!res.ok)return toast('Error','error');
+    toast('✅ Procesado');loadWithdrawals('all');loadStats();
+  }catch(e){toast('Error','error')}
+}
+
+// ═══ DEPOSITS ═══
+async function loadDeposits(status){
+  try{
+    const q=status==='all'?'':`?status=${status}`;
+    const res=await apiFetch(`/admin/deposits${q}`);
+    if(!res||!res.ok)return;
+    const d=await res.json();
+    const deps=d.deposits||d||[];
+    document.getElementById('deposits-tbl').innerHTML=deps.length?deps.map(dp=>`<tr>
+      <td class="mono" style="font-size:11px">${dp.ref_id||dp.id}</td>
+      <td>${dp.user_name||'—'}</td>
+      <td class="mono grn">${formatCOP(dp.amount)}</td>
+      <td style="font-size:12px">${dp.method||'—'}</td>
+      <td><span class="badge ${dp.status==='pending'?'amb':dp.status==='approved'?'grn':'red'}">${dp.status}</span></td>
+      <td class="mono" style="font-size:11px;color:var(--mut)">${formatDate(dp.created_at)}</td>
+      <td>${dp.status==='pending'?`<button class="btn btn-sm btn-grn" onclick="processDeposit(${dp.id},'approve')">Aprobar</button> <button class="btn btn-sm btn-red" onclick="processDeposit(${dp.id},'reject')">Rechazar</button>`:'—'}</td>
+    </tr>`).join(''):'<tr><td colspan="7" class="empty"><span class="empty-ic">📥</span>Sin depósitos</td></tr>';
+  }catch(e){}
+}
+
+function filterDeposits(status,el){document.querySelectorAll('#sec-deposits .fbtn').forEach(b=>b.classList.remove('active'));el.classList.add('active');loadDeposits(status)}
+
+async function processDeposit(id,action){
+  if(!confirm(`¿Confirmar: ${action}?`))return;
+  try{
+    const res=await apiFetch(`/admin/deposits/${id}/process`,{method:'POST',body:JSON.stringify({action})});
+    if(!res.ok)return toast('Error','error');
+    toast('✅ Procesado');loadDeposits('all');loadStats();
+  }catch(e){toast('Error','error')}
+}
+
+// ═══ REGISTRATIONS ═══
+async function loadRegs(status){
+  try{
+    const q=status==='all'?'':`?status=${status}`;
+    const res=await apiFetch(`/admin/registrations${q}`);
+    if(!res||!res.ok)return;
+    const d=await res.json();
+    const regs=d.registrations||d||[];
+    document.getElementById('regs-tbl').innerHTML=regs.length?regs.map(r=>`<tr>
+      <td>${r.full_name||'—'}</td>
+      <td style="font-size:12px;color:var(--mut)">${r.email}</td>
+      <td class="mono" style="font-size:12px">${r.phone||'—'}</td>
+      <td class="mono" style="font-size:12px">${r.document_number||'—'}</td>
+      <td style="font-size:12px">${r.referrer_name||'—'}</td>
+      <td><span class="badge ${r.status==='pending'?'amb':r.status==='approved'?'grn':'red'}">${r.status}</span></td>
+      <td class="mono" style="font-size:11px;color:var(--mut)">${formatDate(r.created_at)}</td>
+      <td>${r.status==='pending'?`<button class="btn btn-sm btn-grn" onclick="processReg(${r.id},'approve')">Aprobar</button> <button class="btn btn-sm btn-red" onclick="processReg(${r.id},'reject')">Rechazar</button>`:'—'}</td>
+    </tr>`).join(''):'<tr><td colspan="8" class="empty"><span class="empty-ic">📝</span>Sin registros</td></tr>';
+  }catch(e){}
+}
+
+function filterRegs(status,el){document.querySelectorAll('#sec-registrations .fbtn').forEach(b=>b.classList.remove('active'));el.classList.add('active');loadRegs(status)}
+
+async function processReg(id,action){
+  if(!confirm(`¿Confirmar: ${action}?`))return;
+  try{
+    const res=await apiFetch(`/admin/registrations/${id}/process`,{method:'POST',body:JSON.stringify({action})});
+    if(!res.ok)return toast('Error','error');
+    toast('✅ Procesado');loadRegs('all');loadUsers();
+  }catch(e){toast('Error','error')}
+}
+
+// ═══ LOANS ═══
+async function loadLoans(status){
+  try{
+    const q=status==='all'?'':`?status=${status}`;
+    const res=await apiFetch(`/admin/loans${q}`);
+    if(!res||!res.ok)return;
+    const d=await res.json();
+    const lns=d.loans||d||[];
+    document.getElementById('loans-tbl').innerHTML=lns.length?lns.map(l=>`<tr>
+      <td class="mono" style="font-size:11px">${l.ref_id||l.id}</td>
+      <td>${l.user_name||'—'}</td>
+      <td class="mono">${formatCOP(l.amount)}</td>
+      <td class="mono" style="font-size:12px">${l.term_months||'—'}m</td>
+      <td style="font-size:12px">${l.purpose||'—'}</td>
+      <td><span class="badge ${l.status==='pending'?'amb':l.status==='active'?'blu':l.status==='paid'?'grn':l.status==='overdue'?'red':'mut'}">${l.status}</span></td>
+      <td class="mono" style="font-size:11px;color:var(--mut)">${formatDate(l.created_at)}</td>
+      <td>${l.status==='pending'?`<button class="btn btn-sm btn-grn" onclick="processLoan(${l.id},'approve')">Aprobar</button> <button class="btn btn-sm btn-red" onclick="processLoan(${l.id},'reject')">Rechazar</button>`:l.status==='active'?`<button class="btn btn-sm btn-primary" onclick="processLoan(${l.id},'mark_paid')">Pagado</button>`:'—'}</td>
+    </tr>`).join(''):'<tr><td colspan="8" class="empty"><span class="empty-ic">🏦</span>Sin préstamos</td></tr>';
+  }catch(e){}
+}
+
+function filterLoans(status,el){document.querySelectorAll('#sec-loans .fbtn').forEach(b=>b.classList.remove('active'));el.classList.add('active');loadLoans(status)}
+
+async function processLoan(id,action){
+  if(!confirm(`¿Confirmar: ${action}?`))return;
+  try{
+    const res=await apiFetch(`/admin/loans/${id}/process`,{method:'POST',body:JSON.stringify({action})});
+    if(!res.ok)return toast('Error','error');
+    toast('✅ Procesado');loadLoans('all');
+  }catch(e){toast('Error','error')}
+}
+
+// ═══ SDTC OVERVIEW ═══
+async function loadSDTC(){
+  try{
+    const [gsRes,invRes]=await Promise.all([
+      apiFetch('/investments/global-stats'),
+      apiFetch('/admin/investments/active')
+    ]);
+    const gs=gsRes&&gsRes.ok?await gsRes.json():{};
+    const invs=invRes&&invRes.ok?await invRes.json():[];
+
+    const totalLocked=gs.totalLocked||0;
+    const apyReal=gs.apyReal||0;
+    const totalEarned=gs.totalEarnedGlobal||0;
+    const activeCount=invs.length;
+
+    document.getElementById('sdtc-content').innerHTML=`
+    <div class="pbox-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px">
+      <div class="pbox-i" style="padding:14px;background:var(--sur);border-radius:8px"><div class="l">Capital Bloqueado</div><div class="v blu">${formatCOP(totalLocked)}</div></div>
+      <div class="pbox-i" style="padding:14px;background:var(--sur);border-radius:8px"><div class="l">APY Real</div><div class="v grn">${apyReal.toFixed(1)}%</div></div>
+      <div class="pbox-i" style="padding:14px;background:var(--sur);border-radius:8px"><div class="l">Ganancias Pagadas</div><div class="v grn">${formatCOP(totalEarned)}</div></div>
+      <div class="pbox-i" style="padding:14px;background:var(--sur);border-radius:8px"><div class="l">Inversiones Activas</div><div class="v">${activeCount}</div></div>
+    </div>
+    <div style="font-size:13px;font-weight:600;margin:20px 0 12px">Inversiones Activas</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Usuario</th><th>Capital</th><th>Inicio</th><th>Vence</th><th>Tasa</th><th>Estado</th></tr></thead>
+        <tbody>${invs.length?invs.map(i=>`<tr>
+          <td>${i.user_name}</td>
+          <td class="mono blu">${formatCOP(i.amount)}</td>
+          <td class="mono" style="font-size:11px">${formatDate(i.start_date)}</td>
+          <td class="mono" style="font-size:11px">${formatDate(i.lock_end_date||i.end_date)}</td>
+          <td class="mono" style="font-size:12px">${i.min_monthly_rate||2}–${i.max_monthly_rate||4}%</td>
+          <td><span class="badge grn">${i.status}</span></td>
+        </tr>`).join(''):'<tr><td colspan="6" class="empty">Sin inversiones</td></tr>'}</tbody>
+      </table>
+    </div>`;
+  }catch(e){document.getElementById('sdtc-content').innerHTML='<div class="empty">Error cargando CDTC</div>'}
+}
+
+// ═══ INIT ═══
+loadData();
+</script>
 </body>
 </html>
