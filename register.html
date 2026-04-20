@@ -4,508 +4,260 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Crear Cuenta — Sanse Capital</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --dark: #0a0a0f;
-      --dark-2: #12121a;
-      --dark-3: #1a1a24;
-      --border: rgba(255,255,255,0.06);
-      --text: #e8e6e3;
-      --text-muted: #7a7a85;
-      --gold: #C9A84C;
-      --gold-dim: rgba(201,168,76,0.12);
-      --gold-glow: rgba(201,168,76,0.25);
-      --green: #4ECB8D;
-      --red: #E74C5E;
-      --radius: 8px;
+    :root{
+      --bg:#0b0e1a;--bg2:#0f1322;--sur:rgba(255,255,255,0.04);
+      --bd:rgba(255,255,255,0.08);--text:#e8eaf0;--mut:#6b7280;--dim:#374151;
+      --blu:#4f8ef7;--blud:rgba(79,142,247,0.07);--pur:#7c5cfc;
+      --tea:#2dd4bf;--grn:#10b981;--red:#ef4444;
     }
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--dark);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    a{color:inherit;text-decoration:none}
 
-    /* ═══ BACKGROUND ═══ */
-    .bg {
-      position: fixed; inset: 0; z-index: 0;
-      background:
-        radial-gradient(ellipse 600px 400px at 80% 20%, rgba(201,168,76,0.05) 0%, transparent 70%),
-        radial-gradient(ellipse 500px 500px at 20% 80%, rgba(201,168,76,0.03) 0%, transparent 70%),
-        var(--dark);
-    }
-    .bg-grid {
-      position: fixed; inset: 0; z-index: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-      background-size: 60px 60px;
-    }
+    .bg-orb{position:fixed;inset:0;z-index:0;pointer-events:none;
+      background:radial-gradient(ellipse 600px 500px at 5% 40%,rgba(79,142,247,.08) 0%,transparent 60%),
+                 radial-gradient(ellipse 500px 400px at 95% 70%,rgba(124,92,252,.06) 0%,transparent 60%)}
+    .bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;
+      background-image:linear-gradient(rgba(79,142,247,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(79,142,247,.03) 1px,transparent 1px);
+      background-size:52px 52px}
 
-    /* ═══ CARD ═══ */
-    .card {
-      position: relative; z-index: 1;
-      width: 100%;
-      max-width: 480px;
-    }
-    .card-inner {
-      background: var(--dark-2);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 44px 40px;
-    }
-    .logo {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 20px;
-      letter-spacing: 2px;
-      text-align: center;
-      margin-bottom: 8px;
-    }
-    .logo span { color: var(--gold); }
-    .card-title {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 24px;
-      text-align: center;
-      margin-bottom: 8px;
-    }
-    .card-sub {
-      text-align: center;
-      font-size: 14px;
-      color: var(--text-muted);
-      margin-bottom: 32px;
-      line-height: 1.5;
-    }
+    /* ── MOBILE BASE ── */
+    .page{position:relative;z-index:1;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px 40px}
 
-    /* ═══ REFERRAL BANNER ═══ */
-    .referral-badge {
-      background: var(--gold-dim);
-      border: 1px solid rgba(201,168,76,0.25);
-      border-radius: var(--radius);
-      padding: 12px 16px;
-      font-size: 13px;
-      color: var(--gold);
-      text-align: center;
-      margin-bottom: 24px;
-    }
-    .referral-badge strong {
-      font-family: 'JetBrains Mono', monospace;
-    }
+    .card{width:100%;max-width:480px}
+    .card-inner{background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:28px 20px;animation:up .45s ease both}
+    @keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 
-    /* ═══ FORM ═══ */
-    .field {
-      margin-bottom: 18px;
-    }
-    .field label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .field label .optional {
-      text-transform: none;
-      font-weight: 400;
-      color: rgba(255,255,255,0.25);
-      letter-spacing: 0;
-    }
-    .field input {
-      width: 100%;
-      padding: 14px 16px;
-      background: var(--dark-3);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text);
-      font-size: 15px;
-      font-family: inherit;
-      outline: none;
-      transition: border 0.3s;
-    }
-    .field input:focus {
-      border-color: var(--gold);
-    }
-    .field input::placeholder {
-      color: rgba(255,255,255,0.2);
-    }
-    .field-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-    .field-hint {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 6px;
-      opacity: 0.7;
-    }
+    .brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:20px}
+    .b-icon{width:30px;height:30px;background:linear-gradient(135deg,var(--blu),var(--pur));border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .b-icon svg{width:14px;height:14px;fill:white}
+    .b-name{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+    .b-name span{color:var(--blu)}
 
-    /* ═══ TERMS CHECKBOX ═══ */
-    .terms-check {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      margin-bottom: 24px;
-      margin-top: 4px;
-    }
-    .terms-check input {
-      accent-color: var(--gold);
-      width: 18px; height: 18px;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-    .terms-check label {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.5;
-      cursor: pointer;
-    }
-    .terms-check label a {
-      color: var(--gold);
-      text-decoration: none;
-    }
-    .terms-check label a:hover { text-decoration: underline; }
+    .ttl{font-size:20px;font-weight:700;text-align:center;margin-bottom:4px}
+    .sub{font-size:13px;color:var(--mut);text-align:center;margin-bottom:22px;line-height:1.5}
 
-    /* ═══ BUTTONS ═══ */
-    .btn-submit {
-      width: 100%;
-      padding: 16px;
-      background: var(--gold);
-      color: #0a0a0f;
-      font-size: 15px;
-      font-weight: 700;
-      font-family: inherit;
-      border: none;
-      border-radius: var(--radius);
-      cursor: pointer;
-      transition: all 0.3s;
-      position: relative;
-    }
-    .btn-submit:hover {
-      background: #d9b35a;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 24px var(--gold-glow);
-    }
-    .btn-submit:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-    .btn-submit.loading {
-      color: transparent;
-    }
-    .btn-submit.loading::after {
-      content: '';
-      position: absolute;
-      top: 50%; left: 50%;
-      width: 20px; height: 20px;
-      margin: -10px 0 0 -10px;
-      border: 2px solid rgba(10,10,15,0.3);
-      border-top-color: #0a0a0f;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .ref-banner{background:rgba(79,142,247,.07);border:1px solid rgba(79,142,247,.2);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--blu);text-align:center;margin-bottom:16px;display:none}
+    .ref-banner.show{display:block}
+    .ref-banner strong{font-family:'Space Mono',monospace}
 
-    /* ═══ ERROR / SUCCESS ═══ */
-    .error-msg {
-      background: rgba(231,76,94,0.08);
-      border: 1px solid rgba(231,76,94,0.2);
-      border-radius: var(--radius);
-      padding: 12px 16px;
-      font-size: 13px;
-      color: var(--red);
-      margin-bottom: 20px;
-      display: none;
-    }
-    .error-msg.show { display: block; }
+    .err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 14px;font-size:13px;color:#f87171;margin-bottom:14px;display:none}
+    .err.show{display:block}
 
-    .success-card {
-      text-align: center;
-      padding: 20px 0;
-    }
-    .success-card .icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-    }
-    .success-card h3 {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 22px;
-      margin-bottom: 12px;
-    }
-    .success-card p {
-      font-size: 14px;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
-    .ref-code {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--gold);
-      background: var(--gold-dim);
-      padding: 16px;
-      border-radius: var(--radius);
-      margin: 16px 0;
-      letter-spacing: 3px;
-    }
-    .btn-login-link {
-      display: inline-block;
-      margin-top: 16px;
-      padding: 14px 32px;
-      background: var(--gold);
-      color: #0a0a0f;
-      font-weight: 700;
-      font-size: 14px;
-      border-radius: var(--radius);
-      text-decoration: none;
-      transition: all 0.3s;
-    }
-    .btn-login-link:hover {
-      background: #d9b35a;
-      transform: translateY(-1px);
-    }
+    /* fields — mobile: single column */
+    .fld{margin-bottom:14px}
+    .frow{display:grid;grid-template-columns:1fr;gap:14px}
+    .lbl{display:block;font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+    .lbl .opt{font-weight:400;text-transform:none;color:var(--dim);font-size:10px;letter-spacing:0}
+    .fw{position:relative}
+    .fi{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none}
+    .fi svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;display:block}
+    .fw input{width:100%;padding:13px 13px 13px 38px;background:var(--sur);border:1px solid var(--bd);border-radius:8px;color:var(--text);font-size:15px;font-family:'Space Grotesk',sans-serif;outline:none;transition:border-color .2s,background .2s;-webkit-appearance:none}
+    .fw input:focus{border-color:rgba(79,142,247,.5);background:rgba(79,142,247,.04)}
+    .fw input::placeholder{color:var(--dim)}
+    .fw input.mono{font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.5px;font-size:13px}
+    .fw input.ep{padding-right:42px}
+    .hint{font-size:11px;color:var(--dim);margin-top:4px;opacity:.85}
+    /* eye */
+    .eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--mut);padding:4px;display:flex;align-items:center;transition:color .2s;-webkit-tap-highlight-color:transparent}
+    .eye svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;display:block}
+    .eye:hover,.eye:focus{color:var(--blu)}
 
-    /* ═══ LINKS ═══ */
-    .card-footer {
-      text-align: center;
-      margin-top: 24px;
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-    .card-footer a {
-      color: var(--gold);
-      font-weight: 600;
-      text-decoration: none;
-    }
-    .card-footer a:hover { text-decoration: underline; }
+    .terms{display:flex;align-items:flex-start;gap:10px;margin:16px 0}
+    .terms input{accent-color:var(--blu);width:17px;height:17px;flex-shrink:0;margin-top:2px}
+    .terms label{font-size:12px;color:var(--mut);line-height:1.65}
+    .terms a{color:var(--blu)}
 
-    .back-link {
-      display: block;
-      text-align: center;
-      margin-top: 24px;
-      font-size: 13px;
-      color: var(--text-muted);
-      text-decoration: none;
-    }
-    .back-link:hover { color: var(--text); }
+    .btn{width:100%;padding:15px;background:linear-gradient(135deg,var(--blu),var(--pur));border:none;border-radius:8px;color:#fff;font-size:15px;font-weight:600;font-family:'Space Grotesk',sans-serif;cursor:pointer;position:relative;transition:opacity .2s,transform .15s;overflow:hidden;-webkit-tap-highlight-color:transparent}
+    .btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.1),transparent 50%)}
+    .btn:active{transform:scale(.98)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .btn.ld{color:transparent}
+    .btn.ld::after{content:'';position:absolute;top:50%;left:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* ═══ TOAST ═══ */
-    .toast {
-      position: fixed; bottom: 24px; right: 24px;
-      padding: 14px 24px;
-      border-radius: var(--radius);
-      font-size: 14px; font-weight: 600;
-      z-index: 1000;
-      animation: slideIn 0.3s ease;
-    }
-    .toast.success {
-      background: rgba(78,203,141,0.15);
-      border: 1px solid rgba(78,203,141,0.3);
-      color: var(--green);
-    }
-    .toast.error {
-      background: rgba(231,76,94,0.15);
-      border: 1px solid rgba(231,76,94,0.3);
-      color: var(--red);
-    }
-    @keyframes slideIn {
-      from { transform: translateX(100px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
+    .ft{text-align:center;font-size:13px;color:var(--mut);margin-top:16px}
+    .ft a{color:var(--blu);font-weight:500}
+    .back{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:14px;font-size:12px;color:var(--dim);transition:color .2s}
+    .back svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+    .back:hover{color:var(--mut)}
 
-    @media (max-width: 520px) {
-      .card-inner { padding: 32px 24px; }
-      .field-row { grid-template-columns: 1fr; }
+    /* success */
+    .succ{text-align:center;padding:12px 0}
+    .succ-icon{font-size:48px;display:block;margin-bottom:16px}
+    .succ h3{font-size:22px;font-weight:700;margin-bottom:8px}
+    .succ p{font-size:13px;color:var(--mut);line-height:1.7;margin-bottom:6px}
+    .ref-code{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--blu);background:var(--blud);border:1px solid rgba(79,142,247,.2);border-radius:8px;padding:14px;margin:14px 0;letter-spacing:2px}
+    .btn-go{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;background:linear-gradient(135deg,var(--blu),var(--pur));border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:600;font-family:'Space Grotesk',sans-serif;cursor:pointer;margin-top:8px;text-decoration:none;-webkit-tap-highlight-color:transparent}
+
+    /* ── TABLET+: 2-col fields ── */
+    @media(min-width:520px){
+      .frow{grid-template-columns:1fr 1fr}
+      .card-inner{padding:36px 32px}
+    }
+    /* ── DESKTOP: center with max width ── */
+    @media(min-width:768px){
+      .page{align-items:center;padding:40px 24px}
+      .card{max-width:520px}
     }
   </style>
 </head>
 <body>
-  <div class="bg"></div>
+  <div class="bg-orb"></div>
   <div class="bg-grid"></div>
 
-  <div class="card">
-    <!-- FORM -->
-    <div class="card-inner" id="register-card">
-      <div class="logo">SANSE <span>CAPITAL</span></div>
-      <h1 class="card-title">Crear Cuenta</h1>
-      <p class="card-sub">Completa tus datos para solicitar ingreso al fondo. Nuestro equipo revisará tu solicitud.</p>
+  <div class="page">
+    <div class="card">
 
-      <div id="referral-banner"></div>
-
-      <div class="error-msg" id="errorMsg"></div>
-
-      <div class="field">
-        <label>Nombre completo</label>
-        <input type="text" id="r-name" placeholder="Juan Pérez" autocomplete="name">
-      </div>
-
-      <div class="field-row">
-        <div class="field">
-          <label>Correo electrónico</label>
-          <input type="email" id="r-email" placeholder="tu@correo.com" autocomplete="email">
+      <!-- FORM -->
+      <div class="card-inner" id="register-card">
+        <div class="brand">
+          <div class="b-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+          <div class="b-name">SANSE <span>CAPITAL</span></div>
         </div>
-        <div class="field">
-          <label>Teléfono</label>
-          <input type="tel" id="r-phone" placeholder="3001234567" autocomplete="tel">
+        <h1 class="ttl">Crea tu cuenta</h1>
+        <p class="sub">Nuestro equipo revisará y aprobará tu solicitud pronto.</p>
+
+        <div class="ref-banner" id="referral-banner"></div>
+        <div class="err" id="errorMsg"></div>
+
+        <div class="fld">
+          <label class="lbl">Nombre completo</label>
+          <div class="fw">
+            <span class="fi"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            <input type="text" id="r-name" placeholder="Juan Pérez" autocomplete="name">
+          </div>
+        </div>
+
+        <div class="frow">
+          <div class="fld">
+            <label class="lbl">Correo electrónico</label>
+            <div class="fw">
+              <span class="fi"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+              <input type="email" id="r-email" placeholder="tu@correo.com" autocomplete="email" inputmode="email">
+            </div>
+          </div>
+          <div class="fld">
+            <label class="lbl">Teléfono</label>
+            <div class="fw">
+              <span class="fi"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.59 1.22h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.35a16 16 0 0 0 7.74 7.74l1.21-1.21a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+              <input type="tel" id="r-phone" placeholder="3001234567" autocomplete="tel" inputmode="tel">
+            </div>
+          </div>
+        </div>
+
+        <div class="frow">
+          <div class="fld">
+            <label class="lbl">Contraseña</label>
+            <div class="fw">
+              <span class="fi"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+              <input type="password" id="r-password" placeholder="Mín. 8 caracteres" autocomplete="new-password" class="ep">
+              <button class="eye" type="button" onclick="togglePass('r-password',this)" aria-label="Mostrar contraseña">
+                <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="fld">
+            <label class="lbl">Confirmar contraseña</label>
+            <div class="fw">
+              <span class="fi"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+              <input type="password" id="r-password2" placeholder="Repite tu contraseña" autocomplete="new-password" class="ep">
+              <button class="eye" type="button" onclick="togglePass('r-password2',this)" aria-label="Mostrar contraseña">
+                <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="fld">
+          <label class="lbl">Código de referido <span class="opt">(opcional)</span></label>
+          <div class="fw">
+            <span class="fi"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>
+            <input type="text" id="r-referral" placeholder="Ej: SANSE-A1B2C3" class="mono">
+          </div>
+          <p class="hint">Si alguien te invitó, ingresa su código aquí</p>
+        </div>
+
+        <div class="terms">
+          <input type="checkbox" id="r-terms">
+          <label for="r-terms">He leído y acepto los <a href="terminos.html" target="_blank">Términos y Condiciones</a>. Entiendo que Sanse Capital SAS gestiona inversiones privadas, no está vigilada por la SFC y que invertir conlleva riesgos.</label>
+        </div>
+
+        <button class="btn" id="registerBtn" onclick="submitRegister()">Crear mi Cuenta</button>
+        <div class="ft">¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a></div>
+        <a href="index.html" class="back">
+          <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Volver al inicio
+        </a>
+      </div>
+
+      <!-- SUCCESS -->
+      <div class="card-inner" id="success-card" style="display:none">
+        <div class="succ">
+          <span class="succ-icon">🎉</span>
+          <h3>¡Registro Exitoso!</h3>
+          <p>Tu cuenta ha sido creada. Nuestro equipo la revisará y aprobará pronto.</p>
+          <p style="margin-top:10px;font-size:12px">Tu código de referido personal:</p>
+          <div class="ref-code" id="my-ref-code">—</div>
+          <p style="font-size:14px;color:var(--text);margin-top:8px">Cada gran patrimonio comenzó con una primera decisión.<br><strong style="color:var(--blu)">La tuya acaba de quedar registrada.</strong></p>
+          <a href="login.html" class="btn-go">Ir a Iniciar Sesión →</a>
         </div>
       </div>
 
-      <div class="field-row">
-        <div class="field">
-          <label>Contraseña</label>
-          <input type="password" id="r-password" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
-        </div>
-        <div class="field">
-          <label>Confirmar contraseña</label>
-          <input type="password" id="r-password2" placeholder="Repite tu contraseña" autocomplete="new-password">
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Código de referido <span class="optional">(opcional)</span></label>
-        <input type="text" id="r-referral" placeholder="Ej: SANSE-A1B2C3" style="font-family:'JetBrains Mono',monospace;text-transform:uppercase;">
-        <p class="field-hint">Si alguien te invitó, ingresa su código aquí</p>
-      </div>
-
-      <div class="terms-check">
-        <input type="checkbox" id="r-terms">
-        <label for="r-terms">He leído y acepto los <a href="terminos.html" target="_blank">Términos y Condiciones</a>. Entiendo que Sanse Capital SAS gestiona inversiones privadas mediante contrato de mandato, no está vigilada por la SFC y que toda inversión conlleva riesgos.</label>
-      </div>
-
-      <button class="btn-submit" id="registerBtn" onclick="submitRegister()">Crear mi Cuenta</button>
-
-      <div class="card-footer">
-        ¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a>
-      </div>
     </div>
-
-    <!-- SUCCESS -->
-    <div class="card-inner" id="success-card" style="display:none;">
-      <div class="success-card">
-        <div class="icon">🎉</div>
-        <h3>Registro Exitoso</h3>
-        <p>Tu cuenta ha sido creada. Nuestro equipo la revisará y aprobará pronto.</p>
-        <p style="margin-top:16px; font-size:13px; color:var(--text-muted);">Tu código personal</p>
-        <div class="ref-code" id="my-ref-code">—</div>
-        <p style="font-size:15px; color:var(--text); line-height:1.7;">
-          Cada gran patrimonio comenzó con una primera decisión.<br>
-          <strong style="color:var(--gold);">La tuya acaba de quedar registrada.</strong>
-        </p>
-        <p style="margin-top:12px; font-size:13px; color:var(--text-muted); line-height:1.6;">
-          Pronto estarás un paso más cerca de la libertad financiera que estás construyendo. 🚀
-        </p>
-        <a href="login.html" class="btn-login-link">Ir a Iniciar Sesión →</a>
-      </div>
-    </div>
-
-    <a href="index.html" class="back-link">← Volver al inicio</a>
   </div>
 
   <script>
-    const API_BASE = 'https://sanse-backend-production.up.railway.app/api';
+    const API_BASE='https://sanse-backend-production.up.railway.app/api';
 
-    // Detectar código de referido en la URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const refCode = urlParams.get('ref');
-    if (refCode) {
-      document.getElementById('r-referral').value = refCode.toUpperCase();
-      document.getElementById('referral-banner').innerHTML = `
-        <div class="referral-badge">🔗 Fuiste invitado con el código <strong>${refCode.toUpperCase()}</strong></div>`;
+    // referral in URL
+    const ref=new URLSearchParams(window.location.search).get('ref');
+    if(ref){
+      document.getElementById('r-referral').value=ref.toUpperCase();
+      const b=document.getElementById('referral-banner');
+      b.innerHTML=`🔗 Fuiste invitado con el código <strong>${ref.toUpperCase()}</strong>`;
+      b.classList.add('show');
     }
 
-    function toast(msg, type = 'success') {
-      const t = document.createElement('div');
-      t.className = 'toast ' + type;
-      t.textContent = msg;
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), 4000);
+    function togglePass(id,btn){
+      const inp=document.getElementById(id);
+      const show=inp.type==='password';
+      inp.type=show?'text':'password';
+      btn.querySelector('svg').innerHTML=show
+        ?'<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+        :'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+      btn.style.color=show?'var(--blu)':'var(--mut)';
     }
 
-    async function submitRegister() {
-      const fullName = document.getElementById('r-name').value.trim();
-      const email = document.getElementById('r-email').value.trim();
-      const phone = document.getElementById('r-phone').value.trim();
-      const password = document.getElementById('r-password').value;
-      const password2 = document.getElementById('r-password2').value;
-      const referralCode = document.getElementById('r-referral').value.trim().toUpperCase();
-      const terms = document.getElementById('r-terms').checked;
-      const btn = document.getElementById('registerBtn');
-      const errorEl = document.getElementById('errorMsg');
-
-      errorEl.classList.remove('show');
-
-      // Validaciones
-      if (!fullName || !email || !phone || !password) {
-        errorEl.textContent = 'Todos los campos son obligatorios (excepto el código de referido).';
-        errorEl.classList.add('show');
-        return;
-      }
-      if (password.length < 8) {
-        errorEl.textContent = 'La contraseña debe tener al menos 8 caracteres.';
-        errorEl.classList.add('show');
-        return;
-      }
-      if (password !== password2) {
-        errorEl.textContent = 'Las contraseñas no coinciden.';
-        errorEl.classList.add('show');
-        return;
-      }
-      if (!terms) {
-        errorEl.textContent = 'Debes aceptar los Términos y Condiciones para continuar.';
-        errorEl.classList.add('show');
-        return;
-      }
-
-      btn.disabled = true;
-      btn.classList.add('loading');
-
-      try {
-        const resp = await fetch(`${API_BASE}/auth/register`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fullName,
-            email,
-            phone,
-            password,
-            referralCode: referralCode || undefined
-          })
-        });
-        const data = await resp.json();
-
-        if (!resp.ok) {
-          throw new Error(data.error || data.message || 'Error al crear la cuenta');
-        }
-
-        // Mostrar éxito
-        document.getElementById('register-card').style.display = 'none';
-        document.getElementById('success-card').style.display = 'block';
-        if (data.referralCode) {
-          document.getElementById('my-ref-code').textContent = data.referralCode;
-        }
-
-      } catch (err) {
-        btn.classList.remove('loading');
-        btn.disabled = false;
-        errorEl.textContent = err.message || 'Error de conexión. Intenta de nuevo.';
-        errorEl.classList.add('show');
-      }
+    async function submitRegister(){
+      const fullName=document.getElementById('r-name').value.trim();
+      const email=document.getElementById('r-email').value.trim();
+      const phone=document.getElementById('r-phone').value.trim();
+      const password=document.getElementById('r-password').value;
+      const password2=document.getElementById('r-password2').value;
+      const referralCode=document.getElementById('r-referral').value.trim().toUpperCase();
+      const terms=document.getElementById('r-terms').checked;
+      const btn=document.getElementById('registerBtn');
+      const err=document.getElementById('errorMsg');
+      err.classList.remove('show');
+      if(!fullName||!email||!phone||!password){err.textContent='Todos los campos son obligatorios.';err.classList.add('show');return;}
+      if(password.length<8){err.textContent='La contraseña debe tener al menos 8 caracteres.';err.classList.add('show');return;}
+      if(password!==password2){err.textContent='Las contraseñas no coinciden.';err.classList.add('show');return;}
+      if(!terms){err.textContent='Debes aceptar los Términos y Condiciones.';err.classList.add('show');return;}
+      btn.disabled=true;btn.classList.add('ld');
+      try{
+        const r=await fetch(`${API_BASE}/auth/register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fullName,email,phone,password,referralCode:referralCode||undefined})});
+        const d=await r.json();
+        if(!r.ok)throw new Error(d.error||d.message||'Error al crear la cuenta');
+        document.getElementById('register-card').style.display='none';
+        document.getElementById('success-card').style.display='block';
+        if(d.referralCode)document.getElementById('my-ref-code').textContent=d.referralCode;
+      }catch(e){btn.classList.remove('ld');btn.disabled=false;err.textContent=e.message||'Error de conexión.';err.classList.add('show');}
     }
-
-    // Enter para submit en último campo
-    document.getElementById('r-password2').addEventListener('keydown', e => {
-      if (e.key === 'Enter') submitRegister();
-    });
+    document.getElementById('r-password2').addEventListener('keydown',e=>{if(e.key==='Enter')submitRegister()});
   </script>
 </body>
 </html>

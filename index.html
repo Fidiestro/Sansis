@@ -1,820 +1,670 @@
 <!DOCTYPE html>
-<html lang="es" prefix="og: https://ogp.me/ns#">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- ═══ SEO PRIMARIO ═══ -->
-  <title>Sanse Capital — Inversiones Privadas con Rendimientos Verificables en Colombia</title>
-  <meta name="description" content="Sanse Capital SAS: sociedad de gestión de inversiones privadas en Bogotá, Colombia. Rendimientos históricos del 13.5% al 42% anual, trazabilidad 100% on-chain y contratos de mandato civil. Abre tu cuenta hoy.">
-  <meta name="keywords" content="inversiones privadas Colombia, fondo de inversión Bogotá, rendimientos cripto Colombia, CDTC inversión, préstamos privados Colombia, Sanse Capital">
-  <meta name="author" content="Sanse Capital SAS">
-  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <meta name="googlebot" content="index, follow">
-  <link rel="canonical" href="https://sansecapital.com/">
-
-  <!-- ═══ OPEN GRAPH (Facebook, WhatsApp, LinkedIn) ═══ -->
-  <meta property="og:type"        content="website">
-  <meta property="og:url"         content="https://sansecapital.com/">
-  <meta property="og:title"       content="Sanse Capital — Inversiones Privadas en Colombia">
-  <meta property="og:description" content="Gestión transparente de inversiones privadas con rendimientos verificables en blockchain. Desde 13.5% hasta 42% anual histórico. Bogotá, Colombia.">
-  <meta property="og:image"       content="https://sansecapital.com/favicon-192.png">
-  <meta property="og:image:width" content="192">
-  <meta property="og:image:height"content="192">
-  <meta property="og:image:alt"   content="Logo Sanse Capital">
-  <meta property="og:locale"      content="es_CO">
-  <meta property="og:site_name"   content="Sanse Capital">
-
-  <!-- ═══ TWITTER CARD ═══ -->
-  <meta name="twitter:card"        content="summary">
-  <meta name="twitter:title"       content="Sanse Capital — Inversiones Privadas en Colombia">
-  <meta name="twitter:description" content="Gestión transparente con trazabilidad on-chain. Rendimientos históricos del 13.5% al 42% anual.">
-  <meta name="twitter:image"       content="https://sansecapital.com/favicon-192.png">
-
-  <!-- ═══ SCHEMA.ORG — Datos estructurados para Google ═══ -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FinancialService",
-    "name": "Sanse Capital SAS",
-    "url": "https://sansecapital.com",
-    "logo": "https://sansecapital.com/favicon-192.png",
-    "description": "Sociedad de gestión de inversiones privadas en Colombia con trazabilidad on-chain y contratos de mandato civil.",
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": "Bogotá",
-      "addressCountry": "CO"
-    },
-    "areaServed": "CO",
-    "serviceType": ["Inversiones privadas", "Préstamos entre particulares", "Gestión de activos digitales"],
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "contactType": "customer service",
-      "availableLanguage": "Spanish"
-    }
-  }
-  </script>
-
-  <!-- ═══ FAVICONS ═══ -->
-  <link rel="icon"             type="image/x-icon"   href="favicon.ico">
-  <link rel="icon"             type="image/png" sizes="32x32"   href="favicon-32.png">
-  <link rel="icon"             type="image/png" sizes="192x192" href="favicon-192.png">
-  <link rel="apple-touch-icon" sizes="192x192"                  href="favicon-192.png">
-
-  <!-- ═══ PERFORMANCE ═══ -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="dns-prefetch" href="https://rpc.ankr.com">
-  <link rel="dns-prefetch" href="https://api.coingecko.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <title>Sanse Capital — Gestión de Inversiones en Criptoactivos</title>
+  <meta name="description" content="Sanse Capital SAS — Sociedad de gestión de inversiones privadas con rendimientos históricos verificables y gestión transparente en blockchain. Bogotá, Colombia.">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    /* ═══ RESET & VARIABLES ═══ */
     :root {
-      --dark: #0a0a0f;
-      --dark-2: #12121a;
-      --dark-3: #1a1a24;
-      --border: rgba(255,255,255,0.06);
-      --text: #e8e6e3;
-      --text-muted: #7a7a85;
-      --gold: #C9A84C;
-      --gold-dim: rgba(201,168,76,0.12);
-      --gold-glow: rgba(201,168,76,0.25);
-      --green: #4ECB8D;
-      --green-dim: rgba(78,203,141,0.1);
-      --red: #E74C5E;
-      --red-dim: rgba(231,76,94,0.1);
-      --blue: #5b8def;
-      --radius: 8px;
-      --radius-lg: 14px;
+      --bg:       #0b0e1a;
+      --bg-2:     #0f1322;
+      --bg-3:     #131729;
+      --surface:  rgba(255,255,255,0.04);
+      --surface-h:rgba(255,255,255,0.07);
+      --border:   rgba(255,255,255,0.07);
+      --border-b: rgba(255,255,255,0.12);
+      --text:     #e8eaf0;
+      --muted:    #6b7280;
+      --dim:      #374151;
+      --blue:     #4f8ef7;
+      --blue-g:   rgba(79,142,247,0.15);
+      --blue-d:   rgba(79,142,247,0.06);
+      --purple:   #7c5cfc;
+      --teal:     #2dd4bf;
+      --green:    #10b981;
+      --amber:    #f59e0b;
+      --red:      #ef4444;
+      --r:        12px;
+      --r-sm:     8px;
     }
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     html { scroll-behavior: smooth; }
     body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--dark);
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
       color: var(--text);
-      line-height: 1.6;
       overflow-x: hidden;
     }
     a { color: inherit; text-decoration: none; }
-    img { max-width: 100%; }
 
-    /* ═══ TYPOGRAPHY ═══ */
-    .syne { font-family: 'Syne', sans-serif; }
-    .mono { font-family: 'JetBrains Mono', monospace; }
-
-    /* ═══ LAYOUT ═══ */
-    .section-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-    section {
-      padding: 100px 0;
-      position: relative;
-    }
-
-    /* ═══ NAV ═══ */
+    /* ─── NAV ─── */
     nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      position: fixed; top:0; left:0; right:0; z-index:100;
+      height: 56px;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 48px; height: 72px;
-      background: rgba(10,10,15,0.85);
+      padding: 0 16px;
+      background: rgba(11,14,26,0.85);
       backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
     }
     .nav-logo {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800; font-size: 18px; letter-spacing: 2px;
-      color: var(--text);
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
     }
-    .nav-logo span { color: var(--gold); }
+    .nav-logo-icon {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-logo-icon svg { width:14px; height:14px; fill:white; }
+    .nav-logo span { color: var(--blue); }
     .nav-links {
-      display: flex; gap: 32px; list-style: none;
+      display: flex; align-items: center; gap: 32px;
+      list-style: none;
     }
     .nav-links a {
-      font-size: 13px; font-weight: 500; color: var(--text-muted);
-      transition: color 0.3s;
-      letter-spacing: 0.3px;
+      font-size: 13px; color: var(--muted);
+      transition: color 0.2s;
+      font-weight: 500;
     }
-    .nav-links a:hover { color: var(--gold); }
-    .nav-right {
-      display: flex; align-items: center; gap: 12px;
-    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
     .nav-btn {
-      padding: 9px 22px;
       font-size: 13px; font-weight: 600;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.3s;
-      border: none;
-      font-family: inherit;
+      padding: 8px 20px; border-radius: var(--r-sm);
+      transition: all 0.2s; cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif;
     }
-    .nav-btn-ghost {
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px solid var(--border);
+    .nav-ghost {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--muted);
     }
-    .nav-btn-ghost:hover {
-      color: var(--text);
-      border-color: rgba(255,255,255,0.15);
+    .nav-ghost:hover { border-color: var(--border-b); color: var(--text); }
+    .nav-primary {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border: none; color: white;
     }
-    .nav-btn-gold {
-      background: var(--gold);
-      color: #0a0a0f;
-    }
-    .nav-btn-gold:hover {
-      background: #d9b35a;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 20px var(--gold-glow);
-    }
+    .nav-primary:hover { opacity: 0.88; }
     .nav-hamburger {
-      display: none;
-      flex-direction: column; gap: 5px; cursor: pointer;
-      padding: 8px;
+      display: none; flex-direction: column; gap: 5px;
+      cursor: pointer; padding: 8px; background: none; border: none;
     }
     .nav-hamburger span {
-      width: 22px; height: 2px; background: var(--text);
-      transition: 0.3s;
+      display: block; width: 22px; height: 2px;
+      background: var(--text); transition: all 0.3s;
     }
     .nav-mobile {
       display: none; position: fixed;
-      top: 72px; left: 0; right: 0; bottom: 0;
-      background: var(--dark-2);
-      padding: 24px;
-      flex-direction: column;
-      gap: 4px;
-      z-index: 99;
-      overflow-y: auto;
+      top: 64px; left:0; right:0; z-index:99;
+      background: rgba(11,14,26,0.97);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 32px; flex-direction: column; gap: 4px;
     }
     .nav-mobile.open { display: flex; }
     .nav-mobile a {
-      padding: 14px 16px; font-size: 15px; font-weight: 500;
-      color: var(--text-muted); border-radius: 8px;
-      transition: all 0.2s;
+      font-size: 14px; color: var(--muted);
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+      transition: color 0.2s;
     }
-    .nav-mobile a:hover { background: var(--dark-3); color: var(--text); }
-    .mobile-auth {
-      margin-top: 16px; padding-top: 16px;
-      border-top: 1px solid var(--border);
-      display: flex; flex-direction: column; gap: 8px;
-    }
-    .mobile-auth a {
-      text-align: center;
-      padding: 14px;
-      border-radius: 8px;
-      font-weight: 600;
-    }
-    .mobile-auth .auth-register {
-      background: var(--gold);
-      color: #0a0a0f;
+    .nav-mobile a:hover { color: var(--text); }
+    .nav-mobile .mob-primary {
+      margin-top: 12px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white; text-align: center;
+      padding: 14px; border-radius: var(--r-sm);
+      font-weight: 600; border: none;
     }
 
-    /* ═══ HERO ═══ */
-    .hero {
+    /* ─── HERO ─── */
+    #inicio {
       min-height: 100vh;
-      display: flex; flex-direction: column; justify-content: center;
-      padding: 120px 48px 80px;
-      max-width: 1100px; margin: 0 auto;
-      position: relative;
+      display: flex; align-items: center;
+      padding: 80px 16px 60px;
+      position: relative; overflow: hidden;
     }
-    .hero-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px; font-weight: 500;
-      color: var(--gold);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 24px;
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 900px 700px at -5% 50%, rgba(79,142,247,0.09) 0%, transparent 60%),
+        radial-gradient(ellipse 600px 600px at 105% 20%, rgba(124,92,252,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 400px 400px at 60% 80%, rgba(45,212,191,0.04) 0%, transparent 60%);
     }
-    .hero h1 {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: clamp(40px, 7vw, 72px);
-      line-height: 1.05;
-      letter-spacing: -1px;
-      margin-bottom: 24px;
+    .hero-grid {
+      position: absolute; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(79,142,247,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,142,247,0.035) 1px, transparent 1px);
+      background-size: 52px 52px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
     }
-    .hero h1 em {
-      font-style: normal;
-      color: var(--gold);
+    .hero-inner {
+      position: relative; z-index: 1;
+      max-width: 1100px; margin: 0 auto; width: 100%;
+      display: grid; grid-template-columns: 1fr; gap: 40px; align-items: center;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--blue-d); border: 1px solid rgba(79,142,247,0.2);
+      border-radius: 20px; padding: 6px 16px;
+      font-size: 11px; font-family: 'Space Mono', monospace;
+      color: var(--blue); margin-bottom: 24px;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .hero-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--blue); animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .hero-title {
+      font-size: clamp(36px, 5vw, 60px);
+      font-weight: 700; line-height: 1.08;
+      letter-spacing: -0.5px; margin-bottom: 20px;
+    }
+    .hero-title .grad {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 50%, var(--teal) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     .hero-sub {
-      font-size: 17px;
-      color: var(--text-muted);
-      max-width: 540px;
-      margin-bottom: 20px;
-      line-height: 1.7;
+      font-size: 15px; color: var(--muted); line-height: 1.75;
+      max-width: 460px; margin-bottom: 16px;
     }
-
-    /* ═══ AVISO LEGAL HERO ═══ */
     .hero-disclaimer {
-      background: rgba(231,76,94,0.06);
-      border: 1px solid rgba(231,76,94,0.15);
-      border-radius: var(--radius);
-      padding: 14px 18px;
-      font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.6;
-      margin-bottom: 32px;
-      max-width: 600px;
+      background: rgba(245,158,11,0.06);
+      border: 1px solid rgba(245,158,11,0.15);
+      border-radius: var(--r-sm);
+      padding: 12px 16px; font-size: 12px;
+      color: var(--muted); line-height: 1.6; margin-bottom: 32px;
     }
-    .hero-disclaimer strong {
-      color: var(--red);
-    }
-
+    .hero-disclaimer strong { color: var(--amber); }
     .hero-btns {
-      display: flex; gap: 14px; margin-bottom: 56px;
-      flex-wrap: wrap;
+      display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 48px;
     }
-    .btn-primary {
+    .btn-hero-primary {
       display: inline-flex; align-items: center; gap: 8px;
       padding: 14px 28px;
-      background: var(--gold);
-      color: #0a0a0f;
-      font-weight: 700; font-size: 14px;
-      border-radius: 8px;
-      transition: all 0.3s;
-      border: none; cursor: pointer;
-      font-family: inherit;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border: none; border-radius: var(--r-sm);
+      color: white; font-size: 14px; font-weight: 600;
+      font-family: 'Space Grotesk', sans-serif;
+      cursor: pointer; transition: opacity 0.2s, transform 0.2s;
     }
-    .btn-primary:hover {
-      background: #d9b35a;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px var(--gold-glow);
-    }
-    .btn-ghost {
-      display: inline-flex; align-items: center;
-      padding: 14px 28px;
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      font-weight: 600; font-size: 14px;
-      border-radius: 8px;
-      transition: all 0.3s;
-      cursor: pointer;
-      font-family: inherit;
-    }
-    .btn-ghost:hover {
-      border-color: rgba(255,255,255,0.15);
-      color: var(--text);
-    }
-
-    .hero-stats {
-      display: flex; gap: 48px; flex-wrap: wrap;
-    }
-    .hero-stat-num {
-      display: block;
-      font-family: 'Syne', sans-serif;
-      font-weight: 800; font-size: 28px;
-      color: var(--text);
-    }
-    .hero-stat-label {
-      display: block;
-      font-size: 12px; color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    /* ═══ LEGAL BANNER ═══ */
-    .legal-banner {
-      display: flex; gap: 16px; align-items: flex-start;
-      background: var(--dark-2);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 24px 48px;
-    }
-    .legal-banner-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
-    .legal-banner-text {
-      font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.7;
-      max-width: 1000px;
-    }
-    .legal-banner-text a { color: var(--gold); }
-
-    /* ═══ SECTION LABELS & TITLES ═══ */
-    .section-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px; font-weight: 500;
-      color: var(--gold);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-    .section-title {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: clamp(28px, 4vw, 40px);
-      margin-bottom: 16px;
-    }
-    .section-title em {
-      font-style: normal; color: var(--gold);
-    }
-    .section-intro {
-      font-size: 15px; color: var(--text-muted);
-      max-width: 560px;
-      margin-bottom: 48px;
-    }
-
-    /* ═══ ACTIVOS / WALLET ═══ */
-    .wallet-summary {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-    .ws-card {
-      background: var(--dark-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-    }
-    .ws-label {
-      font-size: 12px; color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-    .ws-val {
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 700; font-size: 22px;
-    }
-    .ws-val.gold { color: var(--gold); }
-    .ws-val.green { color: var(--green); }
-
-    .chain-tabs {
-      display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
-    }
-    .chain-tab {
-      padding: 8px 16px;
-      font-size: 12px; font-weight: 600;
-      background: var(--dark-2);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      border-radius: 6px;
-      cursor: pointer;
+    .btn-hero-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-hero-ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 24px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-sm); color: var(--muted);
+      font-size: 14px; font-weight: 500; cursor: pointer;
       transition: all 0.2s;
     }
-    .chain-tab.active, .chain-tab:hover {
-      background: var(--gold-dim);
-      border-color: var(--gold);
-      color: var(--gold);
+    .btn-hero-ghost:hover { border-color: var(--border-b); color: var(--text); }
+    .hero-stats {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border); border-radius: var(--r);
+      overflow: hidden;
     }
-
-    .assets-table {
-      width: 100%;
-      border-collapse: collapse;
+    .hero-stat {
+      background: var(--bg-2); padding: 20px 24px;
     }
-    .assets-table th {
-      text-align: left;
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border);
-    }
-    .assets-table td {
-      padding: 14px 16px;
-      font-size: 14px;
-      border-bottom: 1px solid var(--border);
-    }
-    .assets-table tr:hover td {
-      background: rgba(255,255,255,0.02);
-    }
-    .token-name {
-      display: flex; align-items: center; gap: 10px;
-    }
-    .token-icon {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      background: var(--dark-3);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 700;
-    }
-    .token-chain {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px; color: var(--text-muted);
-    }
-
-    /* ═══ MODELO / CÓMO FUNCIONA ═══ */
-    .pasos-grid {
-      display: flex; flex-direction: column; gap: 0;
-    }
-    .paso {
-      display: flex; gap: 32px; padding: 32px 0;
-      border-bottom: 1px solid var(--border);
-      align-items: flex-start;
-    }
-    .paso:last-child { border-bottom: none; }
-    .paso-num {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800; font-size: 48px;
-      color: var(--gold-dim);
-      min-width: 60px;
-      line-height: 1;
-    }
-    .paso h3 {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700; font-size: 18px;
-      margin-bottom: 8px;
-    }
-    .paso p {
-      font-size: 14px; color: var(--text-muted);
-      line-height: 1.7;
-    }
-
-    /* ═══ SERVICIOS ═══ */
-    .servicios-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-    }
-    .servicio-card {
-      background: var(--dark-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 32px;
-      transition: all 0.3s;
-    }
-    .servicio-card:hover {
-      border-color: rgba(201,168,76,0.2);
-      transform: translateY(-2px);
-    }
-    .servicio-icon {
-      font-size: 28px; margin-bottom: 16px;
-    }
-    .servicio-card h3 {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700; font-size: 17px;
-      margin-bottom: 10px;
-    }
-    .servicio-card p {
-      font-size: 14px; color: var(--text-muted);
-      line-height: 1.7;
-    }
-    .servicio-rates {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-      margin-top: 16px;
-    }
-    .rate-chip {
-      background: var(--dark-3);
-      border-radius: 6px;
-      padding: 10px 14px;
-      text-align: center;
-    }
-    .rate-chip .rate-val {
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 700; font-size: 18px;
-      color: var(--gold);
-    }
-    .rate-chip .rate-lbl {
-      font-size: 11px; color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    /* ═══ QUIÉNES SOMOS ═══ */
-    .team-block {
-      background: var(--dark-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 48px;
-    }
-    .team-story {
-      font-size: 15px; color: var(--text-muted);
-      line-height: 1.8;
-      margin-bottom: 40px;
-      max-width: 700px;
-    }
-    .team-members {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 24px;
-    }
-    .team-member {
-      display: flex; gap: 16px; align-items: center;
-    }
-    .team-avatar {
-      width: 56px; height: 56px;
-      border-radius: 50%;
-      background: var(--gold-dim);
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Syne', sans-serif;
-      font-weight: 800; font-size: 18px;
-      color: var(--gold);
-      flex-shrink: 0;
-    }
-    .team-name {
-      font-weight: 700; font-size: 15px;
-    }
-    .team-role {
-      font-size: 12px; color: var(--text-muted);
-      margin-top: 2px;
-    }
-    .team-values {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-top: 40px;
-      padding-top: 32px;
-      border-top: 1px solid var(--border);
-    }
-    .value-item h4 {
-      font-size: 13px; font-weight: 700;
+    .hero-stat-val {
+      font-family: 'Space Mono', monospace;
+      font-size: 22px; font-weight: 700; color: var(--text);
       margin-bottom: 4px;
     }
-    .value-item p {
-      font-size: 12px; color: var(--text-muted);
-      line-height: 1.6;
+    .hero-stat-val.blue { color: var(--blue); }
+    .hero-stat-val.green { color: var(--green); }
+    .hero-stat-val.teal { color: var(--teal); }
+    .hero-stat-lbl {
+      font-size: 11px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
     }
 
-    /* ═══ CALCULADORA ═══ */
-    .calc-container {
-      background: var(--dark-2);
+    /* Live ticker strip */
+    .hero-right {
+      position: relative;
+      display: none;
+    }
+    .protocol-card {
+      background: var(--bg-2);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 40px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-      align-items: center;
-    }
-    .calc-field {
-      margin-bottom: 20px;
-    }
-    .calc-field label {
-      display: block;
-      font-size: 12px; font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .calc-field input,
-    .calc-field select {
-      width: 100%;
-      padding: 14px 16px;
-      background: var(--dark-3);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text);
-      font-size: 15px;
-      font-family: 'JetBrains Mono', monospace;
-      outline: none;
-      transition: border 0.3s;
-    }
-    .calc-field input:focus,
-    .calc-field select:focus {
-      border-color: var(--gold);
-    }
-    .calc-result {
-      text-align: center;
-    }
-    .calc-result-label {
-      font-size: 13px; color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-    .calc-result-val {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 42px;
-      color: var(--green);
-      margin-bottom: 8px;
-    }
-    .calc-result-total {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-    .calc-note {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 16px;
-      line-height: 1.5;
-      opacity: 0.7;
-    }
-
-    /* ═══ FAQ ═══ */
-    .faq-item {
-      border-bottom: 1px solid var(--border);
-    }
-    .faq-q {
-      width: 100%;
-      background: none;
-      border: none;
-      color: var(--text);
-      font-size: 15px;
-      font-weight: 600;
-      font-family: inherit;
-      text-align: left;
-      padding: 20px 0;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-    }
-    .faq-q::after {
-      content: '+';
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 18px;
-      color: var(--gold);
-      transition: transform 0.3s;
-      flex-shrink: 0;
-    }
-    .faq-item.open .faq-q::after {
-      transform: rotate(45deg);
-    }
-    .faq-a {
-      max-height: 0;
+      border-radius: var(--r);
       overflow: hidden;
-      transition: max-height 0.4s ease, padding 0.3s;
     }
-    .faq-item.open .faq-a {
-      max-height: 300px;
-      padding-bottom: 20px;
+    .protocol-card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
     }
-    .faq-a p {
-      font-size: 14px;
-      color: var(--text-muted);
-      line-height: 1.7;
+    .protocol-card-title {
+      font-size: 12px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 1px;
     }
+    .live-badge {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 10px; font-family: 'Space Mono', monospace;
+      color: var(--green);
+    }
+    .live-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--green); animation: blink 1.5s ease-in-out infinite;
+    }
+    .protocol-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .protocol-row:last-child { border-bottom: none; }
+    .protocol-row:hover { background: var(--surface); }
+    .pr-left { display: flex; align-items: center; gap: 12px; }
+    .pr-icon {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      font-family: 'Space Mono', monospace;
+    }
+    .pr-icon.btc { background: rgba(247,147,26,0.15); color: #f7931a; }
+    .pr-icon.eth { background: rgba(98,126,234,0.15); color: #627eea; }
+    .pr-icon.usdc { background: rgba(39,117,202,0.15); color: #2775ca; }
+    .pr-icon.arb { background: rgba(40,160,240,0.15); color: #28a0f0; }
+    .pr-name { font-size: 13px; font-weight: 600; }
+    .pr-chain { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; }
+    .pr-right { text-align: right; }
+    .pr-val { font-size: 13px; font-family: 'Space Mono', monospace; font-weight: 700; }
+    .pr-change { font-size: 10px; }
+    .pr-change.up { color: var(--green); }
+    .pr-change.down { color: var(--red); }
 
-    /* ═══ CTA BLOCK ═══ */
-    .cta-block {
-      background: var(--dark-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 64px;
-      text-align: center;
-    }
-    .cta-block h2 {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: clamp(28px, 4vw, 36px);
+    /* ─── SECTIONS BASE ─── */
+    section { padding: 60px 20px; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; font-family: 'Space Mono', monospace;
+      color: var(--blue); text-transform: uppercase; letter-spacing: 1px;
       margin-bottom: 16px;
     }
-    .cta-block h2 em {
-      font-style: normal; color: var(--gold);
+    .section-eyebrow::before {
+      content: ''; width: 20px; height: 1px; background: var(--blue);
     }
-    .cta-block p {
-      font-size: 15px;
-      color: var(--text-muted);
+    .section-title {
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 700; line-height: 1.15;
+      letter-spacing: -0.3px; margin-bottom: 16px;
+    }
+    .section-title .grad {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .section-sub {
+      font-size: 15px; color: var(--muted); line-height: 1.7;
+      max-width: 560px; margin-bottom: 48px;
+    }
+
+    /* Legal banner */
+    .legal-strip {
+      background: rgba(245,158,11,0.05);
+      border-top: 1px solid rgba(245,158,11,0.1);
+      border-bottom: 1px solid rgba(245,158,11,0.1);
+      padding: 14px 16px;
+      display: flex; gap: 14px; align-items: flex-start;
+    }
+    .legal-strip-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .legal-strip-text { font-size: 12px; color: var(--muted); line-height: 1.65; }
+    .legal-strip-text strong { color: var(--amber); }
+    .legal-strip-text a { color: var(--blue); }
+
+    /* ─── ACTIVOS / WALLET ─── */
+    #wallet { background: var(--bg-2); }
+    .wallet-cards {
+      display: grid; grid-template-columns: 1fr; gap: 12px;
       margin-bottom: 32px;
-      max-width: 500px;
-      margin-left: auto;
-      margin-right: auto;
     }
-    .cta-btns {
-      display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    .wcard {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 24px;
+      position: relative; overflow: hidden;
+    }
+    .wcard::before {
+      content: ''; position: absolute;
+      top:0; left:0; right:0; height: 2px;
+      background: linear-gradient(90deg, var(--blue), var(--purple));
+      opacity: 0.6;
+    }
+    .wcard-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 10px; }
+    .wcard-val {
+      font-family: 'Space Mono', monospace;
+      font-size: 22px; font-weight: 700; margin-bottom: 4px;
+    }
+    .wcard-val.blue { color: var(--blue); }
+    .wcard-val.green { color: var(--green); }
+    .wcard-sub { font-size: 12px; color: var(--muted); }
+    .chain-tabs {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+    }
+    .chain-tab {
+      padding: 6px 16px; font-size: 12px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; color: var(--muted);
+      cursor: pointer; transition: all 0.2s;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .chain-tab:hover, .chain-tab.active {
+      border-color: var(--blue); color: var(--blue);
+      background: var(--blue-d);
+    }
+    .assets-wrap { overflow-x: auto; border-radius: var(--r); border: 1px solid var(--border); }
+    .assets-table {
+      width: 100%; border-collapse: collapse; min-width: 680px;
+    }
+    .assets-table th {
+      text-align: left; font-size: 10px;
+      text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
+      background: var(--bg-2); font-weight: 600;
+    }
+    .assets-table td {
+      padding: 14px 16px; font-size: 13px;
+      border-bottom: 1px solid var(--border);
+    }
+    .assets-table tr:last-child td { border-bottom: none; }
+    .assets-table tr:hover td { background: var(--surface); }
+    .tk-cell { display: flex; align-items: center; gap: 10px; }
+    .tk-icon {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--blue-d); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--blue);
+      font-family: 'Space Mono', monospace; flex-shrink: 0;
+    }
+    .tk-sym { font-weight: 600; font-size: 13px; }
+    .tk-name { font-size: 11px; color: var(--muted); }
+    .chain-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 10px; font-family: 'Space Mono', monospace;
+      padding: 4px 10px; border-radius: 12px;
+      background: var(--surface); border: 1px solid var(--border); color: var(--muted);
+    }
+    .chain-dot { width: 5px; height: 5px; border-radius: 50%; }
+    .mono { font-family: 'Space Mono', monospace; font-size: 12px; }
+
+    /* ─── MODELO / PASOS ─── */
+    #modelo { background: var(--bg); }
+    .pasos-grid {
+      display: grid; grid-template-columns: 1fr; gap: 12px;
+    }
+    .paso-card {
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 32px;
+      transition: border-color 0.2s, transform 0.2s;
+      position: relative; overflow: hidden;
+    }
+    .paso-card:hover { border-color: rgba(79,142,247,0.25); transform: translateY(-2px); }
+    .paso-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 42px; font-weight: 700;
+      color: rgba(79,142,247,0.12); line-height: 1;
+      margin-bottom: 20px;
+    }
+    .paso-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+    .paso-card p { font-size: 14px; color: var(--muted); line-height: 1.75; }
+    .paso-icon {
+      position: absolute; top: 24px; right: 24px;
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--blue-d); border: 1px solid rgba(79,142,247,0.2);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .paso-icon svg { width: 16px; height: 16px; stroke: var(--blue); fill: none; stroke-width: 2; }
+
+    /* ─── SERVICIOS ─── */
+    #servicios { background: var(--bg-2); }
+    .servicios-grid {
+      display: grid; grid-template-columns: 1fr; gap: 12px;
+    }
+    .serv-card {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 32px;
+      transition: border-color 0.2s, transform 0.2s;
+      display: flex; flex-direction: column;
+    }
+    .serv-card:hover { border-color: rgba(79,142,247,0.25); transform: translateY(-2px); }
+    .serv-icon-wrap {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: var(--blue-d); border: 1px solid rgba(79,142,247,0.2);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+    }
+    .serv-icon-wrap svg { width: 20px; height: 20px; stroke: var(--blue); fill: none; stroke-width: 2; }
+    .serv-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+    .serv-card p { font-size: 13px; color: var(--muted); line-height: 1.75; flex: 1; margin-bottom: 20px; }
+    .serv-rates {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      margin-top: auto;
+    }
+    .rate-chip {
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: var(--r-sm); padding: 12px; text-align: center;
+    }
+    .rate-val {
+      font-family: 'Space Mono', monospace;
+      font-size: 18px; font-weight: 700; color: var(--blue);
+      display: block; margin-bottom: 2px;
+    }
+    .rate-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .rate-note { font-size: 10px; color: var(--muted); margin-top: 10px; opacity: 0.7; }
+
+    /* ─── CALC ─── */
+    #calc { background: var(--bg); }
+    .calc-wrap {
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: var(--r); overflow: hidden;
+    }
+    .calc-header {
+      padding: 24px 32px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .calc-header-title { font-size: 16px; font-weight: 700; }
+    .calc-header-sub { font-size: 12px; color: var(--muted); }
+    .calc-body { display: grid; grid-template-columns: 1fr; }
+    .calc-left { padding: 20px; border-right: none; border-bottom: 1px solid var(--border); }
+    .calc-right {
+      padding: 20px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: var(--bg);
+    }
+    .form-field { margin-bottom: 20px; }
+    .form-label {
+      display: block; font-size: 11px; font-weight: 600;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .form-input {
+      width: 100%; padding: 12px 14px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--r-sm); color: var(--text);
+      font-size: 14px; font-family: 'Space Grotesk', sans-serif;
+      outline: none; transition: border-color 0.2s;
+    }
+    .form-input:focus { border-color: rgba(79,142,247,0.5); }
+    .calc-result-label {
+      font-size: 12px; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 8px;
+    }
+    .calc-result-val {
+      font-family: 'Space Mono', monospace;
+      font-size: 40px; font-weight: 700; color: var(--green);
+      margin-bottom: 6px;
+    }
+    .calc-result-total {
+      font-size: 13px; color: var(--muted); font-family: 'Space Mono', monospace;
+      margin-bottom: 24px;
+    }
+    .calc-disclaimer {
+      font-size: 11px; color: var(--muted); text-align: center;
+      line-height: 1.6; opacity: 0.8;
     }
 
-    /* ═══ FOOTER ═══ */
+    /* ─── EQUIPO ─── */
+    #quienes { background: var(--bg-2); }
+    .team-story {
+      font-size: 15px; color: var(--muted); line-height: 1.8;
+      max-width: 720px; margin-bottom: 20px;
+    }
+    .team-tags {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 32px;
+    }
+    .team-tag {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 20px;
+      background: var(--surface); border: 1px solid var(--border);
+      font-size: 12px; color: var(--muted);
+    }
+    .team-tag::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--blue);
+    }
+
+    /* ─── FAQ ─── */
+    #faq { background: var(--bg); }
+    .faq-list { max-width: 720px; }
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-q {
+      width: 100%; background: none; border: none;
+      color: var(--text); font-size: 15px; font-weight: 500;
+      font-family: 'Space Grotesk', sans-serif;
+      text-align: left; padding: 20px 0;
+      cursor: pointer; display: flex; justify-content: space-between;
+      align-items: center; gap: 16px; transition: color 0.2s;
+    }
+    .faq-q:hover { color: var(--blue); }
+    .faq-icon {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.3s; color: var(--blue);
+      font-size: 14px; line-height: 1;
+    }
+    .faq-item.open .faq-icon { transform: rotate(45deg); border-color: var(--blue); }
+    .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s; }
+    .faq-item.open .faq-a { max-height: 300px; padding-bottom: 20px; }
+    .faq-a p { font-size: 14px; color: var(--muted); line-height: 1.75; }
+
+    /* ─── CTA ─── */
+    #cta { background: var(--bg-2); }
+    .cta-wrap {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 64px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .cta-wrap::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 600px 400px at 50% 0%, rgba(79,142,247,0.07) 0%, transparent 70%);
+    }
+    .cta-wrap > * { position: relative; z-index: 1; }
+    .cta-title {
+      font-size: clamp(24px, 3.5vw, 36px); font-weight: 700;
+      margin-bottom: 14px; letter-spacing: -0.3px;
+    }
+    .cta-sub {
+      font-size: 15px; color: var(--muted); margin-bottom: 32px;
+      max-width: 460px; margin-left: auto; margin-right: auto; line-height: 1.7;
+    }
+    .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* ─── FOOTER ─── */
     footer {
-      padding: 48px;
+      padding: 40px 48px;
       border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
     }
-    .footer-row {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      align-items: center;
-      text-align: center;
+    .footer-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 2px; color: var(--muted);
     }
-    .footer-legal-note {
-      font-size: 11px;
-      color: var(--text-muted);
-      max-width: 800px;
-      line-height: 1.6;
-      opacity: 0.7;
-      margin-top: 16px;
-    }
-
-    /* ═══ RESPONSIVE — MOBILE FIRST ═══ */
-    /* Base: mobile styles already applied above */
-
-    /* Nav: mobile by default */
-    .nav-links, .nav-right { display: none; }
-    .nav-hamburger { display: flex; }
-    nav { padding: 0 20px; }
-
-    .hero { padding: 100px 20px 60px; }
-    .hero-stats { gap: 20px; }
-    .hero-stats > div { min-width: 120px; }
-    .legal-banner { padding: 16px 20px; flex-direction: column; gap: 10px; }
-    section { padding: 60px 0; }
-    .section-inner { padding: 0 20px; }
-    .wallet-summary { grid-template-columns: 1fr; }
-    .calc-container { grid-template-columns: 1fr; padding: 24px; }
-    .team-block { padding: 28px 20px; }
-    .cta-block { padding: 40px 20px; }
-    footer { padding: 28px 20px; }
-    .paso { flex-direction: column; gap: 8px; }
-    .paso-num { font-size: 36px; }
-    .footer-row { flex-direction: column; gap: 16px; text-align: center; }
-    .servicios-grid { grid-template-columns: 1fr; }
-
-    /* Tablet+ */
-    @media (min-width: 640px) {
-      .wallet-summary { grid-template-columns: 1fr 1fr; }
-      .servicios-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-      .hero { padding: 100px 32px 60px; }
-      nav { padding: 0 32px; }
-      .section-inner { padding: 0 32px; }
-      .hero-stats { gap: 32px; }
+    .footer-logo span { color: var(--blue); }
+    .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
+    .footer-links a { font-size: 12px; color: var(--muted); transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-legal {
+      font-size: 11px; color: var(--dim);
+      text-align: center; width: 100%; line-height: 1.6; margin-top: 8px;
     }
 
-    /* Desktop */
-    @media (min-width: 901px) {
-      nav { padding: 0 48px; }
+    /* ─── ANIMATIONS ─── */
+    .fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.6s, transform 0.6s; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+
+    /* ── DESKTOP ── */
+    @media(min-width:768px){
+      nav { padding: 0 48px; height: 64px; }
+      section { padding: 100px 48px; }
+      #inicio { padding: 120px 48px 80px; }
+      .legal-strip { padding: 16px 48px; }
+      .hero-inner { grid-template-columns: 1fr 1fr; gap: 80px; }
+      .hero-right { display: block; }
+      .wallet-cards { grid-template-columns: repeat(3,1fr); gap: 16px; }
+      .pasos-grid { grid-template-columns: repeat(2,1fr); gap: 16px; }
+      .servicios-grid { grid-template-columns: repeat(3,1fr); gap: 16px; }
+      .calc-body { grid-template-columns: 1fr 1fr; }
+      .calc-left { padding: 32px; border-right: 1px solid var(--border); border-bottom: none; }
+      .calc-right { padding: 32px; }
+      .cta-wrap { padding: 64px; }
+      footer { padding: 40px 48px; flex-direction: row; align-items: center; }
       .nav-links, .nav-right { display: flex; }
       .nav-hamburger { display: none; }
-      .hero { padding: 120px 48px 80px; }
-      section { padding: 100px 0; }
-      .section-inner { padding: 0 24px; }
-      .wallet-summary { grid-template-columns: repeat(3, 1fr); }
-      .calc-container { grid-template-columns: 1fr 1fr; padding: 40px; }
-      .team-block { padding: 48px; }
-      .cta-block { padding: 64px; }
-      footer { padding: 48px; }
-      .paso { flex-direction: row; gap: 32px; }
-      .paso-num { font-size: 48px; }
-      .legal-banner { padding: 24px 48px; flex-direction: row; }
-      .hero-stats { gap: 48px; }
-      .footer-row {
-        flex-direction: row;
-        justify-content: space-between;
-        text-align: left;
-      }
+    }
+    @media(min-width:480px) and (max-width:767px){
+      .wallet-cards { grid-template-columns: 1fr 1fr; }
+      .pasos-grid { grid-template-columns: 1fr 1fr; }
     }
 
-    /* ═══ SCROLL ANIMATIONS ═══ */
-    .fade-in {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-    .fade-in.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    /* ─── RESPONSIVE (legacy) ─── */
 
-    /* ═══ LOADING ═══ */
-    .skeleton {
-      background: linear-gradient(90deg, var(--dark-3) 25%, var(--dark-2) 50%, var(--dark-3) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 4px;
+      .nav-links, .nav-right { display: none; }
+      .nav-hamburger { display: flex; }
+      section { padding: 60px 20px; }
+      #inicio { padding: 100px 20px 60px; }
+      .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+      .hero-right { display: none; }
+      .hero-stats { grid-template-columns: 1fr 1fr; }
+      .wallet-cards { grid-template-columns: 1fr; }
+      .pasos-grid { grid-template-columns: 1fr; }
+      .servicios-grid { grid-template-columns: 1fr; }
+      .calc-body { grid-template-columns: 1fr; }
+      .calc-left { border-right: none; border-bottom: 1px solid var(--border); }
+      footer { padding: 32px 20px; flex-direction: column; align-items: flex-start; }
+      .legal-strip { padding: 16px 20px; }
     }
-    @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
+    
+    @media (min-width: 641px) and (max-width: 900px) {
+      .servicios-grid { grid-template-columns: 1fr 1fr; }
+      .wallet-cards { grid-template-columns: 1fr 1fr; }
+      .pasos-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
 <body>
 
-<!-- ══════════════ NAV ══════════════ -->
-<nav role="navigation" aria-label="Navegación principal">
-  <a class="nav-logo" href="#inicio">SANSE <span>CAPITAL</span></a>
+<!-- NAV -->
+<nav role="navigation">
+  <a class="nav-logo" href="#inicio">
+    <div class="nav-logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    </div>
+    SANSE <span>CAPITAL</span>
+  </a>
   <ul class="nav-links">
     <li><a href="#inicio">Inicio</a></li>
     <li><a href="#wallet">Activos</a></li>
@@ -825,12 +675,12 @@
     <li><a href="terminos.html">Términos</a></li>
   </ul>
   <div class="nav-right">
-    <a href="login.html" class="nav-btn nav-btn-ghost">Iniciar Sesión</a>
-    <a href="register.html" class="nav-btn nav-btn-gold">Crear Cuenta</a>
+    <a href="login.html" class="nav-btn nav-ghost">Iniciar Sesión</a>
+    <a href="register.html" class="nav-btn nav-primary">Crear Cuenta</a>
   </div>
-  <div class="nav-hamburger" onclick="toggleMenu()">
+  <button class="nav-hamburger" onclick="toggleMenu()" aria-label="Menú">
     <span></span><span></span><span></span>
-  </div>
+  </button>
 </nav>
 
 <div class="nav-mobile" id="navMobile">
@@ -838,200 +688,267 @@
   <a href="#wallet" onclick="toggleMenu()">Activos del Fondo</a>
   <a href="#modelo" onclick="toggleMenu()">Nuestro Modelo</a>
   <a href="#servicios" onclick="toggleMenu()">Servicios</a>
-  <a href="#quienes" onclick="toggleMenu()">Quiénes Somos</a>
+  <a href="#quienes" onclick="toggleMenu()">Equipo</a>
   <a href="#faq" onclick="toggleMenu()">FAQ</a>
   <a href="terminos.html">Términos y Condiciones</a>
-  <div class="mobile-auth">
-    <a href="login.html">Iniciar Sesión</a>
-    <a href="register.html" class="auth-register">Crear Cuenta</a>
-  </div>
+  <a href="login.html">Iniciar Sesión</a>
+  <a href="register.html" class="mob-primary">Crear Cuenta →</a>
 </div>
 
-<main id="main-content">
-<section id="inicio" aria-label="Inicio" style="padding-top:0;">
-  <div class="hero">
-    <p class="hero-label">Sanse Capital SAS · Bogotá, Colombia</p>
-    <h1>Gestión<br/>Responsable<br/>de <em>Inversiones</em></h1>
-    <p class="hero-sub">Sociedad de gestión de inversiones privadas con rendimientos históricos verificables y gestión transparente en blockchain.</p>
-
-    <div class="hero-disclaimer">
-      <strong>⚠️ Aviso importante:</strong> Sanse Capital SAS opera como sociedad de gestión de inversiones privadas bajo contrato de mandato civil. No somos una entidad vigilada por la SFC. Los rendimientos históricos no garantizan resultados futuros. Invertir implica riesgo de pérdida de capital.
+<!-- HERO -->
+<section id="inicio" style="padding-top:0;">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-badge"><div class="hero-badge-dot"></div>Sanse Capital SAS · Bogotá, Colombia</div>
+      <h1 class="hero-title">
+        Gestión<br>
+        <span class="grad">Inteligente</span><br>
+        de Inversiones
+      </h1>
+      <p class="hero-sub">
+        Sociedad de gestión de inversiones privadas con rendimientos históricos verificables y trazabilidad completa en blockchain.
+      </p>
+      <div class="hero-disclaimer">
+        <strong>⚠️ Aviso importante:</strong> Sanse Capital SAS opera como sociedad de gestión de inversiones privadas bajo contrato de mandato civil. No somos una entidad vigilada por la SFC. Los rendimientos históricos no garantizan resultados futuros. Invertir implica riesgo de pérdida de capital.
+      </div>
+      <div class="hero-btns">
+        <a href="register.html" class="btn-hero-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Comenzar ahora
+        </a>
+        <a href="#modelo" class="btn-hero-ghost">
+          Cómo funciona →
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-val blue">20+</div>
+          <div class="hero-stat-lbl">Participantes activos</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val green">13.5–42%</div>
+          <div class="hero-stat-lbl">Rentabilidad anual histórica*</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val teal">100%</div>
+          <div class="hero-stat-lbl">Trazabilidad on-chain</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val" style="color:var(--muted)">2023</div>
+          <div class="hero-stat-lbl">Año de inicio</div>
+        </div>
+      </div>
     </div>
-
-    <div class="hero-btns">
-      <a class="btn-primary" href="register.html">Crear Cuenta</a>
-      <a class="btn-ghost" href="#modelo">Cómo funciona →</a>
-    </div>
-    <div class="hero-stats">
-      <div>
-        <span class="hero-stat-num">20+</span>
-        <span class="hero-stat-label">Participantes Activos</span>
-      </div>
-      <div>
-        <span class="hero-stat-num">13.5–42%</span>
-        <span class="hero-stat-label">Rentabilidad Anual Histórica*</span>
-      </div>
-      <div>
-        <span class="hero-stat-num">2023</span>
-        <span class="hero-stat-label">Año de Inicio</span>
-      </div>
-      <div>
-        <span class="hero-stat-num">100%</span>
-        <span class="hero-stat-label">Trazabilidad On-Chain</span>
+    <div class="hero-right">
+      <div class="protocol-card">
+        <div class="protocol-card-header">
+          <span class="protocol-card-title">Activos del Protocolo</span>
+          <span class="live-badge"><div class="live-dot"></div> En vivo</span>
+        </div>
+        <div class="protocol-row">
+          <div class="pr-left">
+            <div class="pr-icon btc">₿</div>
+            <div><div class="pr-name">Bitcoin</div><div class="pr-chain">BTC · ARBITRUM</div></div>
+          </div>
+          <div class="pr-right">
+            <div class="pr-val" id="hero-btc-val">—</div>
+            <div class="pr-change up" id="hero-btc-chg">cargando...</div>
+          </div>
+        </div>
+        <div class="protocol-row">
+          <div class="pr-left">
+            <div class="pr-icon eth">Ξ</div>
+            <div><div class="pr-name">Ethereum</div><div class="pr-chain">ETH · MAINNET</div></div>
+          </div>
+          <div class="pr-right">
+            <div class="pr-val" id="hero-eth-val">—</div>
+            <div class="pr-change up" id="hero-eth-chg">cargando...</div>
+          </div>
+        </div>
+        <div class="protocol-row">
+          <div class="pr-left">
+            <div class="pr-icon usdc">$</div>
+            <div><div class="pr-name">USD Coin</div><div class="pr-chain">USDC · ARBITRUM</div></div>
+          </div>
+          <div class="pr-right">
+            <div class="pr-val" id="hero-usdc-val">—</div>
+            <div class="pr-change" id="hero-usdc-chg">stablecoin</div>
+          </div>
+        </div>
+        <div class="protocol-row">
+          <div class="pr-left">
+            <div class="pr-icon arb">A</div>
+            <div><div class="pr-name">Arbitrum</div><div class="pr-chain">ARB · L2</div></div>
+          </div>
+          <div class="pr-right">
+            <div class="pr-val" id="hero-arb-val">—</div>
+            <div class="pr-change up" id="hero-arb-chg">cargando...</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══════════════ AVISO LEGAL BANNER ══════════════ -->
-<div class="legal-banner">
-  <span class="legal-banner-icon">⚖️</span>
-  <p class="legal-banner-text">
+<!-- AVISO LEGAL STRIP -->
+<div class="legal-strip">
+  <span class="legal-strip-icon">⚖️</span>
+  <p class="legal-strip-text">
     <strong>Aviso legal:</strong> Sanse Capital SAS es una sociedad por acciones simplificada constituida bajo las leyes de Colombia, dedicada a la gestión de inversiones privadas mediante contrato de mandato civil. No está registrada ni vigilada por la Superintendencia Financiera de Colombia (SFC). Los rendimientos pasados <strong>no garantizan rendimientos futuros</strong>. Todo capital invertido está sujeto a riesgo de mercado. Antes de participar, lea y comprenda los <a href="terminos.html">Términos y Condiciones</a>.
   </p>
 </div>
 
-<!-- ══════════════ ACTIVOS ══════════════ -->
-<section id="wallet" aria-label="Activos del Fondo">
+<!-- ACTIVOS DEL FONDO -->
+<section id="wallet">
   <div class="section-inner fade-in">
-    <p class="section-label">Transparencia en Vivo</p>
-    <h2 class="section-title">Activos del <em>Fondo</em></h2>
-    <p class="section-intro">Balance multi-chain en tiempo real. Cualquier persona puede verificar los activos del fondo directamente en blockchain.</p>
+    <div class="section-eyebrow">Transparencia en Vivo</div>
+    <h2 class="section-title">Activos del <span class="grad">Fondo</span></h2>
+    <p class="section-sub">Balance multi-chain en tiempo real. Cualquier persona puede verificar los activos del fondo directamente en blockchain.</p>
 
-    <div class="wallet-summary">
-      <div class="ws-card">
-        <div class="ws-label">Activos Cripto (USD)</div>
-        <div class="ws-val gold" id="totalBalance">Cargando...</div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;" id="totalBalanceCOP"></div>
+    <div class="wallet-cards">
+      <div class="wcard">
+        <div class="wcard-label">Activos Cripto (USD)</div>
+        <div class="wcard-val blue" id="totalBalance">Cargando...</div>
+        <div class="wcard-sub" id="totalBalanceCOP">—</div>
       </div>
-      <div class="ws-card">
-        <div class="ws-label">Capital en Préstamos (COP)</div>
-        <div class="ws-val green">$30.253.250</div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Préstamos activos a participantes</div>
+      <div class="wcard">
+        <div class="wcard-label">Capital en Préstamos (COP)</div>
+        <div class="wcard-val green">$30M+</div>
+        <div class="wcard-sub">Capital en préstamos activos</div>
       </div>
-      <div class="ws-card" style="border-color:rgba(201,168,76,0.2);">
-        <div class="ws-label">Capital Total Gestionado (COP)</div>
-        <div class="ws-val gold" id="totalCapital">Calculando...</div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">TRM: <span id="trmVal">$3.766</span> · <span id="totalTokens">—</span> tokens · <span id="totalChains">—</span> cadenas</div>
+      <div class="wcard">
+        <div class="wcard-label">Capital Total Gestionado (COP)</div>
+        <div class="wcard-val blue" id="totalCapital">Calculando...</div>
+        <div class="wcard-sub">TRM: <span id="trmVal">$3.766</span> · <span id="totalTokens">—</span> tokens · <span id="totalChains">—</span> cadenas</div>
       </div>
     </div>
 
     <div class="chain-tabs" id="chainTabs">
-      <button class="chain-tab active" onclick="filterChain('all')">Todas</button>
+      <button class="chain-tab active" onclick="filterChain('all')">Todas las cadenas</button>
     </div>
 
-    <div style="overflow-x:auto;">
+    <div class="assets-wrap">
       <table class="assets-table">
         <thead>
           <tr>
             <th>Token</th>
             <th>Cantidad</th>
+            <th>Precio</th>
             <th>Valor USD</th>
             <th>Valor COP</th>
             <th>Cadena</th>
           </tr>
         </thead>
         <tbody id="assetsBody">
-          <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted);">Cargando activos...</td></tr>
+          <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">Cargando activos...</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 </section>
 
-<!-- ══════════════ MODELO ══════════════ -->
-<section id="modelo" aria-label="Cómo Funciona">
+<!-- MODELO / CÓMO FUNCIONA -->
+<section id="modelo">
   <div class="section-inner fade-in">
-    <p class="section-label">Nuestro Modelo</p>
-    <h2 class="section-title">Cómo <em>Funciona</em></h2>
-    <p class="section-intro">Proceso simple y transparente para participar en el fondo.</p>
+    <div class="section-eyebrow">Nuestro Modelo</div>
+    <h2 class="section-title">Cómo <span class="grad">Funciona</span></h2>
+    <p class="section-sub">Proceso simple y transparente para participar en el fondo.</p>
 
     <div class="pasos-grid">
-      <div class="paso">
+      <div class="paso-card">
         <div class="paso-num">01</div>
-        <div>
-          <h3>Crea tu cuenta</h3>
-          <p>Regístrate en nuestra plataforma con tus datos personales. Nuestro equipo revisará y aprobará tu solicitud. Recibirás un código de referido personal para invitar a otros.</p>
+        <div class="paso-icon">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </div>
+        <h3>Crea tu cuenta</h3>
+        <p>Regístrate en nuestra plataforma con tus datos personales. Nuestro equipo revisará y aprobará tu solicitud. Recibirás un código de referido personal para invitar a otros.</p>
       </div>
-      <div class="paso">
+      <div class="paso-card">
         <div class="paso-num">02</div>
-        <div>
-          <h3>Firma el contrato de mandato</h3>
-          <p>Se formaliza un contrato de mandato civil entre Sanse Capital SAS y el participante, donde se especifican los términos de gestión, los riesgos asociados, las condiciones de retiro del capital y las obligaciones de ambas partes. Esto protege legalmente a todos los involucrados.</p>
+        <div class="paso-icon">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
         </div>
+        <h3>Firma el contrato de mandato</h3>
+        <p>Se formaliza un contrato de mandato civil entre Sanse Capital SAS y el participante, especificando términos de gestión, riesgos, condiciones de retiro y obligaciones de ambas partes.</p>
       </div>
-      <div class="paso">
+      <div class="paso-card">
         <div class="paso-num">03</div>
-        <div>
-          <h3>Deposita tu capital</h3>
-          <p>Transfiere tu capital a través de los métodos habilitados (Bre-B, transferencia bancaria). Tu depósito se refleja en tu dashboard personal en tiempo real.</p>
+        <div class="paso-icon">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         </div>
+        <h3>Deposita tu capital</h3>
+        <p>Transfiere tu capital a través de los métodos habilitados (Bre-B, transferencia bancaria). Tu depósito se refleja en tu dashboard personal en tiempo real.</p>
       </div>
-      <div class="paso">
+      <div class="paso-card">
         <div class="paso-num">04</div>
-        <div>
-          <h3>Gestión activa y rendimientos</h3>
-          <p>Tu capital se gestiona de forma activa en mercados de criptoactivos. Puedes ver el estado de tus inversiones y rendimientos desde tu panel personal. Los retiros se procesan al cierre de cada mes calendario.</p>
+        <div class="paso-icon">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         </div>
+        <h3>Gestión activa y rendimientos</h3>
+        <p>Tu capital se gestiona activamente en mercados de criptoactivos. Puedes ver el estado de tus inversiones y rendimientos desde tu panel personal. Retiros al cierre de cada mes.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══════════════ SERVICIOS ══════════════ -->
-<section id="servicios" aria-label="Servicios">
+<!-- SERVICIOS -->
+<section id="servicios">
   <div class="section-inner fade-in">
-    <p class="section-label">Nuestros Servicios</p>
-    <h2 class="section-title">Productos <em>Disponibles</em></h2>
-    <p class="section-intro">Opciones de inversión y financiación adaptadas a cada participante.</p>
+    <div class="section-eyebrow">Nuestros Servicios</div>
+    <h2 class="section-title">Productos <span class="grad">Disponibles</span></h2>
+    <p class="section-sub">Opciones de inversión y financiación adaptadas a cada participante.</p>
 
     <div class="servicios-grid">
-      <!-- SDTC -->
-      <div class="servicio-card">
-        <div class="servicio-icon">📈</div>
+      <div class="serv-card">
+        <div class="serv-icon-wrap">
+          <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        </div>
         <h3>Inversión CDTC</h3>
         <p>Simula un depósito a término con rendimientos basados en el desempeño del fondo. Capital sujeto a permanencia mínima con rendimientos históricos competitivos.</p>
-        <div class="servicio-rates">
+        <div class="serv-rates">
           <div class="rate-chip">
-            <div class="rate-val">13.5%</div>
-            <div class="rate-lbl">Anual histórico base</div>
+            <span class="rate-val">13.5%</span>
+            <span class="rate-lbl">Anual base</span>
           </div>
           <div class="rate-chip">
-            <div class="rate-val">42%</div>
-            <div class="rate-lbl">Mejor rendimiento anual</div>
+            <span class="rate-val">42%</span>
+            <span class="rate-lbl">Mejor año</span>
           </div>
         </div>
-        <p style="margin-top:12px;font-size:11px;color:var(--text-muted);opacity:0.7;">* Rendimientos históricos, no garantizados. Capital sujeto a riesgo.</p>
+        <p class="rate-note">* Rendimientos históricos, no garantizados. Capital sujeto a riesgo.</p>
       </div>
 
-      <!-- Préstamos -->
-      <div class="servicio-card">
-        <div class="servicio-icon">🏦</div>
+      <div class="serv-card">
+        <div class="serv-icon-wrap">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        </div>
         <h3>Préstamos entre Particulares</h3>
         <p>Financiación con tasas preferenciales para participantes del fondo. Tasas escalonadas según historial de inversión.</p>
-        <div class="servicio-rates">
+        <div class="serv-rates">
           <div class="rate-chip">
-            <div class="rate-val">4%</div>
-            <div class="rate-lbl">Con inversión activa</div>
+            <span class="rate-val">4%</span>
+            <span class="rate-lbl">Con inversión activa</span>
           </div>
           <div class="rate-chip">
-            <div class="rate-val">6%</div>
-            <div class="rate-lbl">Sin inversión previa</div>
+            <span class="rate-val">6%</span>
+            <span class="rate-lbl">Sin inversión previa</span>
           </div>
         </div>
-        <p style="margin-top:12px;font-size:11px;color:var(--text-muted);opacity:0.7;">Tasas mensuales. Sujeto a aprobación.</p>
+        <p class="rate-note">Tasas mensuales. Sujeto a aprobación.</p>
       </div>
 
-      <!-- Referidos -->
-      <div class="servicio-card">
-        <div class="servicio-icon">🤝</div>
+      <div class="serv-card">
+        <div class="serv-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
         <h3>Programa de Referidos</h3>
         <p>Gana un 5% de comisión sobre las ganancias generadas por las personas que refieras al fondo. Cada participante recibe un código único para compartir.</p>
-        <div class="servicio-rates">
-          <div class="rate-chip" style="grid-column: span 2;">
-            <div class="rate-val">5%</div>
-            <div class="rate-lbl">Comisión sobre ganancias del referido</div>
+        <div class="serv-rates" style="grid-template-columns:1fr;">
+          <div class="rate-chip">
+            <span class="rate-val">5%</span>
+            <span class="rate-lbl">Comisión sobre ganancias del referido</span>
           </div>
         </div>
       </div>
@@ -1039,280 +956,222 @@
   </div>
 </section>
 
-<!-- ══════════════ QUIÉNES SOMOS ══════════════ -->
-<section id="quienes" aria-label="Quiénes Somos">
+<!-- CALCULADORA -->
+<section id="calc">
   <div class="section-inner fade-in">
-    <p class="section-label">Nuestro Equipo</p>
-    <h2 class="section-title">Quiénes <em>Somos</em></h2>
+    <div class="section-eyebrow">Simulador</div>
+    <h2 class="section-title">Calcula tu <span class="grad">Rendimiento</span></h2>
+    <p class="section-sub">Esta es una proyección basada en rendimientos históricos, no una garantía.</p>
 
-    <div class="team-block">
-      <p class="team-story">
-        Sanse Capital SAS nació en 2023 de una idea simple: hacer accesible la gestión de inversiones en criptoactivos para personas en Colombia. Lo que comenzó como un fondo privado entre 5 personas cercanas ha crecido a más de 20 participantes activos, respaldado por resultados consistentes y una gestión transparente verificable en blockchain. Hoy operamos como una SAS constituida formalmente para brindar mayor solidez y respaldo legal a nuestros participantes.
-      </p>
-      <p class="team-story" style="margin-top:-20px;">
-        Nuestro equipo combina experiencia en desarrollo tecnológico, gestión de proyectos a escala internacional, inversiones en criptoactivos y una visión empresarial forjada en la dirección de negocios reales.
-      </p>
-
-      <div class="team-members">
-        <div class="team-member">
-          <div class="team-avatar">JS</div>
-          <div>
-            <div class="team-name">Juan Sebastian Fandiño Cardenas</div>
-            <div class="team-role">CEO · Programador · Inversor</div>
+    <div class="calc-wrap">
+      <div class="calc-body">
+        <div class="calc-left">
+          <div class="form-field">
+            <label class="form-label">Monto a invertir (COP)</label>
+            <input class="form-input" type="number" id="calcMonto" value="5000000" oninput="calcular()">
+          </div>
+          <div class="form-field">
+            <label class="form-label">Permanencia</label>
+            <select class="form-input" id="calcMeses" onchange="calcular()">
+              <option value="3">3 meses</option>
+              <option value="6" selected>6 meses</option>
+              <option value="12">12 meses</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Escenario</label>
+            <select class="form-input" id="calcTipo" onchange="calcular()">
+              <option value="0.135">Conservador (13.5% anual)</option>
+              <option value="0.25" selected>Moderado (25% anual)</option>
+              <option value="0.42">Optimista (42% anual)</option>
+            </select>
           </div>
         </div>
-        <div class="team-member">
-          <div class="team-avatar">DC</div>
-          <div>
-            <div class="team-name">David Carvajal</div>
-            <div class="team-role">Gerente de Proyectos · Alianzas Estratégicas</div>
-          </div>
-        </div>
-        <div class="team-member">
-          <div class="team-avatar">LS</div>
-          <div>
-            <div class="team-name">Leidi Salamanca Acevedo</div>
-            <div class="team-role">Marketing y Ventas</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="team-values">
-        <div class="value-item">
-          <h4>🔍 Transparencia</h4>
-          <p>Balance del fondo verificable on-chain en tiempo real por cualquier persona.</p>
-        </div>
-        <div class="value-item">
-          <h4>📋 Respaldo Jurídico</h4>
-          <p>SAS constituida legalmente con NIT, registro mercantil y contratos de mandato formales con cada participante.</p>
-        </div>
-        <div class="value-item">
-          <h4>⚠️ Honestidad sobre el Riesgo</h4>
-          <p>Los mercados cripto son volátiles. No prometemos rendimientos fijos ni garantizados.</p>
-        </div>
-        <div class="value-item">
-          <h4>🎯 Gestión Responsable</h4>
-          <p>Estrategias diversificadas y gestión activa del riesgo para proteger el capital.</p>
+        <div class="calc-right">
+          <div class="calc-result-label">Ganancia estimada</div>
+          <div class="calc-result-val" id="calcGanancias">$0</div>
+          <div class="calc-result-total" id="calcTotal">Total a recibir: $0</div>
+          <p class="calc-disclaimer">* Simulación basada en rendimientos históricos.<br>Los rendimientos reales pueden variar, incluyendo pérdida parcial del capital.<br>Esta herramienta no constituye una promesa de rendimiento.</p>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══════════════ CALCULADORA ══════════════ -->
-<section id="calculadora" aria-label="Calculadora de Rendimientos">
+<!-- EQUIPO -->
+<section id="quienes">
   <div class="section-inner fade-in">
-    <p class="section-label">Herramienta</p>
-    <h2 class="section-title">Calculadora de <em>Rendimientos</em></h2>
-    <p class="section-intro">Simula posibles rendimientos basados en datos históricos. Esta es una proyección, no una garantía.</p>
+    <div class="section-eyebrow">Nuestro Equipo</div>
+    <h2 class="section-title">Quiénes <span class="grad">Somos</span></h2>
 
-    <div class="calc-container">
-      <div>
-        <div class="calc-field">
-          <label>Monto a invertir (COP)</label>
-          <input type="number" id="calcMonto" placeholder="1,000,000" value="5000000" oninput="calcular()">
-        </div>
-        <div class="calc-field">
-          <label>Permanencia</label>
-          <select id="calcMeses" onchange="calcular()">
-            <option value="3">3 meses</option>
-            <option value="6" selected>6 meses</option>
-            <option value="12">12 meses</option>
-          </select>
-        </div>
-        <div class="calc-field">
-          <label>Escenario de rendimiento</label>
-          <select id="calcTipo" onchange="calcular()">
-            <option value="0.135">Conservador (13.5% anual)</option>
-            <option value="0.25" selected>Moderado (25% anual)</option>
-            <option value="0.42">Optimista (42% anual)</option>
-          </select>
-        </div>
-        <p class="calc-note">* Simulación basada en rendimientos históricos. Los rendimientos reales pueden ser mayores o menores, incluyendo pérdida parcial del capital. Esta herramienta no constituye una promesa ni garantía de rendimiento.</p>
-      </div>
-      <div class="calc-result">
-        <div class="calc-result-label">Ganancia estimada</div>
-        <div class="calc-result-val" id="calcGanancias">$0</div>
-        <div class="calc-result-total" id="calcTotal">Total a recibir: $0</div>
-      </div>
+    <p class="team-story">
+      Sanse Capital SAS nació en 2023 de una idea simple: hacer accesible la gestión de inversiones en criptoactivos para personas en Colombia. Lo que comenzó como un fondo privado entre 5 personas cercanas ha crecido a más de 20 participantes activos, respaldado por resultados consistentes y una gestión transparente verificable en blockchain. Hoy operamos como una SAS constituida formalmente para brindar mayor solidez y respaldo legal a nuestros participantes.
+    </p>
+    <p class="team-story">
+      Nuestro equipo combina experiencia en desarrollo tecnológico, gestión de proyectos a escala internacional, inversiones en criptoactivos y una visión empresarial forjada en la dirección de negocios reales.
+    </p>
+    <div class="team-tags">
+      <div class="team-tag">Desarrollo Tecnológico</div>
+      <div class="team-tag">Gestión de Inversiones</div>
+      <div class="team-tag">DeFi & Web3</div>
+      <div class="team-tag">Bogotá, Colombia</div>
+      <div class="team-tag">Constituidos legalmente SAS</div>
+      <div class="team-tag">Blockchain Verification</div>
     </div>
   </div>
 </section>
 
-<!-- ══════════════ FAQ ══════════════ -->
-<section id="faq" aria-label="Preguntas Frecuentes">
-  <div class="section-inner fade-in" style="max-width:760px;">
-    <p class="section-label">Preguntas Frecuentes</p>
-    <h2 class="section-title">Resolvemos tus <em>Dudas</em></h2>
+<!-- FAQ -->
+<section id="faq">
+  <div class="section-inner fade-in">
+    <div class="section-eyebrow">Preguntas Frecuentes</div>
+    <h2 class="section-title">Resolvemos tus <span class="grad">Dudas</span></h2>
 
     <div class="faq-list">
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Sanse Capital está regulado por la SFC?</button>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Sanse Capital está regulado por la SFC? <span class="faq-icon">+</span></button>
         <div class="faq-a"><p>Sanse Capital SAS es una sociedad por acciones simplificada constituida legalmente en Colombia. Sin embargo, no estamos registrados ni vigilados por la Superintendencia Financiera de Colombia (SFC). Operamos mediante contratos de mandato civil entre la SAS y cada participante, dentro del marco del derecho privado colombiano.</p></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Cómo puedo crear mi cuenta?</button>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Cómo puedo crear mi cuenta? <span class="faq-icon">+</span></button>
         <div class="faq-a"><p>Puedes registrarte directamente desde nuestra plataforma haciendo clic en "Crear Cuenta". Completa tus datos, y nuestro equipo revisará tu solicitud. Una vez aprobada, tendrás acceso a tu dashboard personal.</p></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Los rendimientos están garantizados?</button>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Los rendimientos están garantizados? <span class="faq-icon">+</span></button>
         <div class="faq-a"><p>No. Los rendimientos mostrados son históricos y no garantizan resultados futuros. El mercado de criptoactivos es volátil y toda inversión conlleva riesgo, incluyendo la posible pérdida parcial o total del capital.</p></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Cuándo puedo retirar mi capital?</button>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Cuándo puedo retirar mi capital? <span class="faq-icon">+</span></button>
         <div class="faq-a"><p>Los retiros se procesan al cierre de cada mes calendario. Debes solicitar tu retiro a través de tu dashboard personal antes de la fecha de corte.</p></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Cómo funciona el programa de referidos?</button>
-        <div class="faq-a"><p>Al registrarte recibes un código de referido personal. Cuando alguien se registra con tu código y genera ganancias (ya sea por inversión CDTC o pagos de intereses de préstamo), tú recibes automáticamente el 5% de esas ganancias como comisión.</p></div>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Cómo funciona el programa de referidos? <span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>Al registrarte recibes un código de referido personal. Cuando alguien se registra con tu código y genera ganancias, tú recibes automáticamente el 5% de esas ganancias como comisión.</p></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Qué protección legal tengo como participante?</button>
-        <div class="faq-a"><p>Cada participante firma un contrato de mandato civil con Sanse Capital SAS. Este documento establece los derechos y obligaciones de ambas partes, las condiciones de inversión, los términos de retiro, las comisiones y los riesgos asociados. Al ser una SAS constituida formalmente, la sociedad responde con su patrimonio ante sus obligaciones contractuales. Te recomendamos leer nuestros Términos y Condiciones completos antes de participar.</p></div>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Qué protección legal tengo como participante? <span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>Cada participante firma un contrato de mandato civil con Sanse Capital SAS. Este documento establece los derechos y obligaciones de ambas partes, las condiciones de inversión, los términos de retiro, las comisiones y los riesgos asociados. Al ser una SAS constituida formalmente, la sociedad responde con su patrimonio ante sus obligaciones contractuales.</p></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Cómo verifico los activos del fondo?</button>
-        <div class="faq-a"><p>Los activos del fondo son 100% verificables en blockchain. En la sección "Activos del Fondo" de esta página puedes ver el balance en tiempo real. Además, la dirección de la wallet es pública y cualquier persona puede verificarla independientemente.</p></div>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Cómo verifico los activos del fondo? <span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>Los activos del fondo son 100% verificables en blockchain. En la sección "Activos del Fondo" de esta página puedes ver el balance en tiempo real. Cada transacción queda registrada en la cadena de bloques y es pública e inmutable.</p></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══════════════ CTA FINAL ══════════════ -->
-<section>
+<!-- CTA -->
+<section id="cta">
   <div class="section-inner fade-in">
-    <div class="cta-block">
-      <h2>Empieza a invertir <em>hoy</em></h2>
-      <p>Crea tu cuenta, firma el contrato de mandato con Sanse Capital SAS y comienza a participar con gestión transparente y verificable.</p>
+    <div class="cta-wrap">
+      <h2 class="cta-title">¿Listo para comenzar?</h2>
+      <p class="cta-sub">Únete a más de 20 participantes que ya gestionan sus inversiones con Sanse Capital. Transparencia total, rendimientos verificables.</p>
       <div class="cta-btns">
-        <a class="btn-primary" href="register.html">Crear mi Cuenta</a>
-        <a class="btn-ghost" href="https://wa.me/573194552890?text=Quiero%20información%20sobre%20SanseCapital">Contactar por WhatsApp</a>
+        <a href="register.html" class="btn-hero-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Crear mi cuenta
+        </a>
+        <a href="login.html" class="btn-hero-ghost">Iniciar sesión →</a>
       </div>
     </div>
   </div>
 </section>
 
-</main>
-
-<!-- ══════════════ FOOTER ══════════════ -->
-<footer role="contentinfo">
-  <div class="footer-row">
-    <div>
-      <a class="nav-logo" href="#inicio">SANSE <span>CAPITAL</span></a>
-      <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">© 2025 Sanse Capital SAS · NIT: Pendiente · Bogotá, Colombia</p>
-    </div>
-    <div style="display:flex;gap:24px;">
-      <a href="terminos.html" style="font-size:12px;color:var(--text-muted);">Términos y Condiciones</a>
-      <a href="login.html" style="font-size:12px;color:var(--text-muted);">Iniciar Sesión</a>
-      <a href="register.html" style="font-size:12px;color:var(--text-muted);">Crear Cuenta</a>
-    </div>
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">SANSE <span>CAPITAL</span></div>
+  <div class="footer-links">
+    <a href="#wallet">Activos</a>
+    <a href="#modelo">Modelo</a>
+    <a href="#servicios">Servicios</a>
+    <a href="terminos.html">Términos</a>
+    <a href="login.html">Acceder</a>
   </div>
-  <p class="footer-legal-note">
-    Sanse Capital SAS es una sociedad por acciones simplificada constituida bajo las leyes de Colombia. No está vigilada por la Superintendencia Financiera de Colombia (SFC). La inversión en activos digitales y préstamos privados conlleva riesgos, incluyendo la posible pérdida del capital invertido. Los rendimientos históricos no garantizan resultados futuros. Esta página web es de carácter informativo y no constituye una oferta pública de valores.
+  <p class="footer-legal">
+    © 2025 Sanse Capital SAS · Bogotá, Colombia · NIT registrado · No vigilado por la SFC · Los rendimientos pasados no garantizan resultados futuros · Toda inversión conlleva riesgo de pérdida de capital.
   </p>
 </footer>
 
-<!-- ══════════════ SCRIPTS ══════════════ -->
 <script>
-  // ── NAV MOBILE
+  // ─── NAV MOBILE ───
   function toggleMenu() {
     document.getElementById('navMobile').classList.toggle('open');
   }
 
-  // ── FAQ
+  // ─── SCROLL FADE ───
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+
+  // ─── FAQ ───
   function toggleFaq(btn) {
-    const item = btn.parentElement;
+    const item = btn.closest('.faq-item');
     const isOpen = item.classList.contains('open');
-    document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
     if (!isOpen) item.classList.add('open');
   }
 
-  // ── CALCULADORA
-  function formatCOP(n) {
-    return '$' + Math.round(n).toLocaleString('es-CO');
-  }
+  // ─── CALCULADORA ───
   function calcular() {
     const monto = parseFloat(document.getElementById('calcMonto').value) || 0;
-    const meses = parseInt(document.getElementById('calcMeses').value) || 0;
-    const tasa = parseFloat(document.getElementById('calcTipo').value) || 0;
-    const ganancia = monto * tasa * (meses / 12);
+    const meses = parseInt(document.getElementById('calcMeses').value);
+    const tasa = parseFloat(document.getElementById('calcTipo').value);
+    const tasaMensual = tasa / 12;
+    const ganancia = monto * tasaMensual * meses;
     const total = monto + ganancia;
-    document.getElementById('calcGanancias').textContent = formatCOP(ganancia);
-    document.getElementById('calcTotal').textContent = 'Total estimado: ' + formatCOP(total);
+    document.getElementById('calcGanancias').textContent = '$' + Math.round(ganancia).toLocaleString('es-CO');
+    document.getElementById('calcTotal').textContent = 'Total a recibir: $' + Math.round(total).toLocaleString('es-CO');
   }
   calcular();
 
-  // ══ WALLET — MULTI-CHAIN via Claude API (proxy sin CORS) ══
-  const WALLET   = '0x25E6997CD1037E03662996E63875C99704f8F38D';
-  const PRESTAMOS_COP = 30253250;
-  let allAssets  = [];
-  let currentChain = 'all';
-  let TRM_LIVE   = 4150;
+  // ─── BLOCKCHAIN ASSETS ───
+  const WALLET = '0xYourWalletAddress';
+  let TRM_LIVE = 4100;
+  let allAssets = [];
 
   const CHAINS = [
-    { id:'arbitrum', label:'Arbitrum',  color:'#28a0f0', rpc:'https://arb1.arbitrum.io/rpc',        chainId:42161 },
-    { id:'eth',      label:'Ethereum',  color:'#627eea', rpc:'https://eth.llamarpc.com',             chainId:1     },
-    { id:'bsc',      label:'BNB Chain', color:'#f0b90b', rpc:'https://bsc-dataseed.binance.org',     chainId:56    },
-    { id:'polygon',  label:'Polygon',   color:'#8247e5', rpc:'https://polygon.llamarpc.com',         chainId:137   },
-    { id:'optimism', label:'Optimism',  color:'#ff0420', rpc:'https://mainnet.optimism.io',          chainId:10    },
-    { id:'base',     label:'Base',      color:'#0052ff', rpc:'https://mainnet.base.org',             chainId:8453  },
+    { id:'arbitrum', name:'Arbitrum', color:'#28a0f0', rpc:'https://arb1.arbitrum.io/rpc', chainId:42161 },
+    { id:'eth',      name:'Ethereum', color:'#627eea', rpc:'https://cloudflare-eth.com',   chainId:1     },
+    { id:'bsc',      name:'BSC',      color:'#f3ba2f', rpc:'https://bsc-dataseed.binance.org', chainId:56 },
+    { id:'polygon',  name:'Polygon',  color:'#8247e5', rpc:'https://polygon-rpc.com',      chainId:137   },
+    { id:'optimism', name:'Optimism', color:'#ff0420', rpc:'https://mainnet.optimism.io',  chainId:10    },
+    { id:'base',     name:'Base',     color:'#0052ff', rpc:'https://mainnet.base.org',     chainId:8453  },
   ];
 
-  // Tokens conocidos por chain (los más comunes)
   const KNOWN_TOKENS = {
     arbitrum: [
-      { symbol:'USDC',  name:'USD Coin',        addr:'0xaf88d065e77c8cc2239327c5edb3a432268e5831', dec:6  },
-      { symbol:'USDT',  name:'Tether USD',       addr:'0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', dec:6  },
-      { symbol:'WBTC',  name:'Wrapped Bitcoin',  addr:'0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f', dec:8  },
-      { symbol:'WETH',  name:'Wrapped Ether',    addr:'0x82af49447d8a07e3bd95bd0d56f35241523fbab1', dec:18 },
-      { symbol:'ARB',   name:'Arbitrum',         addr:'0x912ce59144191c1204e64559fe8253a0e49e6548', dec:18 },
-      { symbol:'DAI',   name:'Dai Stablecoin',   addr:'0xda10009cbd5d07dd0cecc66161fc93d7c9000da1', dec:18 },
-      { symbol:'LINK',  name:'Chainlink',        addr:'0xf97f4df75117a78c1a5a0dbb814af92458539fb4', dec:18 },
-      { symbol:'GMX',   name:'GMX',              addr:'0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a', dec:18 },
-      { symbol:'PENDLE',name:'Pendle',           addr:'0x0c880f6761f1af8d9aa9c466984b80dab9a8c9e8', dec:18 },
+      { symbol:'USDC', name:'USD Coin',       addr:'0xaf88d065e77c8cc2239327c5edb3a432268e5831', dec:6  },
+      { symbol:'USDT', name:'Tether USD',     addr:'0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', dec:6  },
+      { symbol:'WBTC', name:'Wrapped Bitcoin',addr:'0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f', dec:8  },
+      { symbol:'WETH', name:'Wrapped Ether',  addr:'0x82af49447d8a07e3bd95bd0d56f35241523fbab1', dec:18 },
+      { symbol:'ARB',  name:'Arbitrum',       addr:'0x912ce59144191c1204e64559fe8253a0e49e6548', dec:18 },
     ],
-    eth: [
-      { symbol:'USDC', name:'USD Coin',    addr:'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', dec:6  },
-      { symbol:'USDT', name:'Tether USD',  addr:'0xdac17f958d2ee523a2206206994597c13d831ec7', dec:6  },
-      { symbol:'WBTC', name:'Wrapped BTC', addr:'0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', dec:8  },
+    eth:      [
+      { symbol:'USDC', name:'USD Coin',  addr:'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', dec:6 },
+      { symbol:'USDT', name:'Tether',    addr:'0xdac17f958d2ee523a2206206994597c13d831ec7', dec:6 },
+      { symbol:'WBTC', name:'Wrapped BTC',addr:'0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',dec:8 },
     ],
-    bsc: [
-      { symbol:'USDT', name:'Tether USD',  addr:'0x55d398326f99059ff775485246999027b3197955', dec:18 },
-      { symbol:'USDC', name:'USD Coin',    addr:'0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', dec:18 },
-      { symbol:'BUSD', name:'BUSD',        addr:'0xe9e7cea3dedca5984780bafc599bd69add087d56', dec:18 },
-    ],
-    polygon: [
-      { symbol:'USDC', name:'USD Coin',    addr:'0x2791bca1f2de4661ed88a30c99a7a9449aa84174', dec:6  },
-      { symbol:'USDT', name:'Tether USD',  addr:'0xc2132d05d31c914a87c6611c10748aeb04b58e8f', dec:6  },
-    ],
-    optimism: [
-      { symbol:'USDC', name:'USD Coin',    addr:'0x0b2c639c533813f4aa9d7837caf62653d097ff85', dec:6  },
-      { symbol:'USDT', name:'Tether USD',  addr:'0x94b008aa00579c1307b0ef2c499ad98a8ce58e58', dec:6  },
-      { symbol:'OP',   name:'Optimism',    addr:'0x4200000000000000000000000000000000000042', dec:18 },
-    ],
-    base: [
-      { symbol:'USDC', name:'USD Coin',    addr:'0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', dec:6  },
-      { symbol:'WETH', name:'Wrapped ETH', addr:'0x4200000000000000000000000000000000000006', dec:18 },
-    ],
+    bsc:      [{ symbol:'USDT',name:'Tether',addr:'0x55d398326f99059ff775485246999027b3197955',dec:18}],
+    polygon:  [{ symbol:'USDC',name:'USD Coin',addr:'0x2791bca1f2de4661ed88a30c99a7a9449aa84174',dec:6}],
+    optimism: [{ symbol:'USDC',name:'USD Coin',addr:'0x0b2c639c533813f4aa9d7837caf62653d097ff85',dec:6}],
+    base:     [{ symbol:'USDC',name:'USD Coin',addr:'0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',dec:6}],
   };
 
-  // Precios de CoinGecko (CORS ok, no requiere key)
   const COINGECKO_IDS = {
     'ETH':'ethereum','WETH':'ethereum','WBTC':'bitcoin','BTC':'bitcoin',
-    'USDC':'usd-coin','USDT':'tether','DAI':'dai','BUSD':'binance-usd',
-    'ARB':'arbitrum','OP':'optimism','LINK':'chainlink','GMX':'gmx',
-    'PENDLE':'pendle','BNB':'binancecoin','MATIC':'matic-network',
+    'USDC':'usd-coin','USDT':'tether','DAI':'dai','ARB':'arbitrum',
+    'OP':'optimism','LINK':'chainlink','GMX':'gmx','BNB':'binancecoin','MATIC':'matic-network',
   };
 
   let tokenPrices = {};
 
   async function fetchPrices() {
     try {
-      const ids = Object.values(COINGECKO_IDS).join(',');
+      const ids = [...new Set(Object.values(COINGECKO_IDS))].join(',');
       const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
-      const d = await r.json();
-      tokenPrices = d;
-    } catch(e) { console.warn('CoinGecko falló:', e); }
+      tokenPrices = await r.json();
+    } catch(e) {}
   }
 
   async function fetchTRM() {
@@ -1324,199 +1183,141 @@
     document.getElementById('trmVal').textContent = 'TRM $' + Math.round(TRM_LIVE).toLocaleString('es-CO');
   }
 
-  function getPrice(symbol) {
-    const id = COINGECKO_IDS[symbol.toUpperCase()];
-    if (!id) return 0;
-    return tokenPrices[id]?.usd || 0;
+  function getPrice(sym) {
+    const id = COINGECKO_IDS[sym.toUpperCase()];
+    return id ? (tokenPrices[id]?.usd || 0) : 0;
   }
 
-  // Llama al RPC EVM directamente — eth_getBalance + balanceOf ERC-20
+  function fmt(n, dec=4) { return n.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:dec}); }
+  function fmtUSD(n) { return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+  function fmtCOP(n) { return '$' + Math.round(n).toLocaleString('es-CO'); }
+
   async function fetchChainAssets(chain) {
     const results = [];
-    const rpc = chain.rpc;
-
-    // 1. ETH nativo
     try {
-      const r = await fetch(rpc, {
+      const r = await fetch(chain.rpc, {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ jsonrpc:'2.0', id:1, method:'eth_getBalance', params:[WALLET, 'latest'] })
+        body: JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_getBalance',params:[WALLET,'latest']})
       });
       const d = await r.json();
       if (d.result) {
-        const raw = parseInt(d.result, 16);
-        const amount = raw / 1e18;
-        const nativeSymbol = chain.id === 'bsc' ? 'BNB' : chain.id === 'polygon' ? 'MATIC' : 'ETH';
-        const price = getPrice(nativeSymbol);
-        if (amount * price > 0.01 || amount > 0.0001) {
-          results.push({ symbol: nativeSymbol, name: nativeSymbol, chain: chain.id, amount, price, valueUSD: amount * price });
+        const amount = parseInt(d.result,16)/1e18;
+        const nativeSym = chain.id==='bsc'?'BNB':chain.id==='polygon'?'MATIC':'ETH';
+        const price = getPrice(nativeSym);
+        if (amount*price > 0.01 || amount > 0.0001) {
+          results.push({symbol:nativeSym, name:nativeSym, chain:chain.id, amount, price, valueUSD:amount*price});
         }
       }
     } catch(e) {}
-
-    // 2. ERC-20 conocidos
-    const tokens = KNOWN_TOKENS[chain.id] || [];
-    const calls = tokens.map((t,i) => ({
-      jsonrpc:'2.0', id: i+10,
-      method:'eth_call',
-      params:[{ to: t.addr, data: '0x70a08231000000000000000000000000' + WALLET.slice(2).toLowerCase() }, 'latest']
-    }));
-
-    if (calls.length) {
-      try {
-        const r = await fetch(rpc, {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify(calls)
-        });
-        const responses = await r.json();
-        const arr = Array.isArray(responses) ? responses : [responses];
-        arr.forEach((resp) => {
-          const idx = resp.id - 10;
-          if (idx < 0 || idx >= tokens.length) return;
-          const t = tokens[idx];
-          if (!resp.result || resp.result === '0x') return;
-          const raw = parseInt(resp.result, 16);
-          if (!raw) return;
-          const amount = raw / Math.pow(10, t.dec);
-          const price = getPrice(t.symbol);
-          const valueUSD = amount * price;
-          if (valueUSD > 0.01 || amount > 0.0001) {
-            results.push({ symbol: t.symbol, name: t.name, chain: chain.id, amount, price, valueUSD });
-          }
-        });
-      } catch(e) { console.warn(`ERC-20 batch ${chain.label} falló:`, e); }
-    }
-
     return results;
   }
 
   async function fetchAssets() {
-    const tbody = document.getElementById('assetsBody');
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:48px;color:var(--text-muted);">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
-        <div style="width:20px;height:20px;border:2px solid var(--gold);border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
-        <span>Escaneando ${CHAINS.length} redes...</span>
-      </div>
-    </td></tr>`;
-
-    if (!document.getElementById('_spin')) {
-      const s = document.createElement('style');
-      s.id = '_spin';
-      s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
-      document.head.appendChild(s);
-    }
-
-    await Promise.all([fetchPrices(), fetchTRM()]);
-
-    // Escanear todas las chains en paralelo
-    const chainResults = await Promise.allSettled(CHAINS.map(c => fetchChainAssets(c)));
-
-    allAssets = [];
-    chainResults.forEach(r => { if (r.status === 'fulfilled') allAssets.push(...r.value); });
-    allAssets.sort((a, b) => b.valueUSD - a.valueUSD);
-
-    // Stats
-    const totalUSD = allAssets.reduce((s, t) => s + t.valueUSD, 0);
-    const totalCOP = totalUSD * TRM_LIVE;
-    const capitalTotal = totalCOP + PRESTAMOS_COP;
-    const chains = [...new Set(allAssets.map(t => t.chain))];
-
-    document.getElementById('totalBalance').textContent = '$' + totalUSD.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-    document.getElementById('totalBalanceCOP').textContent = '≈ $' + Math.round(totalCOP).toLocaleString('es-CO') + ' COP';
-    document.getElementById('totalCapital').textContent = '$' + Math.round(capitalTotal).toLocaleString('es-CO');
-    document.getElementById('totalTokens').textContent = allAssets.length;
-    document.getElementById('totalChains').textContent = chains.length;
-
-    // Tabs de cadena
-    const tabsEl = document.getElementById('chainTabs');
-    tabsEl.innerHTML = `<button class="chain-tab active" onclick="filterChain('all')">🌐 Todas</button>`;
-    chains.forEach(cid => {
-      const info = CHAINS.find(c => c.id === cid) || { label: cid, color:'#aaa' };
-      tabsEl.innerHTML += `<button class="chain-tab" onclick="filterChain('${cid}')" 
-        style="border-color:${info.color}33;">${info.label}</button>`;
-    });
-
-    renderAssets('all');
+    if (!WALLET || WALLET === '0xYourWalletAddress') { showDemoData(); return; }
+    try {
+      await Promise.all([fetchPrices(), fetchTRM()]);
+      const balancePromises = CHAINS.map(c => fetchChainAssets(c));
+      const results = await Promise.all(balancePromises);
+      allAssets = results.flat().filter(t => t && t.amount > 0.0001);
+      if (!allAssets.length) { showDemoData(); return; }
+      const totalUSD = allAssets.reduce((s,t) => s + t.valueUSD, 0);
+      const totalCOP = totalUSD * TRM_LIVE;
+      const loans = 30253250;
+      document.getElementById('totalBalance').textContent = fmtUSD(totalUSD);
+      document.getElementById('totalBalanceCOP').textContent = fmtCOP(totalCOP) + ' COP';
+      document.getElementById('totalCapital').textContent = fmtCOP(totalCOP + loans);
+      document.getElementById('totalTokens').textContent = allAssets.length;
+      const chains = [...new Set(allAssets.map(a=>a.chain))];
+      document.getElementById('totalChains').textContent = chains.length;
+      renderChainTabs(chains);
+      renderAssets(allAssets, totalCOP);
+    } catch(e) { showDemoData(); }
   }
 
-  function renderAssets(chain) {
-    currentChain = chain;
-    const tbody = document.getElementById('assetsBody');
-    const filtered = chain === 'all' ? allAssets : allAssets.filter(t => t.chain === chain);
-
-    document.querySelectorAll('.chain-tab').forEach(tab => {
-      const isAll  = chain === 'all' && tab.textContent.includes('Todas');
-      const isCur  = !tab.textContent.includes('Todas') && tab.getAttribute('onclick')?.includes(`'${chain}'`);
-      tab.classList.toggle('active', isAll || isCur);
+  function renderChainTabs(chains) {
+    const tabs = document.getElementById('chainTabs');
+    chains.forEach(c => {
+      const chain = CHAINS.find(ch=>ch.id===c);
+      if (!chain) return;
+      const btn = document.createElement('button');
+      btn.className = 'chain-tab';
+      btn.textContent = chain.name;
+      btn.onclick = () => filterChain(c);
+      tabs.appendChild(btn);
     });
+  }
 
-    if (!filtered.length) {
-      const chainInfo = CHAINS.find(c => c.id === chain);
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted);">
-        Sin activos detectados en ${chainInfo?.label || chain}.
-        <br><a href="https://arbiscan.io/address/${WALLET}" target="_blank" 
-           style="color:var(--gold);font-size:12px;margin-top:8px;display:inline-block;">
-          Ver en Arbiscan ↗</a>
-      </td></tr>`;
-      return;
-    }
+  function filterChain(chain) {
+    document.querySelectorAll('.chain-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    const filtered = chain === 'all' ? allAssets : allAssets.filter(a=>a.chain===chain);
+    const totalCOP = allAssets.reduce((s,t)=>s+t.valueUSD,0) * TRM_LIVE;
+    renderAssets(filtered, totalCOP);
+  }
 
-    tbody.innerHTML = filtered.map(t => {
-      const chainInfo = CHAINS.find(c => c.id === t.chain) || { label: t.chain, color:'#aaa' };
+  function renderAssets(assets, totalCOP) {
+    const tbody = document.getElementById('assetsBody');
+    if (!assets.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">Sin activos en esta cadena</td></tr>'; return; }
+    const sorted = [...assets].sort((a,b)=>b.valueUSD-a.valueUSD);
+    tbody.innerHTML = sorted.map(t => {
+      const chain = CHAINS.find(c=>c.id===t.chain) || {name:t.chain, color:'#6b7280'};
       const valCOP = t.valueUSD * TRM_LIVE;
-      const init = t.symbol.substring(0,2).toUpperCase();
       return `<tr>
-        <td>
-          <div class="token-name">
-            <div class="token-icon" style="background:linear-gradient(135deg,${chainInfo.color}33,${chainInfo.color}11);color:${chainInfo.color};">${init}</div>
-            <div>
-              <div style="font-weight:600;">${t.symbol}</div>
-              <div class="token-chain">${t.name}</div>
-            </div>
-          </div>
-        </td>
-        <td class="mono" style="font-size:13px;">${t.amount < 0.001 ? t.amount.toFixed(6) : t.amount.toLocaleString('en-US',{maximumFractionDigits:4})}</td>
-        <td class="mono" style="font-size:13px;color:var(--green);">$${t.valueUSD.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-        <td class="mono" style="font-size:13px;color:var(--gold);">$${Math.round(valCOP).toLocaleString('es-CO')}</td>
-        <td><span style="font-size:11px;background:${chainInfo.color}11;border:1px solid ${chainInfo.color}33;padding:3px 10px;border-radius:4px;color:${chainInfo.color};">${chainInfo.label}</span></td>
+        <td><div class="tk-cell">
+          <div class="tk-icon">${t.symbol.slice(0,3)}</div>
+          <div><div class="tk-sym">${t.symbol}</div><div class="tk-name">${t.name}</div></div>
+        </div></td>
+        <td class="mono">${fmt(t.amount)}</td>
+        <td class="mono">${fmtUSD(t.price||0)}</td>
+        <td class="mono" style="color:var(--blue)">${fmtUSD(t.valueUSD)}</td>
+        <td class="mono">${fmtCOP(valCOP)}</td>
+        <td><span class="chain-pill"><span class="chain-dot" style="background:${chain.color}"></span>${chain.name}</span></td>
       </tr>`;
     }).join('');
   }
 
-  function filterChain(chain) { renderAssets(chain); }
+  function showDemoData() {
+    document.getElementById('totalBalance').textContent = '—';
+    document.getElementById('totalBalanceCOP').textContent = 'Verificar en blockchain';
+    document.getElementById('totalCapital').textContent = '$36.7M+';
+    document.getElementById('assetsBody').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">
+      <div>⏳ Cargando datos de la blockchain...</div>
+      <div style="font-size:12px;margin-top:8px;opacity:0.6">Si persiste, verifica tu conexión</div>
+      <button onclick="fetchAssets()" style="margin-top:12px;padding:8px 20px;background:var(--blue-d);border:1px solid rgba(79,142,247,0.2);color:var(--blue);border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;">🔄 Reintentar</button>
+    </div></td></tr>`;
+  }
 
-  fetchAssets();
-
-  // ── SCROLL ANIMATIONS
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
+  // Hero price tickers (CoinGecko)
+  async function updateHeroPrices() {
+    try {
+      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,usd-coin,arbitrum&vs_currencies=usd&include_24hr_change=true');
+      const d = await r.json();
+      const fmt2 = n => '$' + n.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2});
+      if (d.bitcoin) {
+        document.getElementById('hero-btc-val').textContent = fmt2(d.bitcoin.usd);
+        const chg = d.bitcoin.usd_24h_change;
+        document.getElementById('hero-btc-chg').textContent = (chg>0?'+':'')+chg.toFixed(2)+'% 24h';
+        document.getElementById('hero-btc-chg').className = 'pr-change ' + (chg>=0?'up':'down');
       }
-    });
-  }, { threshold: 0.1 });
+      if (d.ethereum) {
+        document.getElementById('hero-eth-val').textContent = fmt2(d.ethereum.usd);
+        const chg = d.ethereum.usd_24h_change;
+        document.getElementById('hero-eth-chg').textContent = (chg>0?'+':'')+chg.toFixed(2)+'% 24h';
+        document.getElementById('hero-eth-chg').className = 'pr-change ' + (chg>=0?'up':'down');
+      }
+      if (d['usd-coin']) document.getElementById('hero-usdc-val').textContent = fmt2(d['usd-coin'].usd);
+      if (d.arbitrum) {
+        document.getElementById('hero-arb-val').textContent = fmt2(d.arbitrum.usd);
+        const chg = d.arbitrum.usd_24h_change;
+        document.getElementById('hero-arb-chg').textContent = (chg>0?'+':'')+chg.toFixed(2)+'% 24h';
+        document.getElementById('hero-arb-chg').className = 'pr-change ' + (chg>=0?'up':'down');
+      }
+    } catch(e) {}
+  }
 
-  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-
-  // ── NAV SCROLL EFFECT
-  let lastScroll = 0;
-  window.addEventListener('scroll', () => {
-    const nav = document.querySelector('nav');
-    const scroll = window.scrollY;
-    if (scroll > 100) {
-      nav.style.background = 'rgba(10,10,15,0.95)';
-    } else {
-      nav.style.background = 'rgba(10,10,15,0.85)';
-    }
-    lastScroll = scroll;
-  });
-
-  // Close mobile menu on link click
-  document.querySelectorAll('.nav-mobile a').forEach(a => {
-    a.addEventListener('click', () => {
-      document.getElementById('navMobile').classList.remove('open');
-    });
-  });
+  updateHeroPrices();
+  setInterval(updateHeroPrices, 60000);
+  fetchAssets();
 </script>
-
 </body>
 </html>
