@@ -119,19 +119,75 @@
   /* ──────── INVESTMENTS LIST ──────── */
   .inv-card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:10px;transition:all .15s;cursor:pointer}
   .inv-card:hover{border-color:var(--bdh);transform:translateY(-1px)}
-  .inv-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .inv-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap}
+  .inv-type-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .inv-type{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
   .inv-type .plazo{font-size:11px;color:var(--mut);font-weight:400}
-  .inv-status{font-size:10px;padding:3px 9px;border-radius:12px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+  .risk-tag{display:inline-flex;align-items:center;gap:4px;font-size:9px;padding:3px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;background:var(--grnd);color:var(--grn);border:1px solid rgba(16,185,129,.2)}
+  .risk-tag::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--grn)}
+  .inv-status{font-size:10px;padding:3px 9px;border-radius:12px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;white-space:nowrap}
   .inv-status.active{background:var(--grnd);color:var(--grn);border:1px solid rgba(16,185,129,.2)}
   .inv-status.pending{background:rgba(245,158,11,.08);color:var(--amb);border:1px solid rgba(245,158,11,.2)}
   .inv-body{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .inv-cell{padding:10px;background:var(--sur);border-radius:8px}
-  .inv-cell-lbl{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+  .inv-cell{padding:10px;background:var(--sur);border-radius:8px;border:1px solid var(--bd)}
+  .inv-cell-lbl{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;display:flex;align-items:center;gap:4px}
   .inv-cell-val{font-family:'Space Mono',monospace;font-size:14px;font-weight:700}
   .inv-cell-val.blu{color:var(--blu)}
   .inv-cell-val.grn{color:var(--grn)}
   .inv-cell-val.amb{color:var(--amb)}
+  /* Pending earnings animated */
+  .pulse-dot{width:5px;height:5px;border-radius:50%;background:var(--amb);animation:pulse-live 1.4s ease-in-out infinite}
+  @keyframes pulse-live{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+  .earning-live{position:relative}
+  .earning-live .inv-cell-val{transition:color .3s}
+
+  /* ──────── DETAIL VIEW ──────── */
+  .detail-header{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding:6px 0}
+  .btn-back{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--sur);border:1px solid var(--bd);border-radius:7px;color:var(--mut);font-size:12px;font-weight:500;transition:all .15s}
+  .btn-back:hover{color:var(--text);border-color:var(--bdh)}
+  .btn-back svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+
+  .detail-hero{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:22px 20px;margin-bottom:14px;position:relative;overflow:hidden}
+  .detail-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blu),var(--pur))}
+  .dh-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap}
+  .dh-ttl{font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;font-weight:500;margin-bottom:6px}
+  .dh-cap{font-family:'Space Mono',monospace;font-size:30px;font-weight:700;line-height:1.05;letter-spacing:-.3px}
+
+  .detail-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .dm-item{padding:14px;background:var(--sur);border:1px solid var(--bd);border-radius:10px;position:relative;overflow:hidden}
+  .dm-item::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+  .dm-item.paid::before{background:var(--grn)}
+  .dm-item.pend::before{background:var(--amb)}
+  .dm-item.apy::before{background:var(--blu)}
+  .dm-item.time::before{background:var(--pur)}
+  .dm-lbl{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+  .dm-val{font-family:'Space Mono',monospace;font-size:17px;font-weight:700;line-height:1.2}
+  .dm-val.grn{color:var(--grn)}
+  .dm-val.amb{color:var(--amb)}
+  .dm-val.blu{color:var(--blu)}
+  .dm-val.pur{color:var(--pur)}
+  .dm-sub{font-size:11px;color:var(--mut);margin-top:3px;font-family:'Space Grotesk',sans-serif;font-weight:400}
+
+  .progress-block{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:18px;margin-bottom:14px}
+  .pb-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+  .pb-ttl{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+  .pb-pct{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--blu)}
+  .pb-track{height:8px;background:var(--sur);border-radius:4px;overflow:hidden;margin-bottom:10px}
+  .pb-fill{height:100%;background:linear-gradient(90deg,var(--blu),var(--pur));border-radius:4px;transition:width .8s ease}
+  .pb-dates{display:flex;justify-content:space-between;font-size:11px;color:var(--mut)}
+  .pb-dates .start{color:var(--grn)}
+  .pb-dates .end{color:var(--amb)}
+
+  /* returns timeline */
+  .timeline-card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+  .tl-head{padding:14px 18px;border-bottom:1px solid var(--bd);font-size:13px;font-weight:600}
+  .tl-empty{padding:32px 20px;text-align:center;color:var(--mut);font-size:13px}
+  .tl-row{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--bd)}
+  .tl-row:last-child{border-bottom:none}
+  .tl-dot{width:8px;height:8px;border-radius:50%;background:var(--grn);flex-shrink:0}
+  .tl-month{font-size:13px;font-weight:600}
+  .tl-rate{font-family:'Space Mono',monospace;font-size:12px;color:var(--blu);font-weight:600}
+  .tl-amt{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--grn)}
 
   /* ──────── PRODUCT CTA ──────── */
   .product-card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:18px;position:relative;overflow:hidden}
@@ -228,6 +284,8 @@
     .bc-split{grid-template-columns:1fr 1fr 1fr}
     .stats-grid{grid-template-columns:1fr 1fr 1fr 1fr}
     .inv-body{grid-template-columns:repeat(4,1fr)}
+    .detail-metrics{grid-template-columns:repeat(4,1fr)}
+    .dh-cap{font-size:36px}
   }
 
   /* ──────── DESKTOP (>=1024px) ──────── */
@@ -346,7 +404,10 @@
 <div class="modal-overlay" id="investModal">
   <div class="modal">
     <div class="modal-head">
-      <div class="modal-ttl">Nueva Inversión CDTC</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="modal-ttl">Nueva Inversión CDTC</div>
+        <span class="risk-tag">Bajo Riesgo</span>
+      </div>
       <button class="modal-close" onclick="closeModal('investModal')">✕</button>
     </div>
     <div class="modal-body">
@@ -371,8 +432,8 @@
         </div>
       </div>
 
-      <div class="info-row"><span class="l">Producto</span><span class="v">CDTC</span></div>
-      <div class="info-row"><span class="l">Rendimiento</span><span class="v blu">~2.1% mensual</span></div>
+      <div class="info-row"><span class="l">Producto</span><span class="v">CDTC — Bajo Riesgo</span></div>
+      <div class="info-row"><span class="l">APY mensual</span><span class="v blu">~2.0%</span></div>
       <div class="info-row"><span class="l">Mínimo</span><span class="v">$100,000 COP</span></div>
 
       <div class="fld" style="margin-top:16px">
@@ -603,12 +664,15 @@ function renderDashboard(c){
           <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
         </div>
         <div>
-          <div class="prod-ttl">Inversión CDTC</div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <div class="prod-ttl">Inversión CDTC</div>
+            <span class="risk-tag">Bajo Riesgo</span>
+          </div>
           <div class="prod-sub">Rendimiento variable</div>
         </div>
       </div>
       <div class="prod-rates">
-        <div class="rate-chip"><strong>~2.1%</strong> mensual</div>
+        <div class="rate-chip"><strong>~2.0%</strong> mensual</div>
         <div class="rate-chip"><strong>3/6/12</strong> meses</div>
         <div class="rate-chip">${active.length}/3 activas</div>
       </div>
@@ -641,6 +705,7 @@ function renderDashboard(c){
   </div>`;
 
   setTimeout(()=>drawChart(dashboardData.balanceHistory||[]),100);
+  startEarningsAnimation();
 }
 
 function showViewByName(v){
@@ -650,18 +715,59 @@ function showViewByName(v){
 
 function renderInvCard(inv){
   const isPending=inv.status==='pending_deposit';
+  // Calcular ganancia pendiente proporcional: capital × 2% × (días transcurridos / 30)
+  const cap=parseFloat(inv.amount)||0;
+  const start=new Date(inv.startDate||inv.start_date||Date.now());
+  const now=new Date();
+  const daysElapsed=Math.max(0,(now-start)/(1000*60*60*24));
+  const pendingGross=cap*0.02*(daysElapsed/30);
+  const paidEarnings=parseFloat(inv.totalEarned)||0;
+  const pendingLive=Math.max(0,pendingGross-paidEarnings);
+
   return `<div class="inv-card" onclick="showInvestmentDetail(${inv.id})">
     <div class="inv-head">
-      <div class="inv-type">CDTC <span class="plazo">— ${inv.durationMonths||6} meses</span></div>
+      <div class="inv-type-wrap">
+        <div class="inv-type">CDTC <span class="plazo">— ${inv.durationMonths||6} meses</span></div>
+        <span class="risk-tag">Bajo Riesgo</span>
+      </div>
       <span class="inv-status ${isPending?'pending':'active'}">${isPending?'Pendiente':'Activa'}</span>
     </div>
     <div class="inv-body">
-      <div class="inv-cell"><div class="inv-cell-lbl">Capital</div><div class="inv-cell-val blu">${formatCOP(inv.amount)}</div></div>
-      <div class="inv-cell"><div class="inv-cell-lbl">Ganado</div><div class="inv-cell-val grn">+${formatCOP(inv.totalEarned||0)}</div></div>
-      <div class="inv-cell"><div class="inv-cell-lbl">Vence</div><div class="inv-cell-val">${formatDate(inv.lockEndDate||inv.endDate)}</div></div>
-      <div class="inv-cell"><div class="inv-cell-lbl">Progreso</div><div class="inv-cell-val">${inv.progressPct||0}%</div></div>
+      <div class="inv-cell">
+        <div class="inv-cell-lbl">Capital</div>
+        <div class="inv-cell-val blu">${formatCOP(cap)}</div>
+      </div>
+      <div class="inv-cell">
+        <div class="inv-cell-lbl">APY mensual</div>
+        <div class="inv-cell-val">~2.0%</div>
+      </div>
+      <div class="inv-cell">
+        <div class="inv-cell-lbl">Ganancia pagada</div>
+        <div class="inv-cell-val grn">+${formatCOP(paidEarnings)}</div>
+      </div>
+      <div class="inv-cell earning-live">
+        <div class="inv-cell-lbl"><span class="pulse-dot"></span>Pendiente</div>
+        <div class="inv-cell-val amb" data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-paid="${paidEarnings}">+${formatCOP(pendingLive)}</div>
+      </div>
     </div>
   </div>`;
+}
+
+// Update pending earnings animation — recalculates every second
+function startEarningsAnimation(){
+  if(window._earningsInterval)clearInterval(window._earningsInterval);
+  window._earningsInterval=setInterval(()=>{
+    document.querySelectorAll('[data-pending-live]').forEach(el=>{
+      const cap=parseFloat(el.dataset.capital)||0;
+      const start=new Date(el.dataset.start);
+      const paid=parseFloat(el.dataset.paid)||0;
+      const now=new Date();
+      const days=Math.max(0,(now-start)/(1000*60*60*24));
+      const gross=cap*0.02*(days/30);
+      const live=Math.max(0,gross-paid);
+      el.textContent='+'+formatCOP(live);
+    });
+  },1000);
 }
 
 function renderTxRows(txs){
@@ -710,8 +816,11 @@ function renderInvestmentsView(c){
             <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
           </div>
           <div>
-            <div class="prod-ttl">Inversión CDTC</div>
-            <div class="prod-sub">Rendimiento histórico ~2.1% mensual</div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <div class="prod-ttl">Inversión CDTC</div>
+              <span class="risk-tag">Bajo Riesgo</span>
+            </div>
+            <div class="prod-sub">Rendimiento histórico ~2.0% mensual</div>
           </div>
         </div>
         <div class="prod-rates">
@@ -738,6 +847,7 @@ function renderInvestmentsView(c){
       ${done.map(inv=>renderInvCard(inv)).join('')}
     </div>`:''}
   </div>`;
+  startEarningsAnimation();
 }
 
 // ══════════════════ RENDER: DEPOSIT ══════════════════
@@ -1050,7 +1160,7 @@ function updateInvestPreview(){
     const months=selectedPlan.months;
     const now=new Date();
     const unlock=new Date(now.getFullYear(),now.getMonth()+months,now.getDate());
-    const gain=Math.round(amt*0.021*months);
+    const gain=Math.round(amt*0.02*months);
     document.getElementById('pv-cap').textContent=formatCOP(amt);
     document.getElementById('pv-unlock').textContent=formatDate(unlock);
     document.getElementById('pv-gain').textContent='+'+formatCOP(gain);
@@ -1075,8 +1185,135 @@ async function confirmInvest(){
   finally{btn.disabled=false;btn.textContent='Confirmar Inversión'}
 }
 
-function showInvestmentDetail(id){
-  showViewByName('investments');
+// ══════════════════ INVESTMENT DETAIL ══════════════════
+async function showInvestmentDetail(id){
+  const c=document.getElementById('dashboard-content');
+  c.innerHTML='<div class="loading"><div class="spinner"></div><p>Cargando detalle...</p></div>';
+  try{
+    const res=await apiFetch(`/investments/${id}`);
+    const data=res&&res.ok?await res.json():null;
+    if(!data){c.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span>No se pudo cargar el detalle</div>';return}
+
+    const inv=data.investment||{};
+    const returns=data.returns||[];
+    const cap=parseFloat(inv.amount)||0;
+    const start=new Date(inv.startDate||Date.now());
+    const lockEnd=new Date(inv.lockEndDate||inv.endDate||Date.now());
+    const now=new Date();
+
+    // Tiempo transcurrido
+    const msElapsed=Math.max(0,now-start);
+    const daysElapsed=Math.floor(msElapsed/(1000*60*60*24));
+    const monthsElapsed=Math.floor(daysElapsed/30);
+    const remDays=daysElapsed%30;
+    const elapsedLabel=monthsElapsed>0?`${monthsElapsed} ${monthsElapsed===1?'mes':'meses'}${remDays>0?` y ${remDays} ${remDays===1?'día':'días'}`:''}`:`${daysElapsed} ${daysElapsed===1?'día':'días'}`;
+
+    // Días restantes hasta desbloqueo
+    const msToUnlock=Math.max(0,lockEnd-now);
+    const daysToUnlock=Math.ceil(msToUnlock/(1000*60*60*24));
+    const isMatured=msToUnlock<=0;
+
+    // Progreso
+    const totalDuration=Math.max(1,lockEnd-start);
+    const progressPct=Math.min(100,Math.round((msElapsed/totalDuration)*100));
+
+    // Ganancias
+    const paidEarnings=returns.reduce((s,r)=>s+(parseFloat(r.earned)||0),0);
+    const pendingGross=cap*0.02*(daysElapsed/30);
+    const pendingLive=Math.max(0,pendingGross-paidEarnings);
+
+    c.innerHTML=`
+    <div class="anim">
+      <div class="detail-header">
+        <button class="btn-back" onclick="showViewByName('investments')">
+          <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Volver
+        </button>
+      </div>
+
+      <div class="detail-hero">
+        <div class="dh-top">
+          <div class="inv-type-wrap">
+            <div class="inv-type">Inversión CDTC <span class="plazo">— ${inv.durationMonths||6} meses</span></div>
+            <span class="risk-tag">Bajo Riesgo</span>
+          </div>
+          <span class="inv-status ${inv.status==='pending_deposit'?'pending':'active'}">${inv.status==='pending_deposit'?'Pendiente':isMatured?'Vencida':'Activa'}</span>
+        </div>
+        <div class="dh-ttl">Capital Invertido</div>
+        <div class="dh-cap">${formatCOP(cap)}</div>
+      </div>
+
+      <div class="detail-metrics">
+        <div class="dm-item paid">
+          <div class="dm-lbl">Ganancia pagada</div>
+          <div class="dm-val grn">+${formatCOP(paidEarnings)}</div>
+          <div class="dm-sub">${returns.length} ${returns.length===1?'pago':'pagos'} registrado${returns.length===1?'':'s'}</div>
+        </div>
+        <div class="dm-item pend earning-live">
+          <div class="dm-lbl"><span class="pulse-dot"></span>Pendiente</div>
+          <div class="dm-val amb" data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-paid="${paidEarnings}">+${formatCOP(pendingLive)}</div>
+          <div class="dm-sub">Generándose en tiempo real</div>
+        </div>
+        <div class="dm-item apy">
+          <div class="dm-lbl">APY mensual</div>
+          <div class="dm-val blu">~2.0%</div>
+          <div class="dm-sub">Estimado histórico</div>
+        </div>
+        <div class="dm-item time">
+          <div class="dm-lbl">Tiempo activo</div>
+          <div class="dm-val pur">${elapsedLabel}</div>
+          <div class="dm-sub">${isMatured?'Ya puedes retirar':`${daysToUnlock} ${daysToUnlock===1?'día':'días'} para desbloqueo`}</div>
+        </div>
+      </div>
+
+      <div class="progress-block">
+        <div class="pb-head">
+          <div class="pb-ttl">Progreso del contrato</div>
+          <div class="pb-pct">${progressPct}%</div>
+        </div>
+        <div class="pb-track"><div class="pb-fill" style="width:${progressPct}%"></div></div>
+        <div class="pb-dates">
+          <span class="start">Inicio: ${formatDate(start)}</span>
+          <span class="end">Desbloqueo: ${formatDate(lockEnd)}</span>
+        </div>
+      </div>
+
+      <div class="timeline-card">
+        <div class="tl-head">Historial de Rendimientos Pagados</div>
+        ${returns.length===0?`<div class="tl-empty"><span style="font-size:24px;display:block;margin-bottom:8px;opacity:.4">📋</span>Aún no hay rendimientos registrados.<br><span style="font-size:11px;opacity:.7">Los rendimientos se pagan mensualmente.</span></div>`:returns.map(r=>`
+        <div class="tl-row">
+          <div class="tl-dot"></div>
+          <div class="tl-month">${formatDate(r.month)}</div>
+          <div class="tl-rate">${r.rate}%</div>
+          <div class="tl-amt">+${formatCOP(r.earned)}</div>
+        </div>`).join('')}
+      </div>
+
+      ${isMatured?`
+      <button class="prod-cta" style="margin-top:14px" onclick="withdrawInvestment(${inv.id})">Retirar Inversión Completa →</button>`:`
+      <div style="margin-top:14px;padding:14px;background:var(--sur);border:1px solid var(--bd);border-radius:10px;font-size:12px;color:var(--mut);line-height:1.6;text-align:center">
+        🔒 El capital se desbloquea el <strong style="color:var(--text)">${formatDate(lockEnd)}</strong>
+      </div>`}
+    </div>`;
+
+    // Arrancar animación de ganancia pendiente
+    startEarningsAnimation();
+  }catch(e){
+    console.error(e);
+    c.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span>Error cargando el detalle</div>';
+  }
+}
+
+async function withdrawInvestment(id){
+  if(!confirm('¿Confirmar retiro completo de esta inversión? El capital regresará a tu saldo disponible.'))return;
+  try{
+    const res=await apiFetch(`/investments/${id}/withdraw`,{method:'POST'});
+    const d=await res.json();
+    if(!res.ok)return toast(d.error||'Error al retirar','error');
+    toast('✅ Inversión retirada correctamente');
+    await loadAllData();
+    showViewByName('investments');
+  }catch(e){toast('Error de conexión','error')}
 }
 
 // ══════════════════ INIT ══════════════════
