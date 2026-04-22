@@ -725,8 +725,8 @@ function renderDashboard(c){
       <div style="position:absolute;top:14px;right:14px;font-size:9px;color:var(--blu);background:rgba(79,142,247,.08);padding:2px 8px;border-radius:10px;font-weight:600">1pt/$1k</div>
     </div>
     <div class="stat-card" onclick="showViewByName('investments')" style="cursor:pointer">
-      <div class="stat-label">APY Pool</div>
-      <div class="stat-val" style="color:var(--amb)">${calculatePoolAPY().monthly.toFixed(2)}%</div>
+      <div class="stat-label">Mi APY Promedio</div>
+      <div class="stat-val" style="color:var(--amb)">${calculateMyAvgAPY().toFixed(2)}%</div>
     </div>
   </div>
 
@@ -799,14 +799,23 @@ function renderInvCard(inv){
   const isPending=inv.status==='pending_deposit';
   const isPool=inv.type==='pool'||String(inv.type||'').includes('pool');
   
-  // Calcular ganancia pendiente proporcional: capital × 2% × (días transcurridos / 30)
+  // Para CDTC: ganancia pendiente proporcional animada
+  // Para Pool: solo mostrar lo que el admin registró (sin animación dinámica)
   const cap=parseFloat(inv.amount)||0;
+  const paidEarnings=parseFloat(inv.totalEarned)||0;
   const start=new Date(inv.startDate||inv.start_date||Date.now());
   const now=new Date();
-  const daysElapsed=Math.max(0,(now-start)/(1000*60*60*24));
-  const pendingGross=cap*0.02*(daysElapsed/30);
-  const paidEarnings=parseFloat(inv.totalEarned)||0;
-  const pendingLive=Math.max(0,pendingGross-paidEarnings);
+  
+  // CDTC: animación en tiempo real. Pool: estático (solo rendimientos registrados)
+  let pendingLive=0;
+  if(!isPool){
+    const daysElapsed=Math.max(0,(now-start)/(1000*60*60*24));
+    const pendingGross=cap*0.02*(daysElapsed/30);
+    pendingLive=Math.max(0,pendingGross-paidEarnings);
+  }
+
+  // APY personalizado del usuario (promedio de sus propios rendimientos)
+  const myAPY=calculateMyAvgAPY(inv.id);
 
   return `<div class="inv-card" onclick="showInvestmentDetail(${inv.id})">
     <div class="inv-head">
@@ -822,16 +831,16 @@ function renderInvCard(inv){
         <div class="inv-cell-val blu">${formatCOP(cap)}</div>
       </div>
       <div class="inv-cell">
-        <div class="inv-cell-lbl">APY ${isPool?'anual':'mensual'}</div>
-        <div class="inv-cell-val">${isPool?'~'+calculatePoolAPY().annual.toFixed(1)+'%':'~2.0%'}</div>
+        <div class="inv-cell-lbl">Mi APY ${isPool?'mensual':'mensual'}</div>
+        <div class="inv-cell-val">${myAPY>0?myAPY.toFixed(2)+'%':'~2.0%'}</div>
       </div>
       <div class="inv-cell">
         <div class="inv-cell-lbl">Ganancia ${isPool?'acumulada':'pagada'}</div>
         <div class="inv-cell-val grn">+${formatCOP(paidEarnings)}</div>
       </div>
-      <div class="inv-cell earning-live">
-        <div class="inv-cell-lbl"><span class="pulse-dot"></span>Pendiente</div>
-        <div class="inv-cell-val amb" data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-paid="${paidEarnings}">+${formatCOP(pendingLive)}</div>
+      <div class="inv-cell ${isPool?'':'earning-live'}">
+        <div class="inv-cell-lbl">${isPool?'':'<span class="pulse-dot"></span>'}${isPool?'Próx. pago':'Pendiente'}</div>
+        <div class="inv-cell-val amb" ${isPool?'':`data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-paid="${paidEarnings}"`}>+${formatCOP(isPool?0:pendingLive)}</div>
       </div>
     </div>
     ${isPool&&paidEarnings>0?`<div style="margin-top:12px"><button class="btn btn-sm" style="width:100%;background:var(--amb);color:white;border:none;padding:10px;border-radius:7px;font-weight:600;font-size:12px" onclick="event.stopPropagation();withdrawPoolEarnings(${inv.id},${paidEarnings})">💰 Retirar Ganancias (20% comisión)</button></div>`:''}
@@ -1065,7 +1074,7 @@ function renderDepositView(c){
         <span class="l">Llave Bre-B / Nequi</span>
         <span class="v" style="display:flex;align-items:center;gap:8px">
           <strong id="breb-key">@JFC927</strong>
-          <button onclick="navigator.clipboard.writeText('@JFC927').then(()=>toast('¡Llave copiada!','success'))" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--mut);cursor:pointer">Copiar</button>
+          <button onclick="navigator.clipboard.writeText('@JFC927').then(()=>showToast('¡Llave copiada!','success'))" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--mut);cursor:pointer">Copiar</button>
         </span>
       </div>
       <div class="info-row"><span class="l">Titular</span><span class="v">Sanse Capital SAS</span></div>
@@ -1125,7 +1134,7 @@ function updateDepositPreview(){
 function handleDepositFile(input){
   const file=input.files[0];
   if(!file) return;
-  if(file.size>5*1024*1024){ toast('La imagen no puede superar 5MB','error'); input.value=''; return; }
+  if(file.size>5*1024*1024){ showToast('La imagen no puede superar 5MB','error'); input.value=''; return; }
   const reader=new FileReader();
   reader.onload=e=>{
     document.getElementById('dep-img-thumb').src=e.target.result;
@@ -1161,7 +1170,7 @@ async function submitDepositProof(){
   const note=document.getElementById('dep-note')?.value||'';
   const file=document.getElementById('dep-file')?.files[0];
 
-  if(amt<10000||!file){ toast('Completa el monto y adjunta el comprobante','error'); return; }
+  if(amt<10000||!file){ showToast('Completa el monto y adjunta el comprobante','error'); return; }
 
   btn.disabled=true; btn.textContent='Enviando...'; btn.style.opacity='.6';
 
@@ -1190,7 +1199,7 @@ async function submitDepositProof(){
       msgEl.innerHTML='✅ Comprobante enviado. El admin revisará tu depósito pronto.';
       btn.textContent='✓ Enviado';
       btn.style.background='var(--grn)';
-      toast('Comprobante enviado exitosamente','success');
+      showToast('Comprobante enviado exitosamente','success');
     } else {
       const err=res?await res.json():{};
       throw new Error(err.error||'Error al enviar');
@@ -1199,7 +1208,7 @@ async function submitDepositProof(){
     btn.disabled=false; btn.textContent='Enviar Comprobante'; btn.style.opacity='1';
     msgEl.style.display='block'; msgEl.style.color='var(--red)';
     msgEl.textContent='Error: '+(e.message||'Intenta de nuevo');
-    toast(e.message||'Error al enviar comprobante','error');
+    showToast(e.message||'Error al enviar comprobante','error');
   }
 }
 
@@ -1702,14 +1711,14 @@ async function showInvestmentDetail(id){
           <div class="dm-val grn">+${formatCOP(paidEarnings)}</div>
           <div class="dm-sub">${returns.length} ${returns.length===1?'pago':'pagos'} registrado${returns.length===1?'':'s'}</div>
         </div>
-        <div class="dm-item pend earning-live">
-          <div class="dm-lbl"><span class="pulse-dot"></span>Pendiente</div>
-          <div class="dm-val amb" data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-paid="${paidEarnings}">+${formatCOP(pendingLive)}</div>
-          <div class="dm-sub">Generándose en tiempo real</div>
+        <div class="dm-item pend ${inv.type==='pool'?'':'earning-live'}">
+          <div class="dm-lbl">${inv.type==='pool'?'Ganancias acumuladas':'<span class="pulse-dot"></span>Pendiente'}</div>
+          <div class="dm-val amb" ${inv.type!=='pool'?`data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-paid="${paidEarnings}"`:''}>+${formatCOP(inv.type==='pool'?paidEarnings:pendingLive)}</div>
+          <div class="dm-sub">${inv.type==='pool'?'Pagos registrados por admin':'Generándose en tiempo real'}</div>
         </div>
         <div class="dm-item apy">
           <div class="dm-lbl">APY mensual</div>
-          <div class="dm-val blu">${inv.type==='pool'?(poolStats&&typeof poolStats.monthlyAPY==='number'?poolStats.monthlyAPY.toFixed(2):calculatePoolAPY().monthly.toFixed(2))+'%':'~2.0%'}</div>
+          <div class="dm-val blu">${inv.type==='pool'?poolAPY.monthly.toFixed(2)+'%':'~2.0%'}</div>
           <div class="dm-sub">${inv.type==='pool'?'Variable — Pool de Liquidez':'Estimado histórico'}</div>
         </div>
         <div class="dm-item time">
@@ -1767,6 +1776,80 @@ async function withdrawInvestment(id){
     await loadAllData();
     showViewByName('investments');
   }catch(e){toast('Error de conexión','error')}
+}
+
+// ══════════════════ APY PERSONALIZADO ══════════════════
+// Calcula el APY promedio real del usuario basado en sus propios rendimientos registrados
+function calculateMyAvgAPY(invId=null){
+  // Si se pasa un invId, calcular solo para esa inversión
+  const targetInvs = invId 
+    ? myInvestments.filter(i=>i.id===invId)
+    : myInvestments;
+  
+  const allReturns = targetInvs.flatMap(i=>i.returns||[]);
+  if(allReturns.length===0) return 2.0; // fallback default
+  
+  const rates = allReturns
+    .map(r=>parseFloat(r.rate||r.rate_applied||r.rateApplied)||0)
+    .filter(r=>r>0);
+  
+  if(rates.length===0) return 2.0;
+  return rates.reduce((a,b)=>a+b,0)/rates.length;
+}
+
+// ══════════════════ HISTORIAL DE DEPÓSITOS ══════════════════
+async function loadDepositHistory(){
+  const container=document.getElementById('dep-history-list');
+  if(!container)return;
+  try{
+    const res=await apiFetch('/deposits/my');
+    if(!res||!res.ok){
+      container.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:13px">No se pudo cargar el historial</div>';
+      return;
+    }
+    const deposits=await res.json();
+    if(!deposits.length){
+      container.innerHTML='<div style="text-align:center;color:var(--mut);padding:30px;font-size:13px"><span style="font-size:24px;display:block;margin-bottom:8px;opacity:.4">📋</span>No tienes depósitos registrados aún</div>';
+      return;
+    }
+    const statusLabel={pending:'Pendiente',approved:'Aprobado',rejected:'Rechazado'};
+    const statusColor={pending:'var(--amb)',approved:'var(--grn)',rejected:'var(--red)'};
+    container.innerHTML=`<div class="table-card"><div class="table-wrap"><table>
+      <thead><tr><th>Ref</th><th>Monto</th><th>Estado</th><th>Nota</th><th>Fecha</th></tr></thead>
+      <tbody>${deposits.map(d=>`<tr>
+        <td class="mono" style="font-size:11px;color:var(--mut)">${d.ref_id||d.id}</td>
+        <td class="mono" style="color:var(--grn);font-weight:600">${formatCOP(d.amount)}</td>
+        <td><span style="font-size:11px;font-weight:700;color:${statusColor[d.status]||'var(--mut)'}">${statusLabel[d.status]||d.status}</span></td>
+        <td style="font-size:12px;color:var(--mut)">${d.note||'—'}</td>
+        <td style="font-size:11px;color:var(--mut)">${formatDate(d.created_at)}</td>
+      </tr>`).join('')}</tbody>
+    </table></div></div>`;
+  }catch(e){
+    container.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:13px">Error cargando historial</div>';
+  }
+}
+
+// ══════════════════ HISTORIAL DE DEPÓSITOS (continuación) ══════════════════
+async function loadDepositHistory_unused(){
+  const container=null;
+  try{
+    const res=await apiFetch('/deposits/my');
+    if(!res||!res.ok){return}
+    const deposits=await res.json();
+    if(!deposits.length){container.innerHTML='<div style="text-align:center;color:var(--mut);padding:30px;font-size:13px"><span style="font-size:24px;display:block;margin-bottom:8px;opacity:.4">📋</span>No tienes depósitos registrados aún</div>';return}
+    const statusColor={pending:'var(--amb)',approved:'var(--grn)',rejected:'var(--red)'};
+    const statusLabel={pending:'Pendiente',approved:'Aprobado',rejected:'Rechazado'};
+    container.innerHTML='<div class="table-card"><div class="table-wrap"><table><thead><tr><th>Ref</th><th>Monto</th><th>Estado</th><th>Nota</th><th>Fecha</th></tr></thead><tbody>'+
+      deposits.map(d=>'<tr>'+
+        '<td class="mono" style="font-size:11px;color:var(--mut)">'+(d.ref_id||d.id)+'</td>'+
+        '<td class="mono" style="color:var(--grn);font-weight:600">'+formatCOP(d.amount)+'</td>'+
+        '<td><span style="font-size:11px;font-weight:700;color:'+(statusColor[d.status]||'var(--mut)')+'">'+
+          (statusLabel[d.status]||d.status)+'</span></td>'+
+        '<td style="font-size:12px;color:var(--mut)">'+(d.note||'—')+'</td>'+
+        '<td style="font-size:11px;color:var(--mut)">'+formatDate(d.created_at)+'</td>'+
+      '</tr>').join('')+
+    '</tbody></table></div></div>';
+  }catch(e){container.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:13px">Error cargando historial</div>'}
 }
 
 // ══════════════════ INIT ══════════════════

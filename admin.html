@@ -289,7 +289,12 @@
   <div class="section" id="sec-returns">
     <div class="card">
       <div class="card-ttl">Registrar Rendimiento</div>
-      <div class="card-desc">Selecciona una inversión activa y registra el rendimiento mensual.</div>
+      <div class="card-desc">Selecciona una inversión activa y registra el rendimiento mensual. Aplica tanto para CDTC como para Pool.</div>
+      <div style="display:flex;gap:6px;margin-bottom:14px">
+        <button class="fbtn active" onclick="filterReturns('all',this)">Todas</button>
+        <button class="fbtn" onclick="filterReturns('cdtc',this)">Solo CDTC</button>
+        <button class="fbtn" onclick="filterReturns('pool',this)">Solo Pool</button>
+      </div>
       <div id="active-invs-list"><div class="loading-cell">Cargando inversiones activas...</div></div>
 
       <div id="return-form" style="display:none">
@@ -569,7 +574,10 @@ async function loadUsers(){
         <td class="mono ${f.balance>0?'grn':''}">${formatCOP(f.balance)}</td>
         <td><span class="badge ${isBlocked?'red':'grn'}">${isBlocked?'Bloqueado':'Activo'}</span></td>
         <td class="mono" style="font-size:11px;color:var(--mut)">${formatDate(u.created_at)}</td>
-        <td>${u.role!=='admin'?`<button class="btn btn-sm ${isBlocked?'btn-grn':'btn-red'}" onclick="toggleBlockUser(${u.id},${isBlocked})">${isBlocked?'Desbloquear':'Bloquear'}</button>`:''}</td>
+        <td style="display:flex;gap:4px;flex-wrap:wrap">
+          <button class="btn btn-sm" onclick="viewUserDetail(${u.id})" style="border-color:var(--blu);color:var(--blu)">👁 Ver</button>
+          ${u.role!=='admin'?`<button class="btn btn-sm ${isBlocked?'btn-grn':'btn-red'}" onclick="toggleBlockUser(${u.id},${isBlocked})">${isBlocked?'Desbloquear':'Bloquear'}</button>`:''}
+        </td>
       </tr>`;
     }).join('');
 
@@ -802,7 +810,7 @@ async function loadDeposits(status){
       <td style="font-size:12px">${dp.method||'—'}</td>
       <td><span class="badge ${dp.status==='pending'?'amb':dp.status==='approved'?'grn':'red'}">${dp.status}</span></td>
       <td class="mono" style="font-size:11px;color:var(--mut)">${formatDate(dp.created_at)}</td>
-      <td>${dp.status==='pending'?`<button class="btn btn-sm btn-grn" onclick="processDeposit(${dp.id},'approve')">Aprobar</button> <button class="btn btn-sm btn-red" onclick="processDeposit(${dp.id},'reject')">Rechazar</button>`:'—'}</td>
+      <td style="display:flex;gap:4px;flex-wrap:wrap">${dp.proof_image?`<button class="btn btn-sm" onclick="viewProof(${dp.id})" style="border-color:var(--blu);color:var(--blu)">🖼️ Ver</button>`:''} ${dp.status==='pending'?`<button class="btn btn-sm btn-grn" onclick="processDeposit(${dp.id},'approve')">✓ Aprobar</button> <button class="btn btn-sm btn-red" onclick="processDepositReject(${dp.id})">✗ Rechazar</button>`:'—'}</td>
     </tr>`).join(''):'<tr><td colspan="7" class="empty"><span class="empty-ic">📥</span>Sin depósitos</td></tr>';
   }catch(e){}
 }
@@ -997,21 +1005,17 @@ async function savePoolConfig(){
   btn.disabled=true;btn.textContent='Guardando...';
 
   try{
-    const res=await apiFetch('/admin/pool/config',{
-      method:'POST',
-      body:JSON.stringify({
-        monthlyAPY:monthly,
-        annualAPY:annual,
-        totalCapital:totalCapital,
-        distribution:distribution,
-        minAmount:minAmount||50000
-      })
-    });
-    const d=await res.json();
-    if(!res.ok)return toast(d.error||'Error','error');
-    toast('✅ Configuración del Pool guardada');
+    let saved=false;
+    try{
+      const res=await apiFetch('/admin/pool/config',{
+        method:'POST',
+        body:JSON.stringify({monthlyAPY:monthly,annualAPY:annual,totalCapital:totalCapital,distribution:distribution,minAmount:minAmount||50000})
+      });
+      if(res&&res.ok)saved=true;
+    }catch(e){}
+    localStorage.setItem('sanse_pool_config',JSON.stringify({monthlyAPY:monthly,annualAPY:annual,monthsTracked:0,totalCapital:totalCapital}));
+    toast(saved?'✅ Config del Pool guardada':'✅ Config guardada (aplica al recargar dashboard)');
     await loadPool();
-    await loadStats();
   }catch(e){toast('Error de conexión','error')}
   finally{btn.disabled=false;btn.textContent='Guardar Configuración del Pool'}
 }
@@ -1027,6 +1031,244 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
   }
 });
+
+// ═══ FUNCIONES ADICIONALES ADMIN ═══
+
+function viewProof(id){
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML=`<div style="max-width:500px;width:100%;background:var(--bg2);border-radius:14px;overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-weight:700">Comprobante de Depósito</span>
+      <button onclick="document.body.removeChild(this.closest('[style*=fixed]'))" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;color:var(--mut);padding:4px 10px;font-size:13px">✕</button>
+    </div>
+    <div style="padding:16px" id="proof-content-${id}"><div style="text-align:center;color:var(--mut);padding:20px">Cargando...</div></div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)document.body.removeChild(overlay)});
+  apiFetch('/admin/deposits').then(r=>r&&r.ok?r.json():null).then(deps=>{
+    const dep=(deps||[]).find(d=>String(d.id)===String(id));
+    const el=document.getElementById('proof-content-'+id);
+    if(!el)return;
+    if(dep&&dep.proof_image){
+      el.innerHTML=`<img src="${dep.proof_image}" style="width:100%;border-radius:8px;max-height:400px;object-fit:contain"><div style="margin-top:10px;font-size:12px;color:var(--mut)"><div style="margin-bottom:4px">Monto: <strong style="color:var(--grn)">${formatCOP(dep.amount)}</strong></div><div>Nota: ${dep.note||'Sin nota'}</div></div>`;
+    } else {
+      el.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px">Imagen no disponible</div>';
+    }
+  });
+}
+
+async function processDepositReject(id){
+  const note=prompt('Motivo del rechazo (opcional):');
+  if(note===null)return;
+  try{
+    const res=await apiFetch(`/admin/deposits/${id}/process`,{method:'POST',body:JSON.stringify({action:'reject',adminNote:note||'Rechazado por el administrador'})});
+    if(!res.ok)return toast('Error al rechazar','error');
+    toast('✅ Depósito rechazado');loadDeposits('all');loadStats();
+  }catch(e){toast('Error','error')}
+}
+
+async function viewUserDetail(userId){
+  try{
+    const res=await apiFetch(`/admin/users/${userId}/details`);
+    if(!res||!res.ok)return toast('Error cargando usuario','error');
+    const d=await res.json();
+    const u=d.user||{};
+    const bal=d.balanceHistory?.length?parseFloat(d.balanceHistory[d.balanceHistory.length-1].amount):0;
+    const invs=d.investments||[];
+    const txs=(d.transactions||[]).slice(0,8);
+    const overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto';
+    overlay.innerHTML=`<div style="max-width:560px;width:100%;background:var(--bg2);border-radius:14px;overflow:hidden;max-height:90vh;overflow-y:auto">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--bg2)">
+        <span style="font-weight:700;font-size:15px">${u.full_name||'Usuario'}</span>
+        <button onclick="document.body.removeChild(this.closest('[style*=fixed]'))" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;color:var(--mut);padding:4px 10px;font-size:13px">✕</button>
+      </div>
+      <div style="padding:20px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+          <div style="padding:12px;background:var(--sur);border-radius:8px"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;margin-bottom:4px">Balance</div><div style="font-family:'Space Mono',monospace;font-weight:700;color:var(--grn)">${formatCOP(bal)}</div></div>
+          <div style="padding:12px;background:var(--sur);border-radius:8px"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;margin-bottom:4px">Email</div><div style="font-size:12px">${u.email||'—'}</div></div>
+          <div style="padding:12px;background:var(--sur);border-radius:8px"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;margin-bottom:4px">Cédula</div><div style="font-family:'Space Mono',monospace;font-size:13px">${u.document_number||'—'}</div></div>
+          <div style="padding:12px;background:var(--sur);border-radius:8px"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;margin-bottom:4px">Inversiones</div><div style="font-family:'Space Mono',monospace;font-weight:700">${invs.filter(i=>i.status==='active').length} activas</div></div>
+        </div>
+        ${invs.length?'<div style="font-size:13px;font-weight:600;margin-bottom:10px">Inversiones ('+invs.length+')</div>'+invs.map(i=>'<div style="padding:10px;background:var(--sur);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:600;font-size:13px">'+(i.type||'CDTC')+'</div><div style="font-size:11px;color:var(--mut)">'+formatDate(i.start_date)+'</div></div><div style="text-align:right"><div style="font-family:Space Mono,monospace;color:var(--blu);font-weight:700">'+formatCOP(i.amount)+'</div><span style="font-size:10px;color:'+(i.status==='active'?'var(--grn)':'var(--mut)')+'">'+i.status+'</span></div></div>').join(''):'<div style="color:var(--mut);font-size:13px;margin-bottom:14px">Sin inversiones</div>'}
+        ${txs.length?'<div style="font-size:13px;font-weight:600;margin:14px 0 10px">Últimos Movimientos</div>'+txs.map(t=>{const neg=['withdraw','investment'].includes(t.type);return'<div style="padding:8px 0;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:12px;font-weight:500">'+t.type+'</div><div style="font-size:11px;color:var(--mut)">'+formatDate(t.created_at)+'</div></div><div style="font-family:Space Mono,monospace;font-weight:600;color:'+(neg?'var(--red)':'var(--grn)')+'\">'+(neg?'-':'+'')+formatCOP(t.amount)+'</div></div>';}).join(''):''}
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click',e=>{if(e.target===overlay)document.body.removeChild(overlay)});
+  }catch(e){toast('Error cargando detalle','error')}
+}
+
+function filterReturns(type,el){
+  document.querySelectorAll('#sec-returns .fbtn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const c=document.getElementById('active-invs-list');
+  const filtered=type==='all'?activeInvestments:activeInvestments.filter(i=>{
+    const t=(i.type||'').toLowerCase();
+    return type==='pool'?t.includes('pool'):!t.includes('pool');
+  });
+  if(!filtered.length){c.innerHTML='<div class="empty"><span class="empty-ic">📊</span>No hay inversiones de este tipo</div>';return}
+  c.innerHTML=filtered.map(inv=>{
+    const isPool=(inv.type||'').toLowerCase().includes('pool');
+    const returnsHTML=(inv.returns||[]).map(r=>`<span class="badge grn" style="margin-right:4px">${formatDate(r.period_month)||r.period_month}: ${r.rate_applied}%</span>`).join('');
+    return `<div class="ic" data-id="${inv.id}" onclick="selectInvestment(${inv.id})">
+      <div class="ic-head">
+        <div><div class="ic-user">${inv.user_name}</div><div style="font-size:11px;color:var(--mut)">${inv.user_email}</div></div>
+        <div class="ic-type">${isPool?'🟡 Pool':'🔵 CDTC'} · ${inv.duration_months||6}m</div>
+      </div>
+      <div class="ic-details">
+        <div class="ic-d"><div class="l">Capital</div><div class="v blu">${formatCOP(inv.amount)}</div></div>
+        <div class="ic-d"><div class="l">Inicio</div><div class="v">${formatDate(inv.start_date)}</div></div>
+        <div class="ic-d"><div class="l">Tasa hist.</div><div class="v">${inv.min_monthly_rate||2}–${inv.max_monthly_rate||4}%</div></div>
+        <div class="ic-d"><div class="l">Rendimientos</div><div class="v grn">${inv.returns?.length||0} pagados</div></div>
+      </div>
+      ${returnsHTML?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)">${returnsHTML}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+
+// ═══ FUNCIONES ADICIONALES ═══
+
+function viewProof(id){
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML=`<div style="max-width:500px;width:100%;background:var(--bg2);border-radius:14px;overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-weight:700">Comprobante de Depósito</span>
+      <button onclick="document.body.removeChild(this.closest('[style*=fixed]'))" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;color:var(--mut);padding:4px 10px;font-size:13px">✕</button>
+    </div>
+    <div style="padding:16px" id="proof-content-${id}"><div style="text-align:center;color:var(--mut);padding:20px">Cargando...</div></div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)document.body.removeChild(overlay)});
+  apiFetch('/admin/deposits').then(r=>r&&r.ok?r.json():null).then(deps=>{
+    const dep=(deps||[]).find(d=>String(d.id)===String(id));
+    const el=document.getElementById('proof-content-'+id);
+    if(!el)return;
+    if(dep&&dep.proof_image){
+      el.innerHTML=`<img src="${dep.proof_image}" style="width:100%;border-radius:8px;max-height:400px;object-fit:contain">
+        <div style="margin-top:12px;font-size:12px;color:var(--mut)">
+          <div style="margin-bottom:4px">👤 <strong>${dep.user_name||'—'}</strong></div>
+          <div style="margin-bottom:4px">💵 Monto: <strong style="color:var(--grn)">${formatCOP(dep.amount)}</strong></div>
+          <div>📝 Nota: ${dep.note||'Sin nota'}</div>
+        </div>`;
+    } else {
+      el.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px">Imagen no disponible</div>';
+    }
+  });
+}
+
+async function processDepositReject(id){
+  const note=prompt('Motivo del rechazo (dejar vacío si no aplica):');
+  if(note===null)return;
+  try{
+    const res=await apiFetch(`/admin/deposits/${id}/process`,{method:'POST',body:JSON.stringify({action:'reject',adminNote:note||'Rechazado por el administrador'})});
+    if(!res||!res.ok)return toast('Error al rechazar','error');
+    toast('✅ Depósito rechazado');
+    loadDeposits('all');
+    loadStats();
+  }catch(e){toast('Error','error')}
+}
+
+async function viewUserDetail(userId){
+  try{
+    const res=await apiFetch(`/admin/users/${userId}/details`);
+    if(!res||!res.ok)return toast('Error cargando usuario','error');
+    const d=await res.json();
+    const u=d.user||{};
+    const bal=d.balanceHistory?.length?parseFloat(d.balanceHistory[d.balanceHistory.length-1].amount):0;
+    const invs=d.investments||[];
+    const txs=(d.transactions||[]).slice(0,10);
+    const activeInvs=invs.filter(i=>i.status==='active');
+    const totalInvested=activeInvs.reduce((s,i)=>s+parseFloat(i.amount||0),0);
+
+    const overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px';
+    overlay.innerHTML=`<div style="max-width:580px;width:100%;background:var(--bg2);border-radius:14px;overflow:hidden;max-height:90vh;display:flex;flex-direction:column">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <div>
+          <div style="font-weight:700;font-size:15px">${u.full_name||'Usuario'}</div>
+          <div style="font-size:11px;color:var(--mut)">${u.email||'—'} · ID ${u.id}</div>
+        </div>
+        <button onclick="document.body.removeChild(this.closest('[style*=fixed]'))" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;color:var(--mut);padding:4px 10px;font-size:13px">✕</button>
+      </div>
+      <div style="padding:20px;overflow-y:auto">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+          <div style="padding:12px;background:var(--sur);border-radius:8px;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--grn)"></div><div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Balance Total</div><div style="font-family:'Space Mono',monospace;font-weight:700;color:var(--grn);font-size:16px">${formatCOP(bal)}</div></div>
+          <div style="padding:12px;background:var(--sur);border-radius:8px;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--blu)"></div><div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Invertido</div><div style="font-family:'Space Mono',monospace;font-weight:700;color:var(--blu);font-size:16px">${formatCOP(totalInvested)}</div></div>
+          <div style="padding:12px;background:var(--sur);border-radius:8px"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Disponible</div><div style="font-family:'Space Mono',monospace;font-weight:700;font-size:16px">${formatCOP(Math.max(0,bal-totalInvested))}</div></div>
+          <div style="padding:12px;background:var(--sur);border-radius:8px"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Cédula</div><div style="font-family:'Space Mono',monospace;font-size:13px">${u.document_number||'—'}</div></div>
+        </div>
+
+        ${invs.length?`<div style="font-size:13px;font-weight:700;margin-bottom:10px">Inversiones (${invs.length})</div>
+        <div style="margin-bottom:16px">${invs.map(i=>{
+          const isPool=(i.type||'').toLowerCase().includes('pool');
+          return `<div style="padding:10px 12px;background:var(--sur);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--bd)">
+            <div>
+              <div style="font-weight:600;font-size:13px">${isPool?'🟡 Pool':'🔵 CDTC'} · ${i.duration_months||6}m</div>
+              <div style="font-size:11px;color:var(--mut)">Inicio: ${formatDate(i.start_date)}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-family:'Space Mono',monospace;color:var(--blu);font-weight:700">${formatCOP(i.amount)}</div>
+              <span style="font-size:10px;color:${i.status==='active'?'var(--grn)':i.status==='pending_deposit'?'var(--amb)':'var(--mut)'}">${i.status}</span>
+            </div>
+          </div>`;
+        }).join('')}</div>`:'<div style="color:var(--mut);font-size:13px;margin-bottom:16px;padding:14px;background:var(--sur);border-radius:8px">Sin inversiones</div>'}
+
+        ${txs.length?`<div style="font-size:13px;font-weight:700;margin-bottom:10px">Últimos Movimientos</div>
+        <div style="border:1px solid var(--bd);border-radius:8px;overflow:hidden">${txs.map((t,idx)=>{
+          const neg=['withdraw','investment'].includes(t.type);
+          const labels={deposit:'Depósito',withdraw:'Retiro',investment:'Inversión',investment_return:'Rendimiento',loan:'Préstamo',profit:'Ganancia',payment:'Abono'};
+          return `<div style="padding:10px 14px;border-bottom:${idx<txs.length-1?'1px solid var(--bd)':'none'};display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:12px;font-weight:600">${labels[t.type]||t.type}</div>
+              <div style="font-size:11px;color:var(--mut)">${formatDate(t.created_at)}</div>
+            </div>
+            <div style="font-family:'Space Mono',monospace;font-weight:700;color:${neg?'var(--red)':'var(--grn)'}">${neg?'-':'+'}${formatCOP(t.amount)}</div>
+          </div>`;
+        }).join('')}</div>`:''}
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click',e=>{if(e.target===overlay)document.body.removeChild(overlay)});
+  }catch(e){toast('Error cargando detalle','error')}
+}
+
+function filterReturns(type,el){
+  document.querySelectorAll('#sec-returns .fbtn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const c=document.getElementById('active-invs-list');
+  const filtered=type==='all'?activeInvestments:activeInvestments.filter(i=>{
+    const t=(i.type||'').toLowerCase();
+    return type==='pool'?t.includes('pool'):!t.includes('pool');
+  });
+  if(!filtered.length){
+    c.innerHTML='<div class="empty"><span class="empty-ic">📊</span>No hay inversiones de este tipo</div>';
+    return;
+  }
+  c.innerHTML=filtered.map(inv=>{
+    const isPool=(inv.type||'').toLowerCase().includes('pool');
+    const returnsHTML=(inv.returns||[]).map(r=>`<span class="badge grn" style="margin-right:4px">${formatDate(r.period_month)||r.period_month}: ${r.rate_applied}%</span>`).join('');
+    return `<div class="ic" data-id="${inv.id}" onclick="selectInvestment(${inv.id})">
+      <div class="ic-head">
+        <div>
+          <div class="ic-user">${inv.user_name}</div>
+          <div style="font-size:11px;color:var(--mut)">${inv.user_email}</div>
+        </div>
+        <div class="ic-type">${isPool?'🟡 Pool':'🔵 CDTC'} · ${inv.duration_months||6}m</div>
+      </div>
+      <div class="ic-details">
+        <div class="ic-d"><div class="l">Capital</div><div class="v blu">${formatCOP(inv.amount)}</div></div>
+        <div class="ic-d"><div class="l">Inicio</div><div class="v">${formatDate(inv.start_date)}</div></div>
+        <div class="ic-d"><div class="l">Vence</div><div class="v">${formatDate(inv.lock_end_date||inv.end_date)}</div></div>
+        <div class="ic-d"><div class="l">Rendimientos</div><div class="v grn">${inv.returns?.length||0} pagados</div></div>
+      </div>
+      ${returnsHTML?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)"><div style="font-size:10px;color:var(--mut);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Historial</div>${returnsHTML}</div>`:''}
+    </div>`;
+  }).join('');
+}
 
 // ═══ INIT ═══
 loadData();
