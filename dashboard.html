@@ -398,7 +398,7 @@
       </a>
       <a class="nav-item" href="#" onclick="showView('score',this);return false">
         <svg class="ni" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        Puntuación
+        Mis Puntos
       </a>
     </div>
     <div class="sb-section">
@@ -485,11 +485,16 @@
 
       <!-- Pool: info box -->
       <div id="pool-info" style="display:none;padding:14px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:10px;margin-bottom:14px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--amb)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          <span style="font-size:12px;font-weight:700;color:var(--amb)">Pool de Liquidez</span>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--amb)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span style="font-size:12px;font-weight:700;color:var(--amb)">Condiciones del Pool</span>
         </div>
-        <div style="font-size:11px;color:var(--mut);line-height:1.6">Exposición diversificada en múltiples activos. APY variable, retiro flexible sin plazo mínimo. Mayor potencial de rendimiento con riesgo moderado.</div>
+        <div style="font-size:11px;color:var(--mut);line-height:1.7">
+          • <strong style="color:var(--text)">Plazo mínimo:</strong> 12 meses bloqueado<br>
+          • <strong style="color:var(--text)">Comisión de entrada:</strong> 2% (se descuenta al invertir)<br>
+          • <strong style="color:var(--text)">Comisión de retiro:</strong> 20% sobre ganancias<br>
+          • <strong style="color:var(--text)">Riesgo:</strong> Puede haber meses negativos. El plazo largo compensa volatilidad.
+        </div>
       </div>
 
       <div class="info-row"><span class="l">Producto</span><span class="v" id="inf-producto">CDTC — Bajo Riesgo</span></div>
@@ -715,9 +720,9 @@ function renderDashboard(c){
       <div class="stat-val">${active.length}</div>
     </div>
     <div class="stat-card" onclick="showViewByName('score')" style="cursor:pointer;position:relative">
-      <div class="stat-label" style="display:flex;align-items:center;gap:4px">⭐ Puntuación</div>
-      <div class="stat-val" style="color:var(--tea)">${creditScore?.totalScore||creditScore?.score||0}</div>
-      <div style="position:absolute;top:14px;right:14px;font-size:10px;color:var(--tea);background:rgba(45,212,191,.1);padding:2px 8px;border-radius:10px;font-weight:600">${creditScore?.airdropMultiplier||creditScore?.multiplier||1}x airdrop</div>
+      <div class="stat-label" style="display:flex;align-items:center;gap:4px">⭐ Puntos</div>
+      <div class="stat-val" style="color:var(--blu)">${Math.floor((dashboardData?.transactions?.filter(t=>t.type==='deposit').reduce((s,t)=>s+(parseFloat(t.amount)||0),0)||0)/1000).toLocaleString('es-CO')}</div>
+      <div style="position:absolute;top:14px;right:14px;font-size:9px;color:var(--blu);background:rgba(79,142,247,.08);padding:2px 8px;border-radius:10px;font-weight:600">1pt/$1k</div>
     </div>
     <div class="stat-card" onclick="showViewByName('investments')" style="cursor:pointer">
       <div class="stat-label">APY Pool</div>
@@ -792,6 +797,8 @@ function showViewByName(v){
 
 function renderInvCard(inv){
   const isPending=inv.status==='pending_deposit';
+  const isPool=inv.type==='pool'||String(inv.type||'').includes('pool');
+  
   // Calcular ganancia pendiente proporcional: capital × 2% × (días transcurridos / 30)
   const cap=parseFloat(inv.amount)||0;
   const start=new Date(inv.startDate||inv.start_date||Date.now());
@@ -804,8 +811,8 @@ function renderInvCard(inv){
   return `<div class="inv-card" onclick="showInvestmentDetail(${inv.id})">
     <div class="inv-head">
       <div class="inv-type-wrap">
-        <div class="inv-type">CDTC <span class="plazo">— ${inv.durationMonths||6} meses</span></div>
-        <span class="risk-tag">Bajo Riesgo</span>
+        <div class="inv-type">${isPool?'Pool':'CDTC'} <span class="plazo">— ${isPool?'12 meses':((inv.durationMonths||6)+' meses')}</span></div>
+        <span class="risk-tag${isPool?' medium':''}">${isPool?'Riesgo Medio':'Bajo Riesgo'}</span>
       </div>
       <span class="inv-status ${isPending?'pending':'active'}">${isPending?'Pendiente':'Activa'}</span>
     </div>
@@ -815,11 +822,11 @@ function renderInvCard(inv){
         <div class="inv-cell-val blu">${formatCOP(cap)}</div>
       </div>
       <div class="inv-cell">
-        <div class="inv-cell-lbl">APY mensual</div>
-        <div class="inv-cell-val">~2.0%</div>
+        <div class="inv-cell-lbl">APY ${isPool?'anual':'mensual'}</div>
+        <div class="inv-cell-val">${isPool?'~'+calculatePoolAPY().annual.toFixed(1)+'%':'~2.0%'}</div>
       </div>
       <div class="inv-cell">
-        <div class="inv-cell-lbl">Ganancia pagada</div>
+        <div class="inv-cell-lbl">Ganancia ${isPool?'acumulada':'pagada'}</div>
         <div class="inv-cell-val grn">+${formatCOP(paidEarnings)}</div>
       </div>
       <div class="inv-cell earning-live">
@@ -827,6 +834,7 @@ function renderInvCard(inv){
         <div class="inv-cell-val amb" data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-paid="${paidEarnings}">+${formatCOP(pendingLive)}</div>
       </div>
     </div>
+    ${isPool&&paidEarnings>0?`<div style="margin-top:12px"><button class="btn btn-sm" style="width:100%;background:var(--amb);color:white;border:none;padding:10px;border-radius:7px;font-weight:600;font-size:12px" onclick="event.stopPropagation();withdrawPoolEarnings(${inv.id},${paidEarnings})">💰 Retirar Ganancias (20% comisión)</button></div>`:''}
   </div>`;
 }
 
@@ -845,6 +853,22 @@ function startEarningsAnimation(){
       el.textContent='+'+formatCOP(live);
     });
   },1000);
+}
+
+// Withdraw pool earnings with 20% commission
+async function withdrawPoolEarnings(invId,earnings){
+  const commission=Math.round(earnings*0.20);
+  const netAmount=earnings-commission;
+  if(!confirm(`¿Retirar ${formatCOP(earnings)} en ganancias?\n\nComisión 20%: -${formatCOP(commission)}\nRecibirás: ${formatCOP(netAmount)}`))return;
+  
+  try{
+    const res=await apiFetch(`/investments/${invId}/withdraw-earnings`,{method:'POST'});
+    const d=await res.json();
+    if(!res.ok)return toast(d.error||'Error al retirar','error');
+    toast(`✅ Retiro procesado. Recibirás ${formatCOP(netAmount)} (comisión: ${formatCOP(commission)})`);
+    await loadAllData();
+    renderCurrentView();
+  }catch(e){toast('Error de conexión','error')}
 }
 
 function renderTxRows(txs){
@@ -961,15 +985,24 @@ function renderInvestmentsView(c){
               <div class="prod-ttl">Pool de Liquidez</div>
               <span class="risk-tag medium">Riesgo Medio</span>
             </div>
-            <div class="prod-sub">Exposición diversificada · Sin plazo fijo</div>
+            <div class="prod-sub">Exposición diversificada · Plazo mínimo 1 año</div>
           </div>
         </div>
         <div class="pool-apy-big">${poolAPY.monthly.toFixed(2)}%<span style="font-size:14px;color:var(--mut);font-weight:500"> mensual</span></div>
         <div class="pool-apy-sub">APY anual real: <strong style="color:var(--amb);font-family:'Space Mono',monospace">${poolAPY.annual.toFixed(1)}%</strong> · Basado en ${poolAPY.months} meses de rendimientos históricos</div>
+        
+        <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:12px;margin:14px 0;font-size:11px;color:var(--mut);line-height:1.7">
+          <div style="font-weight:700;color:var(--amb);margin-bottom:6px;font-size:12px">⚠️ Comisiones y Condiciones</div>
+          • <strong style="color:var(--text)">Plazo mínimo:</strong> 12 meses (1 año bloqueado)<br>
+          • <strong style="color:var(--text)">Comisión de entrada:</strong> 2% del capital depositado<br>
+          • <strong style="color:var(--text)">Comisión de retiro de ganancias:</strong> 20%<br>
+          • <strong style="color:var(--text)">Volatilidad:</strong> Puede haber meses negativos. El plazo largo asegura mejores resultados.
+        </div>
+
         <div class="prod-rates">
-          <div class="rate-chip">Retiro flexible</div>
-          <div class="rate-chip">Sin plazo mínimo</div>
-          <div class="rate-chip">APY variable</div>
+          <div class="rate-chip">🔒 Bloqueado 12 meses</div>
+          <div class="rate-chip">📊 APY variable</div>
+          <div class="rate-chip">💰 Ganancias retirables</div>
         </div>
         <button class="prod-cta" style="background:linear-gradient(135deg,var(--amb),var(--pur))" onclick="openInvestModal('pool')">
           Invertir en Pool →
@@ -1226,83 +1259,68 @@ async function renderReferralsView(c){
   }catch(e){c.innerHTML='<div class="empty">Error cargando referidos</div>'}
 }
 
-// ══════════════════ RENDER: SCORE / CREDITS ══════════════════
+// ══════════════════ RENDER: REWARDS / POINTS ══════════════════
 async function renderScoreView(c){
-  c.innerHTML='<div class="loading"><div class="spinner"></div><p>Cargando puntuación...</p></div>';
-  // refetch to get fresh data
-  try{
-    const res=await apiFetch('/loans/credit-score');
-    if(res&&res.ok)creditScore=await res.json();
-  }catch(e){}
-
-  const s=creditScore||{};
-  const totalScore=s.totalScore||s.score||0;
-  const multiplier=s.airdropMultiplier||s.multiplier||1;
-  const maxScore=s.maxScore||1000;
-  const breakdown=s.breakdown||{};
-  const scorePct=Math.min(100,Math.round((totalScore/maxScore)*100));
-
-  // Categorías de puntos con nombres amigables
-  const labels={
-    antiguedad:{name:'Antigüedad',icon:'📅',desc:'Tiempo como miembro'},
-    capital:{name:'Capital Depositado',icon:'💰',desc:'Monto total depositado'},
-    inversiones:{name:'Inversiones CDTC',icon:'🔒',desc:'Inversiones activas'},
-    prestamos:{name:'Préstamos Pagados',icon:'🏦',desc:'Historial de pagos'},
-    actividad:{name:'Actividad Reciente',icon:'⚡',desc:'Movimientos recientes'},
-    balance:{name:'Balance Actual',icon:'💵',desc:'Saldo mantenido'}
-  };
+  c.innerHTML='<div class="loading"><div class="spinner"></div><p>Cargando puntos...</p></div>';
+  
+  // Calcular puntos: 1 punto por cada $1,000 COP depositados
+  const totalDeposited=dashboardData?.transactions?.filter(t=>t.type==='deposit').reduce((s,t)=>s+(parseFloat(t.amount)||0),0)||0;
+  const points=Math.floor(totalDeposited/1000);
+  const nextPoint=1000-((totalDeposited%1000)||0);
 
   c.innerHTML=`
   <div class="anim" style="max-width:720px">
-    <h3 style="font-size:18px;font-weight:700;margin-bottom:4px">Mi Puntuación</h3>
-    <p style="font-size:13px;color:var(--mut);margin-bottom:20px">Acumula puntos para maximizar tu airdrop futuro</p>
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:4px">Mis Puntos de Recompensa</h3>
+    <p style="font-size:13px;color:var(--mut);margin-bottom:20px">Acumula puntos y canjéalos por premios en nuestra tienda</p>
 
     <div class="score-hero">
-      <div class="score-lbl">Puntuación Total</div>
-      <div class="score-big">${totalScore}</div>
-      <div class="score-sub">${scorePct}% de tu potencial máximo (${maxScore} pts)</div>
-      <div class="score-mult">
-        <span>Multiplicador Airdrop:</span>
-        <strong>${multiplier}x</strong>
+      <div class="score-lbl">Puntos Disponibles</div>
+      <div class="score-big">${points.toLocaleString('es-CO')}</div>
+      <div class="score-sub">Ganas 1 punto por cada $1,000 COP depositados</div>
+      <div class="score-mult" style="background:var(--blud);border-color:rgba(79,142,247,.2);color:var(--blu)">
+        <span>Te faltan ${formatCOP(nextPoint)} para tu próximo punto</span>
       </div>
     </div>
 
     <div class="airdrop-card">
       <div class="ad-ttl">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--pur)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-        Próximo Airdrop
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--pur)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Tienda de Recompensas
       </div>
       <div class="ad-desc">
-        Tus puntos determinarán cuántos tokens recibirás en el airdrop. <strong>Más puntos = más tokens gratis.</strong>
-        Invierte, ahorra y paga tus préstamos a tiempo para maximizar tu multiplicador.
+        <strong>Los puntos son ilimitados.</strong> Mientras más deposites, más puntos acumulas. 
+        Canjea tus puntos por premios exclusivos, beneficios en la plataforma, descuentos en comisiones y más.
       </div>
+      <button class="prod-cta" style="margin-top:12px;opacity:.6;cursor:not-allowed" disabled>
+        🛒 Ver Tienda (Próximamente)
+      </button>
     </div>
 
     <div class="score-breakdown">
-      <div class="sb-ttl">Desglose de Puntos</div>
-      ${Object.entries(breakdown).length>0?Object.entries(breakdown).map(([k,v])=>{
-        const info=labels[k]||{name:k,icon:'•',desc:''};
-        const val=v.value||v.score||0;
-        const max=v.max||100;
-        const pct=Math.min(100,Math.round((val/max)*100));
-        return `<div class="sb-item">
-          <div class="sb-head">
-            <div class="sb-head-l">${info.icon} ${info.name}</div>
-            <div class="sb-head-r"><strong>${val}</strong> / ${max} pts</div>
-          </div>
-          <div class="sb-bar"><div class="sb-bar-fill" style="width:${pct}%"></div></div>
-        </div>`;
-      }).join(''):`<div class="empty" style="padding:20px 0"><span class="empty-icon">⭐</span>Aún no has acumulado puntos.<br><span style="font-size:11px;opacity:.7">Empieza invirtiendo o depositando para sumar.</span></div>`}
+      <div class="sb-ttl">Tu Historial de Puntos</div>
+      <div style="font-size:12px;color:var(--mut);line-height:1.8">
+        <div class="info-row" style="border-bottom:1px solid var(--bd);padding:12px 0">
+          <span class="l">💰 Total Depositado</span>
+          <span class="v grn">${formatCOP(totalDeposited)}</span>
+        </div>
+        <div class="info-row" style="border-bottom:1px solid var(--bd);padding:12px 0">
+          <span class="l">⭐ Puntos Ganados</span>
+          <span class="v blu">${points.toLocaleString('es-CO')}</span>
+        </div>
+        <div class="info-row" style="padding:12px 0">
+          <span class="l">📊 Tasa de Conversión</span>
+          <span class="v">1 punto / $1,000 COP</span>
+        </div>
+      </div>
     </div>
 
     <div class="card" style="padding:18px">
       <div class="sb-ttl" style="margin-bottom:10px">Cómo ganar más puntos</div>
       <div style="font-size:12px;color:var(--mut);line-height:1.9">
-        • <strong style="color:var(--text)">Mantén tu capital depositado</strong> — Más tiempo = más puntos<br>
-        • <strong style="color:var(--text)">Crea inversiones CDTC</strong> — Los plazos largos dan más puntos<br>
-        • <strong style="color:var(--text)">Paga préstamos a tiempo</strong> — Evita la mora<br>
-        • <strong style="color:var(--text)">Actividad frecuente</strong> — Usa la plataforma regularmente<br>
-        • <strong style="color:var(--text)">Refiere amigos activos</strong> — Cada referido suma
+        • <strong style="color:var(--text)">Deposita capital</strong> — 1 punto por cada $1,000 COP<br>
+        • <strong style="color:var(--text)">Sin límite</strong> — Acumula todos los puntos que puedas<br>
+        • <strong style="color:var(--text)">Nunca expiran</strong> — Guárdalos para premios mejores<br>
+        • <strong style="color:var(--text)">Próximamente:</strong> bonos por referidos y actividad constante
       </div>
     </div>
   </div>`;
@@ -1378,7 +1396,7 @@ async function changePassword(){
 
 // ══════════════════ INVEST MODAL ══════════════════
 function openInvestModal(type='cdtc'){
-  selectedPlan={plan:type==='pool'?'pool':'cdtc_6m',months:type==='pool'?0:6,type:type};
+  selectedPlan={plan:type==='pool'?'pool':'cdtc_6m',months:type==='pool'?12:6,type:type};
   const isPool=type==='pool';
   document.getElementById('modal-title').textContent=isPool?'Invertir en Pool':'Nueva Inversión CDTC';
   const tag=document.getElementById('modal-risk-tag');
@@ -1402,7 +1420,7 @@ function openInvestModal(type='cdtc'){
     document.getElementById('inf-min').textContent='$50,000 COP';
     document.getElementById('invest-amount').min='50000';
     document.getElementById('invest-amount').placeholder='Mín. $50,000';
-    document.getElementById('invest-disc').textContent='El Pool permite retiros flexibles sin plazo fijo. El APY es variable y se basa en el rendimiento real mensual del fondo. Conlleva riesgo moderado.';
+    document.getElementById('invest-disc').innerHTML='<strong style="color:var(--amb)">⚠️ Comisión de entrada: 2%</strong> · Tu capital quedará bloqueado por 12 meses. El APY es variable y puede haber meses negativos. Comisión del 20% al retirar ganancias.';
     // Update button style
     document.getElementById('btn-invest').style.background='linear-gradient(135deg,var(--amb),var(--pur))';
   } else {
@@ -1442,17 +1460,20 @@ function updateInvestPreview(){
   const minAmount=isPool?50000:100000;
 
   if(amt>=minAmount&&amt<=balanceSummary.availableBalance){
-    document.getElementById('pv-cap').textContent=formatCOP(amt);
     if(isPool){
-      // Pool: gain = capital * monthlyAPY/100 (estimado para 1 mes)
+      // Pool: deducir comisión de entrada del 2%
+      const entryFee=Math.round(amt*0.02);
+      const netCapital=amt-entryFee;
       const apy=calculatePoolAPY();
-      const gain=Math.round(amt*(apy.monthly/100));
-      document.getElementById('pv-gain').textContent='+'+formatCOP(gain)+' / mes';
+      const gainPerMonth=Math.round(netCapital*(apy.monthly/100));
+      document.getElementById('pv-cap').innerHTML=`${formatCOP(netCapital)}<div style="font-size:10px;color:var(--mut);margin-top:3px">Comisión entrada: -${formatCOP(entryFee)} (2%)</div>`;
+      document.getElementById('pv-gain').innerHTML=`+${formatCOP(gainPerMonth)} / mes<div style="font-size:10px;color:var(--mut);margin-top:3px">Comisión retiro: 20% sobre ganancias</div>`;
     } else {
       const months=selectedPlan.months;
       const now=new Date();
       const unlock=new Date(now.getFullYear(),now.getMonth()+months,now.getDate());
       const gain=Math.round(amt*0.02*months);
+      document.getElementById('pv-cap').textContent=formatCOP(amt);
       document.getElementById('pv-unlock').textContent=formatDate(unlock);
       document.getElementById('pv-gain').textContent='+'+formatCOP(gain);
     }
