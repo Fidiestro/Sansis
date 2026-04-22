@@ -1492,8 +1492,15 @@ async function confirmInvest(){
   const btn=document.getElementById('btn-invest');
   btn.disabled=true;btn.textContent='Procesando...';
   try{
-    const payload={productId:selectedPlan.plan,amount:amt};
-    if(isPool)payload.type='pool';
+    const payload=isPool?{
+      type:'pool',
+      amount:amt,
+      durationMonths:12
+    }:{
+      productId:selectedPlan.plan,
+      amount:amt
+    };
+    
     const res=await apiFetch('/investments/create',{method:'POST',body:JSON.stringify(payload)});
     const d=await res.json();
     if(!res.ok){toast(d.error||'Error','error');return}
