@@ -1065,7 +1065,7 @@ function renderDepositView(c){
         <span class="l">Llave Bre-B / Nequi</span>
         <span class="v" style="display:flex;align-items:center;gap:8px">
           <strong id="breb-key">@JFC927</strong>
-          <button onclick="navigator.clipboard.writeText('@JFC927').then(()=>showToast('¡Llave copiada!','success'))" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--mut);cursor:pointer">Copiar</button>
+          <button onclick="navigator.clipboard.writeText('@JFC927').then(()=>toast('¡Llave copiada!','success'))" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--mut);cursor:pointer">Copiar</button>
         </span>
       </div>
       <div class="info-row"><span class="l">Titular</span><span class="v">Sanse Capital SAS</span></div>
@@ -1125,7 +1125,7 @@ function updateDepositPreview(){
 function handleDepositFile(input){
   const file=input.files[0];
   if(!file) return;
-  if(file.size>5*1024*1024){ showToast('La imagen no puede superar 5MB','error'); input.value=''; return; }
+  if(file.size>5*1024*1024){ toast('La imagen no puede superar 5MB','error'); input.value=''; return; }
   const reader=new FileReader();
   reader.onload=e=>{
     document.getElementById('dep-img-thumb').src=e.target.result;
@@ -1161,7 +1161,7 @@ async function submitDepositProof(){
   const note=document.getElementById('dep-note')?.value||'';
   const file=document.getElementById('dep-file')?.files[0];
 
-  if(amt<10000||!file){ showToast('Completa el monto y adjunta el comprobante','error'); return; }
+  if(amt<10000||!file){ toast('Completa el monto y adjunta el comprobante','error'); return; }
 
   btn.disabled=true; btn.textContent='Enviando...'; btn.style.opacity='.6';
 
@@ -1190,7 +1190,7 @@ async function submitDepositProof(){
       msgEl.innerHTML='✅ Comprobante enviado. El admin revisará tu depósito pronto.';
       btn.textContent='✓ Enviado';
       btn.style.background='var(--grn)';
-      showToast('Comprobante enviado exitosamente','success');
+      toast('Comprobante enviado exitosamente','success');
     } else {
       const err=res?await res.json():{};
       throw new Error(err.error||'Error al enviar');
@@ -1199,7 +1199,7 @@ async function submitDepositProof(){
     btn.disabled=false; btn.textContent='Enviar Comprobante'; btn.style.opacity='1';
     msgEl.style.display='block'; msgEl.style.color='var(--red)';
     msgEl.textContent='Error: '+(e.message||'Intenta de nuevo');
-    showToast(e.message||'Error al enviar comprobante','error');
+    toast(e.message||'Error al enviar comprobante','error');
   }
 }
 
