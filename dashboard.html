@@ -1709,7 +1709,7 @@ async function showInvestmentDetail(id){
         </div>
         <div class="dm-item apy">
           <div class="dm-lbl">APY mensual</div>
-          <div class="dm-val blu">${inv.type==='pool'?poolAPY.monthly.toFixed(2)+'%':'~2.0%'}</div>
+          <div class="dm-val blu">${inv.type==='pool'?(poolStats&&typeof poolStats.monthlyAPY==='number'?poolStats.monthlyAPY.toFixed(2):calculatePoolAPY().monthly.toFixed(2))+'%':'~2.0%'}</div>
           <div class="dm-sub">${inv.type==='pool'?'Variable — Pool de Liquidez':'Estimado histórico'}</div>
         </div>
         <div class="dm-item time">
