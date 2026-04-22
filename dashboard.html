@@ -1058,22 +1058,149 @@ function renderDepositView(c){
         </div>
         <div>
           <div style="font-size:15px;font-weight:700">Transferencia Bancaria</div>
-          <div style="font-size:12px;color:var(--mut)">Bre-B / Bancolombia / Nequi</div>
+          <div style="font-size:12px;color:var(--mut)">Bre-B / Nequi / Bancolombia</div>
         </div>
       </div>
-      <div class="info-row"><span class="l">Banco</span><span class="v">Bancolombia</span></div>
-      <div class="info-row"><span class="l">Tipo</span><span class="v">Ahorros</span></div>
-      <div class="info-row"><span class="l">Número</span><span class="v">71677574856</span></div>
+      <div class="info-row">
+        <span class="l">Llave Bre-B / Nequi</span>
+        <span class="v" style="display:flex;align-items:center;gap:8px">
+          <strong id="breb-key">@JFC927</strong>
+          <button onclick="navigator.clipboard.writeText('@JFC927').then(()=>showToast('¡Llave copiada!','success'))" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--mut);cursor:pointer">Copiar</button>
+        </span>
+      </div>
       <div class="info-row"><span class="l">Titular</span><span class="v">Sanse Capital SAS</span></div>
-      <div style="margin-top:14px;padding:12px;background:var(--blud);border:1px solid rgba(79,142,247,.15);border-radius:8px;font-size:12px;color:var(--blu);line-height:1.6">
-        💡 Después de transferir, envía el comprobante a <strong>WhatsApp +57 319 455 2890</strong> para acreditar los fondos.
+      <div style="margin-top:14px;padding:12px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:8px;font-size:12px;color:var(--grn);line-height:1.6">
+        💡 Realiza la transferencia y luego completa el formulario de abajo para confirmar tu depósito.
       </div>
     </div>
 
-    <a href="https://wa.me/573194552890?text=Hola,%20acabo%20de%20hacer%20un%20depósito.%20Envío%20comprobante." target="_blank" class="prod-cta" style="display:block;text-decoration:none;text-align:center">
-      Enviar Comprobante por WhatsApp →
-    </a>
+    <div class="card" style="padding:20px;margin-bottom:14px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:16px">Confirmar Depósito</div>
+
+      <div class="fld">
+        <label class="fld-lbl">Monto transferido (COP)</label>
+        <input type="number" id="dep-amount" class="mono" placeholder="Ej: 500000" min="10000" oninput="updateDepositPreview()" style="width:100%;box-sizing:border-box">
+        <div id="dep-preview" style="display:none;margin-top:8px;padding:10px;background:var(--sur);border-radius:8px;font-size:12px;color:var(--mut)"></div>
+      </div>
+
+      <div class="fld">
+        <label class="fld-lbl">Captura de pantalla del comprobante</label>
+        <div id="dep-drop" onclick="document.getElementById('dep-file').click()" style="border:2px dashed var(--bd);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='var(--grn)'" onmouseout="this.style.borderColor='var(--bd)'">
+          <div style="font-size:24px;margin-bottom:6px">📎</div>
+          <div style="font-size:13px;color:var(--mut)">Toca para seleccionar imagen</div>
+          <div style="font-size:11px;color:var(--dim);margin-top:4px">JPG, PNG o WebP · máx 5MB</div>
+          <input type="file" id="dep-file" accept="image/*" style="display:none" onchange="handleDepositFile(this)">
+        </div>
+        <div id="dep-preview-img" style="display:none;margin-top:10px;position:relative">
+          <img id="dep-img-thumb" style="width:100%;border-radius:8px;border:1px solid var(--bd);max-height:200px;object-fit:cover">
+          <button onclick="clearDepositFile()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">×</button>
+        </div>
+      </div>
+
+      <div class="fld" style="margin-bottom:0">
+        <label class="fld-lbl">Nota adicional (opcional)</label>
+        <input type="text" id="dep-note" placeholder="Ej: Transferencia desde Nequi" style="width:100%;box-sizing:border-box">
+      </div>
+    </div>
+
+    <button id="dep-submit-btn" onclick="submitDepositProof()" class="prod-cta" style="width:100%;opacity:.5;cursor:not-allowed" disabled>
+      Enviar Comprobante
+    </button>
+    <div id="dep-submit-msg" style="display:none;margin-top:10px;text-align:center;font-size:12px"></div>
   </div>`;
+}
+
+function updateDepositPreview(){
+  const amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
+  const prev=document.getElementById('dep-preview');
+  if(amt>=10000){
+    prev.style.display='block';
+    prev.innerHTML=`Monto a acreditar: <strong style="color:var(--grn)">${formatCOP(amt)}</strong>`;
+  } else {
+    prev.style.display='none';
+  }
+  checkDepositReady();
+}
+
+function handleDepositFile(input){
+  const file=input.files[0];
+  if(!file) return;
+  if(file.size>5*1024*1024){ showToast('La imagen no puede superar 5MB','error'); input.value=''; return; }
+  const reader=new FileReader();
+  reader.onload=e=>{
+    document.getElementById('dep-img-thumb').src=e.target.result;
+    document.getElementById('dep-preview-img').style.display='block';
+    document.getElementById('dep-drop').style.display='none';
+    checkDepositReady();
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearDepositFile(){
+  document.getElementById('dep-file').value='';
+  document.getElementById('dep-preview-img').style.display='none';
+  document.getElementById('dep-drop').style.display='block';
+  checkDepositReady();
+}
+
+function checkDepositReady(){
+  const amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
+  const hasFile=document.getElementById('dep-file')?.files?.length>0;
+  const btn=document.getElementById('dep-submit-btn');
+  if(!btn) return;
+  const ready=amt>=10000&&hasFile;
+  btn.disabled=!ready;
+  btn.style.opacity=ready?'1':'.5';
+  btn.style.cursor=ready?'pointer':'not-allowed';
+}
+
+async function submitDepositProof(){
+  const btn=document.getElementById('dep-submit-btn');
+  const msgEl=document.getElementById('dep-submit-msg');
+  const amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
+  const note=document.getElementById('dep-note')?.value||'';
+  const file=document.getElementById('dep-file')?.files[0];
+
+  if(amt<10000||!file){ showToast('Completa el monto y adjunta el comprobante','error'); return; }
+
+  btn.disabled=true; btn.textContent='Enviando...'; btn.style.opacity='.6';
+
+  try{
+    // Convertir imagen a base64
+    const toBase64=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsDataURL(f);});
+    const imgBase64=await toBase64(file);
+
+    const userRaw=localStorage.getItem('sanse_user')||sessionStorage.getItem('sanse_user');
+    const user=userRaw?JSON.parse(userRaw):{};
+
+    const res=await apiFetch('/deposits/create',{
+      method:'POST',
+      body:JSON.stringify({
+        amount:amt,
+        note:note,
+        proofImage:imgBase64,
+        fileName:file.name
+      })
+    });
+
+    if(res&&res.ok){
+      const data=await res.json();
+      msgEl.style.display='block';
+      msgEl.style.color='var(--grn)';
+      msgEl.innerHTML='✅ Comprobante enviado. El admin revisará tu depósito pronto.';
+      btn.textContent='✓ Enviado';
+      btn.style.background='var(--grn)';
+      showToast('Comprobante enviado exitosamente','success');
+    } else {
+      const err=res?await res.json():{};
+      throw new Error(err.error||'Error al enviar');
+    }
+  } catch(e){
+    btn.disabled=false; btn.textContent='Enviar Comprobante'; btn.style.opacity='1';
+    msgEl.style.display='block'; msgEl.style.color='var(--red)';
+    msgEl.textContent='Error: '+(e.message||'Intenta de nuevo');
+    showToast(e.message||'Error al enviar comprobante','error');
+  }
 }
 
 // ══════════════════ RENDER: WITHDRAW ══════════════════
