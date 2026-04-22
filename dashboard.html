@@ -254,7 +254,53 @@
   .info-row .v.blu{color:var(--blu)}
   .info-row .v.grn{color:var(--grn)}
 
-  /* ──────── LOADING / EMPTY ──────── */
+  /* ──────── SCORE VIEW ──────── */
+  .score-hero{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:24px 20px;margin-bottom:14px;position:relative;overflow:hidden;text-align:center}
+  .score-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--grn),var(--tea))}
+  .score-big{font-family:'Space Mono',monospace;font-size:56px;font-weight:700;line-height:1;letter-spacing:-1px;background:linear-gradient(135deg,var(--grn),var(--tea));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:10px 0 6px}
+  .score-lbl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+  .score-sub{font-size:12px;color:var(--mut);line-height:1.6}
+  .score-mult{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:6px 16px;background:var(--grnd);border:1px solid rgba(16,185,129,.2);border-radius:20px;font-size:12px;color:var(--grn);font-weight:600}
+  .score-mult strong{font-family:'Space Mono',monospace;font-size:15px}
+
+  .score-breakdown{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:18px;margin-bottom:14px}
+  .sb-ttl{font-size:13px;font-weight:700;margin-bottom:14px}
+  .sb-item{margin-bottom:12px}
+  .sb-item:last-child{margin-bottom:0}
+  .sb-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px}
+  .sb-head-l{color:var(--text);font-weight:500}
+  .sb-head-r{font-family:'Space Mono',monospace;color:var(--mut);font-size:11px}
+  .sb-head-r strong{color:var(--grn)}
+  .sb-bar{height:6px;background:var(--sur);border-radius:3px;overflow:hidden}
+  .sb-bar-fill{height:100%;background:linear-gradient(90deg,var(--grn),var(--tea));border-radius:3px;transition:width .8s ease}
+
+  .airdrop-card{background:linear-gradient(135deg,rgba(124,92,252,.08),rgba(45,212,191,.08));border:1px solid rgba(124,92,252,.2);border-radius:12px;padding:18px;margin-bottom:14px;position:relative;overflow:hidden}
+  .airdrop-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--pur),var(--tea))}
+  .ad-ttl{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;margin-bottom:6px}
+  .ad-desc{font-size:12px;color:var(--mut);line-height:1.7;margin-bottom:10px}
+  .ad-desc strong{color:var(--text)}
+
+  /* ──────── POOL CARD (Medium Risk) ──────── */
+  .risk-tag.medium{background:rgba(245,158,11,.1);color:var(--amb);border-color:rgba(245,158,11,.25)}
+  .risk-tag.medium::before{background:var(--amb)}
+
+  .pool-card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:18px;position:relative;overflow:hidden}
+  .pool-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--amb),var(--pur))}
+  .pool-apy-big{font-family:'Space Mono',monospace;font-size:32px;font-weight:700;color:var(--amb);line-height:1;letter-spacing:-.5px;margin:6px 0 4px}
+  .pool-apy-sub{font-size:11px;color:var(--mut);margin-bottom:14px}
+
+  /* allocation ring */
+  .alloc-block{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:18px;margin-bottom:14px}
+  .alloc-ttl{font-size:13px;font-weight:700;margin-bottom:14px}
+  .alloc-rows{display:flex;flex-direction:column;gap:12px}
+  .alloc-row{}
+  .alloc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px}
+  .alloc-name{display:flex;align-items:center;gap:6px;color:var(--text);font-weight:500}
+  .alloc-name .dot-sm{width:8px;height:8px;border-radius:50%}
+  .alloc-val{font-family:'Space Mono',monospace;color:var(--text);font-weight:600}
+  .alloc-pct{font-size:11px;color:var(--mut);margin-left:6px}
+  .alloc-bar{height:6px;background:var(--sur);border-radius:3px;overflow:hidden}
+  .alloc-bar-fill{height:100%;border-radius:3px;transition:width .8s ease}
   .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--mut);gap:14px}
   .spinner{width:32px;height:32px;border:3px solid var(--bd);border-top-color:var(--blu);border-radius:50%;animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
@@ -350,6 +396,10 @@
         <svg class="ni" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Referidos
       </a>
+      <a class="nav-item" href="#" onclick="showView('score',this);return false">
+        <svg class="ni" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Puntuación
+      </a>
     </div>
     <div class="sb-section">
       <div class="sb-section-ttl">Cuenta</div>
@@ -405,15 +455,16 @@
   <div class="modal">
     <div class="modal-head">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <div class="modal-ttl">Nueva Inversión CDTC</div>
-        <span class="risk-tag">Bajo Riesgo</span>
+        <div class="modal-ttl" id="modal-title">Nueva Inversión</div>
+        <span class="risk-tag" id="modal-risk-tag">Bajo Riesgo</span>
       </div>
       <button class="modal-close" onclick="closeModal('investModal')">✕</button>
     </div>
     <div class="modal-body">
       <div id="invest-warn"></div>
 
-      <div class="fld">
+      <!-- CDTC: selector de plazo -->
+      <div class="fld" id="cdtc-plan-selector">
         <label class="fld-lbl">Plazo del contrato</label>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="plan-sel">
           <div class="plan-opt" data-plan="cdtc_3m" data-months="3" onclick="selectPlan(this)" style="padding:14px 8px;background:var(--sur);border:1px solid var(--bd);border-radius:10px;text-align:center;cursor:pointer;transition:all .15s">
@@ -432,9 +483,18 @@
         </div>
       </div>
 
-      <div class="info-row"><span class="l">Producto</span><span class="v">CDTC — Bajo Riesgo</span></div>
-      <div class="info-row"><span class="l">APY mensual</span><span class="v blu">~2.0%</span></div>
-      <div class="info-row"><span class="l">Mínimo</span><span class="v">$100,000 COP</span></div>
+      <!-- Pool: info box -->
+      <div id="pool-info" style="display:none;padding:14px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:10px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--amb)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span style="font-size:12px;font-weight:700;color:var(--amb)">Pool de Liquidez</span>
+        </div>
+        <div style="font-size:11px;color:var(--mut);line-height:1.6">Exposición diversificada en múltiples activos. APY variable, retiro flexible sin plazo mínimo. Mayor potencial de rendimiento con riesgo moderado.</div>
+      </div>
+
+      <div class="info-row"><span class="l">Producto</span><span class="v" id="inf-producto">CDTC — Bajo Riesgo</span></div>
+      <div class="info-row"><span class="l" id="inf-apy-l">APY mensual</span><span class="v blu" id="inf-apy">~2.0%</span></div>
+      <div class="info-row"><span class="l">Mínimo</span><span class="v" id="inf-min">$100,000 COP</span></div>
 
       <div class="fld" style="margin-top:16px">
         <label class="fld-lbl">Monto a invertir (COP)</label>
@@ -445,8 +505,8 @@
       <div id="invest-preview" style="display:none;background:var(--sur);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px">
         <div style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px">Resumen</div>
         <div class="info-row"><span class="l">Capital</span><span class="v" id="pv-cap">$0</span></div>
-        <div class="info-row"><span class="l">Desbloqueo</span><span class="v" id="pv-unlock">—</span></div>
-        <div class="info-row"><span class="l">Ganancia est.</span><span class="v grn" id="pv-gain">$0</span></div>
+        <div class="info-row" id="pv-unlock-row"><span class="l">Desbloqueo</span><span class="v" id="pv-unlock">—</span></div>
+        <div class="info-row"><span class="l">Ganancia estimada</span><span class="v grn" id="pv-gain">$0</span></div>
       </div>
 
       <div style="font-size:11px;color:var(--mut);line-height:1.6;margin-bottom:14px" id="invest-disc">El capital quedará bloqueado durante el plazo seleccionado. Los rendimientos son variables y no garantizados.</div>
@@ -527,8 +587,11 @@ let globalStats={apyReal:0,apyMin:2,apyMax:4};
 let myLoans={legacyLoans:[],loanRequests:[]};
 let paymentMethods=[];
 let userProfile=null;
+let creditScore=null;
+let poolInvestments=[];
+let poolStats=null;
 let currentView='dashboard';
-let selectedPlan={plan:'cdtc_6m',months:6};
+let selectedPlan={plan:'cdtc_6m',months:6,type:'cdtc'};
 
 // ══════════════════ GREETING ══════════════════
 function setGreeting(userName){
@@ -542,18 +605,22 @@ function setGreeting(userName){
 // ══════════════════ LOAD DATA ══════════════════
 async function loadAllData(){
   try{
-    const [dashR,balR,invR,gsR,loanR]=await Promise.all([
+    const [dashR,balR,invR,gsR,loanR,scoreR,poolR]=await Promise.all([
       apiFetch('/dashboard/summary'),
       apiFetch('/investments/balance-summary'),
       apiFetch('/investments/my'),
       apiFetch('/investments/global-stats'),
-      apiFetch('/loans/my')
+      apiFetch('/loans/my'),
+      apiFetch('/loans/credit-score'),
+      apiFetch('/investments/pool-stats')
     ]);
     if(dashR&&dashR.ok)dashboardData=await dashR.json();
     if(balR&&balR.ok)balanceSummary=await balR.json();
     if(invR&&invR.ok)myInvestments=await invR.json();
     if(gsR&&gsR.ok)globalStats=await gsR.json();
     if(loanR&&loanR.ok)myLoans=await loanR.json();
+    if(scoreR&&scoreR.ok)creditScore=await scoreR.json();
+    if(poolR&&poolR.ok)poolStats=await poolR.json();
 
     // Fallback if balance summary missing
     if(!balR||!balR.ok){
@@ -580,7 +647,8 @@ function renderCurrentView(){
     dashboard:renderDashboard,investments:renderInvestmentsView,
     deposit:renderDepositView,withdraw:renderWithdrawView,
     movements:renderMovementsView,loans:renderLoansView,
-    referrals:renderReferralsView,profile:renderProfileView
+    referrals:renderReferralsView,profile:renderProfileView,
+    score:renderScoreView
   };
   (views[currentView]||renderDashboard)(c);
 }
@@ -645,6 +713,15 @@ function renderDashboard(c){
     <div class="stat-card">
       <div class="stat-label">Inversiones activas</div>
       <div class="stat-val">${active.length}</div>
+    </div>
+    <div class="stat-card" onclick="showViewByName('score')" style="cursor:pointer;position:relative">
+      <div class="stat-label" style="display:flex;align-items:center;gap:4px">⭐ Puntuación</div>
+      <div class="stat-val" style="color:var(--tea)">${creditScore?.totalScore||creditScore?.score||0}</div>
+      <div style="position:absolute;top:14px;right:14px;font-size:10px;color:var(--tea);background:rgba(45,212,191,.1);padding:2px 8px;border-radius:10px;font-weight:600">${creditScore?.airdropMultiplier||creditScore?.multiplier||1}x airdrop</div>
+    </div>
+    <div class="stat-card" onclick="showViewByName('investments')" style="cursor:pointer">
+      <div class="stat-label">APY Pool</div>
+      <div class="stat-val" style="color:var(--amb)">${calculatePoolAPY().monthly.toFixed(2)}%</div>
     </div>
   </div>
 
@@ -804,13 +881,50 @@ function drawChart(data){
 function renderInvestmentsView(c){
   const active=myInvestments.filter(i=>['active','pending_deposit'].includes(i.status));
   const done=myInvestments.filter(i=>['completed','cancelled'].includes(i.status));
+
+  // Separate CDTC vs pool
+  const activeCDTC=active.filter(i=>!i.type||i.type==='cdtc'||String(i.type).startsWith('cdtc'));
+  const activePool=active.filter(i=>i.type==='pool'||String(i.type).includes('pool'));
+
+  // Pool APY real (dinámico): calcula desde historial
+  const poolAPY=calculatePoolAPY();
+  const poolTotalInvested=activePool.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
+  const cdtcTotalInvested=activeCDTC.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
+  const totalInvested=poolTotalInvested+cdtcTotalInvested;
+  const cdtcPct=totalInvested>0?Math.round((cdtcTotalInvested/totalInvested)*100):0;
+  const poolPct=100-cdtcPct;
+
   c.innerHTML=`
   <div class="anim">
     <h3 style="font-size:18px;font-weight:700;margin-bottom:4px">Mis Inversiones</h3>
-    <p style="font-size:13px;color:var(--mut);margin-bottom:20px">Gestiona tus CDTC activas y pasadas</p>
+    <p style="font-size:13px;color:var(--mut);margin-bottom:20px">Elige el producto que mejor se ajuste a tu perfil de riesgo</p>
 
+    ${totalInvested>0?`
+    <div class="alloc-block">
+      <div class="alloc-ttl">Distribución de tu capital invertido</div>
+      <div class="alloc-rows">
+        ${cdtcTotalInvested>0?`
+        <div class="alloc-row">
+          <div class="alloc-head">
+            <div class="alloc-name"><span class="dot-sm" style="background:var(--blu)"></span>CDTC — Bajo Riesgo</div>
+            <div><span class="alloc-val">${formatCOP(cdtcTotalInvested)}</span><span class="alloc-pct">${cdtcPct}%</span></div>
+          </div>
+          <div class="alloc-bar"><div class="alloc-bar-fill" style="width:${cdtcPct}%;background:linear-gradient(90deg,var(--blu),var(--pur))"></div></div>
+        </div>`:''}
+        ${poolTotalInvested>0?`
+        <div class="alloc-row">
+          <div class="alloc-head">
+            <div class="alloc-name"><span class="dot-sm" style="background:var(--amb)"></span>Pool — Riesgo Medio</div>
+            <div><span class="alloc-val">${formatCOP(poolTotalInvested)}</span><span class="alloc-pct">${poolPct}%</span></div>
+          </div>
+          <div class="alloc-bar"><div class="alloc-bar-fill" style="width:${poolPct}%;background:linear-gradient(90deg,var(--amb),var(--pur))"></div></div>
+        </div>`:''}
+      </div>
+    </div>`:''}
+
+    <!-- Producto CDTC -->
     <div class="sec">
-      <div class="product-card">
+      <div class="product-card" style="margin-bottom:10px">
         <div class="prod-head">
           <div class="prod-icon">
             <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
@@ -820,17 +934,45 @@ function renderInvestmentsView(c){
               <div class="prod-ttl">Inversión CDTC</div>
               <span class="risk-tag">Bajo Riesgo</span>
             </div>
-            <div class="prod-sub">Rendimiento histórico ~2.0% mensual</div>
+            <div class="prod-sub">Rendimiento histórico ~2.0% mensual · Capital bloqueado</div>
           </div>
         </div>
         <div class="prod-rates">
           <div class="rate-chip"><strong>3</strong> meses</div>
           <div class="rate-chip"><strong>6</strong> meses</div>
           <div class="rate-chip"><strong>12</strong> meses</div>
-          <div class="rate-chip">${active.length}/3 activas</div>
+          <div class="rate-chip">${activeCDTC.length}/3 activas</div>
         </div>
-        <button class="prod-cta" onclick="openInvestModal()" ${active.length>=3?'disabled':''}>
-          ${active.length>=3?'Límite alcanzado':'Crear nueva inversión →'}
+        <button class="prod-cta" onclick="openInvestModal('cdtc')" ${activeCDTC.length>=3?'disabled':''}>
+          ${activeCDTC.length>=3?'Límite alcanzado':'Invertir en CDTC →'}
+        </button>
+      </div>
+    </div>
+
+    <!-- Producto Pool de Liquidez -->
+    <div class="sec">
+      <div class="pool-card">
+        <div class="prod-head">
+          <div class="prod-icon" style="background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.2)">
+            <svg viewBox="0 0 24 24" stroke="var(--amb)"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="10"/></svg>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <div class="prod-ttl">Pool de Liquidez</div>
+              <span class="risk-tag medium">Riesgo Medio</span>
+            </div>
+            <div class="prod-sub">Exposición diversificada · Sin plazo fijo</div>
+          </div>
+        </div>
+        <div class="pool-apy-big">${poolAPY.monthly.toFixed(2)}%<span style="font-size:14px;color:var(--mut);font-weight:500"> mensual</span></div>
+        <div class="pool-apy-sub">APY anual real: <strong style="color:var(--amb);font-family:'Space Mono',monospace">${poolAPY.annual.toFixed(1)}%</strong> · Basado en ${poolAPY.months} meses de rendimientos históricos</div>
+        <div class="prod-rates">
+          <div class="rate-chip">Retiro flexible</div>
+          <div class="rate-chip">Sin plazo mínimo</div>
+          <div class="rate-chip">APY variable</div>
+        </div>
+        <button class="prod-cta" style="background:linear-gradient(135deg,var(--amb),var(--pur))" onclick="openInvestModal('pool')">
+          Invertir en Pool →
         </button>
       </div>
     </div>
@@ -848,6 +990,25 @@ function renderInvestmentsView(c){
     </div>`:''}
   </div>`;
   startEarningsAnimation();
+}
+
+// Calcula APY del pool basado en rendimientos históricos pagados
+function calculatePoolAPY(){
+  // Si el backend trae poolStats, úsalos
+  if(poolStats&&typeof poolStats.monthlyAPY==='number'){
+    return {monthly:poolStats.monthlyAPY,annual:poolStats.annualAPY||poolStats.monthlyAPY*12,months:poolStats.monthsTracked||0};
+  }
+  // Fallback: calcular desde las inversiones del usuario
+  const allReturns=myInvestments.flatMap(i=>i.returns||[]);
+  if(allReturns.length===0){
+    return {monthly:2.0,annual:26.82,months:0};
+  }
+  const rates=allReturns.map(r=>parseFloat(r.rate||r.rate_applied)||0).filter(r=>r>0);
+  if(rates.length===0)return {monthly:2.0,annual:26.82,months:0};
+  const avgMonthly=rates.reduce((a,b)=>a+b,0)/rates.length;
+  // APY anual compuesto: (1+r)^12 - 1
+  const annual=(Math.pow(1+avgMonthly/100,12)-1)*100;
+  return {monthly:avgMonthly,annual,months:rates.length};
 }
 
 // ══════════════════ RENDER: DEPOSIT ══════════════════
@@ -1065,6 +1226,88 @@ async function renderReferralsView(c){
   }catch(e){c.innerHTML='<div class="empty">Error cargando referidos</div>'}
 }
 
+// ══════════════════ RENDER: SCORE / CREDITS ══════════════════
+async function renderScoreView(c){
+  c.innerHTML='<div class="loading"><div class="spinner"></div><p>Cargando puntuación...</p></div>';
+  // refetch to get fresh data
+  try{
+    const res=await apiFetch('/loans/credit-score');
+    if(res&&res.ok)creditScore=await res.json();
+  }catch(e){}
+
+  const s=creditScore||{};
+  const totalScore=s.totalScore||s.score||0;
+  const multiplier=s.airdropMultiplier||s.multiplier||1;
+  const maxScore=s.maxScore||1000;
+  const breakdown=s.breakdown||{};
+  const scorePct=Math.min(100,Math.round((totalScore/maxScore)*100));
+
+  // Categorías de puntos con nombres amigables
+  const labels={
+    antiguedad:{name:'Antigüedad',icon:'📅',desc:'Tiempo como miembro'},
+    capital:{name:'Capital Depositado',icon:'💰',desc:'Monto total depositado'},
+    inversiones:{name:'Inversiones CDTC',icon:'🔒',desc:'Inversiones activas'},
+    prestamos:{name:'Préstamos Pagados',icon:'🏦',desc:'Historial de pagos'},
+    actividad:{name:'Actividad Reciente',icon:'⚡',desc:'Movimientos recientes'},
+    balance:{name:'Balance Actual',icon:'💵',desc:'Saldo mantenido'}
+  };
+
+  c.innerHTML=`
+  <div class="anim" style="max-width:720px">
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:4px">Mi Puntuación</h3>
+    <p style="font-size:13px;color:var(--mut);margin-bottom:20px">Acumula puntos para maximizar tu airdrop futuro</p>
+
+    <div class="score-hero">
+      <div class="score-lbl">Puntuación Total</div>
+      <div class="score-big">${totalScore}</div>
+      <div class="score-sub">${scorePct}% de tu potencial máximo (${maxScore} pts)</div>
+      <div class="score-mult">
+        <span>Multiplicador Airdrop:</span>
+        <strong>${multiplier}x</strong>
+      </div>
+    </div>
+
+    <div class="airdrop-card">
+      <div class="ad-ttl">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--pur)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        Próximo Airdrop
+      </div>
+      <div class="ad-desc">
+        Tus puntos determinarán cuántos tokens recibirás en el airdrop. <strong>Más puntos = más tokens gratis.</strong>
+        Invierte, ahorra y paga tus préstamos a tiempo para maximizar tu multiplicador.
+      </div>
+    </div>
+
+    <div class="score-breakdown">
+      <div class="sb-ttl">Desglose de Puntos</div>
+      ${Object.entries(breakdown).length>0?Object.entries(breakdown).map(([k,v])=>{
+        const info=labels[k]||{name:k,icon:'•',desc:''};
+        const val=v.value||v.score||0;
+        const max=v.max||100;
+        const pct=Math.min(100,Math.round((val/max)*100));
+        return `<div class="sb-item">
+          <div class="sb-head">
+            <div class="sb-head-l">${info.icon} ${info.name}</div>
+            <div class="sb-head-r"><strong>${val}</strong> / ${max} pts</div>
+          </div>
+          <div class="sb-bar"><div class="sb-bar-fill" style="width:${pct}%"></div></div>
+        </div>`;
+      }).join(''):`<div class="empty" style="padding:20px 0"><span class="empty-icon">⭐</span>Aún no has acumulado puntos.<br><span style="font-size:11px;opacity:.7">Empieza invirtiendo o depositando para sumar.</span></div>`}
+    </div>
+
+    <div class="card" style="padding:18px">
+      <div class="sb-ttl" style="margin-bottom:10px">Cómo ganar más puntos</div>
+      <div style="font-size:12px;color:var(--mut);line-height:1.9">
+        • <strong style="color:var(--text)">Mantén tu capital depositado</strong> — Más tiempo = más puntos<br>
+        • <strong style="color:var(--text)">Crea inversiones CDTC</strong> — Los plazos largos dan más puntos<br>
+        • <strong style="color:var(--text)">Paga préstamos a tiempo</strong> — Evita la mora<br>
+        • <strong style="color:var(--text)">Actividad frecuente</strong> — Usa la plataforma regularmente<br>
+        • <strong style="color:var(--text)">Refiere amigos activos</strong> — Cada referido suma
+      </div>
+    </div>
+  </div>`;
+}
+
 // ══════════════════ RENDER: PROFILE ══════════════════
 async function renderProfileView(c){
   c.innerHTML='<div class="loading"><div class="spinner"></div><p>Cargando perfil...</p></div>';
@@ -1134,7 +1377,47 @@ async function changePassword(){
 }
 
 // ══════════════════ INVEST MODAL ══════════════════
-function openInvestModal(){
+function openInvestModal(type='cdtc'){
+  selectedPlan={plan:type==='pool'?'pool':'cdtc_6m',months:type==='pool'?0:6,type:type};
+  const isPool=type==='pool';
+  document.getElementById('modal-title').textContent=isPool?'Invertir en Pool':'Nueva Inversión CDTC';
+  const tag=document.getElementById('modal-risk-tag');
+  tag.textContent=isPool?'Riesgo Medio':'Bajo Riesgo';
+  tag.className='risk-tag'+(isPool?' medium':'');
+
+  // Toggle CDTC-specific UI
+  document.getElementById('cdtc-plan-selector').style.display=isPool?'none':'block';
+  document.getElementById('pool-info').style.display=isPool?'block':'none';
+  document.getElementById('pv-unlock-row').style.display=isPool?'none':'flex';
+
+  // Update info rows
+  if(isPool){
+    const apy=calculatePoolAPY();
+    document.getElementById('inf-producto').textContent='Pool de Liquidez — Riesgo Medio';
+    document.getElementById('inf-apy-l').textContent='APY anual';
+    document.getElementById('inf-apy').textContent='~'+apy.annual.toFixed(1)+'%';
+    document.getElementById('inf-apy').style.color='var(--amb)';
+    document.getElementById('inf-apy').className='v';
+    document.getElementById('inf-apy').style.color='var(--amb)';
+    document.getElementById('inf-min').textContent='$50,000 COP';
+    document.getElementById('invest-amount').min='50000';
+    document.getElementById('invest-amount').placeholder='Mín. $50,000';
+    document.getElementById('invest-disc').textContent='El Pool permite retiros flexibles sin plazo fijo. El APY es variable y se basa en el rendimiento real mensual del fondo. Conlleva riesgo moderado.';
+    // Update button style
+    document.getElementById('btn-invest').style.background='linear-gradient(135deg,var(--amb),var(--pur))';
+  } else {
+    document.getElementById('inf-producto').textContent='CDTC — Bajo Riesgo';
+    document.getElementById('inf-apy-l').textContent='APY mensual';
+    document.getElementById('inf-apy').textContent='~2.0%';
+    document.getElementById('inf-apy').style.color='var(--blu)';
+    document.getElementById('inf-apy').className='v blu';
+    document.getElementById('inf-min').textContent='$100,000 COP';
+    document.getElementById('invest-amount').min='100000';
+    document.getElementById('invest-amount').placeholder='Mín. $100,000';
+    document.getElementById('invest-disc').textContent='El capital quedará bloqueado durante el plazo seleccionado. Los rendimientos son variables y no garantizados.';
+    document.getElementById('btn-invest').style.background='';
+  }
+
   document.getElementById('invest-avail').textContent=formatCOP(balanceSummary.availableBalance);
   document.getElementById('invest-amount').value='';
   document.getElementById('invest-preview').style.display='none';
@@ -1148,37 +1431,53 @@ function selectPlan(el){
   });
   el.classList.add('selected');
   el.style.background='var(--blud)';el.style.borderColor='var(--blu)';
-  selectedPlan={plan:el.dataset.plan,months:parseInt(el.dataset.months)};
+  selectedPlan={plan:el.dataset.plan,months:parseInt(el.dataset.months),type:'cdtc'};
   updateInvestPreview();
 }
 
 function updateInvestPreview(){
   const amt=parseFloat(document.getElementById('invest-amount').value)||0;
   const p=document.getElementById('invest-preview');
-  if(amt>=100000&&amt<=balanceSummary.availableBalance){
-    const months=selectedPlan.months;
-    const now=new Date();
-    const unlock=new Date(now.getFullYear(),now.getMonth()+months,now.getDate());
-    const gain=Math.round(amt*0.02*months);
+  const isPool=selectedPlan.type==='pool';
+  const minAmount=isPool?50000:100000;
+
+  if(amt>=minAmount&&amt<=balanceSummary.availableBalance){
     document.getElementById('pv-cap').textContent=formatCOP(amt);
-    document.getElementById('pv-unlock').textContent=formatDate(unlock);
-    document.getElementById('pv-gain').textContent='+'+formatCOP(gain);
+    if(isPool){
+      // Pool: gain = capital * monthlyAPY/100 (estimado para 1 mes)
+      const apy=calculatePoolAPY();
+      const gain=Math.round(amt*(apy.monthly/100));
+      document.getElementById('pv-gain').textContent='+'+formatCOP(gain)+' / mes';
+    } else {
+      const months=selectedPlan.months;
+      const now=new Date();
+      const unlock=new Date(now.getFullYear(),now.getMonth()+months,now.getDate());
+      const gain=Math.round(amt*0.02*months);
+      document.getElementById('pv-unlock').textContent=formatDate(unlock);
+      document.getElementById('pv-gain').textContent='+'+formatCOP(gain);
+    }
     p.style.display='block';
   }else{p.style.display='none'}
 }
 
 async function confirmInvest(){
   const amt=parseFloat(document.getElementById('invest-amount').value);
-  if(!amt||amt<100000)return toast('Mínimo $100,000','error');
+  const isPool=selectedPlan.type==='pool';
+  const minAmount=isPool?50000:100000;
+
+  if(!amt||amt<minAmount)return toast(`Mínimo ${formatCOP(minAmount)}`,'error');
   if(amt>balanceSummary.availableBalance)return toast('Saldo insuficiente','error');
+
   const btn=document.getElementById('btn-invest');
   btn.disabled=true;btn.textContent='Procesando...';
   try{
-    const res=await apiFetch('/investments/create',{method:'POST',body:JSON.stringify({productId:selectedPlan.plan,amount:amt})});
+    const payload={productId:selectedPlan.plan,amount:amt};
+    if(isPool)payload.type='pool';
+    const res=await apiFetch('/investments/create',{method:'POST',body:JSON.stringify(payload)});
     const d=await res.json();
     if(!res.ok){toast(d.error||'Error','error');return}
     closeModal('investModal');
-    toast(`✅ Inversión CDTC de ${formatCOP(amt)} creada`);
+    toast(`✅ Inversión ${isPool?'en Pool':'CDTC'} de ${formatCOP(amt)} creada`);
     await loadAllData();renderCurrentView();
   }catch(e){toast('Error','error')}
   finally{btn.disabled=false;btn.textContent='Confirmar Inversión'}

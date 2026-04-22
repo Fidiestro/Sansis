@@ -212,6 +212,7 @@
     <button class="tab" onclick="switchTab('transactions',this)">Transacciones</button>
     <button class="tab" onclick="switchTab('returns',this)">Rendimientos</button>
     <button class="tab" onclick="switchTab('sdtc',this)">CDTC</button>
+    <button class="tab" onclick="switchTab('pool',this)">Pool</button>
     <button class="tab" onclick="switchTab('loans',this)">Préstamos</button>
     <button class="tab" onclick="switchTab('deposits',this)">Depósitos</button>
     <button class="tab" onclick="switchTab('registrations',this)">Registros</button>
@@ -318,6 +319,57 @@
       <div class="card-ttl">Panel CDTC — Vista General</div>
       <div class="card-desc">Total de capital bloqueado, rentabilidad APY real, e inversiones próximas a vencer.</div>
       <div id="sdtc-content"><div class="loading-cell">Cargando CDTC...</div></div>
+    </div>
+  </div>
+
+  <!-- ═══ POOL ═══ -->
+  <div class="section" id="sec-pool">
+    <div class="card">
+      <div class="card-ttl">Pool de Liquidez — Gestión</div>
+      <div class="card-desc">Configura los parámetros del pool, APY estimado y distribución de capital. Los usuarios verán estos valores en su dashboard.</div>
+
+      <div class="form-row cols-3" style="margin-bottom:20px">
+        <div class="fg">
+          <label>APY Mensual (%) — Estimado</label>
+          <input id="pool-apy-monthly" type="number" step="0.01" min="0" max="100" placeholder="2.0">
+        </div>
+        <div class="fg">
+          <label>APY Anual (%) — Se calcula auto</label>
+          <input id="pool-apy-annual" type="number" step="0.01" readonly style="opacity:.7">
+        </div>
+        <div class="fg">
+          <label>Monto mínimo (COP)</label>
+          <input id="pool-min" type="number" min="0" value="50000">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="fg">
+          <label>Capital Total Asignado al Pool (COP)</label>
+          <input id="pool-total-capital" type="number" min="0" placeholder="0">
+        </div>
+        <div class="fg">
+          <label>% Distribución Pool vs CDTC</label>
+          <input id="pool-distribution" type="number" min="0" max="100" placeholder="50" style="font-family:'Space Mono',monospace">
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="savePoolConfig()" id="btn-save-pool">Guardar Configuración del Pool</button>
+    </div>
+
+    <div class="card">
+      <div class="card-ttl">Estado Actual del Pool</div>
+      <div id="pool-stats-display"><div class="loading-cell">Cargando estadísticas...</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-ttl">Inversiones Activas en el Pool</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Usuario</th><th>Capital</th><th>Inicio</th><th>Tiempo</th><th>Ganado</th><th>Estado</th></tr></thead>
+          <tbody id="pool-invs-tbl"><tr><td colspan="6" class="loading-cell">Cargando...</td></tr></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -473,6 +525,7 @@ function switchTab(tab,el){
   if(tab==='registrations')loadRegs('all');
   if(tab==='loans')loadLoans('all');
   if(tab==='sdtc')loadSDTC();
+  if(tab==='pool')loadPool();
   if(tab==='users')loadUsers();
   if(tab==='transactions')loadRecentTx();
 }
@@ -867,6 +920,113 @@ async function loadSDTC(){
     </div>`;
   }catch(e){document.getElementById('sdtc-content').innerHTML='<div class="empty">Error cargando CDTC</div>'}
 }
+
+// ═══ POOL MANAGEMENT ═══
+async function loadPool(){
+  try{
+    const res=await apiFetch('/investments/pool-stats');
+    if(res&&res.ok){
+      const d=await res.json();
+      document.getElementById('pool-apy-monthly').value=d.monthlyAPY||2.0;
+      const annual=(Math.pow(1+(d.monthlyAPY||2)/100,12)-1)*100;
+      document.getElementById('pool-apy-annual').value=annual.toFixed(2);
+      document.getElementById('pool-total-capital').value=d.totalCapital||0;
+      document.getElementById('pool-distribution').value=d.distribution||50;
+      document.getElementById('pool-min').value=d.minAmount||50000;
+
+      // Stats display
+      document.getElementById('pool-stats-display').innerHTML=`
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+        <div class="pbox-i" style="padding:14px;background:var(--sur);border-radius:8px">
+          <div class="l">Capital Total Pool</div>
+          <div class="v blu">${formatCOP(d.totalCapital||0)}</div>
+        </div>
+        <div class="pbox-i" style="padding:14px;background:var(--sur);border-radius:8px">
+          <div class="l">APY Mensual Real</div>
+          <div class="v amb">${(d.monthlyAPY||0).toFixed(2)}%</div>
+        </div>
+        <div class="pbox-i" style="padding:14px;background:var(--sur);border-radius:8px">
+          <div class="l">APY Anual Compuesto</div>
+          <div class="v grn">${annual.toFixed(1)}%</div>
+        </div>
+        <div class="pbox-i" style="padding:14px;background:var(--sur);border-radius:8px">
+          <div class="l">Meses Rastreados</div>
+          <div class="v">${d.monthsTracked||0}</div>
+        </div>
+      </div>`;
+
+      // Load pool investments
+      const invRes=await apiFetch('/admin/investments/active?type=pool');
+      if(invRes&&invRes.ok){
+        const invs=await invRes.json();
+        document.getElementById('pool-invs-tbl').innerHTML=invs.length?invs.map(i=>{
+          const start=new Date(i.start_date);
+          const days=Math.floor((Date.now()-start)/(1000*60*60*24));
+          const months=Math.floor(days/30);
+          return `<tr>
+            <td>${i.user_name}</td>
+            <td class="mono blu">${formatCOP(i.amount)}</td>
+            <td class="mono" style="font-size:11px">${formatDate(i.start_date)}</td>
+            <td>${months}m ${days%30}d</td>
+            <td class="mono grn">+${formatCOP(i.totalEarned||0)}</td>
+            <td><span class="badge grn">${i.status}</span></td>
+          </tr>`;
+        }).join(''):'<tr><td colspan="6" class="empty">Sin inversiones en pool</td></tr>';
+      }
+    }
+  }catch(e){
+    document.getElementById('pool-stats-display').innerHTML='<div class="empty">Error cargando estadísticas del pool</div>';
+    console.error(e);
+  }
+}
+
+async function savePoolConfig(){
+  const monthly=parseFloat(document.getElementById('pool-apy-monthly').value);
+  const totalCapital=parseFloat(document.getElementById('pool-total-capital').value);
+  const distribution=parseFloat(document.getElementById('pool-distribution').value);
+  const minAmount=parseFloat(document.getElementById('pool-min').value);
+
+  if(!monthly||monthly<=0)return toast('APY mensual inválido','error');
+  if(!totalCapital||totalCapital<0)return toast('Capital inválido','error');
+  if(!distribution||distribution<0||distribution>100)return toast('Distribución debe estar entre 0-100%','error');
+
+  const annual=(Math.pow(1+monthly/100,12)-1)*100;
+  document.getElementById('pool-apy-annual').value=annual.toFixed(2);
+
+  const btn=document.getElementById('btn-save-pool');
+  btn.disabled=true;btn.textContent='Guardando...';
+
+  try{
+    const res=await apiFetch('/admin/pool/config',{
+      method:'POST',
+      body:JSON.stringify({
+        monthlyAPY:monthly,
+        annualAPY:annual,
+        totalCapital:totalCapital,
+        distribution:distribution,
+        minAmount:minAmount||50000
+      })
+    });
+    const d=await res.json();
+    if(!res.ok)return toast(d.error||'Error','error');
+    toast('✅ Configuración del Pool guardada');
+    await loadPool();
+    await loadStats();
+  }catch(e){toast('Error de conexión','error')}
+  finally{btn.disabled=false;btn.textContent='Guardar Configuración del Pool'}
+}
+
+// Auto-calculate annual APY when monthly changes
+document.addEventListener('DOMContentLoaded',()=>{
+  const monthlyInput=document.getElementById('pool-apy-monthly');
+  if(monthlyInput){
+    monthlyInput.addEventListener('input',function(){
+      const monthly=parseFloat(this.value)||0;
+      const annual=(Math.pow(1+monthly/100,12)-1)*100;
+      document.getElementById('pool-apy-annual').value=annual.toFixed(2);
+    });
+  }
+});
 
 // ═══ INIT ═══
 loadData();
