@@ -1070,34 +1070,72 @@ async function processDepositReject(id){
 
 async function viewUserDetail(userId){
   try{
-    const res=await apiFetch(`/admin/users/${userId}/details`);
+    const res=await apiFetch('/admin/users/'+userId+'/details');
     if(!res||!res.ok)return toast('Error cargando usuario','error');
     const d=await res.json();
     const u=d.user||{};
-    const bal=d.balanceHistory?.length?parseFloat(d.balanceHistory[d.balanceHistory.length-1].amount):0;
+    const bal=d.balanceHistory&&d.balanceHistory.length?parseFloat(d.balanceHistory[d.balanceHistory.length-1].amount):0;
     const invs=d.investments||[];
-    const txs=(d.transactions||[]).slice(0,8);
+    const txs=(d.transactions||[]).slice(0,10);
+    const activeInvs=invs.filter(function(i){return i.status==='active';});
+    const totalInvested=activeInvs.reduce(function(s,i){return s+parseFloat(i.amount||0);},0);
+
+    let invHtml='';
+    if(invs.length){
+      invHtml='<div style="font-size:13px;font-weight:700;margin-bottom:10px">Inversiones ('+invs.length+')</div><div style="margin-bottom:16px">';
+      for(const i of invs){
+        const isPool=(i.type||'').toLowerCase().includes('pool');
+        const statusColor=i.status==='active'?'var(--grn)':i.status==='pending_deposit'?'var(--amb)':'var(--mut)';
+        invHtml+='<div style="padding:10px 12px;background:var(--sur);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--bd)">';
+        invHtml+='<div><div style="font-weight:600;font-size:13px">'+(isPool?'Pool':'CDTC')+' &middot; '+(i.duration_months||6)+'m</div>';
+        invHtml+='<div style="font-size:11px;color:var(--mut)">'+formatDate(i.start_date)+'</div></div>';
+        invHtml+='<div style="text-align:right"><div style="font-family:Space Mono,monospace;color:var(--blu);font-weight:700">'+formatCOP(i.amount)+'</div>';
+        invHtml+='<span style="font-size:10px;color:'+statusColor+'">'+i.status+'</span></div></div>';
+      }
+      invHtml+='</div>';
+    } else {
+      invHtml='<div style="color:var(--mut);font-size:13px;margin-bottom:16px;padding:14px;background:var(--sur);border-radius:8px">Sin inversiones</div>';
+    }
+
+    let txHtml='';
+    if(txs.length){
+      const txLabels={deposit:'Depósito',withdraw:'Retiro',investment:'Inversión',investment_return:'Rendimiento',loan:'Préstamo',profit:'Ganancia',payment:'Abono'};
+      txHtml='<div style="font-size:13px;font-weight:700;margin-bottom:10px">Últimos Movimientos</div><div style="border:1px solid var(--bd);border-radius:8px;overflow:hidden">';
+      txs.forEach(function(t,idx){
+        const neg=['withdraw','investment'].includes(t.type);
+        const border=idx<txs.length-1?'border-bottom:1px solid var(--bd);':'';
+        txHtml+='<div style="padding:10px 14px;'+border+'display:flex;justify-content:space-between;align-items:center">';
+        txHtml+='<div><div style="font-size:12px;font-weight:600">'+(txLabels[t.type]||t.type)+'</div>';
+        txHtml+='<div style="font-size:11px;color:var(--mut)">'+formatDate(t.created_at)+'</div></div>';
+        txHtml+='<div style="font-family:Space Mono,monospace;font-weight:700;color:'+(neg?'var(--red)':'var(--grn)')+'">'+(neg?'-':'+')+formatCOP(t.amount)+'</div>';
+        txHtml+='</div>';
+      });
+      txHtml+='</div>';
+    }
+
     const overlay=document.createElement('div');
-    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto';
-    overlay.innerHTML=`<div style="max-width:560px;width:100%;background:var(--bg2);border-radius:14px;overflow:hidden;max-height:90vh;overflow-y:auto">
-      <div style="padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--bg2)">
-        <span style="font-weight:700;font-size:15px">${u.full_name||'Usuario'}</span>
-        <button onclick="document.body.removeChild(this.closest('[style*=fixed]'))" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;color:var(--mut);padding:4px 10px;font-size:13px">✕</button>
-      </div>
-      <div style="padding:20px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-          <div style="padding:12px;background:var(--sur);border-radius:8px"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;margin-bottom:4px">Balance</div><div style="font-family:'Space Mono',monospace;font-weight:700;color:var(--grn)">${formatCOP(bal)}</div></div>
-          <div style="padding:12px;background:var(--sur);border-radius:8px"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;margin-bottom:4px">Email</div><div style="font-size:12px">${u.email||'—'}</div></div>
-          <div style="padding:12px;background:var(--sur);border-radius:8px"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;margin-bottom:4px">Cédula</div><div style="font-family:'Space Mono',monospace;font-size:13px">${u.document_number||'—'}</div></div>
-          <div style="padding:12px;background:var(--sur);border-radius:8px"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;margin-bottom:4px">Inversiones</div><div style="font-family:'Space Mono',monospace;font-weight:700">${invs.filter(i=>i.status==='active').length} activas</div></div>
-        </div>
-        ${invs.length?'<div style="font-size:13px;font-weight:600;margin-bottom:10px">Inversiones ('+invs.length+')</div>'+invs.map(i=>'<div style="padding:10px;background:var(--sur);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:600;font-size:13px">'+(i.type||'CDTC')+'</div><div style="font-size:11px;color:var(--mut)">'+formatDate(i.start_date)+'</div></div><div style="text-align:right"><div style="font-family:Space Mono,monospace;color:var(--blu);font-weight:700">'+formatCOP(i.amount)+'</div><span style="font-size:10px;color:'+(i.status==='active'?'var(--grn)':'var(--mut)')+'">'+i.status+'</span></div></div>').join(''):'<div style="color:var(--mut);font-size:13px;margin-bottom:14px">Sin inversiones</div>'}
-        ${txs.length?'<div style="font-size:13px;font-weight:600;margin:14px 0 10px">Últimos Movimientos</div>'+txs.map(t=>{const neg=['withdraw','investment'].includes(t.type);return'<div style="padding:8px 0;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:12px;font-weight:500">'+t.type+'</div><div style="font-size:11px;color:var(--mut)">'+formatDate(t.created_at)+'</div></div><div style="font-family:Space Mono,monospace;font-weight:600;color:'+(neg?'var(--red)':'var(--grn)')+'\">'+(neg?'-':'+'')+formatCOP(t.amount)+'</div></div>';}).join(''):''}
-      </div>
-    </div>`;
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px';
+    const html='<div style="max-width:580px;width:100%;background:var(--bg2);border-radius:14px;overflow:hidden;max-height:90vh;display:flex;flex-direction:column">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">'
+      +'<div><div style="font-weight:700;font-size:15px">'+(u.full_name||'Usuario')+'</div>'
+      +'<div style="font-size:11px;color:var(--mut)">'+(u.email||'')+'</div></div>'
+      +'<button id="ud-close-btn" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;color:var(--mut);padding:4px 10px;font-size:13px">&#x2715;</button>'
+      +'</div>'
+      +'<div style="padding:20px;overflow-y:auto">'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">'
+      +'<div style="padding:12px;background:var(--sur);border-radius:8px"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;margin-bottom:4px">Balance</div><div style="font-family:Space Mono,monospace;font-weight:700;color:var(--grn);font-size:16px">'+formatCOP(bal)+'</div></div>'
+      +'<div style="padding:12px;background:var(--sur);border-radius:8px"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;margin-bottom:4px">Invertido</div><div style="font-family:Space Mono,monospace;font-weight:700;color:var(--blu);font-size:16px">'+formatCOP(totalInvested)+'</div></div>'
+      +'<div style="padding:12px;background:var(--sur);border-radius:8px"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;margin-bottom:4px">Disponible</div><div style="font-family:Space Mono,monospace;font-weight:700;font-size:16px">'+formatCOP(Math.max(0,bal-totalInvested))+'</div></div>'
+      +'<div style="padding:12px;background:var(--sur);border-radius:8px"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;margin-bottom:4px">C&eacute;dula</div><div style="font-family:Space Mono,monospace;font-size:13px">'+(u.document_number||'&mdash;')+'</div></div>'
+      +'</div>'
+      +invHtml+txHtml
+      +'</div></div>';
+    overlay.innerHTML=html;
     document.body.appendChild(overlay);
-    overlay.addEventListener('click',e=>{if(e.target===overlay)document.body.removeChild(overlay)});
-  }catch(e){toast('Error cargando detalle','error')}
+    const closeBtn=overlay.querySelector('#ud-close-btn');
+    if(closeBtn)closeBtn.addEventListener('click',function(){document.body.removeChild(overlay);});
+    overlay.addEventListener('click',function(e){if(e.target===overlay)document.body.removeChild(overlay);});
+  }catch(e){toast('Error cargando detalle','error');}
 }
 
 function filterReturns(type,el){
@@ -1172,69 +1210,7 @@ async function processDepositReject(id){
   }catch(e){toast('Error','error')}
 }
 
-async function viewUserDetail(userId){
-  try{
-    const res=await apiFetch(`/admin/users/${userId}/details`);
-    if(!res||!res.ok)return toast('Error cargando usuario','error');
-    const d=await res.json();
-    const u=d.user||{};
-    const bal=d.balanceHistory?.length?parseFloat(d.balanceHistory[d.balanceHistory.length-1].amount):0;
-    const invs=d.investments||[];
-    const txs=(d.transactions||[]).slice(0,10);
-    const activeInvs=invs.filter(i=>i.status==='active');
-    const totalInvested=activeInvs.reduce((s,i)=>s+parseFloat(i.amount||0),0);
 
-    const overlay=document.createElement('div');
-    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px';
-    overlay.innerHTML=`<div style="max-width:580px;width:100%;background:var(--bg2);border-radius:14px;overflow:hidden;max-height:90vh;display:flex;flex-direction:column">
-      <div style="padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
-        <div>
-          <div style="font-weight:700;font-size:15px">${u.full_name||'Usuario'}</div>
-          <div style="font-size:11px;color:var(--mut)">${u.email||'—'} · ID ${u.id}</div>
-        </div>
-        <button onclick="document.body.removeChild(this.closest('[style*=fixed]'))" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;color:var(--mut);padding:4px 10px;font-size:13px">✕</button>
-      </div>
-      <div style="padding:20px;overflow-y:auto">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
-          <div style="padding:12px;background:var(--sur);border-radius:8px;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--grn)"></div><div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Balance Total</div><div style="font-family:'Space Mono',monospace;font-weight:700;color:var(--grn);font-size:16px">${formatCOP(bal)}</div></div>
-          <div style="padding:12px;background:var(--sur);border-radius:8px;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--blu)"></div><div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Invertido</div><div style="font-family:'Space Mono',monospace;font-weight:700;color:var(--blu);font-size:16px">${formatCOP(totalInvested)}</div></div>
-          <div style="padding:12px;background:var(--sur);border-radius:8px"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Disponible</div><div style="font-family:'Space Mono',monospace;font-weight:700;font-size:16px">${formatCOP(Math.max(0,bal-totalInvested))}</div></div>
-          <div style="padding:12px;background:var(--sur);border-radius:8px"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Cédula</div><div style="font-family:'Space Mono',monospace;font-size:13px">${u.document_number||'—'}</div></div>
-        </div>
-
-        ${invs.length?`<div style="font-size:13px;font-weight:700;margin-bottom:10px">Inversiones (${invs.length})</div>
-        <div style="margin-bottom:16px">${invs.map(i=>{
-          const isPool=(i.type||'').toLowerCase().includes('pool');
-          return `<div style="padding:10px 12px;background:var(--sur);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--bd)">
-            <div>
-              <div style="font-weight:600;font-size:13px">${isPool?'🟡 Pool':'🔵 CDTC'} · ${i.duration_months||6}m</div>
-              <div style="font-size:11px;color:var(--mut)">Inicio: ${formatDate(i.start_date)}</div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-family:'Space Mono',monospace;color:var(--blu);font-weight:700">${formatCOP(i.amount)}</div>
-              <span style="font-size:10px;color:${i.status==='active'?'var(--grn)':i.status==='pending_deposit'?'var(--amb)':'var(--mut)'}">${i.status}</span>
-            </div>
-          </div>`;
-        }).join('')}</div>`:'<div style="color:var(--mut);font-size:13px;margin-bottom:16px;padding:14px;background:var(--sur);border-radius:8px">Sin inversiones</div>'}
-
-        ${txs.length?`<div style="font-size:13px;font-weight:700;margin-bottom:10px">Últimos Movimientos</div>
-        <div style="border:1px solid var(--bd);border-radius:8px;overflow:hidden">${txs.map((t,idx)=>{
-          const neg=['withdraw','investment'].includes(t.type);
-          const labels={deposit:'Depósito',withdraw:'Retiro',investment:'Inversión',investment_return:'Rendimiento',loan:'Préstamo',profit:'Ganancia',payment:'Abono'};
-          return `<div style="padding:10px 14px;border-bottom:${idx<txs.length-1?'1px solid var(--bd)':'none'};display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <div style="font-size:12px;font-weight:600">${labels[t.type]||t.type}</div>
-              <div style="font-size:11px;color:var(--mut)">${formatDate(t.created_at)}</div>
-            </div>
-            <div style="font-family:'Space Mono',monospace;font-weight:700;color:${neg?'var(--red)':'var(--grn)'}">${neg?'-':'+'}${formatCOP(t.amount)}</div>
-          </div>`;
-        }).join('')}</div>`:''}
-      </div>
-    </div>`;
-    document.body.appendChild(overlay);
-    overlay.addEventListener('click',e=>{if(e.target===overlay)document.body.removeChild(overlay)});
-  }catch(e){toast('Error cargando detalle','error')}
-}
 
 function filterReturns(type,el){
   document.querySelectorAll('#sec-returns .fbtn').forEach(b=>b.classList.remove('active'));
