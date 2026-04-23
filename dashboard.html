@@ -1478,28 +1478,7 @@ async function renderScoreView(c){
       </button>
     </div>
 
-    <script>
-    (function(){
-      var points2=Math.floor((window.__totalDeposited||0)/1000);
-      var tier=points2<1000?{name:'Bronce',icon:'🥉',next:1000,color:'#cd7f32',nextName:'Plata',start:0}:
-              points2<5000?{name:'Plata',icon:'🥈',next:5000,color:'#9ca3af',nextName:'Oro',start:1000}:
-              points2<15000?{name:'Oro',icon:'🥇',next:15000,color:'#f59e0b',nextName:'Diamante',start:5000}:
-              {name:'Diamante',icon:'💎',next:null,color:'#2dd4bf',nextName:null,start:15000};
-      var pct=tier.next?Math.min(100,Math.round(((points2-tier.start)/(tier.next-tier.start))*100)):100;
-      var hero=document.getElementById('score-hero-block');
-      if(hero){
-        hero.style.setProperty('--score-color',tier.color);
-        var info=document.getElementById('score-tier-info');
-        if(info){
-          info.innerHTML='<div style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,255,255,.1);border-radius:20px;font-size:13px;font-weight:700">'
-            +tier.icon+' Nivel '+tier.name
-          +'</div>'
-          +(tier.next?'<div style="margin:10px auto;max-width:260px"><div style="height:5px;background:rgba(255,255,255,.15);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:white;opacity:.8;border-radius:3px;transition:width 1s ease"></div></div>'
-            +'<div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.5);margin-top:3px"><span>'+tier.start.toLocaleString()+'</span><span>'+tier.next.toLocaleString()+' pts</span></div></div>':'');
-        }
-      }
-    })();
-    </script>
+    <div id="score-tier-bar" style="margin:0 0 14px"></div>
 
     <div class="score-breakdown">
       <div class="sb-ttl">Tu Historial de Puntos</div>
