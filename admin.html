@@ -218,6 +218,7 @@
     <button class="tab" onclick="switchTab('registrations',this)">Registros</button>
     <button class="tab" onclick="switchTab('withdrawals',this)">Retiros</button>
     <button class="tab" onclick="switchTab('users',this)">Usuarios</button>
+    <button class="tab" onclick="switchTab('analytics',this)">📊 Métricas</button>
   </div>
 
   <!-- ═══ REGISTRAR USUARIO ═══ -->
@@ -367,12 +368,46 @@
       <div id="pool-stats-display"><div class="loading-cell">Cargando estadísticas...</div></div>
     </div>
 
+    <!-- Gestión de estrategias DeFi -->
+    <div class="card">
+      <div class="card-ttl">Estrategias DeFi — Asignación del Pool</div>
+      <div class="card-desc">Define en qué está invertido el pool. Los usuarios lo verán en el detalle de su inversión.</div>
+
+      <div id="pool-strategies-list">
+        <!-- Estrategias dinámicas -->
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px" id="pool-strat-inputs">
+        <!-- Se genera dinámicamente -->
+      </div>
+
+      <div style="background:var(--sur);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px">Agregar estrategia</div>
+        <div class="form-row">
+          <div class="fg"><label>Nombre</label><input id="strat-name" placeholder="Ej: Delta Neutral"></div>
+          <div class="fg"><label>Ícono (emoji)</label><input id="strat-icon" placeholder="🛡️" style="width:60px"></div>
+        </div>
+        <div class="form-row cols-3">
+          <div class="fg"><label>% Asignación</label><input id="strat-pct" type="number" min="0" max="100" placeholder="25"></div>
+          <div class="fg"><label>Descripción corta</label><input id="strat-desc" placeholder="Posiciones hedgeadas"></div>
+          <div class="fg"><label>Color barra</label><input id="strat-color" type="color" value="#f59e0b" style="height:42px;padding:4px"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addPoolStrategy()">+ Agregar Estrategia</button>
+      </div>
+
+      <div id="pool-strat-total" style="padding:10px 14px;background:var(--sur);border-radius:8px;font-size:13px;margin-bottom:14px;font-family:'Space Mono',monospace">
+        Total asignado: <strong id="pool-strat-pct-total">0%</strong>
+      </div>
+
+      <button class="btn btn-primary" onclick="savePoolStrategies()" id="btn-save-strategies">Guardar Estrategias</button>
+    </div>
+
     <div class="card">
       <div class="card-ttl">Inversiones Activas en el Pool</div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Usuario</th><th>Capital</th><th>Inicio</th><th>Tiempo</th><th>Ganado</th><th>Estado</th></tr></thead>
-          <tbody id="pool-invs-tbl"><tr><td colspan="6" class="loading-cell">Cargando...</td></tr></tbody>
+          <thead><tr><th>Usuario</th><th>Capital</th><th>Capital Neto</th><th>Inicio</th><th>Tiempo</th><th>Ganado</th><th>Estado</th></tr></thead>
+          <tbody id="pool-invs-tbl"><tr><td colspan="7" class="loading-cell">Cargando...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -476,6 +511,45 @@
   </div>
 </div>
 
+  <!-- ═══ ANALYTICS ═══ -->
+  <div class="section" id="sec-analytics">
+    <div class="stats" style="grid-template-columns:repeat(2,1fr);margin-bottom:14px" id="analytics-kpis">
+      <div class="stat"><div class="stat-lbl">Depósitos este mes</div><div class="stat-val grn" id="ak-dep-month">—</div></div>
+      <div class="stat red"><div class="stat-lbl">Retiros este mes</div><div class="stat-val red" id="ak-wr-month">—</div></div>
+      <div class="stat amb"><div class="stat-lbl">Préstamos activos</div><div class="stat-val amb" id="ak-loans-active">—</div></div>
+      <div class="stat pur"><div class="stat-lbl">Tasa mora</div><div class="stat-val pur" id="ak-mora-rate">—</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-ttl">Distribución por Producto</div>
+      <div class="card-desc">Capital bajo gestión por tipo de inversión</div>
+      <div id="analytics-distrib"><div class="loading-cell">Cargando...</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-ttl">Últimos Depósitos Aprobados</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Fecha</th><th>Usuario</th><th>Monto</th><th>Ref</th></tr></thead>
+          <tbody id="ak-dep-tbl"><tr><td colspan="4" class="loading-cell">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-ttl">Inversiones Próximas a Vencer</div>
+      <div class="card-desc">Inversiones CDTC que vencen en los próximos 30 días</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Usuario</th><th>Capital</th><th>Vence</th><th>Días restantes</th></tr></thead>
+          <tbody id="ak-expiring-tbl"><tr><td colspan="4" class="loading-cell">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -530,7 +604,9 @@ function switchTab(tab,el){
   if(tab==='registrations')loadRegs('all');
   if(tab==='loans')loadLoans('all');
   if(tab==='sdtc')loadSDTC();
-  if(tab==='pool')loadPool();
+  if(tab==='pool'){loadPool();setTimeout(loadPoolStrategies,300);}
+  if(tab==='analytics')loadAnalytics();
+  if(tab==='analytics')loadAnalytics();
   if(tab==='users')loadUsers();
   if(tab==='transactions')loadRecentTx();
 }
@@ -776,7 +852,7 @@ async function loadWithdrawals(status){
       <td class="mono" style="font-size:11px">${w.ref_id||w.id}</td>
       <td>${w.user_name||'—'}</td>
       <td class="mono red">${formatCOP(w.amount)}</td>
-      <td style="font-size:12px">${w.payment_method_type||w.method||'—'}</td>
+      <td style="font-size:12px">${w.pm_type||w.pm_label||w.method||'—'}${w.pm_phone?' · '+w.pm_phone:w.pm_account?' · '+w.pm_account:''}</td>
       <td><span class="badge ${w.status==='pending'?'amb':w.status==='approved'?'blu':w.status==='completed'?'grn':'red'}">${w.status}</span></td>
       <td class="mono" style="font-size:11px;color:var(--mut)">${formatDate(w.created_at)}</td>
       <td>${w.status==='pending'?`<button class="btn btn-sm btn-grn" onclick="processWithdrawal(${w.id},'approve')">Aprobar</button> <button class="btn btn-sm btn-red" onclick="processWithdrawal(${w.id},'reject')">Rechazar</button>`:w.status==='approved'?`<button class="btn btn-sm btn-primary" onclick="processWithdrawal(${w.id},'complete')">Completar</button>`:'—'}</td>
@@ -898,7 +974,9 @@ async function loadSDTC(){
       apiFetch('/admin/investments/active')
     ]);
     const gs=gsRes&&gsRes.ok?await gsRes.json():{};
-    const invs=invRes&&invRes.ok?await invRes.json():[];
+    const allInvs=invRes&&invRes.ok?await invRes.json():[];
+    // Filtrar solo CDTC (excluir pool)
+    const invs=allInvs.filter(i=>!(i.type||'').toLowerCase().includes('pool'));
 
     const totalLocked=gs.totalLocked||0;
     const apyReal=gs.apyReal||0;
@@ -1244,6 +1322,187 @@ function filterReturns(type,el){
       ${returnsHTML?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)"><div style="font-size:10px;color:var(--mut);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Historial</div>${returnsHTML}</div>`:''}
     </div>`;
   }).join('');
+}
+
+// ═══ POOL STRATEGIES ═══
+let poolStrategies=[];
+
+function loadPoolStrategies(){
+  try{
+    const saved=localStorage.getItem('sanse_pool_strategies');
+    if(saved)poolStrategies=JSON.parse(saved);
+    else poolStrategies=[
+      {name:'Pools de Liquidez',icon:'🌊',pct:30,desc:'Uniswap, PancakeSwap',color:'#4f8ef7'},
+      {name:'Delta Neutral',icon:'🛡️',pct:30,desc:'Posiciones hedgeadas',color:'#10b981'},
+      {name:'Preventas DeFi',icon:'🚀',pct:20,desc:'Early-stage projects',color:'#7c5cfc'},
+      {name:'Yield Farming',icon:'📈',pct:20,desc:'Optimización de yields',color:'#f59e0b'}
+    ];
+  }catch(e){poolStrategies=[];}
+  renderPoolStrategies();
+}
+
+function renderPoolStrategies(){
+  const list=document.getElementById('pool-strategies-list');
+  if(!list)return;
+  const total=poolStrategies.reduce(function(s,x){return s+(x.pct||0);},0);
+  const el=document.getElementById('pool-strat-pct-total');
+  if(el){el.textContent=total+'%';el.style.color=total===100?'var(--grn)':total>100?'var(--red)':'var(--amb)';}
+  if(!poolStrategies.length){list.innerHTML='<div class="empty" style="padding:20px 0">Sin estrategias configuradas</div>';return;}
+  list.innerHTML=poolStrategies.map(function(s,i){
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--sur);border-radius:8px;margin-bottom:8px;border:1px solid var(--bd)">'
+      +'<span style="font-size:18px">'+(s.icon||'🔷')+'</span>'
+      +'<div style="flex:1;min-width:0">'
+        +'<div style="font-size:13px;font-weight:600">'+s.name+'</div>'
+        +'<div style="font-size:11px;color:var(--mut)">'+(s.desc||'')+'</div>'
+        +'<div style="height:4px;background:var(--bg);border-radius:2px;margin-top:5px;overflow:hidden">'
+          +'<div style="height:100%;width:'+s.pct+'%;background:'+(s.color||'var(--amb)')+';border-radius:2px"></div>'
+        +'</div>'
+      +'</div>'
+      +'<div style="font-family:Space Mono,monospace;font-weight:700;font-size:14px;color:var(--amb);min-width:40px;text-align:right">'+s.pct+'%</div>'
+      +'<button onclick="removePoolStrategy('+i+')" style="background:var(--redd);border:1px solid rgba(239,68,68,.2);border-radius:6px;color:var(--red);padding:4px 8px;font-size:11px">&#x2715;</button>'
+      +'</div>';
+  }).join('');
+}
+
+function addPoolStrategy(){
+  const name=document.getElementById('strat-name').value.trim();
+  const icon=document.getElementById('strat-icon').value.trim()||'🔷';
+  const pct=parseInt(document.getElementById('strat-pct').value)||0;
+  const desc=document.getElementById('strat-desc').value.trim();
+  const color=document.getElementById('strat-color').value||'#f59e0b';
+  if(!name)return toast('Ingresa el nombre de la estrategia','error');
+  if(pct<=0||pct>100)return toast('El porcentaje debe ser entre 1 y 100','error');
+  const total=poolStrategies.reduce(function(s,x){return s+(x.pct||0);},0)+pct;
+  if(total>100)return toast('El total supera 100% ('+total+'%). Reduce otros primero.','error');
+  poolStrategies.push({name:name,icon:icon,pct:pct,desc:desc,color:color});
+  document.getElementById('strat-name').value='';
+  document.getElementById('strat-icon').value='';
+  document.getElementById('strat-pct').value='';
+  document.getElementById('strat-desc').value='';
+  renderPoolStrategies();
+}
+
+function removePoolStrategy(idx){
+  poolStrategies.splice(idx,1);
+  renderPoolStrategies();
+}
+
+async function savePoolStrategies(){
+  const total=poolStrategies.reduce(function(s,x){return s+(x.pct||0);},0);
+  if(total!==100)return toast('El total debe ser exactamente 100% (actual: '+total+'%)','error');
+  localStorage.setItem('sanse_pool_strategies',JSON.stringify(poolStrategies));
+  const btn=document.getElementById('btn-save-strategies');
+  if(btn){btn.disabled=true;btn.textContent='Guardando...';}
+  try{
+    await apiFetch('/admin/pool/config',{
+      method:'POST',
+      body:JSON.stringify({
+        monthlyAPY:parseFloat(document.getElementById('pool-apy-monthly').value)||2.0,
+        annualAPY:parseFloat(document.getElementById('pool-apy-annual').value)||26.82,
+        totalCapital:parseFloat(document.getElementById('pool-total-capital').value)||0,
+        distribution:parseFloat(document.getElementById('pool-distribution').value)||50,
+        minAmount:parseFloat(document.getElementById('pool-min').value)||50000,
+        strategies:poolStrategies
+      })
+    });
+    toast('✅ Estrategias guardadas — los usuarios verán la nueva distribución');
+  }catch(e){
+    toast('✅ Estrategias guardadas localmente');
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='Guardar Estrategias';}
+  }
+}
+
+// ═══ ANALYTICS ═══
+async function loadAnalytics(){
+  try{
+    // Cargar transacciones para cálculos
+    const [txRes, invRes, loanRes, depRes] = await Promise.all([
+      apiFetch('/admin/transactions/all?limit=200'),
+      apiFetch('/admin/investments/active'),
+      apiFetch('/admin/loans'),
+      apiFetch('/admin/deposits')
+    ]);
+
+    const txs=(txRes&&txRes.ok?await txRes.json():{transactions:[]}).transactions||[];
+    const invs=invRes&&invRes.ok?await invRes.json():[];
+    const loans=loanRes&&loanRes.ok?await loanRes.json():[];
+    const deps=depRes&&depRes.ok?await depRes.json():[];
+
+    // KPIs del mes actual
+    const now=new Date();
+    const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+
+    const depMonth=txs.filter(t=>t.type==='deposit'&&new Date(t.created_at)>=monthStart).reduce((s,t)=>s+parseFloat(t.amount||0),0);
+    const wrMonth=txs.filter(t=>t.type==='withdraw'&&new Date(t.created_at)>=monthStart).reduce((s,t)=>s+parseFloat(t.amount||0),0);
+    const activeLoansList=(loans.loans||loans||[]).filter(l=>l.status==='active');
+    const overdueLoansList=(loans.loans||loans||[]).filter(l=>l.status==='overdue');
+    const totalLoans=activeLoansList.length+overdueLoansList.length;
+    const moraRate=totalLoans>0?Math.round((overdueLoansList.length/totalLoans)*100):0;
+
+    document.getElementById('ak-dep-month').textContent=formatCOP(depMonth);
+    document.getElementById('ak-wr-month').textContent=formatCOP(wrMonth);
+    document.getElementById('ak-loans-active').textContent=activeLoansList.length;
+    document.getElementById('ak-mora-rate').textContent=moraRate+'%';
+
+    // Distribución por producto
+    const cdtcInvs=invs.filter(i=>!(i.type||'').toLowerCase().includes('pool'));
+    const poolInvs=invs.filter(i=>(i.type||'').toLowerCase().includes('pool'));
+    const cdtcCap=cdtcInvs.reduce((s,i)=>s+parseFloat(i.amount||0),0);
+    const poolCap=poolInvs.reduce((s,i)=>s+parseFloat(i.amount||0),0);
+    const totalCap=cdtcCap+poolCap||1;
+
+    document.getElementById('analytics-distrib').innerHTML=`
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <div style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:var(--blu);display:inline-block"></span>CDTC — ${cdtcInvs.length} inv.</div>
+          <div><span style="font-family:Space Mono,monospace;font-weight:700;color:var(--blu)">${formatCOP(cdtcCap)}</span> <span style="color:var(--mut);font-size:11px">${Math.round(cdtcCap/totalCap*100)}%</span></div>
+        </div>
+        <div style="height:8px;background:var(--sur);border-radius:4px;overflow:hidden">
+          <div style="height:100%;width:${Math.round(cdtcCap/totalCap*100)}%;background:linear-gradient(90deg,var(--blu),var(--pur));border-radius:4px"></div>
+        </div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <div style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:var(--amb);display:inline-block"></span>Pool DeFi — ${poolInvs.length} inv.</div>
+          <div><span style="font-family:Space Mono,monospace;font-weight:700;color:var(--amb)">${formatCOP(poolCap)}</span> <span style="color:var(--mut);font-size:11px">${Math.round(poolCap/totalCap*100)}%</span></div>
+        </div>
+        <div style="height:8px;background:var(--sur);border-radius:4px;overflow:hidden">
+          <div style="height:100%;width:${Math.round(poolCap/totalCap*100)}%;background:linear-gradient(90deg,var(--amb),var(--pur));border-radius:4px"></div>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding:12px;background:var(--sur);border-radius:8px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;color:var(--mut)">Total AUM</span>
+        <span style="font-family:Space Mono,monospace;font-weight:700;font-size:16px;color:var(--grn)">${formatCOP(cdtcCap+poolCap)}</span>
+      </div>`;
+
+    // Depósitos aprobados recientes
+    const approvedDeps=(deps.deposits||deps||[]).filter(d=>d.status==='approved').slice(0,8);
+    document.getElementById('ak-dep-tbl').innerHTML=approvedDeps.length?approvedDeps.map(d=>`<tr>
+      <td class="mono" style="font-size:11px;color:var(--mut)">${formatDate(d.created_at)}</td>
+      <td>${d.user_name||'—'}</td>
+      <td class="mono grn">${formatCOP(d.amount)}</td>
+      <td class="mono" style="font-size:11px;color:var(--mut)">${d.ref_id||'—'}</td>
+    </tr>`).join(''):'<tr><td colspan="4" class="empty">Sin depósitos aprobados</td></tr>';
+
+    // Inversiones próximas a vencer
+    const in30=new Date(now.getTime()+30*24*60*60*1000);
+    const expiring=invs.filter(i=>{
+      const end=new Date(i.lock_end_date||i.end_date);
+      return end>=now&&end<=in30&&!(i.type||'').toLowerCase().includes('pool');
+    }).sort((a,b)=>new Date(a.lock_end_date||a.end_date)-new Date(b.lock_end_date||b.end_date));
+
+    document.getElementById('ak-expiring-tbl').innerHTML=expiring.length?expiring.map(i=>{
+      const days=Math.ceil((new Date(i.lock_end_date||i.end_date)-now)/(1000*60*60*24));
+      return `<tr>
+        <td>${i.user_name||'—'}</td>
+        <td class="mono blu">${formatCOP(i.amount)}</td>
+        <td class="mono" style="font-size:11px">${formatDate(i.lock_end_date||i.end_date)}</td>
+        <td><span class="badge ${days<=7?'red':days<=15?'amb':'grn'}">${days} días</span></td>
+      </tr>`;
+    }).join(''):'<tr><td colspan="4" class="empty">Sin inversiones próximas a vencer</td></tr>';
+
+  }catch(e){console.error('Error analytics:',e)}
 }
 
 // ═══ INIT ═══

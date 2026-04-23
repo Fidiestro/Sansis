@@ -354,6 +354,46 @@
   ::-webkit-scrollbar-track{background:var(--bg)}
   ::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
   ::-webkit-scrollbar-thumb:hover{background:var(--bdh)}
+
+  /* ──── SIMULATOR ──── */
+  .sim-card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden}
+  .sim-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--grn),var(--tea))}
+  .sim-result{background:var(--sur);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-top:14px;display:none}
+  .sim-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bd);font-size:13px}
+  .sim-row:last-child{border-bottom:none;padding-top:10px;margin-top:4px}
+  .sim-row .l{color:var(--mut)}
+  .sim-row .v{font-family:'Space Mono',monospace;font-weight:700}
+  .sim-row.total .v{color:var(--grn);font-size:16px}
+  .sim-bar{height:8px;background:var(--sur);border-radius:4px;overflow:hidden;margin:12px 0}
+  .sim-bar-fill{height:100%;background:linear-gradient(90deg,var(--grn),var(--tea));border-radius:4px;transition:width .8s ease}
+
+  /* ──── RISK METER ──── */
+  .risk-meter{display:flex;gap:3px;margin:10px 0}
+  .risk-dot{flex:1;height:6px;border-radius:3px;background:var(--sur)}
+  .risk-dot.on-low{background:var(--grn)}
+  .risk-dot.on-med{background:var(--amb)}
+  .risk-dot.on-high{background:var(--red)}
+
+  /* ──── NOTIFICATION BANNER ──── */
+  .notif-banner{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;margin-bottom:10px;font-size:12px;line-height:1.5;border:1px solid}
+  .notif-banner.info{background:var(--blud);border-color:rgba(79,142,247,.25);color:var(--blu)}
+  .notif-banner.warn{background:var(--ambd);border-color:rgba(245,158,11,.25);color:var(--amb)}
+  .notif-banner.success{background:var(--grnd);border-color:rgba(16,185,129,.25);color:var(--grn)}
+
+  /* ──── MARKET PULSE ──── */
+  .pulse-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bd);font-size:12px}
+  .pulse-row:last-child{border-bottom:none}
+  .pulse-name{font-weight:600;display:flex;align-items:center;gap:6px}
+  .pulse-change.pos{color:var(--grn);font-family:'Space Mono',monospace;font-size:11px;font-weight:700}
+  .pulse-change.neg{color:var(--red);font-family:'Space Mono',monospace;font-size:11px;font-weight:700}
+
+  /* ──── PAYMENT METHODS in Profile ──── */
+  .pm-item{display:flex;align-items:center;gap:10px;padding:12px;background:var(--sur);border:1px solid var(--bd);border-radius:8px;margin-bottom:8px}
+  .pm-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .pm-info{flex:1;min-width:0}
+  .pm-label{font-size:13px;font-weight:600}
+  .pm-detail{font-size:11px;color:var(--mut)}
+  .pm-default{font-size:9px;background:var(--grnd);color:var(--grn);padding:2px 7px;border-radius:10px;font-weight:700;border:1px solid rgba(16,185,129,.2)}
 </style>
 </head>
 <body>
@@ -739,6 +779,13 @@ function renderDashboard(c){
     ${active.slice(0,2).map(inv=>renderInvCard(inv)).join('')}
   </div>`:''}
 
+  <!-- Banner si no hay inversiones -->
+  ${active.length===0?`
+  <div class="notif-banner info anim d2">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div>Aún no tienes inversiones activas. <strong>Empieza desde $100,000 COP</strong> con un CDTC o <strong>$50,000 COP</strong> con el Pool DeFi.</div>
+  </div>`:''}
+
   <div class="sec anim d2">
     <div class="product-card">
       <div class="prod-head">
@@ -750,7 +797,7 @@ function renderDashboard(c){
             <div class="prod-ttl">Inversión CDTC</div>
             <span class="risk-tag">Bajo Riesgo</span>
           </div>
-          <div class="prod-sub">Rendimiento variable</div>
+          <div class="prod-sub">Rendimiento variable · Capital protegido</div>
         </div>
       </div>
       <div class="prod-rates">
@@ -1403,19 +1450,18 @@ async function renderScoreView(c){
   const totalDeposited=dashboardData?.transactions?.filter(t=>t.type==='deposit').reduce((s,t)=>s+(parseFloat(t.amount)||0),0)||0;
   const points=Math.floor(totalDeposited/1000);
   const nextPoint=1000-((totalDeposited%1000)||0);
+  window.__totalDeposited=totalDeposited; // para el script de tiers
 
   c.innerHTML=`
   <div class="anim" style="max-width:720px">
     <h3 style="font-size:18px;font-weight:700;margin-bottom:4px">Mis Puntos de Recompensa</h3>
     <p style="font-size:13px;color:var(--mut);margin-bottom:20px">Acumula puntos y canjéalos por premios en nuestra tienda</p>
 
-    <div class="score-hero">
+        <div class="score-hero" id="score-hero-block">
       <div class="score-lbl">Puntos Disponibles</div>
       <div class="score-big">${points.toLocaleString('es-CO')}</div>
-      <div class="score-sub">Ganas 1 punto por cada $1,000 COP depositados</div>
-      <div class="score-mult" style="background:var(--blud);border-color:rgba(79,142,247,.2);color:var(--blu)">
-        <span>Te faltan ${formatCOP(nextPoint)} para tu próximo punto</span>
-      </div>
+      <div class="score-sub">Puntos de Recompensa · Sanse Capital</div>
+      <div id="score-tier-info" style="margin-top:12px"></div>
     </div>
 
     <div class="airdrop-card">
@@ -1431,6 +1477,29 @@ async function renderScoreView(c){
         🛒 Ver Tienda (Próximamente)
       </button>
     </div>
+
+    <script>
+    (function(){
+      var points2=Math.floor((window.__totalDeposited||0)/1000);
+      var tier=points2<1000?{name:'Bronce',icon:'🥉',next:1000,color:'#cd7f32',nextName:'Plata',start:0}:
+              points2<5000?{name:'Plata',icon:'🥈',next:5000,color:'#9ca3af',nextName:'Oro',start:1000}:
+              points2<15000?{name:'Oro',icon:'🥇',next:15000,color:'#f59e0b',nextName:'Diamante',start:5000}:
+              {name:'Diamante',icon:'💎',next:null,color:'#2dd4bf',nextName:null,start:15000};
+      var pct=tier.next?Math.min(100,Math.round(((points2-tier.start)/(tier.next-tier.start))*100)):100;
+      var hero=document.getElementById('score-hero-block');
+      if(hero){
+        hero.style.setProperty('--score-color',tier.color);
+        var info=document.getElementById('score-tier-info');
+        if(info){
+          info.innerHTML='<div style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,255,255,.1);border-radius:20px;font-size:13px;font-weight:700">'
+            +tier.icon+' Nivel '+tier.name
+          +'</div>'
+          +(tier.next?'<div style="margin:10px auto;max-width:260px"><div style="height:5px;background:rgba(255,255,255,.15);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:white;opacity:.8;border-radius:3px;transition:width 1s ease"></div></div>'
+            +'<div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.5);margin-top:3px"><span>'+tier.start.toLocaleString()+'</span><span>'+tier.next.toLocaleString()+' pts</span></div></div>':'');
+        }
+      }
+    })();
+    </script>
 
     <div class="score-breakdown">
       <div class="sb-ttl">Tu Historial de Puntos</div>
@@ -1657,32 +1726,41 @@ async function showInvestmentDetail(id){
     if(!data){c.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span>No se pudo cargar el detalle</div>';return}
 
     const inv=data.investment||{};
+    const isPool=(inv.type||'').toLowerCase()==='pool';
+
+    // Bifurcar: Pool tiene su propio render
+    if(isPool){
+      renderPoolDetail(c, inv, data.returns||[], data.transactions||[]);
+      return;
+    }
+
+    // ── CDTC DETAIL ──────────────────────────────────
     const returns=data.returns||[];
     const cap=parseFloat(inv.amount)||0;
     const start=new Date(inv.startDate||Date.now());
     const lockEnd=new Date(inv.lockEndDate||inv.endDate||Date.now());
     const now=new Date();
 
-    // Tiempo transcurrido
     const msElapsed=Math.max(0,now-start);
     const daysElapsed=Math.floor(msElapsed/(1000*60*60*24));
     const monthsElapsed=Math.floor(daysElapsed/30);
     const remDays=daysElapsed%30;
     const elapsedLabel=monthsElapsed>0?`${monthsElapsed} ${monthsElapsed===1?'mes':'meses'}${remDays>0?` y ${remDays} ${remDays===1?'día':'días'}`:''}`:`${daysElapsed} ${daysElapsed===1?'día':'días'}`;
 
-    // Días restantes hasta desbloqueo
     const msToUnlock=Math.max(0,lockEnd-now);
     const daysToUnlock=Math.ceil(msToUnlock/(1000*60*60*24));
     const isMatured=msToUnlock<=0;
 
-    // Progreso
     const totalDuration=Math.max(1,lockEnd-start);
     const progressPct=Math.min(100,Math.round((msElapsed/totalDuration)*100));
 
-    // Ganancias
     const paidEarnings=returns.reduce((s,r)=>s+(parseFloat(r.earned)||0),0);
     const pendingGross=cap*0.02*(daysElapsed/30);
     const pendingLive=Math.max(0,pendingGross-paidEarnings);
+
+    // APY personal de esta inversión
+    const myRates=returns.map(r=>parseFloat(r.rate)||0).filter(r=>r>0);
+    const myAPY=myRates.length?(myRates.reduce((a,b)=>a+b,0)/myRates.length):2.0;
 
     c.innerHTML=`
     <div class="anim">
@@ -1696,8 +1774,8 @@ async function showInvestmentDetail(id){
       <div class="detail-hero">
         <div class="dh-top">
           <div class="inv-type-wrap">
-            <div class="inv-type">${inv.type==='pool'?'Pool de Liquidez':'Inversión CDTC'} <span class="plazo">— ${inv.type==='pool'?'12':(inv.durationMonths||6)} meses</span></div>
-            <span class="risk-tag ${inv.type==='pool'?'medium':''}">${inv.type==='pool'?'Riesgo Medio':'Bajo Riesgo'}</span>
+            <div class="inv-type">Inversión CDTC <span class="plazo">— ${inv.durationMonths||6} meses</span></div>
+            <span class="risk-tag">Bajo Riesgo</span>
           </div>
           <span class="inv-status ${inv.status==='pending_deposit'?'pending':'active'}">${inv.status==='pending_deposit'?'Pendiente':isMatured?'Vencida':'Activa'}</span>
         </div>
@@ -1711,15 +1789,15 @@ async function showInvestmentDetail(id){
           <div class="dm-val grn">+${formatCOP(paidEarnings)}</div>
           <div class="dm-sub">${returns.length} ${returns.length===1?'pago':'pagos'} registrado${returns.length===1?'':'s'}</div>
         </div>
-        <div class="dm-item pend ${inv.type==='pool'?'':'earning-live'}">
-          <div class="dm-lbl">${inv.type==='pool'?'Ganancias acumuladas':'<span class="pulse-dot"></span>Pendiente'}</div>
-          <div class="dm-val amb" ${inv.type!=='pool'?`data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-paid="${paidEarnings}"`:''}>+${formatCOP(inv.type==='pool'?paidEarnings:pendingLive)}</div>
-          <div class="dm-sub">${inv.type==='pool'?'Pagos registrados por admin':'Generándose en tiempo real'}</div>
+        <div class="dm-item pend earning-live">
+          <div class="dm-lbl"><span class="pulse-dot"></span>Pendiente</div>
+          <div class="dm-val amb" data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-paid="${paidEarnings}">+${formatCOP(pendingLive)}</div>
+          <div class="dm-sub">Generándose en tiempo real</div>
         </div>
         <div class="dm-item apy">
-          <div class="dm-lbl">APY mensual</div>
-          <div class="dm-val blu">${inv.type==='pool'?poolAPY.monthly.toFixed(2)+'%':'~2.0%'}</div>
-          <div class="dm-sub">${inv.type==='pool'?'Variable — Pool de Liquidez':'Estimado histórico'}</div>
+          <div class="dm-lbl">Mi APY mensual</div>
+          <div class="dm-val blu">${myAPY.toFixed(2)}%</div>
+          <div class="dm-sub">${myRates.length?'Promedio de tus rendimientos':'Estimado histórico'}</div>
         </div>
         <div class="dm-item time">
           <div class="dm-lbl">Tiempo activo</div>
@@ -1741,7 +1819,7 @@ async function showInvestmentDetail(id){
       </div>
 
       <div class="timeline-card">
-        <div class="tl-head">Historial de Rendimientos Pagados</div>
+        <div class="tl-head">Historial de Rendimientos</div>
         ${returns.length===0?`<div class="tl-empty"><span style="font-size:24px;display:block;margin-bottom:8px;opacity:.4">📋</span>Aún no hay rendimientos registrados.<br><span style="font-size:11px;opacity:.7">Los rendimientos se pagan mensualmente.</span></div>`:returns.map(r=>`
         <div class="tl-row">
           <div class="tl-dot"></div>
@@ -1758,12 +1836,217 @@ async function showInvestmentDetail(id){
       </div>`}
     </div>`;
 
-    // Arrancar animación de ganancia pendiente
     startEarningsAnimation();
   }catch(e){
     console.error(e);
     c.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span>Error cargando el detalle</div>';
   }
+}
+
+// ══════════════════ POOL DETAIL — vista dedicada DeFi ══════════════════
+function renderPoolDetail(c, inv, returns, transactions){
+  const cap=parseFloat(inv.amount)||0;
+  const netCap=parseFloat(inv.netCapital)||cap;
+  const entryFee=parseFloat(inv.entryFee)||Math.round(cap*0.02);
+  const paidEarnings=returns.reduce((s,r)=>s+(parseFloat(r.earned)||0),0);
+  const start=new Date(inv.startDate||Date.now());
+  const lockEnd=new Date(inv.lockEndDate||inv.endDate||Date.now());
+  const now=new Date();
+
+  const msElapsed=Math.max(0,now-start);
+  const daysElapsed=Math.floor(msElapsed/(1000*60*60*24));
+  const monthsElapsed=Math.floor(daysElapsed/30);
+  const msToUnlock=Math.max(0,lockEnd-now);
+  const daysToUnlock=Math.ceil(msToUnlock/(1000*60*60*24));
+  const isMatured=msToUnlock<=0;
+  const totalDuration=Math.max(1,lockEnd-start);
+  const progressPct=Math.min(100,Math.round((msElapsed/totalDuration)*100));
+
+  // APY real de esta inversión
+  const myRates=returns.map(r=>parseFloat(r.rate)||0).filter(r=>r>0);
+  const myAPY=myRates.length?(myRates.reduce((a,b)=>a+b,0)/myRates.length):
+    (poolStats&&poolStats.monthlyAPY?poolStats.monthlyAPY:2.0);
+  const myAPYann=(Math.pow(1+myAPY/100,12)-1)*100;
+
+  // Leer estrategias del admin (desde poolStats o notas de la inversión)
+  const poolNote=inv.notes||'';
+  // Parsear asignaciones desde el campo notes si contiene JSON de estrategia
+  let poolAllocation=null;
+  // 1. Intentar desde localStorage (guardado por admin)
+  try{
+    const saved=localStorage.getItem('sanse_pool_strategies');
+    if(saved)poolAllocation=JSON.parse(saved);
+  }catch(_){}
+  // 2. Fallback: desde notas de inversión
+  if(!poolAllocation){
+    try{
+      const match=poolNote.match(/POOL_ALLOCATION:(.*?)(?:$|\n)/);
+      if(match)poolAllocation=JSON.parse(match[1]);
+    }catch(_){}
+  }
+
+  const statusLabel={active:'Activa',pending_deposit:'Pendiente',completed:'Completada',cancelled:'Cancelada'};
+
+  c.innerHTML=`
+  <div class="anim" style="max-width:680px">
+    <div class="detail-header">
+      <button class="btn-back" onclick="showViewByName('investments')">
+        <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Volver
+      </button>
+    </div>
+
+    <!-- HERO POOL -->
+    <div style="background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(124,92,252,.1));border:1px solid rgba(245,158,11,.25);border-radius:16px;padding:24px 20px;margin-bottom:14px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--amb),var(--pur))"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div style="font-size:15px;font-weight:700">Pool de Liquidez DeFi</div>
+          <span class="risk-tag medium">Riesgo Medio</span>
+          <span style="font-size:9px;background:rgba(124,92,252,.15);color:var(--pur);padding:3px 8px;border-radius:10px;font-weight:700;border:1px solid rgba(124,92,252,.3)">⛓️ CRYPTO</span>
+        </div>
+        <span class="inv-status ${inv.status==='pending_deposit'?'pending':'active'}">${statusLabel[inv.status]||inv.status}</span>
+      </div>
+      <div style="font-size:11px;color:rgba(245,158,11,.7);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Capital Total Depositado</div>
+      <div style="font-family:'Space Mono',monospace;font-size:36px;font-weight:700;color:var(--amb);letter-spacing:-.5px">${formatCOP(cap)}</div>
+      <div style="font-size:12px;color:var(--mut);margin-top:6px">Capital neto en pool: <strong style="color:var(--text);font-family:'Space Mono',monospace">${formatCOP(netCap)}</strong> · Comisión entrada: <strong style="color:var(--red)">-${formatCOP(entryFee)}</strong></div>
+    </div>
+
+    <!-- MÉTRICAS -->
+    <div class="detail-metrics" style="margin-bottom:14px">
+      <div class="dm-item paid">
+        <div class="dm-lbl">Ganancias pagadas</div>
+        <div class="dm-val grn">+${formatCOP(paidEarnings)}</div>
+        <div class="dm-sub">${returns.length} ${returns.length===1?'pago':'pagos'} registrado${returns.length===1?'':'s'}</div>
+      </div>
+      <div class="dm-item apy">
+        <div class="dm-lbl">Mi APY mensual</div>
+        <div class="dm-val" style="color:var(--amb)">${myAPY.toFixed(2)}%</div>
+        <div class="dm-sub">Anual: ~${myAPYann.toFixed(1)}%</div>
+      </div>
+      <div class="dm-item time">
+        <div class="dm-lbl">Tiempo activo</div>
+        <div class="dm-val pur">${monthsElapsed}m ${daysElapsed%30}d</div>
+        <div class="dm-sub">${isMatured?'Bloqueado finalizado':`${daysToUnlock} días para desbloqueo`}</div>
+      </div>
+      <div class="dm-item" style="border-color:rgba(124,92,252,.2);background:rgba(124,92,252,.05)">
+        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--pur)"></div>
+        <div class="dm-lbl">Comisión retiro</div>
+        <div class="dm-val pur">20%</div>
+        <div class="dm-sub">Sobre ganancias</div>
+      </div>
+    </div>
+
+    <!-- PROGRESO -->
+    <div class="progress-block" style="margin-bottom:14px">
+      <div class="pb-head">
+        <div class="pb-ttl">Progreso del contrato · 12 meses</div>
+        <div class="pb-pct">${progressPct}%</div>
+      </div>
+      <div class="pb-track"><div class="pb-fill" style="width:${progressPct}%;background:linear-gradient(90deg,var(--amb),var(--pur))"></div></div>
+      <div class="pb-dates">
+        <span class="start">Inicio: ${formatDate(start)}</span>
+        <span class="end">Desbloqueo: ${formatDate(lockEnd)}</span>
+      </div>
+    </div>
+
+    <!-- ESTRATEGIAS CRIPTO -->
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:18px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <div style="width:28px;height:28px;border-radius:8px;background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.2);display:flex;align-items:center;justify-content:center;font-size:14px">⛓️</div>
+        <div>
+          <div style="font-size:13px;font-weight:700">Estrategias DeFi Activas</div>
+          <div style="font-size:11px;color:var(--mut)">Tu capital trabaja en múltiples protocolos</div>
+        </div>
+      </div>
+      ${poolAllocation?`
+      <!-- Asignación real desde el admin -->
+      <div id="pool-alloc-bars">
+        ${poolAllocation.map(s=>`
+        <div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <div style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px">
+              <span style="font-size:14px">${s.icon||'🔷'}</span>${s.name}
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--mut)">${formatCOP(netCap*(s.pct/100))}</span>
+              <span style="font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:var(--amb)">${s.pct}%</span>
+            </div>
+          </div>
+          <div style="height:6px;background:var(--sur);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${s.pct}%;background:${s.color||'linear-gradient(90deg,var(--amb),var(--pur))'};border-radius:3px;transition:width .8s ease"></div>
+          </div>
+          ${s.desc?`<div style="font-size:11px;color:var(--mut);margin-top:3px">${s.desc}</div>`:''}
+        </div>`).join('')}
+      </div>`:`
+      <!-- Vista por defecto si no hay asignación registrada -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${[
+          {icon:'🌊',name:'Pools de Liquidez',desc:'Uniswap, PancakeSwap',color:'#4f8ef7'},
+          {icon:'🛡️',name:'Delta Neutral',desc:'Posiciones hedgeadas',color:'#10b981'},
+          {icon:'🚀',name:'Preventas DeFi',desc:'Early-stage projects',color:'#7c5cfc'},
+          {icon:'📈',name:'Yield Farming',desc:'Optimización de yields',color:'#f59e0b'}
+        ].map(s=>`
+        <div style="padding:12px;background:var(--sur);border-radius:8px;border:1px solid var(--bd)">
+          <div style="font-size:18px;margin-bottom:4px">${s.icon}</div>
+          <div style="font-size:12px;font-weight:600;color:var(--text)">${s.name}</div>
+          <div style="font-size:11px;color:var(--mut);margin-top:2px">${s.desc}</div>
+        </div>`).join('')}
+      </div>
+      <div style="margin-top:12px;padding:10px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:8px;font-size:11px;color:var(--mut);line-height:1.6">
+        ℹ️ El admin actualizará la distribución exacta cada mes. Los porcentajes varían según condiciones del mercado.
+      </div>`}
+    </div>
+
+    <!-- HISTORIAL DE RENDIMIENTOS -->
+    <div class="timeline-card" style="margin-bottom:14px">
+      <div class="tl-head" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Historial de Rendimientos</span>
+        ${paidEarnings>0?`<span style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--grn)">+${formatCOP(paidEarnings)} total</span>`:''}
+      </div>
+      ${returns.length===0?`
+      <div class="tl-empty">
+        <span style="font-size:28px;display:block;margin-bottom:8px;opacity:.4">📊</span>
+        Aún no hay rendimientos registrados.<br>
+        <span style="font-size:11px;opacity:.7">Los rendimientos se pagan y registran mensualmente.</span>
+      </div>`:returns.map(r=>`
+      <div class="tl-row">
+        <div class="tl-dot" style="background:var(--amb)"></div>
+        <div class="tl-month">${formatDate(r.month)}</div>
+        <div class="tl-rate" style="color:var(--amb)">${r.rate}%</div>
+        <div class="tl-amt">+${formatCOP(r.earned)}</div>
+      </div>`).join('')}
+    </div>
+
+    <!-- ACCIONES -->
+    ${paidEarnings>0?`
+    <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:16px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:4px">Retirar Ganancias Disponibles</div>
+      <div style="font-size:12px;color:var(--mut);margin-bottom:14px">Comisión del 20% sobre ganancias · Capital permanece en el pool</div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <div>
+          <div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px">Ganancias brutas</div>
+          <div style="font-family:'Space Mono',monospace;font-weight:700;color:var(--grn);font-size:16px">+${formatCOP(paidEarnings)}</div>
+        </div>
+        <div style="color:var(--mut)">→</div>
+        <div>
+          <div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px">Recibirías (neto)</div>
+          <div style="font-family:'Space Mono',monospace;font-weight:700;color:var(--amb);font-size:16px">${formatCOP(Math.round(paidEarnings*0.8))}</div>
+        </div>
+        <button onclick="withdrawPoolEarnings(${inv.id},${paidEarnings})" style="margin-left:auto;padding:10px 18px;background:linear-gradient(135deg,var(--amb),var(--pur));border:none;border-radius:8px;color:white;font-weight:600;font-size:13px;cursor:pointer">
+          💰 Retirar Ganancias
+        </button>
+      </div>
+    </div>`:''}
+
+    ${isMatured?`
+    <button class="prod-cta" style="background:linear-gradient(135deg,var(--amb),var(--pur));margin-top:4px" onclick="withdrawInvestment(${inv.id})">
+      Retirar Capital Completo →
+    </button>`:`
+    <div style="padding:14px;background:var(--sur);border:1px solid var(--bd);border-radius:10px;font-size:12px;color:var(--mut);line-height:1.6;text-align:center">
+      🔒 Capital bloqueado hasta <strong style="color:var(--text)">${formatDate(lockEnd)}</strong> · ${daysToUnlock} días restantes
+    </div>`}
+  </div>`;
 }
 
 async function withdrawInvestment(id){
