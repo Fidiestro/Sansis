@@ -1445,24 +1445,42 @@ async function renderReferralsView(c){
 // ══════════════════ RENDER: REWARDS / POINTS ══════════════════
 async function renderScoreView(c){
   c.innerHTML='<div class="loading"><div class="spinner"></div><p>Cargando puntos...</p></div>';
-  
-  // Calcular puntos: 1 punto por cada $1,000 COP depositados
   const totalDeposited=dashboardData?.transactions?.filter(t=>t.type==='deposit').reduce((s,t)=>s+(parseFloat(t.amount)||0),0)||0;
   const points=Math.floor(totalDeposited/1000);
   const nextPoint=1000-((totalDeposited%1000)||0);
-  window.__totalDeposited=totalDeposited; // para el script de tiers
+
+  // Calcular tier
+  const tier=points<1000?{name:'Bronce',icon:'🥉',next:1000,color:'#cd7f32',start:0}:
+             points<5000?{name:'Plata',icon:'🥈',next:5000,color:'#9ca3af',start:1000}:
+             points<15000?{name:'Oro',icon:'🥇',next:15000,color:'#f59e0b',start:5000}:
+             {name:'Diamante',icon:'💎',next:null,color:'#2dd4bf',start:15000};
+  const tierPct=tier.next?Math.min(100,Math.round(((points-tier.start)/(tier.next-tier.start))*100)):100;
+
+  const tierHtml='<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px;margin-bottom:14px">'
+    +'<div style="font-size:32px">'+tier.icon+'</div>'
+    +'<div style="flex:1">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:3px">Nivel '+tier.name+'</div>'
+      +(tier.next
+        ?'<div style="font-size:11px;color:var(--mut);margin-bottom:6px">'+tierPct+'% hacia el siguiente nivel ('+tier.next.toLocaleString()+' pts)</div>'
+          +'<div style="height:5px;background:var(--sur);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+tierPct+'%;background:linear-gradient(90deg,'+tier.color+',#7c5cfc);border-radius:3px"></div></div>'
+        :'<div style="font-size:11px;color:var(--tea)">🎉 Nivel máximo alcanzado</div>')
+    +'</div></div>';
 
   c.innerHTML=`
   <div class="anim" style="max-width:720px">
     <h3 style="font-size:18px;font-weight:700;margin-bottom:4px">Mis Puntos de Recompensa</h3>
-    <p style="font-size:13px;color:var(--mut);margin-bottom:20px">Acumula puntos y canjéalos por premios en nuestra tienda</p>
+    <p style="font-size:13px;color:var(--mut);margin-bottom:20px">Acumula puntos y canjéalos por premios exclusivos</p>
 
-        <div class="score-hero" id="score-hero-block">
+    <div class="score-hero">
       <div class="score-lbl">Puntos Disponibles</div>
       <div class="score-big">${points.toLocaleString('es-CO')}</div>
-      <div class="score-sub">Puntos de Recompensa · Sanse Capital</div>
-      <div id="score-tier-info" style="margin-top:12px"></div>
+      <div class="score-sub">Sanse Capital · Programa de Recompensas</div>
+      <div class="score-mult" style="background:var(--blud);border-color:rgba(79,142,247,.2);color:var(--blu)">
+        <span>Te faltan ${formatCOP(nextPoint)} para tu próximo punto</span>
+      </div>
     </div>
+
+    ${tierHtml}
 
     <div class="airdrop-card">
       <div class="ad-ttl">
@@ -1470,36 +1488,30 @@ async function renderScoreView(c){
         Tienda de Recompensas
       </div>
       <div class="ad-desc">
-        <strong>Los puntos son ilimitados.</strong> Mientras más deposites, más puntos acumulas. 
-        Canjea tus puntos por premios exclusivos, beneficios en la plataforma, descuentos en comisiones y más.
+        <strong>Los puntos son ilimitados.</strong> Mientras más deposites, más puntos acumulas.
+        Canjea tus puntos por descuentos en comisiones, beneficios exclusivos y más.
       </div>
       <button class="prod-cta" style="margin-top:12px;opacity:.6;cursor:not-allowed" disabled>
         🛒 Ver Tienda (Próximamente)
       </button>
     </div>
 
-    <div id="score-tier-bar" style="margin:0 0 14px"></div>
-
     <div class="score-breakdown">
-      <div class="sb-ttl">Tu Historial de Puntos</div>
-      <div style="font-size:12px;color:var(--mut);line-height:1.8">
-        <div class="info-row" style="border-bottom:1px solid var(--bd);padding:12px 0">
-          <span class="l">💰 Total Depositado</span>
-          <span class="v grn">${formatCOP(totalDeposited)}</span>
-        </div>
-        <div class="info-row" style="border-bottom:1px solid var(--bd);padding:12px 0">
-          <span class="l">⭐ Puntos Ganados</span>
-          <span class="v blu">${points.toLocaleString('es-CO')}</span>
-        </div>
-        <div class="info-row" style="padding:12px 0">
-          <span class="l">📊 Tasa de Conversión</span>
-          <span class="v">1 punto / $1,000 COP</span>
-        </div>
+      <div class="sb-ttl">Resumen de Puntos</div>
+      <div class="sb-item">
+        <div class="sb-head"><span class="sb-head-l">💰 Total Depositado</span><span class="sb-head-r"><strong>${formatCOP(totalDeposited)}</strong></span></div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-head"><span class="sb-head-l">⭐ Puntos ganados</span><span class="sb-head-r"><strong>${points.toLocaleString('es-CO')} pts</strong></span></div>
+        <div class="sb-bar"><div class="sb-bar-fill" style="width:${Math.min(100,(points/Math.max(tier.next||points+1,1)*100)).toFixed(1)}%"></div></div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-head"><span class="sb-head-l">📊 Tasa de conversión</span><span class="sb-head-r">1 pt / $1,000 COP</span></div>
       </div>
     </div>
 
     <div class="card" style="padding:18px">
-      <div class="sb-ttl" style="margin-bottom:10px">Cómo ganar más puntos</div>
+      <div class="sb-ttl" style="margin-bottom:10px">¿Cómo ganar más puntos?</div>
       <div style="font-size:12px;color:var(--mut);line-height:1.9">
         • <strong style="color:var(--text)">Deposita capital</strong> — 1 punto por cada $1,000 COP<br>
         • <strong style="color:var(--text)">Sin límite</strong> — Acumula todos los puntos que puedas<br>
