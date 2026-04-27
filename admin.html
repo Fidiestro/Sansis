@@ -411,6 +411,31 @@
         </table>
       </div>
     </div>
+
+    <div class="card">
+      <div class="card-ttl">📋 Registro Contable — Comisiones Pool (20%)</div>
+      <div class="card-desc">Historial de retiros de ganancias. La columna <strong>Comisión</strong> es el ingreso de Sanse Capital.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px" id="pool-commission-kpis">
+        <div style="padding:12px;background:var(--sur);border-radius:8px;border:1px solid var(--bd)">
+          <div style="font-size:10px;color:var(--mut);text-transform:uppercase;margin-bottom:4px">Total bruto retirado</div>
+          <div style="font-family:Space Mono,monospace;font-weight:700;color:var(--grn)" id="pwk-gross">—</div>
+        </div>
+        <div style="padding:12px;background:var(--sur);border-radius:8px;border:1px solid var(--bd)">
+          <div style="font-size:10px;color:var(--mut);text-transform:uppercase;margin-bottom:4px">Comisión Sanse (20%)</div>
+          <div style="font-family:Space Mono,monospace;font-weight:700;color:var(--amb)" id="pwk-commission">—</div>
+        </div>
+        <div style="padding:12px;background:var(--sur);border-radius:8px;border:1px solid var(--bd)">
+          <div style="font-size:10px;color:var(--mut);text-transform:uppercase;margin-bottom:4px">Neto pagado a usuarios</div>
+          <div style="font-family:Space Mono,monospace;font-weight:700;color:var(--blu)" id="pwk-net">—</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Fecha</th><th>Usuario</th><th>Bruto</th><th>Comisión (20%)</th><th>Neto pagado</th></tr></thead>
+          <tbody id="pool-commissions-tbl"><tr><td colspan="5" class="loading-cell">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <!-- ═══ PRÉSTAMOS ═══ -->
@@ -1059,6 +1084,31 @@ async function loadPool(){
           </tr>`;
         }).join(''):'<tr><td colspan="6" class="empty">Sin inversiones en pool</td></tr>';
       }
+    }
+
+    // Cargar registro contable de comisiones
+    try {
+      const pwRes = await apiFetch('/admin/pool/withdrawals');
+      if (pwRes && pwRes.ok) {
+        const pws = await pwRes.json();
+        const totalGross = pws.reduce((s,r)=>s+parseFloat(r.gross_amount||0),0);
+        const totalComm  = pws.reduce((s,r)=>s+parseFloat(r.commission||0),0);
+        const totalNet   = pws.reduce((s,r)=>s+parseFloat(r.net_amount||0),0);
+        document.getElementById('pwk-gross').textContent      = formatCOP(totalGross);
+        document.getElementById('pwk-commission').textContent = formatCOP(totalComm);
+        document.getElementById('pwk-net').textContent        = formatCOP(totalNet);
+        document.getElementById('pool-commissions-tbl').innerHTML = pws.length
+          ? pws.map(r=>`<tr>
+              <td class="mono" style="font-size:11px;color:var(--mut)">${formatDate(r.withdrawal_date||r.created_at)}</td>
+              <td>${r.user_name||'—'}</td>
+              <td class="mono grn">${formatCOP(r.gross_amount)}</td>
+              <td class="mono amb">${formatCOP(r.commission)}</td>
+              <td class="mono blu">${formatCOP(r.net_amount)}</td>
+            </tr>`).join('')
+          : '<tr><td colspan="5" class="empty">Sin retiros registrados</td></tr>';
+      }
+    } catch(_) {
+      document.getElementById('pool-commissions-tbl').innerHTML='<tr><td colspan="5" class="empty">Sin datos disponibles aún</td></tr>';
     }
   }catch(e){
     document.getElementById('pool-stats-display').innerHTML='<div class="empty">Error cargando estadísticas del pool</div>';
