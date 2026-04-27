@@ -650,30 +650,36 @@ function setGreeting(userName){
 // ══════════════════ LOAD DATA ══════════════════
 async function loadAllData(){
   try{
-    const [dashR,balR,invR,gsR,loanR,scoreR,poolR]=await Promise.all([
+    // Carga crítica: todo lo que el home necesita para renderizar correctamente
+    const [dashR,balR,invR,poolR]=await Promise.all([
       apiFetch('/dashboard/summary'),
       apiFetch('/investments/balance-summary'),
       apiFetch('/investments/my'),
-      apiFetch('/investments/global-stats'),
-      apiFetch('/loans/my'),
-      apiFetch('/loans/credit-score'),
       apiFetch('/investments/pool-stats')
     ]);
     if(dashR&&dashR.ok)dashboardData=await dashR.json();
     if(balR&&balR.ok)balanceSummary=await balR.json();
     if(invR&&invR.ok)myInvestments=await invR.json();
-    if(gsR&&gsR.ok)globalStats=await gsR.json();
-    if(loanR&&loanR.ok)myLoans=await loanR.json();
-    if(scoreR&&scoreR.ok)creditScore=await scoreR.json();
     if(poolR&&poolR.ok)poolStats=await poolR.json();
 
-    // Fallback if balance summary missing
+    // Fallback balance si falla el endpoint
     if(!balR||!balR.ok){
       if(dashboardData){
         const inv=dashboardData.investments?.filter(i=>i.status==='active').reduce((s,i)=>s+i.amount,0)||0;
         balanceSummary={totalBalance:dashboardData.balance||0,totalInvested:inv,availableBalance:Math.max(0,(dashboardData.balance||0)-inv),totalEarnings:dashboardData.totalProfit||0,pendingWithdrawals:0};
       }
     }
+
+    // Carga secundaria en background (no bloquea el render)
+    Promise.all([
+      apiFetch('/investments/global-stats'),
+      apiFetch('/loans/my'),
+      apiFetch('/loans/credit-score')
+    ]).then(([gsR,loanR,scoreR])=>{
+      if(gsR&&gsR.ok)gsR.json().then(d=>{globalStats=d;});
+      if(loanR&&loanR.ok)loanR.json().then(d=>{myLoans=d;});
+      if(scoreR&&scoreR.ok)scoreR.json().then(d=>{creditScore=d;});
+    }).catch(()=>{});
   }catch(e){console.error('Load error:',e)}
 }
 
@@ -757,7 +763,7 @@ function renderDashboard(c){
     </div>
     <div class="stat-card">
       <div class="stat-label">Inversiones activas</div>
-      <div class="stat-val">${active.length}</div>
+      <div class="stat-val">${myInvestments.filter(i=>['active','pending_deposit'].includes(i.status)).length}</div>
     </div>
     <div class="stat-card" onclick="showViewByName('score')" style="cursor:pointer;position:relative">
       <div class="stat-label" style="display:flex;align-items:center;gap:4px">⭐ Puntos</div>
@@ -847,13 +853,12 @@ function renderInvCard(inv){
   const isPool=inv.type==='pool'||String(inv.type||'').includes('pool');
   
   // Para CDTC: ganancia pendiente proporcional animada
-  // Para Pool: solo mostrar lo que el admin registró (sin animación dinámica)
+  // Para Pool: SOLO lo que el admin registró — sin cálculo dinámico
   const cap=parseFloat(inv.amount)||0;
-  const paidEarnings=parseFloat(inv.totalEarned)||0;
+  const paidEarnings=parseFloat(inv.totalEarned)||parseFloat(inv.withdrawable_earnings)||0;
   const start=new Date(inv.startDate||inv.start_date||Date.now());
   const now=new Date();
-  
-  // CDTC: animación en tiempo real. Pool: estático (solo rendimientos registrados)
+
   let pendingLive=0;
   if(!isPool){
     const daysElapsed=Math.max(0,(now-start)/(1000*60*60*24));
@@ -915,13 +920,17 @@ function startEarningsAnimation(){
 async function withdrawPoolEarnings(invId,earnings){
   const commission=Math.round(earnings*0.20);
   const netAmount=earnings-commission;
-  if(!confirm(`¿Retirar ${formatCOP(earnings)} en ganancias?\n\nComisión 20%: -${formatCOP(commission)}\nRecibirás: ${formatCOP(netAmount)}`))return;
-  
+  if(!confirm('¿Retirar '+formatCOP(earnings)+' en ganancias?\n\nComisión 20%: -'+formatCOP(commission)+'\nRecibirás: '+formatCOP(netAmount)))return;
   try{
-    const res=await apiFetch(`/investments/${invId}/withdraw-earnings`,{method:'POST'});
+    const res=await apiFetch('/investments/'+invId+'/withdraw-earnings',{method:'POST'});
+    if(res&&res.status===404){
+      toast('El retiro de ganancias debe solicitarse por WhatsApp al admin','error');
+      setTimeout(()=>window.open('https://wa.me/573194552890?text=Quiero retirar mis ganancias del Pool de Liquidez - ID inv: '+invId,'_blank'),500);
+      return;
+    }
     const d=await res.json();
     if(!res.ok)return toast(d.error||'Error al retirar','error');
-    toast(`✅ Retiro procesado. Recibirás ${formatCOP(netAmount)} (comisión: ${formatCOP(commission)})`);
+    toast('✅ Retiro procesado. Recibirás '+formatCOP(netAmount)+' (comisión: '+formatCOP(commission)+')');
     await loadAllData();
     renderCurrentView();
   }catch(e){toast('Error de conexión','error')}
@@ -1121,7 +1130,7 @@ function renderDepositView(c){
         <span class="l">Llave Bre-B / Nequi</span>
         <span class="v" style="display:flex;align-items:center;gap:8px">
           <strong id="breb-key">@JFC927</strong>
-          <button onclick="navigator.clipboard.writeText('@JFC927').then(()=>showToast('¡Llave copiada!','success'))" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--mut);cursor:pointer">Copiar</button>
+          <button onclick="navigator.clipboard.writeText('@JFC927').then(()=>toast('¡Llave copiada!','success'))" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--mut);cursor:pointer">Copiar</button>
         </span>
       </div>
       <div class="info-row"><span class="l">Titular</span><span class="v">Sanse Capital SAS</span></div>
@@ -1181,7 +1190,7 @@ function updateDepositPreview(){
 function handleDepositFile(input){
   const file=input.files[0];
   if(!file) return;
-  if(file.size>5*1024*1024){ showToast('La imagen no puede superar 5MB','error'); input.value=''; return; }
+  if(file.size>5*1024*1024){ toast('La imagen no puede superar 5MB','error'); input.value=''; return; }
   const reader=new FileReader();
   reader.onload=e=>{
     document.getElementById('dep-img-thumb').src=e.target.result;
@@ -1217,7 +1226,7 @@ async function submitDepositProof(){
   const note=document.getElementById('dep-note')?.value||'';
   const file=document.getElementById('dep-file')?.files[0];
 
-  if(amt<10000||!file){ showToast('Completa el monto y adjunta el comprobante','error'); return; }
+  if(amt<10000||!file){ toast('Completa el monto y adjunta el comprobante','error'); return; }
 
   btn.disabled=true; btn.textContent='Enviando...'; btn.style.opacity='.6';
 
@@ -1246,7 +1255,7 @@ async function submitDepositProof(){
       msgEl.innerHTML='✅ Comprobante enviado. El admin revisará tu depósito pronto.';
       btn.textContent='✓ Enviado';
       btn.style.background='var(--grn)';
-      showToast('Comprobante enviado exitosamente','success');
+      toast('Comprobante enviado exitosamente','success');
     } else {
       const err=res?await res.json():{};
       throw new Error(err.error||'Error al enviar');
@@ -1255,7 +1264,7 @@ async function submitDepositProof(){
     btn.disabled=false; btn.textContent='Enviar Comprobante'; btn.style.opacity='1';
     msgEl.style.display='block'; msgEl.style.color='var(--red)';
     msgEl.textContent='Error: '+(e.message||'Intenta de nuevo');
-    showToast(e.message||'Error al enviar comprobante','error');
+    toast(e.message||'Error al enviar comprobante','error');
   }
 }
 
@@ -1717,7 +1726,8 @@ async function showInvestmentDetail(id){
     if(!data){c.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span>No se pudo cargar el detalle</div>';return}
 
     const inv=data.investment||{};
-    const isPool=(inv.type||'').toLowerCase()==='pool';
+    const invType2=(inv.type||'').toLowerCase().trim();
+  const isPool=invType2==='pool'||invType2.includes('pool');
 
     // Bifurcar: Pool tiene su propio render
     if(isPool){
