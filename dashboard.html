@@ -855,7 +855,9 @@ function renderInvCard(inv){
   // Para CDTC: ganancia pendiente proporcional animada
   // Para Pool: SOLO lo que el admin registró — sin cálculo dinámico
   const cap=parseFloat(inv.amount)||0;
-  const paidEarnings=parseFloat(inv.totalEarned)||parseFloat(inv.withdrawable_earnings)||0;
+  const totalEarned=parseFloat(inv.totalEarned)||0;
+  const withdrawable=parseFloat(inv.withdrawableEarnings)||parseFloat(inv.withdrawable_earnings)||0;
+  const paidEarnings=isPool?Math.max(0,totalEarned-withdrawable):totalEarned;
   const start=new Date(inv.startDate||inv.start_date||Date.now());
   const now=new Date();
 
@@ -887,15 +889,15 @@ function renderInvCard(inv){
         <div class="inv-cell-val">${myAPY>0?myAPY.toFixed(2)+'%':'~2.0%'}</div>
       </div>
       <div class="inv-cell">
-        <div class="inv-cell-lbl">Ganancia ${isPool?'acumulada':'pagada'}</div>
+        <div class="inv-cell-lbl">${isPool?'Ya retirado':'Ganancia pagada'}</div>
         <div class="inv-cell-val grn">+${formatCOP(paidEarnings)}</div>
       </div>
       <div class="inv-cell ${isPool?'':'earning-live'}">
-        <div class="inv-cell-lbl">${isPool?'':'<span class="pulse-dot"></span>'}${isPool?'Próx. pago':'Pendiente'}</div>
-        <div class="inv-cell-val amb" ${isPool?'':`data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-paid="${paidEarnings}"`}>+${formatCOP(isPool?0:pendingLive)}</div>
+        <div class="inv-cell-lbl">${isPool?'<span class="pulse-dot"></span>Por retirar':'<span class="pulse-dot"></span>Pendiente'}</div>
+        <div class="inv-cell-val amb" ${isPool?'':`data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-paid="${totalEarned}"`}>+${formatCOP(isPool?withdrawable:pendingLive)}</div>
       </div>
     </div>
-    ${isPool&&paidEarnings>0?`<div style="margin-top:12px"><button class="btn btn-sm" style="width:100%;background:var(--amb);color:white;border:none;padding:10px;border-radius:7px;font-weight:600;font-size:12px" onclick="event.stopPropagation();withdrawPoolEarnings(${inv.id},${paidEarnings})">💰 Retirar Ganancias (20% comisión)</button></div>`:''}
+    ${isPool&&withdrawable>0?`<div style="margin-top:12px"><button class="btn btn-sm" style="width:100%;background:var(--amb);color:white;border:none;padding:10px;border-radius:7px;font-weight:600;font-size:12px" onclick="event.stopPropagation();withdrawPoolEarnings(${inv.id},${withdrawable})">💰 Retirar $`+formatCOP(withdrawable).replace('$','')+` (20% comisión)</button></div>`:''}
   </div>`;
 }
 
@@ -1112,362 +1114,270 @@ function calculatePoolAPY(){
 // ══════════════════ RENDER: DEPOSIT ══════════════════
 function renderDepositView(c){
   c.innerHTML='<div class="loading"><div class="spinner"></div><p>Cargando...</p></div>';
-  loadDepositHistory().then(()=>{
-    const pendingDeposits=window.__depositHistory?.filter(d=>d.status==='pending')||[];
 
-    c.innerHTML=`
-    <div class="anim" style="max-width:640px">
+  apiFetch('/deposits/my').then(res=>res&&res.ok?res.json():[]).then(deposits=>{
+    window.__depositHistory=deposits;
+    const pending=deposits.filter(d=>d.status==='pending');
 
-      <!-- BANNER PENDIENTE si hay depósitos sin aprobar -->
-      ${pendingDeposits.length>0?pendingDeposits.map(d=>`
-      <div style="background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(245,158,11,.03));border:1px solid rgba(245,158,11,.3);border-radius:14px;padding:16px;margin-bottom:16px;position:relative;overflow:hidden">
-        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--amb),var(--pur))"></div>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-          <div style="width:36px;height:36px;border-radius:10px;background:rgba(245,158,11,.15);display:flex;align-items:center;justify-content:center">
-            <div style="width:12px;height:12px;border:2px solid var(--amb);border-radius:50%;border-top-color:transparent;animation:spin 1s linear infinite"></div>
-          </div>
-          <div>
-            <div style="font-size:14px;font-weight:700;color:var(--amb)">Depósito en revisión</div>
-            <div style="font-size:11px;color:var(--mut)">Enviado el ${formatDate(d.created_at)}</div>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.15);border-radius:8px">
-          <div>
-            <div style="font-size:10px;color:var(--mut);text-transform:uppercase">Monto</div>
-            <div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--amb)">${formatCOP(d.amount)}</div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-size:10px;color:var(--mut);text-transform:uppercase">Ref</div>
-            <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--mut)">${d.ref_id||'#'+d.id}</div>
-          </div>
-        </div>
-        <div style="font-size:11px;color:var(--mut);margin-top:10px;text-align:center;line-height:1.6">
-          ⏳ Nuestro equipo revisará tu comprobante en las próximas <strong style="color:var(--text)">24 horas</strong>
-        </div>
-      </div>`).join(''):''}
+    c.innerHTML='<div class="anim" style="max-width:640px">'
 
-      <!-- HEADER -->
-      <div style="margin-bottom:20px">
-        <h3 style="font-size:20px;font-weight:700;margin-bottom:4px">Depositar Capital</h3>
-        <p style="font-size:13px;color:var(--mut)">Transfiere a nuestra cuenta y envía tu comprobante</p>
-      </div>
+    // BANNER PENDIENTE
+    +(pending.length?pending.map(d=>
+      '<div style="background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(245,158,11,.03));border:1px solid rgba(245,158,11,.3);border-radius:14px;padding:16px;margin-bottom:16px;position:relative;overflow:hidden">'
+      +'<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--amb),var(--pur))"></div>'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'
+        +'<div style="width:36px;height:36px;border-radius:10px;background:rgba(245,158,11,.15);display:flex;align-items:center;justify-content:center">'
+          +'<div style="width:12px;height:12px;border:2px solid var(--amb);border-radius:50%;border-top-color:transparent;animation:spin 1s linear infinite"></div>'
+        +'</div>'
+        +'<div><div style="font-size:14px;font-weight:700;color:var(--amb)">Depósito en revisión</div>'
+        +'<div style="font-size:11px;color:var(--mut)">Enviado el '+formatDate(d.created_at)+'</div></div>'
+      +'</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.15);border-radius:8px">'
+        +'<div><div style="font-size:10px;color:var(--mut);text-transform:uppercase">Monto</div>'
+        +'<div style="font-family:Space Mono,monospace;font-size:18px;font-weight:700;color:var(--amb)">'+formatCOP(d.amount)+'</div></div>'
+        +'<div style="text-align:right"><div style="font-size:10px;color:var(--mut);text-transform:uppercase">Ref</div>'
+        +'<div style="font-family:Space Mono,monospace;font-size:12px;color:var(--mut)">'+(d.ref_id||'#'+d.id)+'</div></div>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--mut);margin-top:10px;text-align:center">⏳ Revisión en las próximas <strong style=color:var(--text)>24 horas</strong></div>'
+      +'</div>'
+    ).join(''):'')
 
-      <!-- LLAVE PRINCIPAL — grande y clara -->
-      <div style="background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(79,142,247,.1));border:1px solid rgba(16,185,129,.25);border-radius:16px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden;text-align:center">
-        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--grn),var(--blu))"></div>
-        <div style="font-size:10px;font-weight:700;color:var(--grn);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px">Llave Bre-B / Nequi</div>
-        <div id="dep-key-display" style="font-family:'Space Mono',monospace;font-size:42px;font-weight:700;color:var(--text);letter-spacing:3px;margin-bottom:14px;user-select:all">@JFC927</div>
-        <button id="dep-copy-btn" onclick="copyDepositKey()" style="padding:12px 32px;background:linear-gradient(135deg,var(--grn),var(--blu));border:none;border-radius:10px;color:white;font-size:14px;font-weight:700;cursor:pointer;transition:transform .15s;display:inline-flex;align-items:center;gap:8px"
-          onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
-          📋 Copiar Llave
-        </button>
-        <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left;font-size:12px">
-          <div style="padding:10px;background:rgba(0,0,0,.15);border-radius:8px">
-            <div style="color:var(--mut);font-size:10px;text-transform:uppercase;margin-bottom:3px">Titular</div>
-            <div style="font-weight:600">Juan Fandino Cardenas</div>
-          </div>
-          <div style="padding:10px;background:rgba(0,0,0,.15);border-radius:8px">
-            <div style="color:var(--mut);font-size:10px;text-transform:uppercase;margin-bottom:3px">Banco destino</div>
-            <div style="font-weight:600">Nu (Nubank)</div>
-          </div>
-        </div>
-      </div>
+    // HEADER
+    +'<div style="margin-bottom:20px">'
+      +'<h3 style="font-size:20px;font-weight:700;margin-bottom:4px">Depositar Capital</h3>'
+      +'<p style="font-size:13px;color:var(--mut)">Transfiere a nuestra cuenta y envía tu comprobante</p>'
+    +'</div>'
 
-      <!-- PASOS -->
-      <div style="display:flex;gap:8px;margin-bottom:20px">
-        <div style="flex:1;padding:12px;background:var(--bg2);border-radius:10px;border:1px solid var(--bd);text-align:center">
-          <div style="width:28px;height:28px;border-radius:50%;background:var(--grnd);color:var(--grn);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;border:1px solid rgba(16,185,129,.2)">1</div>
-          <div style="font-size:11px;font-weight:600">Transfiere</div>
-          <div style="font-size:10px;color:var(--mut)">A la llave de arriba</div>
-        </div>
-        <div style="flex:1;padding:12px;background:var(--bg2);border-radius:10px;border:1px solid var(--bd);text-align:center">
-          <div style="width:28px;height:28px;border-radius:50%;background:var(--blud);color:var(--blu);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;border:1px solid rgba(79,142,247,.2)">2</div>
-          <div style="font-size:11px;font-weight:600">Sube el comprobante</div>
-          <div style="font-size:10px;color:var(--mut)">Captura o foto</div>
-        </div>
-        <div style="flex:1;padding:12px;background:var(--bg2);border-radius:10px;border:1px solid var(--bd);text-align:center">
-          <div style="width:28px;height:28px;border-radius:50%;background:rgba(124,92,252,.1);color:var(--pur);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;border:1px solid rgba(124,92,252,.2)">3</div>
-          <div style="font-size:11px;font-weight:600">Espera aprobación</div>
-          <div style="font-size:10px;color:var(--mut)">En 24 horas</div>
-        </div>
-      </div>
+    // LLAVE GRANDE
+    +'<div style="background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(79,142,247,.1));border:1px solid rgba(16,185,129,.25);border-radius:16px;padding:24px;margin-bottom:20px;text-align:center;position:relative;overflow:hidden">'
+      +'<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--grn),var(--blu))"></div>'
+      +'<div style="font-size:10px;font-weight:700;color:var(--grn);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px">Llave Bre-B / Nequi</div>'
+      +'<div style="font-family:Space Mono,monospace;font-size:42px;font-weight:700;color:var(--text);letter-spacing:3px;margin-bottom:14px;user-select:all">@JFC927</div>'
+      +'<button id="dep-copy-btn" onclick="copyDepKey()" style="padding:12px 32px;background:linear-gradient(135deg,var(--grn),var(--blu));border:none;border-radius:10px;color:white;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px">📋 Copiar Llave</button>'
+      +'<div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left;font-size:12px">'
+        +'<div style="padding:10px;background:rgba(0,0,0,.15);border-radius:8px"><div style="color:var(--mut);font-size:10px;text-transform:uppercase;margin-bottom:3px">Titular</div><div style="font-weight:600">Juan Fandino Cardenas</div></div>'
+        +'<div style="padding:10px;background:rgba(0,0,0,.15);border-radius:8px"><div style="color:var(--mut);font-size:10px;text-transform:uppercase;margin-bottom:3px">Banco destino</div><div style="font-weight:600">Nu (Nubank)</div></div>'
+      +'</div>'
+    +'</div>'
 
-      <!-- FORMULARIO -->
-      <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;margin-bottom:16px">
+    // 3 PASOS
+    +'<div style="display:flex;gap:8px;margin-bottom:20px">'
+      +'<div style="flex:1;padding:12px;background:var(--bg2);border-radius:10px;border:1px solid var(--bd);text-align:center"><div style="width:28px;height:28px;border-radius:50%;background:var(--grnd);color:var(--grn);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;border:1px solid rgba(16,185,129,.2)">1</div><div style="font-size:11px;font-weight:600">Transfiere</div><div style="font-size:10px;color:var(--mut)">A la llave de arriba</div></div>'
+      +'<div style="flex:1;padding:12px;background:var(--bg2);border-radius:10px;border:1px solid var(--bd);text-align:center"><div style="width:28px;height:28px;border-radius:50%;background:var(--blud);color:var(--blu);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;border:1px solid rgba(79,142,247,.2)">2</div><div style="font-size:11px;font-weight:600">Sube comprobante</div><div style="font-size:10px;color:var(--mut)">Captura o foto</div></div>'
+      +'<div style="flex:1;padding:12px;background:var(--bg2);border-radius:10px;border:1px solid var(--bd);text-align:center"><div style="width:28px;height:28px;border-radius:50%;background:rgba(124,92,252,.1);color:var(--pur);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;border:1px solid rgba(124,92,252,.2)">3</div><div style="font-size:11px;font-weight:600">Espera aprobación</div><div style="font-size:10px;color:var(--mut)">En 24 horas</div></div>'
+    +'</div>'
 
-        <!-- Monto -->
-        <div style="padding:18px;border-bottom:1px solid var(--bd)">
-          <label style="display:block;font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Monto transferido (COP)</label>
-          <input type="number" id="dep-amount" inputmode="numeric" placeholder="0" min="10000"
-            oninput="updateDepositPreview()"
-            style="width:100%;font-family:'Space Mono',monospace;font-size:28px;font-weight:700;background:transparent;border:none;outline:none;color:var(--text);padding:0;box-sizing:border-box">
-          <div id="dep-amount-hint" style="font-size:12px;color:var(--mut);margin-top:6px;min-height:18px"></div>
-        </div>
+    // FORMULARIO
+    +'<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;margin-bottom:16px">'
+      +'<div style="padding:18px;border-bottom:1px solid var(--bd)"><label style="display:block;font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Monto transferido (COP)</label><input type="number" id="dep-amount" inputmode="numeric" placeholder="0" min="10000" oninput="updateDepPreview()" style="width:100%;font-family:Space Mono,monospace;font-size:28px;font-weight:700;background:transparent;border:none;outline:none;color:var(--text);padding:0;box-sizing:border-box"><div id="dep-hint" style="font-size:12px;color:var(--mut);margin-top:6px;min-height:18px"></div></div>'
+      +'<div style="border-bottom:1px solid var(--bd)"><div style="padding:14px 18px 0"><div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px">Comprobante de pago</div></div>'
+        +'<div id="dep-drop" onclick="document.getElementById(&quot;dep-file&quot;).click()" style="padding:28px 20px;text-align:center;cursor:pointer" ondragover="event.preventDefault()" ondrop="event.preventDefault();document.getElementById(&quot;dep-file&quot;).files=event.dataTransfer.files;handleDepFile(document.getElementById(&quot;dep-file&quot;))">'
+          +'<div style="width:48px;height:48px;border-radius:12px;background:var(--grnd);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--grn)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>'
+          +'<div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">Toca o arrastra tu comprobante</div>'
+          +'<div style="font-size:12px;color:var(--mut)">JPG, PNG o WebP · máx 5MB</div>'
+          +'<input type="file" id="dep-file" accept="image/*" style="display:none" onchange="handleDepFile(this)">'
+        +'</div>'
+        +'<div id="dep-preview-img" style="display:none;position:relative"><img id="dep-img-thumb" style="width:100%;max-height:260px;object-fit:cover;display:block"><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.6) 0%,transparent 50%)"></div><button onclick="clearDepFile()" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600">✕ Cambiar</button><div style="position:absolute;bottom:12px;left:12px;color:white;font-size:12px;font-weight:600">✅ Comprobante listo</div></div>'
+      +'</div>'
+      +'<div style="padding:14px 18px"><label style="display:block;font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Nota <span style="font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label><input type="text" id="dep-note" placeholder="Ej: Desde Nequi personal" style="width:100%;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;box-sizing:border-box"></div>'
+    +'</div>'
 
-        <!-- Comprobante -->
-        <div style="border-bottom:1px solid var(--bd)">
-          <div style="padding:14px 18px 0">
-            <div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Comprobante de pago</div>
-          </div>
-          <div id="dep-drop"
-            onclick="document.getElementById('dep-file').click()"
-            style="padding:28px 20px;text-align:center;cursor:pointer;transition:background .2s"
-            ondragover="event.preventDefault();this.style.background='rgba(16,185,129,.06)'"
-            ondragleave="this.style.background='transparent'"
-            ondrop="event.preventDefault();this.style.background='transparent';document.getElementById('dep-file').files=event.dataTransfer.files;handleDepositFile(document.getElementById('dep-file'))">
-            <div style="width:48px;height:48px;border-radius:12px;background:var(--grnd);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 10px">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--grn)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            </div>
-            <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">Toca o arrastra tu comprobante aquí</div>
-            <div style="font-size:12px;color:var(--mut)">JPG, PNG o WebP · máx 5MB</div>
-            <input type="file" id="dep-file" accept="image/*" style="display:none" onchange="handleDepositFile(this)">
-          </div>
-          <div id="dep-preview-img" style="display:none;position:relative">
-            <img id="dep-img-thumb" style="width:100%;max-height:260px;object-fit:cover;display:block">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.6) 0%,transparent 50%)"></div>
-            <button onclick="clearDepositFile()" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px">✕ Cambiar</button>
-            <div style="position:absolute;bottom:12px;left:12px;color:white;font-size:12px;font-weight:600">✅ Comprobante listo</div>
-          </div>
-        </div>
+    // BOTÓN
+    +'<button id="dep-submit-btn" onclick="submitDep()" disabled style="width:100%;padding:16px;background:linear-gradient(135deg,var(--grn),var(--blu));border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:not-allowed;opacity:.4;transition:all .2s">Enviar Comprobante →</button>'
+    +'<div id="dep-submit-msg" style="display:none;margin-top:12px;text-align:center;font-size:13px;padding:14px;border-radius:10px"></div>'
 
-        <!-- Nota -->
-        <div style="padding:14px 18px">
-          <label style="display:block;font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Nota <span style="font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
-          <input type="text" id="dep-note" placeholder="Ej: Transferencia desde Nequi personal"
-            style="width:100%;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;box-sizing:border-box">
-        </div>
-      </div>
-
-      <!-- BOTÓN ENVIAR -->
-      <button id="dep-submit-btn" onclick="submitDepositProof()" disabled
-        style="width:100%;padding:16px;background:linear-gradient(135deg,var(--grn),var(--blu));border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:not-allowed;opacity:.4;transition:all .2s">
-        Enviar Comprobante →
-      </button>
-      <div id="dep-submit-msg" style="display:none;margin-top:12px;text-align:center;font-size:13px;padding:14px;border-radius:10px"></div>
-
-      <!-- HISTORIAL -->
-      <div style="margin-top:28px">
-        <div style="font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
-          <span>Historial de Depósitos</span>
-          <span id="dep-hist-count" style="font-size:11px;color:var(--mut)"></span>
-        </div>
-        <div id="dep-history-list"></div>
-      </div>
-    </div>`;
-
-    // Renderizar historial inline
-    renderDepositHistoryInline();
+    // HISTORIAL
+    +'<div style="margin-top:28px"><div style="font-size:13px;font-weight:700;margin-bottom:12px">Historial de Depósitos</div>'
+    +'<div id="dep-history-list">'
+    +(deposits.length?deposits.map(d=>{
+      var sc={pending:'var(--amb)',approved:'var(--grn)',rejected:'var(--red)'};
+      var sl={pending:'En revisión',approved:'Aprobado',rejected:'Rechazado'};
+      var sb={pending:'rgba(245,158,11,.1)',approved:'rgba(16,185,129,.1)',rejected:'rgba(239,68,68,.08)'};
+      return '<div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg2);border:1px solid var(--bd);border-radius:10px;margin-bottom:8px"><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap"><span style="font-family:Space Mono,monospace;font-size:14px;font-weight:700;color:var(--grn)">'+formatCOP(d.amount)+'</span><span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:'+(sb[d.status]||'var(--sur)')+';color:'+(sc[d.status]||'var(--mut)')+'">'+( sl[d.status]||d.status)+'</span></div><div style="font-size:11px;color:var(--mut)">'+(d.note||'Sin nota')+' · '+formatDate(d.created_at)+'</div><div style="font-size:10px;color:var(--dim);margin-top:2px;font-family:Space Mono,monospace">'+(d.ref_id||'#'+d.id)+'</div></div></div>';
+    }).join(''):'<div style="text-align:center;color:var(--mut);padding:24px;font-size:13px"><div style="font-size:24px;margin-bottom:8px;opacity:.4">📋</div>No tienes depósitos registrados</div>')
+    +'</div></div>'
+    +'</div>';
+  }).catch(()=>{
+    c.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span>Error cargando la sección de depósitos</div>';
   });
 }
 
-function copyDepositKey(){
+function copyDepKey(){
   navigator.clipboard.writeText('@JFC927').then(()=>{
-    const btn=document.getElementById('dep-copy-btn');
-    if(btn){
-      btn.innerHTML='✅ Copiado!';
-      btn.style.background='var(--grn)';
-      setTimeout(()=>{btn.innerHTML='📋 Copiar Llave';btn.style.background='linear-gradient(135deg,var(--grn),var(--blu))';},2000);
-    }
-    toast('✅ Llave @JFC927 copiada al portapapeles');
+    var btn=document.getElementById('dep-copy-btn');
+    if(btn){btn.innerHTML='✅ Copiado!';btn.style.background='var(--grn)';setTimeout(function(){btn.innerHTML='📋 Copiar Llave';btn.style.background='linear-gradient(135deg,var(--grn),var(--blu))';},2000);}
+    toast('✅ Llave @JFC927 copiada');
   });
 }
 
-function updateDepositPreview(){
-  const amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
-  const hint=document.getElementById('dep-amount-hint');
-  if(hint){
-    if(amt>0&&amt<10000) hint.innerHTML='<span style="color:var(--red)">Monto mínimo: $10,000 COP</span>';
-    else if(amt>=10000) hint.innerHTML='Se acreditará: <strong style="color:var(--grn)">'+formatCOP(amt)+'</strong>';
-    else hint.textContent='';
-  }
-  checkDepositReady();
+function updateDepPreview(){
+  var amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
+  var h=document.getElementById('dep-hint');
+  if(h){if(amt>0&&amt<10000)h.innerHTML='<span style="color:var(--red)">Monto mínimo: $10,000 COP</span>';else if(amt>=10000)h.innerHTML='Se acreditará: <strong style="color:var(--grn)">'+formatCOP(amt)+'</strong>';else h.textContent='';}
+  checkDepReady();
 }
 
-function handleDepositFile(input){
-  const file=input.files[0];
-  if(!file) return;
-  if(file.size>5*1024*1024){ toast('La imagen no puede superar 5MB','error'); input.value=''; return; }
-  const reader=new FileReader();
-  reader.onload=e=>{
-    document.getElementById('dep-img-thumb').src=e.target.result;
-    document.getElementById('dep-preview-img').style.display='block';
-    document.getElementById('dep-drop').style.display='none';
-    checkDepositReady();
-  };
+function handleDepFile(input){
+  var file=input.files[0];if(!file)return;
+  if(file.size>5*1024*1024){toast('Máximo 5MB','error');input.value='';return;}
+  var reader=new FileReader();
+  reader.onload=function(e){document.getElementById('dep-img-thumb').src=e.target.result;document.getElementById('dep-preview-img').style.display='block';document.getElementById('dep-drop').style.display='none';checkDepReady();};
   reader.readAsDataURL(file);
 }
 
-function clearDepositFile(){
-  document.getElementById('dep-file').value='';
-  document.getElementById('dep-preview-img').style.display='none';
-  document.getElementById('dep-drop').style.display='block';
-  checkDepositReady();
+function clearDepFile(){document.getElementById('dep-file').value='';document.getElementById('dep-preview-img').style.display='none';document.getElementById('dep-drop').style.display='block';checkDepReady();}
+
+function checkDepReady(){
+  var amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
+  var hasFile=document.getElementById('dep-file')?.files?.length>0;
+  var btn=document.getElementById('dep-submit-btn');
+  if(!btn)return;var ready=amt>=10000&&hasFile;
+  btn.disabled=!ready;btn.style.opacity=ready?'1':'.4';btn.style.cursor=ready?'pointer':'not-allowed';
 }
 
-function checkDepositReady(){
-  const amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
-  const hasFile=document.getElementById('dep-file')?.files?.length>0;
-  const btn=document.getElementById('dep-submit-btn');
-  if(!btn) return;
-  const ready=amt>=10000&&hasFile;
-  btn.disabled=!ready;
-  btn.style.opacity=ready?'1':'.4';
-  btn.style.cursor=ready?'pointer':'not-allowed';
-}
-
-async function submitDepositProof(){
-  const btn=document.getElementById('dep-submit-btn');
-  const msgEl=document.getElementById('dep-submit-msg');
-  const amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
-  const note=document.getElementById('dep-note')?.value||'';
-  const file=document.getElementById('dep-file')?.files[0];
-
-  if(amt<10000||!file){ toast('Completa el monto y adjunta el comprobante','error'); return; }
-
-  btn.disabled=true; btn.textContent='Enviando...'; btn.style.opacity='.6';
-
+async function submitDep(){
+  var btn=document.getElementById('dep-submit-btn');
+  var msgEl=document.getElementById('dep-submit-msg');
+  var amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
+  var note=document.getElementById('dep-note')?.value||'';
+  var file=document.getElementById('dep-file')?.files[0];
+  if(amt<10000||!file){toast('Completa el monto y adjunta comprobante','error');return;}
+  btn.disabled=true;btn.textContent='Enviando...';btn.style.opacity='.6';
   try{
-    const toBase64=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsDataURL(f);});
-    const imgBase64=await toBase64(file);
-
-    const res=await apiFetch('/deposits/create',{
-      method:'POST',
-      body:JSON.stringify({amount:amt,note:note,proofImage:imgBase64,fileName:file.name})
-    });
-
+    var toB64=function(f){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(e){res(e.target.result)};r.onerror=rej;r.readAsDataURL(f)})};
+    var imgB64=await toB64(file);
+    var res=await apiFetch('/deposits/create',{method:'POST',body:JSON.stringify({amount:amt,note:note,proofImage:imgB64,fileName:file.name})});
     if(res&&res.ok){
-      // Éxito — mostrar banner de espera
-      msgEl.style.display='block';
-      msgEl.style.background='rgba(16,185,129,.08)';
-      msgEl.style.border='1px solid rgba(16,185,129,.2)';
-      msgEl.style.color='var(--grn)';
-      msgEl.innerHTML='✅ <strong>Comprobante enviado</strong><br><span style="font-size:12px;opacity:.8">El equipo revisará tu depósito en las próximas 24 horas</span>';
-      btn.textContent='✓ Enviado';
-      btn.style.background='var(--grn)';
-      btn.style.opacity='1';
+      msgEl.style.display='block';msgEl.style.background='rgba(16,185,129,.08)';msgEl.style.border='1px solid rgba(16,185,129,.2)';msgEl.style.color='var(--grn)';
+      msgEl.innerHTML='✅ <strong>Comprobante enviado</strong><br><span style="font-size:12px;opacity:.8">Revisión en las próximas 24 horas</span>';
+      btn.textContent='✓ Enviado';btn.style.background='var(--grn)';btn.style.opacity='1';
       toast('✅ Comprobante enviado');
-      // Recargar la vista completa para mostrar el banner pendiente
-      setTimeout(()=>renderDepositView(document.getElementById('dashboard-content')),1500);
-    } else {
-      const err=res?await res.json():{};
-      throw new Error(err.error||'Error al enviar');
-    }
-  } catch(e){
-    btn.disabled=false; btn.textContent='Enviar Comprobante →'; btn.style.opacity='1';
-    msgEl.style.display='block';
-    msgEl.style.background='rgba(239,68,68,.06)';
-    msgEl.style.border='1px solid rgba(239,68,68,.2)';
-    msgEl.style.color='var(--red)';
-    msgEl.textContent='Error: '+(e.message||'Intenta de nuevo');
-    toast(e.message||'Error al enviar','error');
-  }
-}
-
-function renderDepositHistoryInline(){
-  const container=document.getElementById('dep-history-list');
-  const countEl=document.getElementById('dep-hist-count');
-  const deposits=window.__depositHistory||[];
-  if(countEl)countEl.textContent=deposits.length+' registros';
-  if(!deposits.length){
-    if(container)container.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:13px"><div style="font-size:24px;margin-bottom:8px;opacity:.4">📋</div>No tienes depósitos registrados</div>';
-    return;
-  }
-  const statusColor={pending:'var(--amb)',approved:'var(--grn)',rejected:'var(--red)'};
-  const statusLabel={pending:'En revisión',approved:'Aprobado',rejected:'Rechazado'};
-  const statusBg={pending:'rgba(245,158,11,.1)',approved:'rgba(16,185,129,.1)',rejected:'rgba(239,68,68,.08)'};
-  if(container) container.innerHTML=deposits.map(d=>`
-    <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg2);border:1px solid var(--bd);border-radius:10px;margin-bottom:8px">
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
-          <span style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--grn)">${formatCOP(d.amount)}</span>
-          <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:${statusBg[d.status]||'var(--sur)'};color:${statusColor[d.status]||'var(--mut)'}">${statusLabel[d.status]||d.status}</span>
-        </div>
-        <div style="font-size:11px;color:var(--mut)">${d.note||'Sin nota'} · ${formatDate(d.created_at)}</div>
-        <div style="font-size:10px;color:var(--dim);margin-top:2px;font-family:'Space Mono',monospace">${d.ref_id||'#'+d.id}</div>
-      </div>
-    </div>`).join('');
+      setTimeout(function(){renderDepositView(document.getElementById('dashboard-content'))},1500);
+    }else{var err=res?await res.json():{};throw new Error(err.error||'Error al enviar')}
+  }catch(e){btn.disabled=false;btn.textContent='Enviar Comprobante →';btn.style.opacity='1';
+    msgEl.style.display='block';msgEl.style.background='rgba(239,68,68,.06)';msgEl.style.border='1px solid rgba(239,68,68,.2)';msgEl.style.color='var(--red)';
+    msgEl.textContent='Error: '+(e.message||'Intenta de nuevo');toast(e.message||'Error','error');}
 }
 
 // ══════════════════ RENDER: WITHDRAW ══════════════════
 async function renderWithdrawView(c){
   c.innerHTML='<div class="loading"><div class="spinner"></div><p>Cargando...</p></div>';
   try{
-    const res=await apiFetch('/withdrawals/payment-methods');
+    var res=await apiFetch('/withdrawals/payment-methods');
     if(res&&res.ok)paymentMethods=await res.json();
-  }catch(e){paymentMethods=[]}
+  }catch(e){paymentMethods=[];}
 
-  const b=balanceSummary;
-  c.innerHTML=`
-  <div class="anim" style="max-width:600px">
-    <h3 style="font-size:18px;font-weight:700;margin-bottom:4px">Retirar Fondos</h3>
-    <p style="font-size:13px;color:var(--mut);margin-bottom:20px">Solicita el retiro de tu capital disponible</p>
+  var b=balanceSummary;
+  var hasPM=paymentMethods.length>0;
 
-    <div class="card" style="padding:20px;margin-bottom:14px">
-      <div class="info-row"><span class="l">Disponible para retirar</span><span class="v grn">${formatCOP(b.availableBalance)}</span></div>
-    </div>
+  c.innerHTML='<div class="anim" style="max-width:640px">'
 
-    <div class="card" style="padding:20px;margin-bottom:14px">
-      <div class="fld">
-        <label class="fld-lbl">Monto a retirar (COP)</label>
-        <input type="number" id="wr-amount" class="mono" placeholder="0" min="10000" max="${b.availableBalance}" oninput="updateWithdrawPreview()">
-      </div>
+    // Header
+    +'<div style="margin-bottom:20px">'
+      +'<h3 style="font-size:20px;font-weight:700;margin-bottom:4px">Retirar Fondos</h3>'
+      +'<p style="font-size:13px;color:var(--mut)">Solicita el retiro de tu capital disponible</p>'
+    +'</div>'
 
-      <div class="fld">
-        <label class="fld-lbl">Método de pago</label>
-        <select id="wr-pm" onchange="updateWithdrawPreview()">
-          <option value="">Seleccionar método...</option>
-          ${paymentMethods.map(pm=>`<option value="${pm.id}">${pm.type==='bank'?'🏦':'📱'} ${pm.bank_name||pm.type} — ${pm.account_number||pm.account_holder||''}</option>`).join('')}
-        </select>
-        ${paymentMethods.length===0?`<div style="font-size:11px;color:var(--amb);margin-top:6px">⚠️ No tienes métodos de pago. <a href="#" onclick="showViewByName('profile');return false" style="color:var(--blu)">Agrégalo en Perfil</a></div>`:''}
-      </div>
+    // Balance card
+    +'<div style="background:linear-gradient(135deg,rgba(239,68,68,.06),rgba(245,158,11,.06));border:1px solid rgba(239,68,68,.2);border-radius:14px;padding:20px;margin-bottom:20px;position:relative;overflow:hidden">'
+      +'<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--red),var(--amb))"></div>'
+      +'<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Disponible para retirar</div>'
+      +'<div style="font-family:Space Mono,monospace;font-size:32px;font-weight:700;color:var(--grn)">'+formatCOP(b.availableBalance)+'</div>'
+      +'<div style="display:flex;gap:16px;margin-top:12px;font-size:12px;color:var(--mut)">'
+        +'<span>Invertido: <strong style="color:var(--blu)">'+formatCOP(b.totalInvested)+'</strong></span>'
+        +(b.pendingWithdrawals>0?'<span>Retiros pendientes: <strong style="color:var(--amb)">'+formatCOP(b.pendingWithdrawals)+'</strong></span>':'')
+      +'</div>'
+    +'</div>'
 
-      <div id="wr-preview" style="display:none;background:var(--sur);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:14px">
-        <div class="info-row"><span class="l">Monto</span><span class="v" id="wp-amt">$0</span></div>
-        <div class="info-row"><span class="l">Tiempo estimado</span><span class="v" id="wp-time">24-48h</span></div>
-        <div id="wp-warn" style="display:none;font-size:11px;color:var(--amb);margin-top:8px;line-height:1.6"></div>
-      </div>
+    // Sin métodos de pago
+    +(!hasPM?
+      '<div style="background:var(--bg2);border:1px solid rgba(245,158,11,.3);border-radius:12px;padding:20px;text-align:center;margin-bottom:20px">'
+        +'<div style="font-size:28px;margin-bottom:10px">⚠️</div>'
+        +'<div style="font-size:14px;font-weight:700;margin-bottom:6px">Agrega un método de pago</div>'
+        +'<div style="font-size:12px;color:var(--mut);margin-bottom:14px">Necesitas al menos un método para solicitar retiros</div>'
+        +'<button onclick="showViewByName(&quot;profile&quot;)" style="padding:10px 20px;background:var(--blu);border:none;border-radius:8px;color:white;font-size:13px;font-weight:600;cursor:pointer">Ir a Mi Perfil →</button>'
+      +'</div>'
+    :
 
-      <button class="prod-cta" id="btn-withdraw-request" onclick="submitWithdrawalRequest()" disabled style="opacity:0.5">Solicitar Retiro</button>
-    </div>
+    // Formulario de retiro
+      '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;margin-bottom:16px">'
+        +'<div style="padding:18px;border-bottom:1px solid var(--bd)">'
+          +'<label style="display:block;font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Monto a retirar (COP)</label>'
+          +'<input type="number" id="wr-amount" inputmode="numeric" placeholder="0" min="10000" max="'+b.availableBalance+'" oninput="updateWrPreview()" style="width:100%;font-family:Space Mono,monospace;font-size:28px;font-weight:700;background:transparent;border:none;outline:none;color:var(--text);padding:0;box-sizing:border-box">'
+          +'<div id="wr-hint" style="font-size:12px;color:var(--mut);margin-top:6px;min-height:18px"></div>'
+        +'</div>'
+        +'<div style="padding:18px">'
+          +'<label style="display:block;font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Método de pago</label>'
+          +'<select id="wr-pm" onchange="updateWrPreview()" style="width:100%;padding:12px;background:var(--sur);border:1px solid var(--bd);border-radius:8px;color:var(--text);font-size:14px;box-sizing:border-box">'
+            +'<option value="">Seleccionar método...</option>'
+            +paymentMethods.map(function(pm){return '<option value="'+pm.id+'">'+(pm.type==='bank'||pm.type==='bancolombia'?'🏦':'📱')+' '+(pm.label||pm.type)+' — '+(pm.phone||pm.account_number||'')+'</option>';}).join('')
+          +'</select>'
+        +'</div>'
+      +'</div>'
 
-    <div style="font-size:11px;color:var(--mut);line-height:1.6;padding:14px;background:var(--sur);border-radius:8px">
-      💡 Los retiros hasta <strong>$2,000,000</strong> se procesan en 24-48h. Montos superiores pueden requerir hasta 30 días hábiles.
-    </div>
-  </div>`;
+      // Preview
+      +'<div id="wr-preview" style="display:none;background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:16px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd);font-size:13px"><span style="color:var(--mut)">Monto a retirar</span><span style="font-family:Space Mono,monospace;font-weight:700" id="wp-amt">$0</span></div>'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px"><span style="color:var(--mut)">Tiempo estimado</span><span style="font-weight:600" id="wp-time">24-48h</span></div>'
+        +'<div id="wp-warn" style="display:none;font-size:11px;color:var(--amb);margin-top:8px;padding:10px;background:rgba(245,158,11,.06);border-radius:8px;line-height:1.6"></div>'
+      +'</div>'
+
+      // Botón
+      +'<button id="btn-wr" onclick="submitWr()" disabled style="width:100%;padding:16px;background:linear-gradient(135deg,var(--red),var(--amb));border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:not-allowed;opacity:.4;transition:all .2s">Solicitar Retiro</button>'
+    )
+
+    // Info
+    +'<div style="padding:14px;background:var(--sur);border-radius:10px;font-size:11px;color:var(--mut);line-height:1.8;margin-top:16px">'
+      +'<strong style="color:var(--text);display:block;margin-bottom:6px">Información de retiros</strong>'
+      +'• Retiros hasta <strong>$2,000,000</strong>: procesados en 24-48 horas<br>'
+      +'• Montos mayores: hasta 30 días hábiles con aprobación especial<br>'
+      +'• Sin comisión por retiro · Monto mínimo: $10,000 COP'
+    +'</div>'
+
+  +'</div>';
 }
 
-function updateWithdrawPreview(){
-  const amt=parseFloat(document.getElementById('wr-amount').value)||0;
-  const pm=document.getElementById('wr-pm').value;
-  const prev=document.getElementById('wr-preview');
-  const btn=document.getElementById('btn-withdraw-request');
-  const warn=document.getElementById('wp-warn');
+function updateWrPreview(){
+  var amt=parseFloat(document.getElementById('wr-amount')?.value)||0;
+  var pm=document.getElementById('wr-pm')?.value;
+  var hint=document.getElementById('wr-hint');
+  var prev=document.getElementById('wr-preview');
+  var btn=document.getElementById('btn-wr');
+  var warn=document.getElementById('wp-warn');
+  var avail=balanceSummary.availableBalance||0;
 
-  if(amt>=10000&&amt<=balanceSummary.availableBalance&&pm){
+  if(hint){
+    if(amt>avail)hint.innerHTML='<span style="color:var(--red)">Excede tu balance disponible ('+formatCOP(avail)+')</span>';
+    else if(amt>0&&amt<10000)hint.innerHTML='<span style="color:var(--red)">Monto mínimo: $10,000 COP</span>';
+    else if(amt>=10000)hint.innerHTML='Retirar: <strong style="color:var(--grn)">'+formatCOP(amt)+'</strong>';
+    else hint.textContent='';
+  }
+
+  if(amt>=10000&&amt<=avail&&pm){
     document.getElementById('wp-amt').textContent=formatCOP(amt);
-    document.getElementById('wp-time').textContent=amt>2000000?'Hasta 30 días':'24-48h';
-    if(amt>2000000){warn.style.display='block';warn.textContent='⚠️ Retiros mayores a $2,000,000 requieren aprobación especial.'}
-    else{warn.style.display='none'}
-    prev.style.display='block';btn.disabled=false;btn.style.opacity='1';
+    document.getElementById('wp-time').textContent=amt>2000000?'Hasta 30 días hábiles':'24-48 horas';
+    if(amt>2000000){warn.style.display='block';warn.textContent='⚠️ Retiros mayores a $2,000,000 requieren aprobación especial y pueden tomar más tiempo.';}
+    else{warn.style.display='none';}
+    prev.style.display='block';btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';
   }else{
-    prev.style.display='none';btn.disabled=true;btn.style.opacity='0.5';
+    if(prev)prev.style.display='none';if(btn){btn.disabled=true;btn.style.opacity='.4';btn.style.cursor='not-allowed';}
   }
 }
 
-async function submitWithdrawalRequest(){
-  const amount=parseFloat(document.getElementById('wr-amount').value);
-  const paymentMethodId=parseInt(document.getElementById('wr-pm').value);
-  const btn=document.getElementById('btn-withdraw-request');
-  if(!paymentMethodId)return toast('Selecciona un método','error');
+async function submitWr(){
+  var amount=parseFloat(document.getElementById('wr-amount').value);
+  var paymentMethodId=parseInt(document.getElementById('wr-pm').value);
+  var btn=document.getElementById('btn-wr');
+  if(!paymentMethodId)return toast('Selecciona un método de pago','error');
   btn.disabled=true;btn.textContent='Procesando...';
   try{
-    const res=await apiFetch('/withdrawals/request',{method:'POST',body:JSON.stringify({amount,paymentMethodId})});
-    const d=await res.json();
-    if(!res.ok)return toast(d.error,'error');
-    toast(`✅ Retiro de ${formatCOP(amount)} solicitado`);
+    var res=await apiFetch('/withdrawals/request',{method:'POST',body:JSON.stringify({amount:amount,paymentMethodId:paymentMethodId})});
+    var d=await res.json();
+    if(!res.ok)return toast(d.error||'Error','error');
+    toast('✅ Retiro de '+formatCOP(amount)+' solicitado');
     await loadAllData();renderCurrentView();
-  }catch(e){toast('Error de conexión','error')}
-  finally{btn.disabled=false;btn.textContent='Solicitar Retiro'}
+  }catch(e){toast('Error de conexión','error');}
+  finally{btn.disabled=false;btn.textContent='Solicitar Retiro';}
 }
 
 // ══════════════════ RENDER: MOVEMENTS ══════════════════
@@ -1500,29 +1410,42 @@ function renderMovementsView(c){
 
 // ══════════════════ RENDER: LOANS ══════════════════
 function renderLoansView(c){
+  const all=[...(myLoans.loanRequests||[]),...(myLoans.legacyLoans||[])];
+  const active=all.filter(l=>['active','overdue'].includes(l.status));
   c.innerHTML=`
-  <div class="anim" style="max-width:600px;text-align:center;padding:40px 0">
-    <div style="font-size:64px;margin-bottom:16px">🚧</div>
-    <h3 style="font-size:20px;font-weight:700;margin-bottom:8px">Préstamos — Fuera de Servicio</h3>
-    <p style="font-size:14px;color:var(--mut);margin-bottom:8px;line-height:1.7;max-width:400px;margin-left:auto;margin-right:auto">
-      Estamos mejorando nuestro sistema de préstamos para ofrecerte una experiencia más rápida y con mejores tasas.
-    </p>
-    <p style="font-size:13px;color:var(--mut);margin-bottom:28px">Vuelve pronto — estaremos de vuelta con novedades.</p>
+  <div class="anim">
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:4px">Préstamos</h3>
+    <p style="font-size:13px;color:var(--mut);margin-bottom:20px">Solicita financiación con tasas preferenciales</p>
 
-    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:20px;max-width:360px;margin:0 auto 20px;text-align:left">
-      <div style="font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Mientras tanto</div>
-      <div style="font-size:13px;color:var(--text);line-height:1.8">
-        📱 Consulta disponibilidad de préstamos directamente por WhatsApp con nuestro equipo.
+    <div class="card" style="padding:20px;margin-bottom:14px">
+      <div class="prod-head">
+        <div class="prod-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+        </div>
+        <div>
+          <div class="prod-ttl">Tasas preferenciales</div>
+          <div class="prod-sub">Para participantes del fondo</div>
+        </div>
       </div>
+      <div class="prod-rates">
+        <div class="rate-chip"><strong>4%</strong> mensual con inversión</div>
+        <div class="rate-chip"><strong>6%</strong> mensual sin inversión</div>
+      </div>
+      <a href="https://wa.me/573194552890?text=Hola,%20quiero%20solicitar%20un%20préstamo" target="_blank" class="prod-cta" style="display:block;text-decoration:none;text-align:center">
+        Solicitar por WhatsApp →
+      </a>
     </div>
 
-    <a href="https://wa.me/573194552890?text=Hola,%20quiero%20consultar%20sobre%20préstamos%20en%20Sanse%20Capital"
-       target="_blank"
-       style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:#25D366;border:none;border-radius:12px;color:white;font-size:14px;font-weight:700;text-decoration:none;transition:transform .15s"
-       onmouseover="this.style.transform='scale(1.03)'"
-       onmouseout="this.style.transform='scale(1)'">
-      💬 Consultar por WhatsApp
-    </a>
+    ${active.length>0?`
+    <div class="sec">
+      <div class="sec-head"><div class="sec-ttl">Préstamos activos</div></div>
+      ${active.map(l=>`
+      <div class="card" style="padding:16px;margin-bottom:10px">
+        <div class="info-row"><span class="l">Monto</span><span class="v">${formatCOP(l.approvedAmount||l.amount)}</span></div>
+        <div class="info-row"><span class="l">Estado</span><span class="v ${l.status==='overdue'?'amt-neg':'grn'}">${l.status==='overdue'?'En mora':'Activo'}</span></div>
+        ${l.dueDate?`<div class="info-row"><span class="l">Vence</span><span class="v">${formatDate(l.dueDate)}</span></div>`:''}
+      </div>`).join('')}
+    </div>`:'<div class="empty"><span class="empty-icon">🏦</span>No tienes préstamos activos</div>'}
   </div>`;
 }
 
@@ -1956,7 +1879,10 @@ function renderPoolDetail(c, inv, returns, transactions){
   const cap=parseFloat(inv.amount)||0;
   const netCap=parseFloat(inv.netCapital)||cap;
   const entryFee=parseFloat(inv.entryFee)||Math.round(cap*0.02);
-  const paidEarnings=returns.reduce((s,r)=>s+(parseFloat(r.earned)||0),0);
+  const totalEarnedPool=returns.reduce((s,r)=>s+(parseFloat(r.earned)||0),0);
+  const withdrawablePool=parseFloat(inv.withdrawableEarnings)||0;
+  const alreadyWithdrawn=Math.max(0,totalEarnedPool-withdrawablePool);
+  const paidEarnings=alreadyWithdrawn;
   const start=new Date(inv.startDate||Date.now());
   const lockEnd=new Date(inv.lockEndDate||inv.endDate||Date.now());
   const now=new Date();
@@ -2023,9 +1949,14 @@ function renderPoolDetail(c, inv, returns, transactions){
     <!-- MÉTRICAS -->
     <div class="detail-metrics" style="margin-bottom:14px">
       <div class="dm-item paid">
-        <div class="dm-lbl">Ganancias pagadas</div>
-        <div class="dm-val grn">+${formatCOP(paidEarnings)}</div>
-        <div class="dm-sub">${returns.length} ${returns.length===1?'pago':'pagos'} registrado${returns.length===1?'':'s'}</div>
+        <div class="dm-lbl">Ya retirado</div>
+        <div class="dm-val grn">+${formatCOP(alreadyWithdrawn)}</div>
+        <div class="dm-sub">Acreditado a tu balance</div>
+      </div>
+      <div class="dm-item pend">
+        <div class="dm-lbl"><span class="pulse-dot"></span>Por retirar</div>
+        <div class="dm-val amb">+${formatCOP(withdrawablePool)}</div>
+        <div class="dm-sub">${returns.length} ${returns.length===1?'pago':'pagos'} del admin</div>
       </div>
       <div class="dm-item apy">
         <div class="dm-lbl">Mi APY mensual</div>
@@ -2110,7 +2041,7 @@ function renderPoolDetail(c, inv, returns, transactions){
     <div class="timeline-card" style="margin-bottom:14px">
       <div class="tl-head" style="display:flex;align-items:center;justify-content:space-between">
         <span>Historial de Rendimientos</span>
-        ${paidEarnings>0?`<span style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--grn)">+${formatCOP(paidEarnings)} total</span>`:''}
+        ${totalEarnedPool>0?`<span style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--grn)">+${formatCOP(totalEarnedPool)} histórico</span>`:''}
       </div>
       ${returns.length===0?`
       <div class="tl-empty">
@@ -2188,60 +2119,6 @@ function calculateMyAvgAPY(invId=null){
 }
 
 // ══════════════════ HISTORIAL DE DEPÓSITOS ══════════════════
-async function loadDepositHistory(){
-  const container=document.getElementById('dep-history-list');
-  if(!container)return;
-  try{
-    const res=await apiFetch('/deposits/my');
-    if(!res||!res.ok){
-      container.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:13px">No se pudo cargar el historial</div>';
-      return;
-    }
-    const deposits=await res.json();
-    if(!deposits.length){
-      container.innerHTML='<div style="text-align:center;color:var(--mut);padding:30px;font-size:13px"><span style="font-size:24px;display:block;margin-bottom:8px;opacity:.4">📋</span>No tienes depósitos registrados aún</div>';
-      return;
-    }
-    const statusLabel={pending:'Pendiente',approved:'Aprobado',rejected:'Rechazado'};
-    const statusColor={pending:'var(--amb)',approved:'var(--grn)',rejected:'var(--red)'};
-    container.innerHTML=`<div class="table-card"><div class="table-wrap"><table>
-      <thead><tr><th>Ref</th><th>Monto</th><th>Estado</th><th>Nota</th><th>Fecha</th></tr></thead>
-      <tbody>${deposits.map(d=>`<tr>
-        <td class="mono" style="font-size:11px;color:var(--mut)">${d.ref_id||d.id}</td>
-        <td class="mono" style="color:var(--grn);font-weight:600">${formatCOP(d.amount)}</td>
-        <td><span style="font-size:11px;font-weight:700;color:${statusColor[d.status]||'var(--mut)'}">${statusLabel[d.status]||d.status}</span></td>
-        <td style="font-size:12px;color:var(--mut)">${d.note||'—'}</td>
-        <td style="font-size:11px;color:var(--mut)">${formatDate(d.created_at)}</td>
-      </tr>`).join('')}</tbody>
-    </table></div></div>`;
-  }catch(e){
-    container.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:13px">Error cargando historial</div>';
-  }
-}
-
-// ══════════════════ HISTORIAL DE DEPÓSITOS (continuación) ══════════════════
-async function loadDepositHistory_unused(){
-  const container=null;
-  try{
-    const res=await apiFetch('/deposits/my');
-    if(!res||!res.ok){return}
-    const deposits=await res.json();
-    if(!deposits.length){container.innerHTML='<div style="text-align:center;color:var(--mut);padding:30px;font-size:13px"><span style="font-size:24px;display:block;margin-bottom:8px;opacity:.4">📋</span>No tienes depósitos registrados aún</div>';return}
-    const statusColor={pending:'var(--amb)',approved:'var(--grn)',rejected:'var(--red)'};
-    const statusLabel={pending:'Pendiente',approved:'Aprobado',rejected:'Rechazado'};
-    container.innerHTML='<div class="table-card"><div class="table-wrap"><table><thead><tr><th>Ref</th><th>Monto</th><th>Estado</th><th>Nota</th><th>Fecha</th></tr></thead><tbody>'+
-      deposits.map(d=>'<tr>'+
-        '<td class="mono" style="font-size:11px;color:var(--mut)">'+(d.ref_id||d.id)+'</td>'+
-        '<td class="mono" style="color:var(--grn);font-weight:600">'+formatCOP(d.amount)+'</td>'+
-        '<td><span style="font-size:11px;font-weight:700;color:'+(statusColor[d.status]||'var(--mut)')+'">'+
-          (statusLabel[d.status]||d.status)+'</span></td>'+
-        '<td style="font-size:12px;color:var(--mut)">'+(d.note||'—')+'</td>'+
-        '<td style="font-size:11px;color:var(--mut)">'+formatDate(d.created_at)+'</td>'+
-      '</tr>').join('')+
-    '</tbody></table></div></div>';
-  }catch(e){container.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:13px">Error cargando historial</div>'}
-}
-
 // ══════════════════ INIT ══════════════════
 async function init(){
   const user=getUserData();
