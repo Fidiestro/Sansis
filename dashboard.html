@@ -2040,26 +2040,6 @@ function renderPoolDetail(c, inv, returns, transactions){
       </div>`).join('')}
     </div>
 
-    <!-- ACCIONES -->
-    ${paidEarnings>0?`
-    <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:16px;margin-bottom:14px">
-      <div style="font-size:13px;font-weight:700;margin-bottom:4px">Retirar Ganancias Disponibles</div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <div>
-          <div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px">Ganancias brutas</div>
-          <div style="font-family:'Space Mono',monospace;font-weight:700;color:var(--grn);font-size:16px">+${formatCOP(paidEarnings)}</div>
-        </div>
-        <div style="color:var(--mut)">→</div>
-        <div>
-          <div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px">Recibirías (neto)</div>
-          <div style="font-family:'Space Mono',monospace;font-weight:700;color:var(--amb);font-size:16px">${formatCOP(Math.round(paidEarnings*0.8))}</div>
-        </div>
-        <button onclick="withdrawPoolEarnings(${inv.id},${paidEarnings})" style="margin-left:auto;padding:10px 18px;background:linear-gradient(135deg,var(--amb),var(--pur));border:none;border-radius:8px;color:white;font-weight:600;font-size:13px;cursor:pointer">
-          💰 Retirar Ganancias
-        </button>
-      </div>
-    </div>`:''}
-
     ${isMatured?`
     <button class="prod-cta" style="background:linear-gradient(135deg,var(--amb),var(--pur));margin-top:4px" onclick="withdrawInvestment(${inv.id})">
       Retirar Capital Completo →
