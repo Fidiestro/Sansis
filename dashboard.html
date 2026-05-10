@@ -853,9 +853,12 @@ function renderInvCard(inv){
   const isPool=inv.type==='pool'||String(inv.type||'').includes('pool');
   
   // Para CDTC: ganancia pendiente proporcional animada
-  // Para Pool: SOLO lo que el admin registró — sin cálculo dinámico
+  // Para Pool: separar 'pagado total' vs 'pendiente de retiro'
   const cap=parseFloat(inv.amount)||0;
-  const paidEarnings=parseFloat(inv.totalEarned)||parseFloat(inv.withdrawable_earnings)||0;
+  const totalEarned=parseFloat(inv.totalEarned)||0;        // todo lo que se ha ganado históricamente
+  const withdrawable=parseFloat(inv.withdrawableEarnings)||parseFloat(inv.withdrawable_earnings)||0; // pendiente de retiro
+  const alreadyWithdrawn=Math.max(0,totalEarned-withdrawable); // ya retirado
+  const paidEarnings=isPool?alreadyWithdrawn:totalEarned;  // para mostrar como "pagado/retirado"
   const start=new Date(inv.startDate||inv.start_date||Date.now());
   const now=new Date();
 
@@ -863,7 +866,7 @@ function renderInvCard(inv){
   if(!isPool){
     const daysElapsed=Math.max(0,(now-start)/(1000*60*60*24));
     const pendingGross=cap*0.02*(daysElapsed/30);
-    pendingLive=Math.max(0,pendingGross-paidEarnings);
+    pendingLive=Math.max(0,pendingGross-totalEarned);
   }
 
   // APY personalizado del usuario (promedio de sus propios rendimientos)
@@ -883,19 +886,19 @@ function renderInvCard(inv){
         <div class="inv-cell-val blu">${formatCOP(cap)}</div>
       </div>
       <div class="inv-cell">
-        <div class="inv-cell-lbl">Mi APY ${isPool?'mensual':'mensual'}</div>
+        <div class="inv-cell-lbl">Mi APY mensual</div>
         <div class="inv-cell-val">${myAPY>0?myAPY.toFixed(2)+'%':'~2.0%'}</div>
       </div>
       <div class="inv-cell">
-        <div class="inv-cell-lbl">Ganancia ${isPool?'acumulada':'pagada'}</div>
+        <div class="inv-cell-lbl">${isPool?'Ya retirado':'Ganancia pagada'}</div>
         <div class="inv-cell-val grn">+${formatCOP(paidEarnings)}</div>
       </div>
       <div class="inv-cell ${isPool?'':'earning-live'}">
-        <div class="inv-cell-lbl">${isPool?'':'<span class="pulse-dot"></span>'}${isPool?'Próx. pago':'Pendiente'}</div>
-        <div class="inv-cell-val amb" ${isPool?'':`data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-paid="${paidEarnings}"`}>+${formatCOP(isPool?0:pendingLive)}</div>
+        <div class="inv-cell-lbl">${isPool?'<span class="pulse-dot"></span>Pendiente retiro':'<span class="pulse-dot"></span>Pendiente'}</div>
+        <div class="inv-cell-val amb" ${isPool?'':`data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-paid="${totalEarned}"`}>+${formatCOP(isPool?withdrawable:pendingLive)}</div>
       </div>
     </div>
-    ${isPool&&paidEarnings>0?`<div style="margin-top:12px"><button class="btn btn-sm" style="width:100%;background:var(--amb);color:white;border:none;padding:10px;border-radius:7px;font-weight:600;font-size:12px" onclick="event.stopPropagation();withdrawPoolEarnings(${inv.id},${paidEarnings})">💰 Retirar Ganancias (20% comisión)</button></div>`:''}
+    ${isPool&&withdrawable>0?`<div style="margin-top:12px"><button class="btn btn-sm" style="width:100%;background:var(--amb);color:white;border:none;padding:10px;border-radius:7px;font-weight:600;font-size:12px" onclick="event.stopPropagation();withdrawPoolEarnings(${inv.id},${withdrawable})">💰 Retirar $${formatCOP(withdrawable).replace('$','')} (20% comisión)</button></div>`:''}
   </div>`;
 }
 
@@ -1849,7 +1852,13 @@ function renderPoolDetail(c, inv, returns, transactions){
   const cap=parseFloat(inv.amount)||0;
   const netCap=parseFloat(inv.netCapital)||cap;
   const entryFee=parseFloat(inv.entryFee)||Math.round(cap*0.02);
-  const paidEarnings=returns.reduce((s,r)=>s+(parseFloat(r.earned)||0),0);
+  // totalEarned = suma de TODOS los rendimientos históricos
+  const totalEarned=returns.reduce((s,r)=>s+(parseFloat(r.earned)||0),0);
+  // withdrawable = lo que aún está pendiente de retirar (de la BD)
+  const withdrawable=parseFloat(inv.withdrawableEarnings)||0;
+  // alreadyWithdrawn = lo que el usuario ya cobró (totalEarned - withdrawable)
+  const alreadyWithdrawn=Math.max(0,totalEarned-withdrawable);
+  const paidEarnings=alreadyWithdrawn; // en pool, "pagado" = ya retirado
   const start=new Date(inv.startDate||Date.now());
   const lockEnd=new Date(inv.lockEndDate||inv.endDate||Date.now());
   const now=new Date();
@@ -1916,9 +1925,14 @@ function renderPoolDetail(c, inv, returns, transactions){
     <!-- MÉTRICAS -->
     <div class="detail-metrics" style="margin-bottom:14px">
       <div class="dm-item paid">
-        <div class="dm-lbl">Ganancias pagadas</div>
-        <div class="dm-val grn">+${formatCOP(paidEarnings)}</div>
-        <div class="dm-sub">${returns.length} ${returns.length===1?'pago':'pagos'} registrado${returns.length===1?'':'s'}</div>
+        <div class="dm-lbl">Ya retirado</div>
+        <div class="dm-val grn">+${formatCOP(alreadyWithdrawn)}</div>
+        <div class="dm-sub">Acreditado a tu balance</div>
+      </div>
+      <div class="dm-item pend">
+        <div class="dm-lbl"><span class="pulse-dot"></span>Pendiente de retiro</div>
+        <div class="dm-val amb">+${formatCOP(withdrawable)}</div>
+        <div class="dm-sub">${returns.length} ${returns.length===1?'pago':'pagos'} del admin</div>
       </div>
       <div class="dm-item apy">
         <div class="dm-lbl">Mi APY mensual</div>
@@ -1929,12 +1943,6 @@ function renderPoolDetail(c, inv, returns, transactions){
         <div class="dm-lbl">Tiempo activo</div>
         <div class="dm-val pur">${monthsElapsed}m ${daysElapsed%30}d</div>
         <div class="dm-sub">${isMatured?'Bloqueado finalizado':`${daysToUnlock} días para desbloqueo`}</div>
-      </div>
-      <div class="dm-item" style="border-color:rgba(124,92,252,.2);background:rgba(124,92,252,.05)">
-        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--pur)"></div>
-        <div class="dm-lbl">Comisión retiro</div>
-        <div class="dm-val pur">20%</div>
-        <div class="dm-sub">Sobre ganancias</div>
       </div>
     </div>
 
@@ -2003,7 +2011,7 @@ function renderPoolDetail(c, inv, returns, transactions){
     <div class="timeline-card" style="margin-bottom:14px">
       <div class="tl-head" style="display:flex;align-items:center;justify-content:space-between">
         <span>Historial de Rendimientos</span>
-        ${paidEarnings>0?`<span style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--grn)">+${formatCOP(paidEarnings)} total</span>`:''}
+        ${totalEarned>0?`<span style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--grn)">+${formatCOP(totalEarned)} histórico</span>`:''}
       </div>
       ${returns.length===0?`
       <div class="tl-empty">
