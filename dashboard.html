@@ -1561,14 +1561,31 @@ async function renderProfileView(c){
       <button class="prod-cta" onclick="changePassword()" style="background:var(--sur);color:var(--text);border:1px solid var(--bd)">Cambiar Contraseña</button>
     </div>
 
-    <div class="card" style="padding:20px">
+    <div class="card" style="padding:20px;margin-bottom:14px">
       <div style="font-size:13px;font-weight:600;margin-bottom:10px">Mi código de referido</div>
       <div style="display:flex;align-items:center;gap:12px">
         <div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--blu);letter-spacing:2px">${p.referral_code||'—'}</div>
         <button onclick="navigator.clipboard.writeText('${p.referral_code||''}');toast('✅ Copiado')" style="padding:6px 12px;background:var(--blud);border:1px solid rgba(79,142,247,.2);color:var(--blu);font-size:11px;border-radius:6px">📋 Copiar</button>
       </div>
     </div>
+
+    <div class="card" style="padding:20px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:36px;height:36px;border-radius:10px;background:var(--grnd);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;font-size:18px">📱</div>
+        <div>
+          <div style="font-size:14px;font-weight:700">Cuenta de retiro</div>
+          <div style="font-size:12px;color:var(--mut)">Tu llave Bre-B para recibir retiros</div>
+        </div>
+      </div>
+      <div id="pm-list"><div style="color:var(--mut);font-size:12px;padding:16px 0;text-align:center">Cargando...</div></div>
+      <div style="height:1px;background:var(--bd);margin:16px 0"></div>
+      <div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Agregar llave de retiro</div>
+      <div class="fld"><label class="fld-lbl">Llave Bre-B / Nequi</label><input id="pm-key" class="mono" placeholder="Ej: @usuario o 3001234567" style="font-size:16px"></div>
+      <div class="fld"><label class="fld-lbl">Nombre del titular</label><input id="pm-holder" placeholder="Nombre completo"></div>
+      <button class="prod-cta" onclick="addPM()">+ Agregar Llave</button>
+    </div>
   </div>`;
+  loadPMs();
 }
 
 async function saveProfile(){
@@ -1599,6 +1616,46 @@ async function changePassword(){
   }catch(e){toast('Error de conexión','error')}
 }
 
+async function loadPMs(){
+  var list=document.getElementById('pm-list');if(!list)return;
+  try{
+    var res=await apiFetch('/withdrawals/payment-methods');
+    var pms=res&&res.ok?await res.json():[];
+    if(!pms.length){list.innerHTML='<div style="padding:16px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:10px;text-align:center;font-size:12px;color:var(--amb);line-height:1.6"><div style="font-size:20px;margin-bottom:6px">⚠️</div>No tienes llave de retiro.<br>Agrega una abajo para poder solicitar retiros.</div>';return;}
+    list.innerHTML=pms.map(function(pm){
+      return '<div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--sur);border:1px solid var(--bd);border-radius:10px;margin-bottom:8px">'
+        +'<div style="width:36px;height:36px;border-radius:10px;background:var(--grnd);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;font-size:16px">📱</div>'
+        +'<div style="flex:1;min-width:0">'
+          +'<div style="font-size:14px;font-weight:700;font-family:Space Mono,monospace">'+(pm.phone||pm.label||pm.account_number||'—')+'</div>'
+          +'<div style="font-size:11px;color:var(--mut);margin-top:2px">'+(pm.holder_name||'Llave Bre-B')+'</div>'
+        +'</div>'
+        +(pm.is_default?'<span style="font-size:9px;background:var(--grnd);color:var(--grn);padding:3px 8px;border-radius:10px;font-weight:700;border:1px solid rgba(16,185,129,.2)">Principal</span>':'')
+        +'<button onclick="deletePM('+pm.id+')" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:var(--red);padding:6px 10px;font-size:11px;cursor:pointer;font-weight:600">✕</button>'
+      +'</div>';
+    }).join('');
+  }catch(e){list.innerHTML='<div style="color:var(--mut);font-size:12px;text-align:center;padding:12px">Error cargando llaves</div>';}
+}
+
+async function addPM(){
+  var key=document.getElementById('pm-key')?.value.trim();
+  var holder=document.getElementById('pm-holder')?.value.trim();
+  if(!key)return toast('Ingresa tu llave Bre-B','error');
+  try{
+    var res=await apiFetch('/withdrawals/payment-methods',{method:'POST',body:JSON.stringify({type:'nequi',label:'Bre-B',phone:key,holderName:holder||undefined,isDefault:true})});
+    var d=await res.json();if(!res.ok)return toast(d.error||'Error','error');
+    toast('✅ Llave de retiro agregada');
+    document.getElementById('pm-key').value='';
+    document.getElementById('pm-holder').value='';
+    loadPMs();
+  }catch(e){toast('Error de conexión','error');}
+}
+
+async function deletePM(id){
+  if(!confirm('¿Eliminar esta llave de retiro?'))return;
+  try{var res=await apiFetch('/withdrawals/payment-methods/'+id,{method:'DELETE'});
+    if(!res.ok)return toast('Error al eliminar','error');toast('✅ Llave eliminada');loadPMs();
+  }catch(e){toast('Error de conexión','error');}
+}
 // ══════════════════ INVEST MODAL ══════════════════
 function openInvestModal(type='cdtc'){
   selectedPlan={plan:type==='pool'?'pool':'cdtc_6m',months:type==='pool'?12:6,type:type};
