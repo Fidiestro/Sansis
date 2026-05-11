@@ -1111,161 +1111,82 @@ function calculatePoolAPY(){
 
 // ══════════════════ RENDER: DEPOSIT ══════════════════
 function renderDepositView(c){
-  c.innerHTML=`
-  <div class="anim" style="max-width:600px">
-    <h3 style="font-size:18px;font-weight:700;margin-bottom:4px">Depositar Capital</h3>
-    <p style="font-size:13px;color:var(--mut);margin-bottom:20px">Añade fondos a tu cuenta para invertir o retirar</p>
+  c.innerHTML='<div class="loading"><div class="spinner"></div><p>Cargando...</p></div>';
+  apiFetch('/deposits/my').then(function(res){return res&&res.ok?res.json():[]}).then(function(deposits){
+    window.__depHist=deposits;
+    var pending=deposits.filter(function(d){return d.status==='pending'});
+    var sc={pending:'var(--amb)',approved:'var(--grn)',rejected:'var(--red)'};
+    var sl={pending:'En revisión',approved:'Aprobado',rejected:'Rechazado'};
+    var sb={pending:'rgba(245,158,11,.1)',approved:'rgba(16,185,129,.1)',rejected:'rgba(239,68,68,.08)'};
+    c.innerHTML='<div class="anim" style="max-width:640px">'
+    +(pending.length?pending.map(function(d){return '<div style="background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(245,158,11,.03));border:1px solid rgba(245,158,11,.3);border-radius:14px;padding:16px;margin-bottom:16px;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--amb),var(--pur))"></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:36px;height:36px;border-radius:10px;background:rgba(245,158,11,.15);display:flex;align-items:center;justify-content:center"><div style="width:12px;height:12px;border:2px solid var(--amb);border-radius:50%;border-top-color:transparent;animation:spin 1s linear infinite"></div></div><div><div style="font-size:14px;font-weight:700;color:var(--amb)">Depósito en revisión</div><div style="font-size:11px;color:var(--mut)">Enviado el '+formatDate(d.created_at)+'</div></div></div><div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.15);border-radius:8px"><div><div style="font-size:10px;color:var(--mut);text-transform:uppercase">Monto</div><div style="font-family:Space Mono,monospace;font-size:18px;font-weight:700;color:var(--amb)">'+formatCOP(d.amount)+'</div></div><div style="text-align:right"><div style="font-size:10px;color:var(--mut);text-transform:uppercase">Ref</div><div style="font-family:Space Mono,monospace;font-size:12px;color:var(--mut)">'+(d.ref_id||'#'+d.id)+'</div></div></div><div style="font-size:11px;color:var(--mut);margin-top:10px;text-align:center">⏳ Revisión en las próximas <strong style="color:var(--text)">24 horas</strong></div></div>';}).join(''):'')
+    +'<div style="margin-bottom:20px"><h3 style="font-size:20px;font-weight:700;margin-bottom:4px">Depositar Capital</h3><p style="font-size:13px;color:var(--mut)">Transfiere a nuestra cuenta y envía tu comprobante</p></div>'
+    +'<div style="background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(79,142,247,.1));border:1px solid rgba(16,185,129,.25);border-radius:16px;padding:24px;margin-bottom:20px;text-align:center;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--grn),var(--blu))"></div><div style="font-size:10px;font-weight:700;color:var(--grn);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px">Llave Bre-B / Nequi</div><div style="font-family:Space Mono,monospace;font-size:42px;font-weight:700;color:var(--text);letter-spacing:3px;margin-bottom:14px;user-select:all">@JFC927</div><button id="dep-copy-btn" onclick="copyDepKey()" style="padding:12px 32px;background:linear-gradient(135deg,var(--grn),var(--blu));border:none;border-radius:10px;color:white;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px">📋 Copiar Llave</button><div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left;font-size:12px"><div style="padding:10px;background:rgba(0,0,0,.15);border-radius:8px"><div style="color:var(--mut);font-size:10px;text-transform:uppercase;margin-bottom:3px">Titular</div><div style="font-weight:600">Juan Fandino Cardenas</div></div><div style="padding:10px;background:rgba(0,0,0,.15);border-radius:8px"><div style="color:var(--mut);font-size:10px;text-transform:uppercase;margin-bottom:3px">Banco destino</div><div style="font-weight:600">Nu (Nubank)</div></div></div></div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:20px"><div style="flex:1;padding:12px;background:var(--bg2);border-radius:10px;border:1px solid var(--bd);text-align:center"><div style="width:28px;height:28px;border-radius:50%;background:var(--grnd);color:var(--grn);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;border:1px solid rgba(16,185,129,.2)">1</div><div style="font-size:11px;font-weight:600">Transfiere</div><div style="font-size:10px;color:var(--mut)">A la llave de arriba</div></div><div style="flex:1;padding:12px;background:var(--bg2);border-radius:10px;border:1px solid var(--bd);text-align:center"><div style="width:28px;height:28px;border-radius:50%;background:var(--blud);color:var(--blu);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;border:1px solid rgba(79,142,247,.2)">2</div><div style="font-size:11px;font-weight:600">Sube comprobante</div><div style="font-size:10px;color:var(--mut)">Captura o foto</div></div><div style="flex:1;padding:12px;background:var(--bg2);border-radius:10px;border:1px solid var(--bd);text-align:center"><div style="width:28px;height:28px;border-radius:50%;background:rgba(124,92,252,.1);color:var(--pur);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;border:1px solid rgba(124,92,252,.2)">3</div><div style="font-size:11px;font-weight:600">Espera aprobación</div><div style="font-size:10px;color:var(--mut)">En 24 horas</div></div></div>'
+    +'<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;margin-bottom:16px"><div style="padding:18px;border-bottom:1px solid var(--bd)"><label style="display:block;font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Monto transferido (COP)</label><input type="number" id="dep-amount" inputmode="numeric" placeholder="0" min="10000" oninput="updateDepositPreview()" style="width:100%;font-family:Space Mono,monospace;font-size:28px;font-weight:700;background:transparent;border:none;outline:none;color:var(--text);padding:0;box-sizing:border-box"><div id="dep-hint" style="font-size:12px;color:var(--mut);margin-top:6px;min-height:18px"></div></div><div style="border-bottom:1px solid var(--bd)"><div style="padding:14px 18px 0"><div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px">Comprobante de pago</div></div><div id="dep-drop" onclick="document.getElementById(&quot;dep-file&quot;).click()" style="padding:28px 20px;text-align:center;cursor:pointer" ondragover="event.preventDefault()" ondrop="event.preventDefault();document.getElementById(&quot;dep-file&quot;).files=event.dataTransfer.files;handleDepositFile(document.getElementById(&quot;dep-file&quot;))"><div style="width:48px;height:48px;border-radius:12px;background:var(--grnd);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--grn)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">Toca o arrastra tu comprobante</div><div style="font-size:12px;color:var(--mut)">JPG, PNG o WebP · máx 5MB</div><input type="file" id="dep-file" accept="image/*" style="display:none" onchange="handleDepositFile(this)"></div><div id="dep-preview-img" style="display:none;position:relative"><img id="dep-img-thumb" style="width:100%;max-height:260px;object-fit:cover;display:block"><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.6) 0%,transparent 50%)"></div><button onclick="clearDepositFile()" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600">✕ Cambiar</button><div style="position:absolute;bottom:12px;left:12px;color:white;font-size:12px;font-weight:600">✅ Comprobante listo</div></div></div><div style="padding:14px 18px"><label style="display:block;font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Nota <span style="font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label><input type="text" id="dep-note" placeholder="Ej: Desde Nequi personal" style="width:100%;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;box-sizing:border-box"></div></div>'
+    +'<button id="dep-submit-btn" onclick="submitDepositProof()" disabled style="width:100%;padding:16px;background:linear-gradient(135deg,var(--grn),var(--blu));border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:not-allowed;opacity:.4;transition:all .2s">Enviar Comprobante →</button>'
+    +'<div id="dep-submit-msg" style="display:none;margin-top:12px;text-align:center;font-size:13px;padding:14px;border-radius:10px"></div>'
+    +'<div style="margin-top:28px"><div style="font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between"><span>Historial de Depósitos</span><span style="font-size:11px;color:var(--mut)">'+deposits.length+' registros</span></div>'
+    +(deposits.length?deposits.map(function(d){return '<div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg2);border:1px solid var(--bd);border-radius:10px;margin-bottom:8px"><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap"><span style="font-family:Space Mono,monospace;font-size:14px;font-weight:700;color:var(--grn)">'+formatCOP(d.amount)+'</span><span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:'+(sb[d.status]||'var(--sur)')+';color:'+(sc[d.status]||'var(--mut)')+'">'+( sl[d.status]||d.status)+'</span></div><div style="font-size:11px;color:var(--mut)">'+(d.note||'Sin nota')+' · '+formatDate(d.created_at)+'</div><div style="font-size:10px;color:var(--dim);margin-top:2px;font-family:Space Mono,monospace">'+(d.ref_id||'#'+d.id)+'</div></div></div>';}).join(''):'<div style="text-align:center;color:var(--mut);padding:24px;font-size:13px"><div style="font-size:24px;margin-bottom:8px;opacity:.4">📋</div>No tienes depósitos registrados</div>')
+    +'</div></div>';
+  }).catch(function(){c.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span>Error cargando depósitos</div>';});
+}
 
-    <div class="card" style="padding:20px;margin-bottom:14px">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-        <div style="width:40px;height:40px;border-radius:10px;background:var(--grnd);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--grn)" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-        </div>
-        <div>
-          <div style="font-size:15px;font-weight:700">Transferencia Bancaria</div>
-          <div style="font-size:12px;color:var(--mut)">Bre-B / Nequi / Bancolombia</div>
-        </div>
-      </div>
-      <div class="info-row">
-        <span class="l">Llave Bre-B / Nequi</span>
-        <span class="v" style="display:flex;align-items:center;gap:8px">
-          <strong id="breb-key">@JFC927</strong>
-          <button onclick="navigator.clipboard.writeText('@JFC927').then(()=>toast('¡Llave copiada!','success'))" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--mut);cursor:pointer">Copiar</button>
-        </span>
-      </div>
-      <div class="info-row"><span class="l">Titular</span><span class="v">Sanse Capital SAS</span></div>
-      <div style="margin-top:14px;padding:12px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:8px;font-size:12px;color:var(--grn);line-height:1.6">
-        💡 Realiza la transferencia y luego completa el formulario de abajo para confirmar tu depósito.
-      </div>
-    </div>
-
-    <div class="card" style="padding:20px;margin-bottom:14px">
-      <div style="font-size:14px;font-weight:700;margin-bottom:16px">Confirmar Depósito</div>
-
-      <div class="fld">
-        <label class="fld-lbl">Monto transferido (COP)</label>
-        <input type="number" id="dep-amount" class="mono" placeholder="Ej: 500000" min="10000" oninput="updateDepositPreview()" style="width:100%;box-sizing:border-box">
-        <div id="dep-preview" style="display:none;margin-top:8px;padding:10px;background:var(--sur);border-radius:8px;font-size:12px;color:var(--mut)"></div>
-      </div>
-
-      <div class="fld">
-        <label class="fld-lbl">Captura de pantalla del comprobante</label>
-        <div id="dep-drop" onclick="document.getElementById('dep-file').click()" style="border:2px dashed var(--bd);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='var(--grn)'" onmouseout="this.style.borderColor='var(--bd)'">
-          <div style="font-size:24px;margin-bottom:6px">📎</div>
-          <div style="font-size:13px;color:var(--mut)">Toca para seleccionar imagen</div>
-          <div style="font-size:11px;color:var(--dim);margin-top:4px">JPG, PNG o WebP · máx 5MB</div>
-          <input type="file" id="dep-file" accept="image/*" style="display:none" onchange="handleDepositFile(this)">
-        </div>
-        <div id="dep-preview-img" style="display:none;margin-top:10px;position:relative">
-          <img id="dep-img-thumb" style="width:100%;border-radius:8px;border:1px solid var(--bd);max-height:200px;object-fit:cover">
-          <button onclick="clearDepositFile()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">×</button>
-        </div>
-      </div>
-
-      <div class="fld" style="margin-bottom:0">
-        <label class="fld-lbl">Nota adicional (opcional)</label>
-        <input type="text" id="dep-note" placeholder="Ej: Transferencia desde Nequi" style="width:100%;box-sizing:border-box">
-      </div>
-    </div>
-
-    <button id="dep-submit-btn" onclick="submitDepositProof()" class="prod-cta" style="width:100%;opacity:.5;cursor:not-allowed" disabled>
-      Enviar Comprobante
-    </button>
-    <div id="dep-submit-msg" style="display:none;margin-top:10px;text-align:center;font-size:12px"></div>
-  </div>`;
+function copyDepKey(){
+  navigator.clipboard.writeText('@JFC927').then(function(){
+    var btn=document.getElementById('dep-copy-btn');
+    if(btn){btn.innerHTML='✅ Copiado!';btn.style.background='var(--grn)';setTimeout(function(){btn.innerHTML='📋 Copiar Llave';btn.style.background='linear-gradient(135deg,var(--grn),var(--blu))';},2000);}
+    toast('✅ Llave @JFC927 copiada');
+  });
 }
 
 function updateDepositPreview(){
-  const amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
-  const prev=document.getElementById('dep-preview');
-  if(amt>=10000){
-    prev.style.display='block';
-    prev.innerHTML=`Monto a acreditar: <strong style="color:var(--grn)">${formatCOP(amt)}</strong>`;
-  } else {
-    prev.style.display='none';
-  }
+  var amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
+  var h=document.getElementById('dep-hint');
+  if(h){if(amt>0&&amt<10000)h.innerHTML='<span style="color:var(--red)">Monto mínimo: $10,000 COP</span>';else if(amt>=10000)h.innerHTML='Se acreditará: <strong style="color:var(--grn)">'+formatCOP(amt)+'</strong>';else h.textContent='';}
   checkDepositReady();
 }
 
 function handleDepositFile(input){
-  const file=input.files[0];
-  if(!file) return;
-  if(file.size>5*1024*1024){ toast('La imagen no puede superar 5MB','error'); input.value=''; return; }
-  const reader=new FileReader();
-  reader.onload=e=>{
-    document.getElementById('dep-img-thumb').src=e.target.result;
-    document.getElementById('dep-preview-img').style.display='block';
-    document.getElementById('dep-drop').style.display='none';
-    checkDepositReady();
-  };
+  var file=input.files[0];if(!file)return;
+  if(file.size>5*1024*1024){toast('Máximo 5MB','error');input.value='';return;}
+  var reader=new FileReader();
+  reader.onload=function(e){document.getElementById('dep-img-thumb').src=e.target.result;document.getElementById('dep-preview-img').style.display='block';document.getElementById('dep-drop').style.display='none';checkDepositReady();};
   reader.readAsDataURL(file);
 }
 
-function clearDepositFile(){
-  document.getElementById('dep-file').value='';
-  document.getElementById('dep-preview-img').style.display='none';
-  document.getElementById('dep-drop').style.display='block';
-  checkDepositReady();
-}
+function clearDepositFile(){document.getElementById('dep-file').value='';document.getElementById('dep-preview-img').style.display='none';document.getElementById('dep-drop').style.display='block';checkDepositReady();}
 
 function checkDepositReady(){
-  const amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
-  const hasFile=document.getElementById('dep-file')?.files?.length>0;
-  const btn=document.getElementById('dep-submit-btn');
-  if(!btn) return;
-  const ready=amt>=10000&&hasFile;
-  btn.disabled=!ready;
-  btn.style.opacity=ready?'1':'.5';
-  btn.style.cursor=ready?'pointer':'not-allowed';
+  var amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
+  var hasFile=document.getElementById('dep-file')?.files?.length>0;
+  var btn=document.getElementById('dep-submit-btn');
+  if(!btn)return;var ready=amt>=10000&&hasFile;
+  btn.disabled=!ready;btn.style.opacity=ready?'1':'.4';btn.style.cursor=ready?'pointer':'not-allowed';
 }
 
 async function submitDepositProof(){
-  const btn=document.getElementById('dep-submit-btn');
-  const msgEl=document.getElementById('dep-submit-msg');
-  const amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
-  const note=document.getElementById('dep-note')?.value||'';
-  const file=document.getElementById('dep-file')?.files[0];
-
-  if(amt<10000||!file){ toast('Completa el monto y adjunta el comprobante','error'); return; }
-
-  btn.disabled=true; btn.textContent='Enviando...'; btn.style.opacity='.6';
-
+  var btn=document.getElementById('dep-submit-btn');
+  var msgEl=document.getElementById('dep-submit-msg');
+  var amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
+  var note=document.getElementById('dep-note')?.value||'';
+  var file=document.getElementById('dep-file')?.files[0];
+  if(amt<10000||!file){toast('Completa el monto y adjunta comprobante','error');return;}
+  btn.disabled=true;btn.textContent='Enviando...';btn.style.opacity='.6';
   try{
-    // Convertir imagen a base64
-    const toBase64=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsDataURL(f);});
-    const imgBase64=await toBase64(file);
-
-    const userRaw=localStorage.getItem('sanse_user')||sessionStorage.getItem('sanse_user');
-    const user=userRaw?JSON.parse(userRaw):{};
-
-    const res=await apiFetch('/deposits/create',{
-      method:'POST',
-      body:JSON.stringify({
-        amount:amt,
-        note:note,
-        proofImage:imgBase64,
-        fileName:file.name
-      })
-    });
-
+    var toB64=function(f){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(e){res(e.target.result)};r.onerror=rej;r.readAsDataURL(f)})};
+    var imgB64=await toB64(file);
+    var res=await apiFetch('/deposits/create',{method:'POST',body:JSON.stringify({amount:amt,note:note,proofImage:imgB64,fileName:file.name})});
     if(res&&res.ok){
-      const data=await res.json();
-      msgEl.style.display='block';
-      msgEl.style.color='var(--grn)';
-      msgEl.innerHTML='✅ Comprobante enviado. El admin revisará tu depósito pronto.';
-      btn.textContent='✓ Enviado';
-      btn.style.background='var(--grn)';
-      toast('Comprobante enviado exitosamente','success');
-    } else {
-      const err=res?await res.json():{};
-      throw new Error(err.error||'Error al enviar');
-    }
-  } catch(e){
-    btn.disabled=false; btn.textContent='Enviar Comprobante'; btn.style.opacity='1';
-    msgEl.style.display='block'; msgEl.style.color='var(--red)';
-    msgEl.textContent='Error: '+(e.message||'Intenta de nuevo');
-    toast(e.message||'Error al enviar comprobante','error');
-  }
+      msgEl.style.display='block';msgEl.style.background='rgba(16,185,129,.08)';msgEl.style.border='1px solid rgba(16,185,129,.2)';msgEl.style.color='var(--grn)';
+      msgEl.innerHTML='✅ <strong>Comprobante enviado</strong><br><span style="font-size:12px;opacity:.8">Revisión en las próximas 24 horas</span>';
+      btn.textContent='✓ Enviado';btn.style.background='var(--grn)';btn.style.opacity='1';
+      toast('✅ Comprobante enviado');
+      setTimeout(function(){renderDepositView(document.getElementById('dashboard-content'))},1500);
+    }else{var err=res?await res.json():{};throw new Error(err.error||'Error al enviar')}
+  }catch(e){btn.disabled=false;btn.textContent='Enviar Comprobante →';btn.style.opacity='1';
+    msgEl.style.display='block';msgEl.style.background='rgba(239,68,68,.06)';msgEl.style.border='1px solid rgba(239,68,68,.2)';msgEl.style.color='var(--red)';
+    msgEl.textContent='Error: '+(e.message||'Intenta de nuevo');toast(e.message||'Error','error');}
 }
 
 // ══════════════════ RENDER: WITHDRAW ══════════════════
