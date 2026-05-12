@@ -206,6 +206,14 @@
     <div class="stat grn"><div class="stat-lbl">Capital Libre</div><div class="stat-val grn" id="st-total-available">$0</div></div>
   </div>
 
+  <!-- STATS RÁPIDAS -->
+  <div class="stats" id="admin-quick-stats" style="padding:0 16px 8px">
+    <div class="stat"><div class="stat-lbl">Usuarios</div><div class="stat-val" id="qs-users">—</div></div>
+    <div class="stat"><div class="stat-lbl">Capital Total</div><div class="stat-val grn" id="qs-capital">—</div></div>
+    <div class="stat"><div class="stat-lbl">Depósitos Pendientes</div><div class="stat-val amb" id="qs-dep-pending">—</div></div>
+    <div class="stat"><div class="stat-lbl">Retiros Pendientes</div><div class="stat-val red" id="qs-wr-pending">—</div></div>
+  </div>
+
   <!-- ═══ TABS ═══ -->
   <div class="tabs">
     <button class="tab active" onclick="switchTab('register',this)">Registrar</button>
@@ -631,7 +639,6 @@ function switchTab(tab,el){
   if(tab==='sdtc')loadSDTC();
   if(tab==='pool'){loadPool();setTimeout(loadPoolStrategies,300);}
   if(tab==='analytics')loadAnalytics();
-  if(tab==='analytics')loadAnalytics();
   if(tab==='users')loadUsers();
   if(tab==='transactions')loadRecentTx();
 }
@@ -917,6 +924,38 @@ async function loadDeposits(status){
 }
 
 function filterDeposits(status,el){document.querySelectorAll('#sec-deposits .fbtn').forEach(b=>b.classList.remove('active'));el.classList.add('active');loadDeposits(status)}
+
+// Ver comprobante de depósito en modal
+function viewProof(depId){
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px';
+  ov.onclick=function(e){if(e.target===ov)ov.remove()};
+  ov.innerHTML='<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:20px;max-width:500px;width:100%;max-height:90vh;overflow:auto;position:relative">'
+    +'<button id="close-proof-modal" style="position:absolute;top:12px;right:12px;background:var(--sur);border:1px solid var(--bd);border-radius:8px;padding:4px 10px;color:var(--text);font-size:14px;cursor:pointer">✕</button>'
+    +'<div style="font-size:14px;font-weight:700;margin-bottom:14px">Comprobante #'+depId+'</div>'
+    +'<div id="proof-content" style="text-align:center;color:var(--mut);padding:20px">Cargando...</div>'
+  +'</div>';
+  document.body.appendChild(ov);
+  document.getElementById('close-proof-modal').onclick=function(){ov.remove()};
+  document.getElementById('close-proof-btn').onclick=function(){ov.remove()};
+  apiFetch('/admin/deposits/'+depId+'/proof').then(function(r){return r&&r.ok?r.json():null}).then(function(d){
+    var el=document.getElementById('proof-content');
+    if(d&&d.proofImage){el.innerHTML='<img src="'+d.proofImage+'" style="width:100%;border-radius:8px;border:1px solid var(--bd)">';}
+    else if(d&&d.proof_url){el.innerHTML='<img src="'+d.proof_url+'" style="width:100%;border-radius:8px;border:1px solid var(--bd)">';}
+    else{el.textContent='Sin comprobante disponible';}
+  }).catch(function(){document.getElementById('proof-content').textContent='Error cargando comprobante';});
+}
+
+// Rechazar depósito con nota
+async function processDepositReject(id){
+  var notes=prompt('Motivo del rechazo (opcional):');
+  if(notes===null)return;
+  try{
+    var res=await apiFetch('/admin/deposits/'+id+'/process',{method:'POST',body:JSON.stringify({action:'reject',notes:notes||''})});
+    if(!res.ok)return toast('Error','error');
+    toast('Depósito rechazado');loadDeposits('all');loadStats();
+  }catch(e){toast('Error','error')}
+}
 
 async function processDeposit(id,action){
   if(!confirm(`¿Confirmar: ${action}?`))return;
