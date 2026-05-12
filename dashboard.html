@@ -1,4 +1,4 @@
-+<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -853,9 +853,14 @@ function renderInvCard(inv){
   const isPool=inv.type==='pool'||String(inv.type||'').includes('pool');
   
   // Para CDTC: ganancia pendiente proporcional animada
-  // Para Pool: SOLO lo que el admin registró — sin cálculo dinámico
+  // Para Pool: separar withdrawable (pendiente) vs ya retirado (neto después del 20%)
   const cap=parseFloat(inv.amount)||0;
-  const paidEarnings=parseFloat(inv.totalEarned)||parseFloat(inv.withdrawable_earnings)||0;
+  const totalEarned=parseFloat(inv.totalEarned)||0;
+  const withdrawable=parseFloat(inv.withdrawableEarnings)||parseFloat(inv.withdrawable_earnings)||0;
+  // "Pagadas" = lo que ya retiró, que es el neto (80% de lo retirado)
+  const grossWithdrawn=Math.max(0,totalEarned-withdrawable);
+  const netWithdrawn=Math.round(grossWithdrawn*0.8);
+  const paidEarnings=isPool?netWithdrawn:totalEarned;
   const start=new Date(inv.startDate||inv.start_date||Date.now());
   const now=new Date();
 
@@ -863,7 +868,7 @@ function renderInvCard(inv){
   if(!isPool){
     const daysElapsed=Math.max(0,(now-start)/(1000*60*60*24));
     const pendingGross=cap*0.02*(daysElapsed/30);
-    pendingLive=Math.max(0,pendingGross-paidEarnings);
+    pendingLive=Math.max(0,pendingGross-totalEarned);
   }
 
   // APY personalizado del usuario (promedio de sus propios rendimientos)
@@ -883,19 +888,19 @@ function renderInvCard(inv){
         <div class="inv-cell-val blu">${formatCOP(cap)}</div>
       </div>
       <div class="inv-cell">
-        <div class="inv-cell-lbl">Mi APY ${isPool?'mensual':'mensual'}</div>
+        <div class="inv-cell-lbl">Mi APY mensual</div>
         <div class="inv-cell-val">${myAPY>0?myAPY.toFixed(2)+'%':'~2.0%'}</div>
       </div>
       <div class="inv-cell">
-        <div class="inv-cell-lbl">Ganancia ${isPool?'acumulada':'pagada'}</div>
+        <div class="inv-cell-lbl">${isPool?'Ganancias pagadas':'Ganancia pagada'}</div>
         <div class="inv-cell-val grn">+${formatCOP(paidEarnings)}</div>
       </div>
       <div class="inv-cell ${isPool?'':'earning-live'}">
-        <div class="inv-cell-lbl">${isPool?'':'<span class="pulse-dot"></span>'}${isPool?'Próx. pago':'Pendiente'}</div>
-        <div class="inv-cell-val amb" ${isPool?'':`data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-paid="${paidEarnings}"`}>+${formatCOP(isPool?0:pendingLive)}</div>
+        <div class="inv-cell-lbl">${isPool?(withdrawable>0?'<span class="pulse-dot"></span>Por retirar':'Sin pendientes'):'<span class="pulse-dot"></span>Pendiente'}</div>
+        <div class="inv-cell-val amb" ${isPool?'':`data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-paid="${totalEarned}"`}>+${formatCOP(isPool?withdrawable:pendingLive)}</div>
       </div>
     </div>
-    ${isPool&&paidEarnings>0?`<div style="margin-top:12px"><button class="btn btn-sm" style="width:100%;background:var(--amb);color:white;border:none;padding:10px;border-radius:7px;font-weight:600;font-size:12px" onclick="event.stopPropagation();withdrawPoolEarnings(${inv.id},${paidEarnings})">💰 Retirar Ganancias (20% comisión)</button></div>`:''}
+    ${isPool&&withdrawable>0?`<div style="margin-top:12px"><button class="btn btn-sm" style="width:100%;background:var(--amb);color:white;border:none;padding:10px;border-radius:7px;font-weight:600;font-size:12px" onclick="event.stopPropagation();withdrawPoolEarnings(${inv.id},${withdrawable})">💰 Retirar Ganancias</button></div>`:''}
   </div>`;
 }
 
@@ -918,19 +923,40 @@ function startEarningsAnimation(){
 
 // Withdraw pool earnings with 20% commission
 async function withdrawPoolEarnings(invId,earnings){
-  const commission=Math.round(earnings*0.20);
-  const netAmount=earnings-commission;
-  if(!confirm('¿Retirar '+formatCOP(earnings)+' en ganancias?\n\nComisión 20%: -'+formatCOP(commission)+'\nRecibirás: '+formatCOP(netAmount)))return;
+  var commission=Math.round(earnings*0.20);
+  var netAmount=earnings-commission;
+  if(!confirm('¿Retirar ganancias del Pool?\n\nBruto: '+formatCOP(earnings)+'\nComisión 20%: -'+formatCOP(commission)+'\nRecibirás: '+formatCOP(netAmount)))return;
   try{
-    const res=await apiFetch('/investments/'+invId+'/withdraw-earnings',{method:'POST'});
+    var res=await apiFetch('/investments/'+invId+'/withdraw-earnings',{method:'POST'});
     if(res&&res.status===404){
-      toast('El retiro de ganancias debe solicitarse por WhatsApp al admin','error');
-      setTimeout(()=>window.open('https://wa.me/573194552890?text=Quiero retirar mis ganancias del Pool de Liquidez - ID inv: '+invId,'_blank'),500);
+      toast('Solicita el retiro por WhatsApp al admin','error');
+      setTimeout(function(){window.open('https://wa.me/573194552890?text=Quiero retirar mis ganancias del Pool - ID inv: '+invId,'_blank')},500);
       return;
     }
-    const d=await res.json();
+    var d=await res.json();
     if(!res.ok)return toast(d.error||'Error al retirar','error');
-    toast('✅ Retiro procesado. Recibirás '+formatCOP(netAmount)+' (comisión: '+formatCOP(commission)+')');
+
+    // Animación de retiro exitoso
+    if(!document.getElementById('wr-anims')){var st=document.createElement('style');st.id='wr-anims';st.textContent='@keyframes wrScale{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}@keyframes wrBounce{0%{transform:scale(0)}50%{transform:scale(1.25)}100%{transform:scale(1)}}@keyframes wrFade{from{opacity:0}to{opacity:1}}';document.head.appendChild(st);}
+    var ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:9999;animation:wrFade .3s ease';
+    ov.onclick=function(e){if(e.target===ov)ov.remove()};
+    ov.innerHTML='<div style="background:var(--bg2);border:1px solid rgba(16,185,129,.3);border-radius:20px;padding:32px 40px;text-align:center;max-width:360px;width:90%;animation:wrScale .4s ease">'
+      +'<div style="font-size:52px;margin-bottom:12px;animation:wrBounce .6s ease">💰</div>'
+      +'<div style="font-size:20px;font-weight:700;color:var(--grn);margin-bottom:8px">¡Retiro Exitoso!</div>'
+      +'<div style="font-family:Space Mono,monospace;font-size:30px;font-weight:700;color:var(--text);margin-bottom:4px">+'+formatCOP(netAmount)+'</div>'
+      +'<div style="font-size:12px;color:var(--mut);margin-bottom:18px">Acreditado a tu balance disponible</div>'
+      +'<div style="display:flex;justify-content:space-between;padding:12px 16px;background:var(--sur);border-radius:10px;font-size:12px;margin-bottom:18px">'
+        +'<div style="text-align:left"><div style="color:var(--mut);font-size:10px;text-transform:uppercase">Bruto</div><div style="font-weight:700;font-family:Space Mono,monospace">'+formatCOP(earnings)+'</div></div>'
+        +'<div style="color:var(--mut);font-size:18px;display:flex;align-items:center">→</div>'
+        +'<div style="text-align:right"><div style="color:var(--mut);font-size:10px;text-transform:uppercase">Comisión 20%</div><div style="font-weight:700;color:var(--red);font-family:Space Mono,monospace">-'+formatCOP(commission)+'</div></div>'
+      +'</div>'
+      +'<button id="wr-ok-btn" style="padding:12px 32px;background:linear-gradient(135deg,var(--grn),var(--blu));border:none;border-radius:10px;color:white;font-weight:700;font-size:14px;cursor:pointer;width:100%">Entendido ✓</button>'
+    +'</div>';
+    document.body.appendChild(ov);
+    document.getElementById('wr-ok-btn').onclick=function(){ov.remove()};
+
+    toast('✅ '+formatCOP(netAmount)+' acreditado a tu balance');
     await loadAllData();
     renderCurrentView();
   }catch(e){toast('Error de conexión','error')}
@@ -1277,128 +1303,77 @@ async function renderWithdrawView(c){
   }catch(e){paymentMethods=[]}
 
   const b=balanceSummary;
-  const hasPM=paymentMethods.length>0;
-
   c.innerHTML=`
-  <div class="anim" style="max-width:640px">
-    <div style="margin-bottom:20px">
-      <h3 style="font-size:20px;font-weight:700;margin-bottom:4px">Retirar Fondos</h3>
-      <p style="font-size:13px;color:var(--mut)">Solicita el retiro de tu capital disponible</p>
+  <div class="anim" style="max-width:600px">
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:4px">Retirar Fondos</h3>
+    <p style="font-size:13px;color:var(--mut);margin-bottom:20px">Solicita el retiro de tu capital disponible</p>
+
+    <div class="card" style="padding:20px;margin-bottom:14px">
+      <div class="info-row"><span class="l">Disponible para retirar</span><span class="v grn">${formatCOP(b.availableBalance)}</span></div>
     </div>
 
-    <!-- Balance card -->
-    <div style="background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(79,142,247,.06));border:1px solid rgba(16,185,129,.2);border-radius:14px;padding:20px;margin-bottom:20px;position:relative;overflow:hidden">
-      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--grn),var(--blu))"></div>
-      <div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Disponible para retirar</div>
-      <div style="font-family:'Space Mono',monospace;font-size:32px;font-weight:700;color:var(--grn)">${formatCOP(b.availableBalance)}</div>
-      <div style="display:flex;gap:16px;margin-top:10px;font-size:12px;color:var(--mut)">
-        <span>Invertido: <strong style="color:var(--blu)">${formatCOP(b.totalInvested)}</strong></span>
-        ${b.pendingWithdrawals>0?`<span>Pendiente: <strong style="color:var(--amb)">${formatCOP(b.pendingWithdrawals)}</strong></span>`:''}
+    <div class="card" style="padding:20px;margin-bottom:14px">
+      <div class="fld">
+        <label class="fld-lbl">Monto a retirar (COP)</label>
+        <input type="number" id="wr-amount" class="mono" placeholder="0" min="10000" max="${b.availableBalance}" oninput="updateWithdrawPreview()">
       </div>
-    </div>
 
-    ${!hasPM?`
-    <!-- Sin métodos de pago -->
-    <div style="background:var(--bg2);border:1px solid rgba(245,158,11,.3);border-radius:12px;padding:24px;text-align:center;margin-bottom:20px">
-      <div style="font-size:28px;margin-bottom:10px">⚠️</div>
-      <div style="font-size:14px;font-weight:700;margin-bottom:6px">Agrega una llave de retiro</div>
-      <div style="font-size:12px;color:var(--mut);margin-bottom:14px">Necesitas al menos una llave Bre-B para solicitar retiros</div>
-      <button onclick="showViewByName('profile')" style="padding:10px 20px;background:var(--blu);border:none;border-radius:8px;color:white;font-size:13px;font-weight:600;cursor:pointer">Ir a Mi Perfil →</button>
-    </div>
-    `:`
-    <!-- Formulario de retiro -->
-    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;margin-bottom:16px">
-      <!-- Monto -->
-      <div style="padding:18px;border-bottom:1px solid var(--bd)">
-        <label style="display:block;font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Monto a retirar (COP)</label>
-        <input type="number" id="wr-amount" inputmode="numeric" placeholder="0" min="10000" max="${b.availableBalance}" oninput="updateWithdrawPreview()"
-          style="width:100%;font-family:'Space Mono',monospace;font-size:28px;font-weight:700;background:transparent;border:none;outline:none;color:var(--text);padding:0;box-sizing:border-box">
-        <div id="wr-hint" style="font-size:12px;color:var(--mut);margin-top:6px;min-height:18px"></div>
+      <div class="fld">
+        <label class="fld-lbl">Método de pago</label>
+        <select id="wr-pm" onchange="updateWithdrawPreview()">
+          <option value="">Seleccionar método...</option>
+          ${paymentMethods.map(pm=>`<option value="${pm.id}">${pm.type==='bank'?'🏦':'📱'} ${pm.bank_name||pm.type} — ${pm.account_number||pm.account_holder||''}</option>`).join('')}
+        </select>
+        ${paymentMethods.length===0?`<div style="font-size:11px;color:var(--amb);margin-top:6px">⚠️ No tienes métodos de pago. <a href="#" onclick="showViewByName('profile');return false" style="color:var(--blu)">Agrégalo en Perfil</a></div>`:''}
       </div>
-      <!-- Método de pago -->
-      <div style="padding:18px">
-        <label style="display:block;font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Método de pago</label>
-        <div id="wr-pm-list">
-          ${paymentMethods.map(pm=>`
-          <label style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--sur);border:2px solid var(--bd);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:border-color .15s" onclick="this.querySelector('input').checked=true;document.querySelectorAll('#wr-pm-list label').forEach(l=>l.style.borderColor='var(--bd)');this.style.borderColor='var(--grn)';updateWithdrawPreview()">
-            <input type="radio" name="wr-pm" value="${pm.id}" style="accent-color:var(--grn);width:18px;height:18px;flex-shrink:0">
-            <div style="width:36px;height:36px;border-radius:8px;background:var(--grnd);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📱</div>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:13px;font-weight:700;color:var(--text)">${pm.phone||pm.label||pm.account_number||'—'}</div>
-              <div style="font-size:11px;color:var(--mut)">${pm.holder_name||'Llave Bre-B'}</div>
-            </div>
-          </label>`).join('')}
-        </div>
+
+      <div id="wr-preview" style="display:none;background:var(--sur);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:14px">
+        <div class="info-row"><span class="l">Monto</span><span class="v" id="wp-amt">$0</span></div>
+        <div class="info-row"><span class="l">Tiempo estimado</span><span class="v" id="wp-time">24-48h</span></div>
+        <div id="wp-warn" style="display:none;font-size:11px;color:var(--amb);margin-top:8px;line-height:1.6"></div>
       </div>
+
+      <button class="prod-cta" id="btn-withdraw-request" onclick="submitWithdrawalRequest()" disabled style="opacity:0.5">Solicitar Retiro</button>
     </div>
 
-    <!-- Preview -->
-    <div id="wr-preview" style="display:none;background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd);font-size:13px"><span style="color:var(--mut)">Monto a retirar</span><span style="font-family:'Space Mono',monospace;font-weight:700;color:var(--grn)" id="wp-amt">$0</span></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px"><span style="color:var(--mut)">Tiempo estimado</span><span style="font-weight:600" id="wp-time">24-48h</span></div>
-      <div id="wp-warn" style="display:none;font-size:11px;color:var(--amb);margin-top:8px;padding:10px;background:rgba(245,158,11,.06);border-radius:8px;line-height:1.6"></div>
-    </div>
-
-    <!-- Botón -->
-    <button id="btn-withdraw-request" onclick="submitWithdrawalRequest()" disabled
-      style="width:100%;padding:16px;background:linear-gradient(135deg,var(--grn),var(--blu));border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:not-allowed;opacity:.4;transition:all .2s">
-      Solicitar Retiro
-    </button>
-    `}
-
-    <div style="font-size:11px;color:var(--mut);line-height:1.8;padding:14px;background:var(--sur);border-radius:10px;margin-top:16px">
-      <strong style="color:var(--text);display:block;margin-bottom:4px">Información de retiros</strong>
-      • Retiros hasta <strong>$2,000,000</strong>: procesados en 24-48 horas<br>
-      • Montos mayores: hasta 30 días hábiles con aprobación especial<br>
-      • Sin comisión por retiro · Monto mínimo: $10,000 COP
+    <div style="font-size:11px;color:var(--mut);line-height:1.6;padding:14px;background:var(--sur);border-radius:8px">
+      💡 Los retiros hasta <strong>$2,000,000</strong> se procesan en 24-48h. Montos superiores pueden requerir hasta 30 días hábiles.
     </div>
   </div>`;
 }
 
 function updateWithdrawPreview(){
-  const amt=parseFloat(document.getElementById('wr-amount')?.value)||0;
-  const pmEl=document.querySelector('input[name="wr-pm"]:checked');
-  const pm=pmEl?pmEl.value:'';
-  const hint=document.getElementById('wr-hint');
+  const amt=parseFloat(document.getElementById('wr-amount').value)||0;
+  const pm=document.getElementById('wr-pm').value;
   const prev=document.getElementById('wr-preview');
   const btn=document.getElementById('btn-withdraw-request');
   const warn=document.getElementById('wp-warn');
-  const avail=balanceSummary.availableBalance||0;
 
-  if(hint){
-    if(amt>avail)hint.innerHTML='<span style="color:var(--red)">Excede tu balance disponible ('+formatCOP(avail)+')</span>';
-    else if(amt>0&&amt<10000)hint.innerHTML='<span style="color:var(--red)">Monto mínimo: $10,000 COP</span>';
-    else if(amt>=10000)hint.innerHTML='Retirar: <strong style="color:var(--grn)">'+formatCOP(amt)+'</strong>';
-    else hint.textContent='';
-  }
-
-  if(amt>=10000&&amt<=avail&&pm){
+  if(amt>=10000&&amt<=balanceSummary.availableBalance&&pm){
     document.getElementById('wp-amt').textContent=formatCOP(amt);
-    document.getElementById('wp-time').textContent=amt>2000000?'Hasta 30 días hábiles':'24-48 horas';
-    if(amt>2000000){warn.style.display='block';warn.textContent='⚠️ Retiros mayores a $2,000,000 requieren aprobación especial.';}else{warn.style.display='none';}
-    if(prev)prev.style.display='block';
-    if(btn){btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';}
+    document.getElementById('wp-time').textContent=amt>2000000?'Hasta 30 días':'24-48h';
+    if(amt>2000000){warn.style.display='block';warn.textContent='⚠️ Retiros mayores a $2,000,000 requieren aprobación especial.'}
+    else{warn.style.display='none'}
+    prev.style.display='block';btn.disabled=false;btn.style.opacity='1';
   }else{
-    if(prev)prev.style.display='none';
-    if(btn){btn.disabled=true;btn.style.opacity='.4';btn.style.cursor='not-allowed';}
+    prev.style.display='none';btn.disabled=true;btn.style.opacity='0.5';
   }
 }
 
 async function submitWithdrawalRequest(){
   const amount=parseFloat(document.getElementById('wr-amount').value);
-  const pmEl=document.querySelector('input[name="wr-pm"]:checked');
-  const paymentMethodId=pmEl?parseInt(pmEl.value):0;
+  const paymentMethodId=parseInt(document.getElementById('wr-pm').value);
   const btn=document.getElementById('btn-withdraw-request');
-  if(!paymentMethodId)return toast('Selecciona un método de pago','error');
+  if(!paymentMethodId)return toast('Selecciona un método','error');
   btn.disabled=true;btn.textContent='Procesando...';
   try{
     const res=await apiFetch('/withdrawals/request',{method:'POST',body:JSON.stringify({amount,paymentMethodId})});
     const d=await res.json();
-    if(!res.ok)return toast(d.error||'Error','error');
-    toast('✅ Retiro de '+formatCOP(amount)+' solicitado');
+    if(!res.ok)return toast(d.error,'error');
+    toast(`✅ Retiro de ${formatCOP(amount)} solicitado`);
     await loadAllData();renderCurrentView();
   }catch(e){toast('Error de conexión','error')}
-  finally{btn.disabled=false;btn.textContent='Solicitar Retiro';}
+  finally{btn.disabled=false;btn.textContent='Solicitar Retiro'}
 }
 
 // ══════════════════ RENDER: MOVEMENTS ══════════════════
@@ -1431,25 +1406,42 @@ function renderMovementsView(c){
 
 // ══════════════════ RENDER: LOANS ══════════════════
 function renderLoansView(c){
+  const all=[...(myLoans.loanRequests||[]),...(myLoans.legacyLoans||[])];
+  const active=all.filter(l=>['active','overdue'].includes(l.status));
   c.innerHTML=`
-  <div class="anim" style="max-width:600px;text-align:center;padding:40px 0">
-    <div style="font-size:64px;margin-bottom:16px">🚧</div>
-    <h3 style="font-size:22px;font-weight:700;margin-bottom:8px">Préstamos — En Construcción</h3>
-    <p style="font-size:14px;color:var(--mut);margin-bottom:8px;line-height:1.7;max-width:420px;margin-left:auto;margin-right:auto">
-      Estamos trabajando en nuestro sistema de préstamos para ofrecerte una experiencia más rápida y con mejores tasas.
-    </p>
-    <p style="font-size:13px;color:var(--mut);margin-bottom:28px">Vuelve pronto — estaremos de vuelta con novedades.</p>
-    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:20px;max-width:380px;margin:0 auto 24px;text-align:left">
-      <div style="font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Mientras tanto</div>
-      <div style="font-size:13px;color:var(--text);line-height:1.8">
-        📱 Consulta disponibilidad de préstamos directamente por WhatsApp con nuestro equipo.
+  <div class="anim">
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:4px">Préstamos</h3>
+    <p style="font-size:13px;color:var(--mut);margin-bottom:20px">Solicita financiación con tasas preferenciales</p>
+
+    <div class="card" style="padding:20px;margin-bottom:14px">
+      <div class="prod-head">
+        <div class="prod-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+        </div>
+        <div>
+          <div class="prod-ttl">Tasas preferenciales</div>
+          <div class="prod-sub">Para participantes del fondo</div>
+        </div>
       </div>
+      <div class="prod-rates">
+        <div class="rate-chip"><strong>4%</strong> mensual con inversión</div>
+        <div class="rate-chip"><strong>6%</strong> mensual sin inversión</div>
+      </div>
+      <a href="https://wa.me/573194552890?text=Hola,%20quiero%20solicitar%20un%20préstamo" target="_blank" class="prod-cta" style="display:block;text-decoration:none;text-align:center">
+        Solicitar por WhatsApp →
+      </a>
     </div>
-    <a href="https://wa.me/573194552890?text=Hola,%20quiero%20consultar%20sobre%20préstamos%20en%20Sanse%20Capital"
-       target="_blank"
-       style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:#25D366;border:none;border-radius:12px;color:white;font-size:14px;font-weight:700;text-decoration:none">
-      💬 Consultar por WhatsApp
-    </a>
+
+    ${active.length>0?`
+    <div class="sec">
+      <div class="sec-head"><div class="sec-ttl">Préstamos activos</div></div>
+      ${active.map(l=>`
+      <div class="card" style="padding:16px;margin-bottom:10px">
+        <div class="info-row"><span class="l">Monto</span><span class="v">${formatCOP(l.approvedAmount||l.amount)}</span></div>
+        <div class="info-row"><span class="l">Estado</span><span class="v ${l.status==='overdue'?'amt-neg':'grn'}">${l.status==='overdue'?'En mora':'Activo'}</span></div>
+        ${l.dueDate?`<div class="info-row"><span class="l">Vence</span><span class="v">${formatDate(l.dueDate)}</span></div>`:''}
+      </div>`).join('')}
+    </div>`:'<div class="empty"><span class="empty-icon">🏦</span>No tienes préstamos activos</div>'}
   </div>`;
 }
 
