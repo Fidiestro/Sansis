@@ -438,11 +438,21 @@ var allUsers=[];
 async function init(){await loadUsers();await loadStats();loadDashTx()}
 
 async function loadStats(){
-  try{var r=await apiFetch('/admin/stats');if(!r||!r.ok)return;var s=await r.json();
-  var e=function(id,v){var el=document.getElementById(id);if(el)el.textContent=v};
-  e('qs-users',s.totalUsers||0);e('qs-capital',F(s.totalInvested||s.totalCapital||0));e('qs-dep',s.pendingDeposits||0);e('qs-wr',s.pendingWithdrawals||0);
-  e('st-dep',F(s.totalDeposited||0));e('st-inv',F(s.totalInvested||0));e('st-earn',F(s.totalEarnings||0));e('st-active',s.activeInvestments||0);
-  }catch(e){}
+  try{
+    var r=await apiFetch('/admin/stats');
+    if(!r||!r.ok){console.warn('loadStats failed:',r?.status);return}
+    var s=await r.json();
+    console.log('Admin stats:',s);
+    var e=function(id,v){var el=document.getElementById(id);if(el)el.textContent=v};
+    e('qs-users',s.totalUsers||0);
+    e('qs-capital',F(s.totalInvested||s.totalCapital||s.totalBalance||0));
+    e('qs-dep',s.pendingDeposits||0);
+    e('qs-wr',s.pendingWithdrawals||0);
+    e('st-dep',F(s.totalDeposited||0));
+    e('st-inv',F(s.totalInvested||0));
+    e('st-earn',F(s.totalEarnings||0));
+    e('st-active',s.activeInvestments||0);
+  }catch(e){console.error('loadStats error:',e)}
 }
 
 async function loadDashTx(){
@@ -541,13 +551,13 @@ async function loadRetInvs(filter){
 }
 function fRet(f,el){document.querySelectorAll('#sec-rets .fb').forEach(function(b){b.classList.remove('on')});el.classList.add('on');loadRetInvs(f)}
 function selInv(id){
-  var inv=null;apiFetch('/admin/investments/active').then(function(r){return r.json()}).then(function(invs){
-    inv=invs.find(function(i){return i.id===id});if(!inv)return;selectedInv=inv;
+  apiFetch('/admin/investments/active').then(function(r){return r.json()}).then(function(invs){
+    var inv=invs.find(function(i){return String(i.id)===String(id)});if(!inv){toast('Inversión no encontrada','error');return}selectedInv=inv;
     var isP=(inv.type||'').toLowerCase().includes('pool');
-    document.getElementById('rf-label').textContent=(isP?'Pool':'CDTC')+' · '+inv.user_name+' · '+F(inv.amount);
+    document.getElementById('rf-label').textContent=(isP?'Pool':'CDTC')+' · '+(inv.user_name||'—')+' · '+F(inv.amount);
     document.getElementById('ret-form-card').style.display='block';
     document.getElementById('ret-form-card').scrollIntoView({behavior:'smooth'});
-  });
+  }).catch(function(){toast('Error cargando inversión','error')});
 }
 function updateRetPrev(){
   var rate=parseFloat(document.getElementById('rf-rate').value)||0;if(!selectedInv||!rate)return;
