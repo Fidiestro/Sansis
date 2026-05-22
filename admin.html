@@ -250,7 +250,7 @@ tbody tr:hover{background:rgba(255,255,255,.015)}
     <div class="card-t">Pool de Liquidez — Configuración</div>
     <div class="card-d">Parámetros del pool. Los usuarios ven estos valores en su dashboard.</div>
     <div class="fr3" style="margin-bottom:14px">
-      <div class="fg"><label>APY Mensual (%)</label><input id="pool-apy-monthly" type="number" step="0.01" placeholder="2.0"></div>
+      <div class="fg"><label>APY Mensual (%)</label><input id="pool-apy-monthly" type="number" step="0.01" placeholder="2.0" oninput="updatePoolAnnual()"></div>
       <div class="fg"><label>APY Anual (auto)</label><input id="pool-apy-annual" type="number" readonly style="opacity:.6"></div>
       <div class="fg"><label>Mínimo (COP)</label><input id="pool-min" type="number" value="50000"></div>
     </div>
@@ -313,7 +313,16 @@ tbody tr:hover{background:rgba(255,255,255,.015)}
     <div class="card-d">Crear transacción manual para un usuario</div>
     <div class="fr3">
       <div class="fg"><label>Usuario</label><select id="tx-user"></select></div>
-      <div class="fg"><label>Tipo</label><select id="tx-type"><option value="deposit">Depósito</option><option value="withdraw">Retiro</option><option value="profit">Ganancia</option><option value="payment">Abono</option></select></div>
+      <div class="fg"><label>Tipo</label><select id="tx-type">
+        <option value="deposit">Depósito</option>
+        <option value="withdraw">Retiro</option>
+        <option value="profit">Ganancia</option>
+        <option value="payment">Abono</option>
+        <option value="interest">Interés</option>
+        <option value="investment_return">Rendimiento inversión</option>
+        <option value="investment_withdrawal">Retiro inversión</option>
+        <option value="loan">Préstamo</option>
+      </select></div>
       <div class="fg"><label>Monto (COP)</label><input id="tx-amount" type="number" placeholder="0"></div>
     </div>
     <div class="fr">
@@ -394,7 +403,20 @@ tbody tr:hover{background:rgba(255,255,255,.015)}
 <div class="toast" id="toast"></div>
 
 <script>
+/* ═══════════════════════════════════════════════════════════════
+   SANSE CAPITAL — ADMIN PANEL (FIXED)
+   Cambios principales vs versión anterior:
+   - GET  /admin/users               (existe ahora en backend)
+   - POST /admin/users/create        (existe ahora en backend)
+   - POST /admin/users/:id/block     (alias backend, sin body)
+   - POST /admin/pool/config         (existe ahora en backend)
+   - Lectura correcta de status (no "is_blocked")
+   - Loans usa term_months (no duration_months)
+   - tx-type incluye todos los tipos válidos del balanceHelper
+═══════════════════════════════════════════════════════════════ */
+
 const API='https://sanse-backend-production.up.railway.app/api';
+
 function getToken(){return localStorage.getItem('sanse_access_token')||sessionStorage.getItem('sanse_access_token')}
 function logout(){['sanse_access_token','sanse_refresh_token','sanse_user'].forEach(k=>{localStorage.removeItem(k);sessionStorage.removeItem(k)});location.href='login.html'}
 
@@ -414,6 +436,10 @@ async function refreshTk(){
 function toast(m,t){var el=document.getElementById('toast');el.textContent=m;el.className='toast'+(t==='error'?' err':'')+' show';setTimeout(function(){el.className='toast'},3000)}
 function F(n){if(n===null||n===undefined||isNaN(Number(n)))return '—';return '$'+Math.round(Number(n)).toLocaleString('es-CO')}
 function D(d){if(!d)return '—';var dt=new Date(d);return isNaN(dt)?'—':dt.toLocaleDateString('es-CO',{day:'numeric',month:'short',year:'numeric'})}
+
+// FIX: helper unificado para saber si un user está bloqueado.
+// El backend devuelve `status` ('active'|'blocked'); aceptamos también `is_blocked` por compatibilidad.
+function isBlocked(u){ return u && (u.status === 'blocked' || u.is_blocked === true || u.is_blocked === 1); }
 
 // ═══ TAB SWITCHING ═══
 function sw(tab,el){
@@ -440,12 +466,12 @@ async function init(){await loadUsers();await loadStats();loadDashTx()}
 async function loadStats(){
   try{
     var r=await apiFetch('/admin/stats');
-    if(!r||!r.ok){console.warn('loadStats failed:',r?.status);return}
+    if(!r||!r.ok){console.warn('loadStats failed:',r&&r.status);return}
     var s=await r.json();
-    console.log('Admin stats:',s);
     var e=function(id,v){var el=document.getElementById(id);if(el)el.textContent=v};
     e('qs-users',s.totalUsers||0);
-    e('qs-capital',F(s.totalInvested||s.totalCapital||s.totalBalance||0));
+    // FIX: usar totalBalance (que el backend sí devuelve) con fallbacks por compat
+    e('qs-capital',F(s.totalBalance!=null?s.totalBalance:(s.totalInvested||s.totalCapital||0)));
     e('qs-dep',s.pendingDeposits||0);
     e('qs-wr',s.pendingWithdrawals||0);
     e('st-dep',F(s.totalDeposited||0));
@@ -456,172 +482,428 @@ async function loadStats(){
 }
 
 async function loadDashTx(){
-  try{var r=await apiFetch('/admin/transactions/recent');if(!r||!r.ok)return;var d=await r.json();var txs=d.transactions||d||[];
-  var tl={deposit:'Depósito',withdraw:'Retiro',investment:'Inversión',investment_return:'Rendimiento',profit:'Ganancia',payment:'Abono',loan:'Préstamo'};
-  document.getElementById('dash-tx-tbl').innerHTML=txs.length?txs.slice(0,15).map(function(t){var neg=['withdraw','investment'].includes(t.type);return '<tr><td class="m" style="font-size:11px;color:var(--mut)">'+D(t.created_at)+'</td><td>'+(t.user_name||'—')+'</td><td><span class="bg bg-'+(neg?'r':'g')+'">'+(tl[t.type]||t.type)+'</span></td><td class="m '+(neg?'cr':'cg')+'">'+F(t.amount)+'</td><td style="font-size:11px;color:var(--mut);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(t.description||'—')+'</td></tr>'}).join(''):'<tr><td colspan="5" class="empty">Sin transacciones</td></tr>';
+  try{
+    var r=await apiFetch('/admin/transactions/recent');if(!r||!r.ok)return;
+    var d=await r.json();var txs=d.transactions||d||[];
+    var tl={deposit:'Depósito',withdraw:'Retiro',investment:'Inversión',investment_return:'Rendimiento',investment_withdrawal:'Retiro inv.',profit:'Ganancia',payment:'Abono',loan:'Préstamo',interest:'Interés'};
+    document.getElementById('dash-tx-tbl').innerHTML=txs.length?txs.slice(0,15).map(function(t){
+      var neg=['withdraw','investment'].includes(t.type);
+      return '<tr><td class="m" style="font-size:11px;color:var(--mut)">'+D(t.created_at)+'</td><td>'+(t.user_name||'—')+'</td><td><span class="bg bg-'+(neg?'r':'g')+'">'+(tl[t.type]||t.type)+'</span></td><td class="m '+(neg?'cr':'cg')+'">'+F(t.amount)+'</td><td style="font-size:11px;color:var(--mut);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(t.description||'—')+'</td></tr>';
+    }).join(''):'<tr><td colspan="5" class="empty">Sin transacciones</td></tr>';
   }catch(e){}
 }
 
 // ═══ USERS ═══
 async function loadUsers(){
-  try{var r=await apiFetch('/admin/users');if(!r||!r.ok)return;allUsers=await r.json();
-  var sel=document.getElementById('tx-user');if(sel)sel.innerHTML=allUsers.map(function(u){return '<option value="'+u.id+'">'+u.full_name+' ('+u.email+')</option>'}).join('');
-  document.getElementById('users-tbl').innerHTML=allUsers.length?allUsers.map(function(u){return '<tr><td style="font-weight:600">'+u.full_name+'</td><td style="font-size:11px;color:var(--mut)">'+u.email+'</td><td class="m cg">'+F(u.balance||0)+'</td><td class="m cb">'+F(u.totalInvested||0)+'</td><td><span class="bg '+(u.is_blocked?'bg-r':'bg-g')+'">'+(u.is_blocked?'Bloqueado':'Activo')+'</span></td><td style="display:flex;gap:4px"><button class="bt bt-s" onclick="viewUser('+u.id+')">Ver</button><button class="bt bt-s '+(u.is_blocked?'bt-g':'bt-r')+'" onclick="toggleBlock('+u.id+','+u.is_blocked+')">'+(u.is_blocked?'Desbloquear':'Bloquear')+'</button></td></tr>'}).join(''):'<tr><td colspan="6" class="empty">Sin usuarios</td></tr>';
-  }catch(e){}
+  try{
+    var r=await apiFetch('/admin/users');
+    if(!r||!r.ok){
+      // Fallback amistoso si el endpoint aún no está desplegado
+      document.getElementById('users-tbl').innerHTML='<tr><td colspan="6" class="empty">No se pudo cargar usuarios (endpoint GET /admin/users)</td></tr>';
+      return;
+    }
+    var data=await r.json();
+    // Soporta ambas respuestas: array directo o {users:[]}
+    allUsers=Array.isArray(data)?data:(data.users||[]);
+
+    var sel=document.getElementById('tx-user');
+    if(sel)sel.innerHTML=allUsers.map(function(u){return '<option value="'+u.id+'">'+u.full_name+' ('+u.email+')</option>'}).join('');
+
+    document.getElementById('users-tbl').innerHTML=allUsers.length?allUsers.map(function(u){
+      var blocked=isBlocked(u);
+      return '<tr>'
+        +'<td style="font-weight:600">'+u.full_name+'</td>'
+        +'<td style="font-size:11px;color:var(--mut)">'+u.email+'</td>'
+        +'<td class="m cg">'+F(u.balance||0)+'</td>'
+        +'<td class="m cb">'+F(u.totalInvested||0)+'</td>'
+        +'<td><span class="bg '+(blocked?'bg-r':'bg-g')+'">'+(blocked?'Bloqueado':'Activo')+'</span></td>'
+        +'<td style="display:flex;gap:4px">'
+          +'<button class="bt bt-s" onclick="viewUser('+u.id+')">Ver</button> '
+          +'<button class="bt bt-s '+(blocked?'bt-g':'bt-r')+'" onclick="toggleBlock('+u.id+','+blocked+')">'+(blocked?'Desbloquear':'Bloquear')+'</button>'
+        +'</td>'
+      +'</tr>';
+    }).join(''):'<tr><td colspan="6" class="empty">Sin usuarios</td></tr>';
+  }catch(e){console.error('loadUsers error:',e)}
 }
+
 async function createUser(){
-  var name=document.getElementById('u-name').value.trim();var email=document.getElementById('u-email').value.trim();var pass=document.getElementById('u-pass').value;
+  var name=document.getElementById('u-name').value.trim();
+  var email=document.getElementById('u-email').value.trim();
+  var pass=document.getElementById('u-pass').value;
   if(!name||!email||!pass)return toast('Completa todos los campos','error');
-  try{var r=await apiFetch('/admin/users/create',{method:'POST',body:JSON.stringify({fullName:name,email:email,password:pass,phone:document.getElementById('u-phone').value.trim()||undefined,documentNumber:document.getElementById('u-cc').value.trim()||undefined})});
-  if(!r.ok){var d=await r.json();return toast(d.error||'Error','error')}toast('✅ Usuario creado');loadUsers();['u-name','u-email','u-pass','u-phone','u-cc'].forEach(function(id){document.getElementById(id).value=''})}catch(e){toast('Error','error')}
+  if(pass.length<8)return toast('La contraseña debe tener mínimo 8 caracteres','error');
+  try{
+    var r=await apiFetch('/admin/users/create',{method:'POST',body:JSON.stringify({
+      fullName:name,
+      email:email,
+      password:pass,
+      phone:document.getElementById('u-phone').value.trim()||undefined,
+      documentNumber:document.getElementById('u-cc').value.trim()||undefined
+    })});
+    if(!r.ok){var d=await r.json().catch(function(){return{}});return toast(d.error||'Error creando usuario','error')}
+    toast('✅ Usuario creado');
+    loadUsers();
+    ['u-name','u-email','u-pass','u-phone','u-cc'].forEach(function(id){document.getElementById(id).value=''});
+  }catch(e){toast('Error de red','error')}
 }
-async function toggleBlock(id,blocked){if(!confirm(blocked?'¿Desbloquear?':'¿Bloquear?'))return;try{await apiFetch('/admin/users/'+id+'/block',{method:'POST',body:JSON.stringify({block:!blocked})});toast('✅ OK');loadUsers()}catch(e){toast('Error','error')}}
+
+// FIX: endpoint correcto es /toggle-block. Mantenemos el alias /block por compat con backend nuevo.
+async function toggleBlock(id,blocked){
+  if(!confirm(blocked?'¿Desbloquear este usuario?':'¿Bloquear este usuario?'))return;
+  try{
+    var r=await apiFetch('/admin/users/'+id+'/toggle-block',{method:'POST',body:JSON.stringify({})});
+    if(!r||!r.ok){
+      var d=await (r?r.json().catch(function(){return{}}):{});
+      return toast(d.error||'Error','error');
+    }
+    toast('✅ OK');loadUsers();
+  }catch(e){toast('Error','error')}
+}
 
 // ═══ TRANSACTIONS ═══
 async function loadTxs(){
-  try{var r=await apiFetch('/admin/transactions/recent');if(!r||!r.ok)return;var d=await r.json();var txs=d.transactions||d||[];
-  var tl={deposit:'Depósito',withdraw:'Retiro',investment:'Inversión',investment_return:'Rendimiento',profit:'Ganancia',payment:'Abono'};
-  document.getElementById('tx-tbl').innerHTML=txs.length?txs.map(function(t){var neg=['withdraw','investment'].includes(t.type);return '<tr><td class="m" style="font-size:11px;color:var(--mut)">'+D(t.created_at)+'</td><td>'+(t.user_name||'—')+'</td><td><span class="bg bg-'+(neg?'r':'g')+'">'+(tl[t.type]||t.type)+'</span></td><td class="m '+(neg?'cr':'cg')+'">'+F(t.amount)+'</td><td style="font-size:11px;color:var(--mut);max-width:200px;overflow:hidden;text-overflow:ellipsis">'+(t.description||'—')+'</td></tr>'}).join(''):'<tr><td colspan="5" class="empty">Sin transacciones</td></tr>';
+  try{
+    var r=await apiFetch('/admin/transactions/recent');if(!r||!r.ok)return;
+    var d=await r.json();var txs=d.transactions||d||[];
+    var tl={deposit:'Depósito',withdraw:'Retiro',investment:'Inversión',investment_return:'Rendimiento',investment_withdrawal:'Retiro inv.',profit:'Ganancia',payment:'Abono',loan:'Préstamo',interest:'Interés'};
+    document.getElementById('tx-tbl').innerHTML=txs.length?txs.map(function(t){
+      var neg=['withdraw','investment'].includes(t.type);
+      return '<tr><td class="m" style="font-size:11px;color:var(--mut)">'+D(t.created_at)+'</td><td>'+(t.user_name||'—')+'</td><td><span class="bg bg-'+(neg?'r':'g')+'">'+(tl[t.type]||t.type)+'</span></td><td class="m '+(neg?'cr':'cg')+'">'+F(t.amount)+'</td><td style="font-size:11px;color:var(--mut);max-width:200px;overflow:hidden;text-overflow:ellipsis">'+(t.description||'—')+'</td></tr>';
+    }).join(''):'<tr><td colspan="5" class="empty">Sin transacciones</td></tr>';
   }catch(e){}
 }
+
 async function createTx(){
-  var uid=document.getElementById('tx-user').value;var type=document.getElementById('tx-type').value;var amt=parseFloat(document.getElementById('tx-amount').value);
-  if(!amt)return toast('Ingresa un monto','error');var desc=document.getElementById('tx-desc').value.trim();var date=document.getElementById('tx-date').value;
-  try{var r=await apiFetch('/admin/transactions',{method:'POST',body:JSON.stringify({userId:uid,type:type,amount:amt,description:desc||undefined,date:date?new Date(date).toISOString():undefined})});
-  if(!r.ok)return toast('Error','error');toast('✅ Transacción creada');document.getElementById('tx-amount').value='';document.getElementById('tx-desc').value='';loadTxs();loadStats()}catch(e){toast('Error','error')}
+  var uid=document.getElementById('tx-user').value;
+  var type=document.getElementById('tx-type').value;
+  var amt=parseFloat(document.getElementById('tx-amount').value);
+  if(!uid)return toast('Selecciona un usuario','error');
+  if(!amt)return toast('Ingresa un monto','error');
+  var desc=document.getElementById('tx-desc').value.trim();
+  var date=document.getElementById('tx-date').value;
+  try{
+    var r=await apiFetch('/admin/transactions',{method:'POST',body:JSON.stringify({
+      userId:uid,type:type,amount:amt,
+      description:desc||undefined,
+      date:date?new Date(date).toISOString():undefined
+    })});
+    if(!r.ok){var d=await r.json().catch(function(){return{}});return toast(d.error||'Error','error')}
+    toast('✅ Transacción creada');
+    document.getElementById('tx-amount').value='';
+    document.getElementById('tx-desc').value='';
+    loadTxs();loadStats();
+  }catch(e){toast('Error','error')}
 }
 
 // ═══ DEPOSITS ═══
 async function loadDeps(st){
-  try{var q=st==='all'?'':'?status='+st;var r=await apiFetch('/admin/deposits'+q);if(!r||!r.ok)return;var d=await r.json();var deps=d.deposits||d||[];
-  document.getElementById('dep-tbl').innerHTML=deps.length?deps.map(function(dp){return '<tr><td class="m" style="font-size:11px">'+(dp.ref_id||dp.id)+'</td><td>'+(dp.user_name||'—')+'</td><td class="m cg">'+F(dp.amount)+'</td><td style="font-size:11px;color:var(--mut);max-width:120px;overflow:hidden;text-overflow:ellipsis">'+(dp.note||'—')+'</td><td><span class="bg bg-'+(dp.status==='pending'?'a':dp.status==='approved'?'g':'r')+'">'+dp.status+'</span></td><td class="m" style="font-size:11px;color:var(--mut)">'+D(dp.created_at)+'</td><td style="white-space:nowrap">'+(dp.proof_image?'<button class="bt bt-s" onclick="viewProof('+dp.id+')" style="color:var(--blu)">🖼️</button> ':'')+(dp.status==='pending'?'<button class="bt bt-s bt-g" onclick="procDep('+dp.id+',\'approve\')">✓</button> <button class="bt bt-s bt-r" onclick="rejectDep('+dp.id+')">✗</button>':'—')+'</td></tr>'}).join(''):'<tr><td colspan="7" class="empty">Sin depósitos</td></tr>';}catch(e){}
+  try{
+    var q=st==='all'?'':'?status='+st;
+    var r=await apiFetch('/admin/deposits'+q);if(!r||!r.ok)return;
+    var d=await r.json();var deps=d.deposits||d||[];
+    document.getElementById('dep-tbl').innerHTML=deps.length?deps.map(function(dp){
+      return '<tr><td class="m" style="font-size:11px">'+(dp.ref_id||dp.id)+'</td><td>'+(dp.user_name||'—')+'</td><td class="m cg">'+F(dp.amount)+'</td><td style="font-size:11px;color:var(--mut);max-width:120px;overflow:hidden;text-overflow:ellipsis">'+(dp.note||'—')+'</td><td><span class="bg bg-'+(dp.status==='pending'?'a':dp.status==='approved'?'g':'r')+'">'+dp.status+'</span></td><td class="m" style="font-size:11px;color:var(--mut)">'+D(dp.created_at)+'</td><td style="white-space:nowrap">'+(dp.proof_image?'<button class="bt bt-s" onclick="viewProof('+dp.id+')" style="color:var(--blu)">🖼️</button> ':'')+(dp.status==='pending'?'<button class="bt bt-s bt-g" onclick="procDep('+dp.id+',\'approve\')">✓</button> <button class="bt bt-s bt-r" onclick="rejectDep('+dp.id+')">✗</button>':'—')+'</td></tr>';
+    }).join(''):'<tr><td colspan="7" class="empty">Sin depósitos</td></tr>';
+  }catch(e){}
 }
 function fDep(s,el){document.querySelectorAll('#sec-deps .fb').forEach(function(b){b.classList.remove('on')});el.classList.add('on');loadDeps(s)}
-async function procDep(id,action){if(!confirm('¿'+action+'?'))return;try{var r=await apiFetch('/admin/deposits/'+id+'/process',{method:'POST',body:JSON.stringify({action:action})});if(!r.ok)return toast('Error','error');toast('✅ OK');loadDeps('all');loadStats()}catch(e){toast('Error','error')}}
-async function rejectDep(id){var n=prompt('Motivo del rechazo:');if(n===null)return;try{var r=await apiFetch('/admin/deposits/'+id+'/process',{method:'POST',body:JSON.stringify({action:'reject',notes:n||''})});if(!r.ok)return toast('Error','error');toast('Rechazado');loadDeps('all');loadStats()}catch(e){toast('Error','error')}}
+
+async function procDep(id,action){
+  if(!confirm('¿'+action+'?'))return;
+  try{
+    // FIX: backend espera "adminNote" no "notes" para depósitos
+    var r=await apiFetch('/admin/deposits/'+id+'/process',{method:'POST',body:JSON.stringify({action:action})});
+    if(!r.ok)return toast('Error','error');
+    toast('✅ OK');loadDeps('all');loadStats();
+  }catch(e){toast('Error','error')}
+}
+async function rejectDep(id){
+  var n=prompt('Motivo del rechazo:');if(n===null)return;
+  try{
+    var r=await apiFetch('/admin/deposits/'+id+'/process',{method:'POST',body:JSON.stringify({action:'reject',adminNote:n||''})});
+    if(!r.ok)return toast('Error','error');
+    toast('Rechazado');loadDeps('all');loadStats();
+  }catch(e){toast('Error','error')}
+}
 function viewProof(id){
   var ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px';
   ov.onclick=function(e){if(e.target===ov)ov.remove()};
   ov.innerHTML='<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:20px;max-width:500px;width:100%;max-height:90vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div style="font-weight:700">Comprobante #'+id+'</div><button id="cp-close" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;padding:4px 10px;color:var(--mut);cursor:pointer">✕</button></div><div id="proof-img" style="text-align:center;color:var(--mut);padding:20px">Cargando...</div></div>';
   document.body.appendChild(ov);document.getElementById('cp-close').onclick=function(){ov.remove()};
-  apiFetch('/admin/deposits/'+id+'/proof').then(function(r){return r&&r.ok?r.json():null}).then(function(d){var el=document.getElementById('proof-img');if(d&&(d.proofImage||d.proof_url))el.innerHTML='<img src="'+(d.proofImage||d.proof_url)+'" style="width:100%;border-radius:8px">';else el.textContent='Sin comprobante'}).catch(function(){document.getElementById('proof-img').textContent='Error'});
+  apiFetch('/admin/deposits/'+id+'/proof').then(function(r){return r&&r.ok?r.json():null}).then(function(d){
+    var el=document.getElementById('proof-img');
+    if(d&&(d.proofImage||d.proof_url||d.proof_image))el.innerHTML='<img src="'+(d.proofImage||d.proof_url||d.proof_image)+'" style="width:100%;border-radius:8px">';
+    else el.textContent='Sin comprobante';
+  }).catch(function(){document.getElementById('proof-img').textContent='Error'});
 }
 
 // ═══ WITHDRAWALS ═══
 async function loadWrs(st){
-  try{var q=st==='all'?'':'?status='+st;var r=await apiFetch('/admin/withdrawals'+q);if(!r||!r.ok)return;var d=await r.json();var wr=d.withdrawals||d||[];
-  document.getElementById('wr-tbl').innerHTML=wr.length?wr.map(function(w){return '<tr><td class="m" style="font-size:11px">'+(w.ref_id||w.id)+'</td><td>'+(w.user_name||'—')+'</td><td class="m cr">'+F(w.amount)+'</td><td style="font-size:11px">'+(w.pm_type||w.pm_label||w.method||'—')+(w.pm_phone?' · '+w.pm_phone:'')+'</td><td><span class="bg bg-'+(w.status==='pending'?'a':w.status==='approved'?'b':w.status==='completed'?'g':'r')+'">'+w.status+'</span></td><td class="m" style="font-size:11px;color:var(--mut)">'+D(w.created_at)+'</td><td style="white-space:nowrap">'+(w.status==='pending'?'<button class="bt bt-s bt-g" onclick="procWr('+w.id+',\'approve\')">Aprobar</button> <button class="bt bt-s bt-r" onclick="procWr('+w.id+',\'reject\')">Rechazar</button>':w.status==='approved'?'<button class="bt bt-s bt-p" onclick="procWr('+w.id+',\'complete\')">Completar</button>':'—')+'</td></tr>'}).join(''):'<tr><td colspan="7" class="empty">Sin retiros</td></tr>';}catch(e){}
+  try{
+    var q=st==='all'?'':'?status='+st;
+    var r=await apiFetch('/admin/withdrawals'+q);if(!r||!r.ok)return;
+    var d=await r.json();var wr=d.withdrawals||d||[];
+    document.getElementById('wr-tbl').innerHTML=wr.length?wr.map(function(w){
+      return '<tr><td class="m" style="font-size:11px">'+(w.ref_id||w.id)+'</td><td>'+(w.user_name||'—')+'</td><td class="m cr">'+F(w.amount)+'</td><td style="font-size:11px">'+(w.pm_type||w.pm_label||w.method||'—')+(w.pm_phone?' · '+w.pm_phone:'')+'</td><td><span class="bg bg-'+(w.status==='pending'?'a':w.status==='approved'?'b':w.status==='completed'?'g':'r')+'">'+w.status+'</span></td><td class="m" style="font-size:11px;color:var(--mut)">'+D(w.created_at)+'</td><td style="white-space:nowrap">'+(w.status==='pending'?'<button class="bt bt-s bt-g" onclick="procWr('+w.id+',\'approve\')">Aprobar</button> <button class="bt bt-s bt-r" onclick="procWr('+w.id+',\'reject\')">Rechazar</button>':w.status==='approved'?'<button class="bt bt-s bt-p" onclick="procWr('+w.id+',\'complete\')">Completar</button>':'—')+'</td></tr>';
+    }).join(''):'<tr><td colspan="7" class="empty">Sin retiros</td></tr>';
+  }catch(e){}
 }
 function fWr(s,el){document.querySelectorAll('#sec-wrs .fb').forEach(function(b){b.classList.remove('on')});el.classList.add('on');loadWrs(s)}
-async function procWr(id,action){if(!confirm('¿'+action+'?'))return;try{var r=await apiFetch('/admin/withdrawals/'+id+'/process',{method:'POST',body:JSON.stringify({action:action})});if(!r.ok)return toast('Error','error');toast('✅ OK');loadWrs('all');loadStats()}catch(e){toast('Error','error')}}
+async function procWr(id,action){
+  if(!confirm('¿'+action+'?'))return;
+  try{
+    var r=await apiFetch('/admin/withdrawals/'+id+'/process',{method:'POST',body:JSON.stringify({action:action})});
+    if(!r.ok)return toast('Error','error');
+    toast('✅ OK');loadWrs('all');loadStats();
+  }catch(e){toast('Error','error')}
+}
 
 // ═══ REGISTRATIONS ═══
 async function loadRegs(st){
-  try{var q=st==='all'?'':'?status='+st;var r=await apiFetch('/admin/registrations'+q);if(!r||!r.ok)return;var d=await r.json();var regs=d.registrations||d||[];
-  document.getElementById('reg-tbl').innerHTML=regs.length?regs.map(function(rg){return '<tr><td style="font-weight:600">'+(rg.full_name||'—')+'</td><td style="font-size:11px">'+rg.email+'</td><td class="m" style="font-size:11px">'+(rg.phone||'—')+'</td><td><span class="bg bg-'+(rg.status==='pending'?'a':rg.status==='approved'?'g':'r')+'">'+rg.status+'</span></td><td class="m" style="font-size:11px;color:var(--mut)">'+D(rg.created_at)+'</td><td>'+(rg.status==='pending'?'<button class="bt bt-s bt-g" onclick="procReg('+rg.id+',\'approve\')">✓</button> <button class="bt bt-s bt-r" onclick="procReg('+rg.id+',\'reject\')">✗</button>':'—')+'</td></tr>'}).join(''):'<tr><td colspan="6" class="empty">Sin registros</td></tr>';}catch(e){}
+  try{
+    var q=st==='all'?'':'?status='+st;
+    var r=await apiFetch('/admin/registrations'+q);if(!r||!r.ok)return;
+    var d=await r.json();var regs=d.registrations||d||[];
+    document.getElementById('reg-tbl').innerHTML=regs.length?regs.map(function(rg){
+      return '<tr><td style="font-weight:600">'+(rg.full_name||'—')+'</td><td style="font-size:11px">'+rg.email+'</td><td class="m" style="font-size:11px">'+(rg.phone||'—')+'</td><td><span class="bg bg-'+(rg.status==='pending'?'a':rg.status==='approved'?'g':'r')+'">'+rg.status+'</span></td><td class="m" style="font-size:11px;color:var(--mut)">'+D(rg.created_at)+'</td><td>'+(rg.status==='pending'?'<button class="bt bt-s bt-g" onclick="procReg('+rg.id+',\'approve\')">✓</button> <button class="bt bt-s bt-r" onclick="procReg('+rg.id+',\'reject\')">✗</button>':'—')+'</td></tr>';
+    }).join(''):'<tr><td colspan="6" class="empty">Sin registros</td></tr>';
+  }catch(e){}
 }
 function fReg(s,el){document.querySelectorAll('#sec-regs .fb').forEach(function(b){b.classList.remove('on')});el.classList.add('on');loadRegs(s)}
-async function procReg(id,action){if(!confirm('¿'+action+'?'))return;try{var r=await apiFetch('/admin/registrations/'+id+'/process',{method:'POST',body:JSON.stringify({action:action})});if(!r.ok)return toast('Error','error');toast('✅ OK');loadRegs('all')}catch(e){toast('Error','error')}}
+async function procReg(id,action){
+  if(!confirm('¿'+action+'?'))return;
+  try{
+    var r=await apiFetch('/admin/registrations/'+id+'/process',{method:'POST',body:JSON.stringify({action:action})});
+    if(!r.ok)return toast('Error','error');
+    toast('✅ OK');loadRegs('all');loadUsers();
+  }catch(e){toast('Error','error')}
+}
 
 // ═══ LOANS ═══
 async function loadLoans(st){
-  try{var q=st==='all'?'':'?status='+st;var r=await apiFetch('/admin/loans'+q);if(!r||!r.ok)return;var d=await r.json();var loans=d.loans||d||[];
-  document.getElementById('loan-tbl').innerHTML=loans.length?loans.map(function(l){return '<tr><td>'+(l.user_name||'—')+'</td><td class="m cb">'+F(l.amount||l.requested_amount)+'</td><td class="m">'+( l.monthly_rate||l.rate||'—')+'%</td><td>'+(l.duration_months||'—')+'m</td><td><span class="bg bg-'+(l.status==='pending'?'a':l.status==='active'?'b':l.status==='completed'?'g':'r')+'">'+l.status+'</span></td><td class="m" style="font-size:11px;color:var(--mut)">'+D(l.created_at)+'</td><td>'+(l.status==='pending'?'<button class="bt bt-s bt-g" onclick="procLoan('+l.id+',\'approve\')">Aprobar</button> <button class="bt bt-s bt-r" onclick="procLoan('+l.id+',\'reject\')">Rechazar</button>':'—')+'</td></tr>'}).join(''):'<tr><td colspan="7" class="empty">Sin préstamos</td></tr>';}catch(e){}
+  try{
+    var q=st==='all'?'':'?status='+st;
+    var r=await apiFetch('/admin/loans'+q);if(!r||!r.ok)return;
+    var d=await r.json();var loans=d.loans||d||[];
+    document.getElementById('loan-tbl').innerHTML=loans.length?loans.map(function(l){
+      // FIX: columna real es term_months (no duration_months)
+      var term=l.term_months||l.duration_months||'—';
+      var rate=l.approved_rate||l.monthly_rate||l.rate||'—';
+      return '<tr><td>'+(l.user_name||'—')+'</td><td class="m cb">'+F(l.amount||l.requested_amount)+'</td><td class="m">'+rate+'%</td><td>'+term+'m</td><td><span class="bg bg-'+(l.status==='pending'?'a':l.status==='active'?'b':(l.status==='completed'||l.status==='paid')?'g':'r')+'">'+l.status+'</span></td><td class="m" style="font-size:11px;color:var(--mut)">'+D(l.created_at)+'</td><td>'+(l.status==='pending'?'<button class="bt bt-s bt-g" onclick="procLoan('+l.id+',\'approve\')">Aprobar</button> <button class="bt bt-s bt-r" onclick="procLoan('+l.id+',\'reject\')">Rechazar</button>':'—')+'</td></tr>';
+    }).join(''):'<tr><td colspan="7" class="empty">Sin préstamos</td></tr>';
+  }catch(e){}
 }
 function fLoan(s,el){document.querySelectorAll('#sec-loans .fb').forEach(function(b){b.classList.remove('on')});el.classList.add('on');loadLoans(s)}
-async function procLoan(id,action){if(!confirm('¿'+action+'?'))return;try{var r=await apiFetch('/admin/loans/'+id+'/process',{method:'POST',body:JSON.stringify({action:action})});if(!r.ok)return toast('Error','error');toast('✅ OK');loadLoans('all')}catch(e){toast('Error','error')}}
+async function procLoan(id,action){
+  if(!confirm('¿'+action+'?'))return;
+  try{
+    var r=await apiFetch('/admin/loans/'+id+'/process',{method:'POST',body:JSON.stringify({action:action})});
+    if(!r.ok)return toast('Error','error');
+    toast('✅ OK');loadLoans('all');
+  }catch(e){toast('Error','error')}
+}
 
 // ═══ INVESTMENTS (CDTC) ═══
 async function loadSDTC(){
-  try{var gr=await apiFetch('/investments/global-stats');var ir=await apiFetch('/admin/investments/active');
-  var gs=gr&&gr.ok?await gr.json():{};var allI=ir&&ir.ok?await ir.json():[];
-  var invs=allI.filter(function(i){return !(i.type||'').toLowerCase().includes('pool')});
-  document.getElementById('sdtc-content').innerHTML='<div class="sg"><div class="si"><div class="l">Capital Bloqueado</div><div class="v cb">'+F(gs.totalLocked||0)+'</div></div><div class="si"><div class="l">APY Real</div><div class="v cg">'+(gs.apyReal||0).toFixed(1)+'%</div></div><div class="si"><div class="l">Ganancias Pagadas</div><div class="v ct">'+F(gs.totalEarnedGlobal||0)+'</div></div><div class="si"><div class="l">Inv. Activas</div><div class="v">'+invs.length+'</div></div></div><div class="tw"><table><thead><tr><th>Usuario</th><th>Capital</th><th>Inicio</th><th>Vence</th><th>Ganado</th><th>Estado</th></tr></thead><tbody>'+(invs.length?invs.map(function(i){return '<tr><td>'+(i.user_name||'—')+'</td><td class="m cb">'+F(i.amount)+'</td><td class="m" style="font-size:11px">'+D(i.start_date)+'</td><td class="m" style="font-size:11px">'+D(i.lock_end_date||i.end_date)+'</td><td class="m cg">+'+F(i.totalEarned||0)+'</td><td><span class="bg bg-g">'+i.status+'</span></td></tr>'}).join(''):'<tr><td colspan="6" class="empty">Sin inversiones</td></tr>')+'</tbody></table></div>';
+  try{
+    var gr=await apiFetch('/investments/global-stats');
+    var ir=await apiFetch('/admin/investments/active');
+    var gs=gr&&gr.ok?await gr.json():{};
+    var allI=ir&&ir.ok?await ir.json():[];
+    var invs=allI.filter(function(i){return !(i.type||'').toLowerCase().includes('pool')});
+    document.getElementById('sdtc-content').innerHTML=
+      '<div class="sg"><div class="si"><div class="l">Capital Bloqueado</div><div class="v cb">'+F(gs.totalLocked||0)+'</div></div><div class="si"><div class="l">APY Real</div><div class="v cg">'+(parseFloat(gs.apyReal||0)).toFixed(1)+'%</div></div><div class="si"><div class="l">Ganancias Pagadas</div><div class="v ct">'+F(gs.totalEarnedGlobal||0)+'</div></div><div class="si"><div class="l">Inv. Activas</div><div class="v">'+invs.length+'</div></div></div>'
+      +'<div class="tw"><table><thead><tr><th>Usuario</th><th>Capital</th><th>Inicio</th><th>Vence</th><th>Ganado</th><th>Estado</th></tr></thead><tbody>'
+      +(invs.length?invs.map(function(i){
+        return '<tr><td>'+(i.userName||i.user_name||'—')+'</td><td class="m cb">'+F(i.amount)+'</td><td class="m" style="font-size:11px">'+D(i.startDate||i.start_date)+'</td><td class="m" style="font-size:11px">'+D(i.lockEndDate||i.lock_end_date||i.endDate||i.end_date)+'</td><td class="m cg">+'+F(i.totalEarned||0)+'</td><td><span class="bg bg-g">'+i.status+'</span></td></tr>';
+      }).join(''):'<tr><td colspan="6" class="empty">Sin inversiones</td></tr>')
+      +'</tbody></table></div>';
   }catch(e){document.getElementById('sdtc-content').innerHTML='<div class="empty">Error cargando</div>'}
 }
 
 // ═══ RETURNS ═══
 var selectedInv=null;
 async function loadRetInvs(filter){
-  try{var r=await apiFetch('/admin/investments/active');if(!r||!r.ok)return;var invs=await r.json();
-  if(filter==='cdtc')invs=invs.filter(function(i){return !(i.type||'').toLowerCase().includes('pool')});
-  if(filter==='pool')invs=invs.filter(function(i){return (i.type||'').toLowerCase().includes('pool')});
-  document.getElementById('ret-invs-tbl').innerHTML=invs.length?invs.map(function(i){var isP=(i.type||'').toLowerCase().includes('pool');return '<tr><td>'+(i.user_name||'—')+'</td><td><span class="bg bg-'+(isP?'a':'b')+'">'+(isP?'Pool':'CDTC')+'</span></td><td class="m cb">'+F(i.amount)+'</td><td class="m" style="font-size:11px">'+D(i.start_date)+'</td><td class="m cg">+'+F(i.totalEarned||0)+'</td><td><span class="bg bg-g">'+i.status+'</span></td><td><button class="bt bt-s bt-p" onclick="selInv('+i.id+')">Registrar</button></td></tr>'}).join(''):'<tr><td colspan="7" class="empty">Sin inversiones activas</td></tr>';
+  try{
+    var r=await apiFetch('/admin/investments/active');if(!r||!r.ok)return;
+    var invs=await r.json();
+    if(filter==='cdtc')invs=invs.filter(function(i){return !(i.type||'').toLowerCase().includes('pool')});
+    if(filter==='pool')invs=invs.filter(function(i){return (i.type||'').toLowerCase().includes('pool')});
+    document.getElementById('ret-invs-tbl').innerHTML=invs.length?invs.map(function(i){
+      var isP=(i.type||'').toLowerCase().includes('pool');
+      return '<tr><td>'+(i.userName||i.user_name||'—')+'</td><td><span class="bg bg-'+(isP?'a':'b')+'">'+(isP?'Pool':'CDTC')+'</span></td><td class="m cb">'+F(i.amount)+'</td><td class="m" style="font-size:11px">'+D(i.startDate||i.start_date)+'</td><td class="m cg">+'+F(i.totalEarned||0)+'</td><td><span class="bg bg-g">'+i.status+'</span></td><td><button class="bt bt-s bt-p" onclick="selInv('+i.id+')">Registrar</button></td></tr>';
+    }).join(''):'<tr><td colspan="7" class="empty">Sin inversiones activas</td></tr>';
   }catch(e){}
 }
 function fRet(f,el){document.querySelectorAll('#sec-rets .fb').forEach(function(b){b.classList.remove('on')});el.classList.add('on');loadRetInvs(f)}
 function selInv(id){
   apiFetch('/admin/investments/active').then(function(r){return r.json()}).then(function(invs){
-    var inv=invs.find(function(i){return String(i.id)===String(id)});if(!inv){toast('Inversión no encontrada','error');return}selectedInv=inv;
+    var inv=invs.find(function(i){return String(i.id)===String(id)});
+    if(!inv){toast('Inversión no encontrada','error');return}
+    selectedInv=inv;
     var isP=(inv.type||'').toLowerCase().includes('pool');
-    document.getElementById('rf-label').textContent=(isP?'Pool':'CDTC')+' · '+(inv.user_name||'—')+' · '+F(inv.amount);
+    document.getElementById('rf-label').textContent=(isP?'Pool':'CDTC')+' · '+(inv.userName||inv.user_name||'—')+' · '+F(inv.amount);
     document.getElementById('ret-form-card').style.display='block';
     document.getElementById('ret-form-card').scrollIntoView({behavior:'smooth'});
   }).catch(function(){toast('Error cargando inversión','error')});
 }
 function updateRetPrev(){
-  var rate=parseFloat(document.getElementById('rf-rate').value)||0;if(!selectedInv||!rate)return;
+  var rate=parseFloat(document.getElementById('rf-rate').value)||0;
+  if(!selectedInv||!rate)return;
   var cap=parseFloat(selectedInv.amount)||0;var earned=Math.round(cap*(rate/100));
   document.getElementById('rf-preview').style.display='block';
   document.getElementById('rf-preview').innerHTML='Capital: <strong class="cb">'+F(cap)+'</strong> × '+rate+'% = <strong class="cg">+'+F(earned)+'</strong>';
 }
 async function registerReturn(){
-  if(!selectedInv)return toast('Selecciona inversión','error');var rate=parseFloat(document.getElementById('rf-rate').value);
-  if(!rate)return toast('Ingresa la tasa','error');var month=document.getElementById('rf-month').value;var notes=document.getElementById('rf-notes').value;
+  if(!selectedInv)return toast('Selecciona inversión','error');
+  var rate=parseFloat(document.getElementById('rf-rate').value);
+  if(!rate)return toast('Ingresa la tasa','error');
+  var month=document.getElementById('rf-month').value;
+  if(!month)return toast('Selecciona el mes del período','error');
+  var notes=document.getElementById('rf-notes').value;
   var btn=document.getElementById('rf-btn');btn.disabled=true;btn.textContent='Registrando...';
-  try{var r=await apiFetch('/admin/investments/'+selectedInv.id+'/return',{method:'POST',body:JSON.stringify({rate:rate,periodMonth:month||undefined,notes:notes||undefined})});
-  var d=await r.json();if(!r.ok)return toast(d.error||'Error','error');toast('✅ '+d.message);document.getElementById('ret-form-card').style.display='none';selectedInv=null;document.getElementById('rf-rate').value='';document.getElementById('rf-notes').value='';document.getElementById('rf-preview').style.display='none';loadRetInvs('all');loadStats()}
-  catch(e){toast('Error','error')}finally{btn.disabled=false;btn.textContent='Registrar Rendimiento'}
+  try{
+    var r=await apiFetch('/admin/investments/'+selectedInv.id+'/return',{method:'POST',body:JSON.stringify({rate:rate,periodMonth:month,notes:notes||undefined})});
+    var d=await r.json();
+    if(!r.ok)return toast(d.error||'Error','error');
+    toast('✅ '+(d.message||'Rendimiento registrado'));
+    document.getElementById('ret-form-card').style.display='none';
+    selectedInv=null;
+    document.getElementById('rf-rate').value='';
+    document.getElementById('rf-notes').value='';
+    document.getElementById('rf-preview').style.display='none';
+    loadRetInvs('all');loadStats();
+  }catch(e){toast('Error','error')}
+  finally{btn.disabled=false;btn.textContent='Registrar Rendimiento'}
 }
 
 // ═══ POOL ═══
+function updatePoolAnnual(){
+  var m=parseFloat(document.getElementById('pool-apy-monthly').value)||0;
+  document.getElementById('pool-apy-annual').value=((Math.pow(1+m/100,12)-1)*100).toFixed(2);
+}
 async function loadPool(){
-  try{var r=await apiFetch('/investments/pool-stats');if(!r||!r.ok)return;var d=await r.json();
-  document.getElementById('pool-apy-monthly').value=d.monthlyAPY||2;
-  document.getElementById('pool-apy-annual').value=((Math.pow(1+(d.monthlyAPY||2)/100,12)-1)*100).toFixed(2);
-  document.getElementById('pool-total-capital').value=d.totalCapital||0;document.getElementById('pool-distribution').value=d.distribution||50;document.getElementById('pool-min').value=d.minAmount||50000;
-  var ann=((Math.pow(1+(d.monthlyAPY||2)/100,12)-1)*100);
-  document.getElementById('pool-stats-display').innerHTML='<div class="sg"><div class="si"><div class="l">Capital Pool</div><div class="v cb">'+F(d.totalCapital||0)+'</div></div><div class="si"><div class="l">APY Mensual</div><div class="v ca">'+(d.monthlyAPY||0).toFixed(2)+'%</div></div><div class="si"><div class="l">APY Anual</div><div class="v cg">'+ann.toFixed(1)+'%</div></div><div class="si"><div class="l">Meses</div><div class="v">'+(d.monthsTracked||0)+'</div></div></div>';
-  var ir=await apiFetch('/admin/investments/active?type=pool');if(ir&&ir.ok){var invs=await ir.json();
-  document.getElementById('pool-invs-tbl').innerHTML=invs.length?invs.map(function(i){var s=new Date(i.start_date);var days=Math.floor((Date.now()-s)/(864e5));return '<tr><td>'+(i.user_name||'—')+'</td><td class="m cb">'+F(i.amount)+'</td><td class="m" style="font-size:11px">'+D(i.start_date)+'</td><td>'+Math.floor(days/30)+'m '+days%30+'d</td><td class="m cg">+'+F(i.totalEarned||0)+'</td><td><span class="bg bg-g">'+i.status+'</span></td></tr>'}).join(''):'<tr><td colspan="6" class="empty">Sin inversiones</td></tr>'}
-  // Comisiones
-  try{var pr=await apiFetch('/admin/pool/withdrawals');if(pr&&pr.ok){var pws=await pr.json();
-  var tg=pws.reduce(function(s,r){return s+parseFloat(r.gross_amount||0)},0);var tc=pws.reduce(function(s,r){return s+parseFloat(r.commission||0)},0);var tn=pws.reduce(function(s,r){return s+parseFloat(r.net_amount||0)},0);
-  document.getElementById('pwk-gross').textContent=F(tg);document.getElementById('pwk-commission').textContent=F(tc);document.getElementById('pwk-net').textContent=F(tn);
-  document.getElementById('pool-comm-tbl').innerHTML=pws.length?pws.map(function(r){return '<tr><td class="m" style="font-size:11px;color:var(--mut)">'+D(r.withdrawal_date||r.created_at)+'</td><td>'+(r.user_name||'—')+'</td><td class="m cg">'+F(r.gross_amount)+'</td><td class="m ca">'+F(r.commission)+'</td><td class="m cb">'+F(r.net_amount)+'</td></tr>'}).join(''):'<tr><td colspan="5" class="empty">Sin retiros</td></tr>';
-  }}catch(e){document.getElementById('pool-comm-tbl').innerHTML='<tr><td colspan="5" class="empty">Sin datos</td></tr>'}
+  try{
+    var r=await apiFetch('/investments/pool-stats');if(!r||!r.ok)return;
+    var d=await r.json();
+    document.getElementById('pool-apy-monthly').value=d.monthlyAPY||2;
+    document.getElementById('pool-apy-annual').value=((Math.pow(1+(d.monthlyAPY||2)/100,12)-1)*100).toFixed(2);
+    document.getElementById('pool-total-capital').value=d.totalCapital||0;
+    document.getElementById('pool-distribution').value=d.distribution||50;
+    document.getElementById('pool-min').value=d.minAmount||50000;
+    var ann=((Math.pow(1+(d.monthlyAPY||2)/100,12)-1)*100);
+    document.getElementById('pool-stats-display').innerHTML='<div class="sg"><div class="si"><div class="l">Capital Pool</div><div class="v cb">'+F(d.totalCapital||0)+'</div></div><div class="si"><div class="l">APY Mensual</div><div class="v ca">'+(parseFloat(d.monthlyAPY||0)).toFixed(2)+'%</div></div><div class="si"><div class="l">APY Anual</div><div class="v cg">'+ann.toFixed(1)+'%</div></div><div class="si"><div class="l">Meses</div><div class="v">'+(d.monthsTracked||0)+'</div></div></div>';
+
+    var ir=await apiFetch('/admin/investments/active?type=pool');
+    if(ir&&ir.ok){
+      var invs=await ir.json();
+      document.getElementById('pool-invs-tbl').innerHTML=invs.length?invs.map(function(i){
+        var s=new Date(i.startDate||i.start_date);
+        var days=Math.floor((Date.now()-s)/(864e5));
+        return '<tr><td>'+(i.userName||i.user_name||'—')+'</td><td class="m cb">'+F(i.amount)+'</td><td class="m" style="font-size:11px">'+D(i.startDate||i.start_date)+'</td><td>'+Math.floor(days/30)+'m '+days%30+'d</td><td class="m cg">+'+F(i.totalEarned||0)+'</td><td><span class="bg bg-g">'+i.status+'</span></td></tr>';
+      }).join(''):'<tr><td colspan="6" class="empty">Sin inversiones</td></tr>';
+    }
+    // Comisiones
+    try{
+      var pr=await apiFetch('/admin/pool/withdrawals');
+      if(pr&&pr.ok){
+        var pws=await pr.json();
+        var tg=pws.reduce(function(s,r){return s+parseFloat(r.gross_amount||0)},0);
+        var tc=pws.reduce(function(s,r){return s+parseFloat(r.commission||0)},0);
+        var tn=pws.reduce(function(s,r){return s+parseFloat(r.net_amount||0)},0);
+        document.getElementById('pwk-gross').textContent=F(tg);
+        document.getElementById('pwk-commission').textContent=F(tc);
+        document.getElementById('pwk-net').textContent=F(tn);
+        document.getElementById('pool-comm-tbl').innerHTML=pws.length?pws.map(function(r){
+          return '<tr><td class="m" style="font-size:11px;color:var(--mut)">'+D(r.withdrawal_date||r.created_at)+'</td><td>'+(r.user_name||'—')+'</td><td class="m cg">'+F(r.gross_amount)+'</td><td class="m ca">'+F(r.commission)+'</td><td class="m cb">'+F(r.net_amount)+'</td></tr>';
+        }).join(''):'<tr><td colspan="5" class="empty">Sin retiros</td></tr>';
+      }
+    }catch(e){document.getElementById('pool-comm-tbl').innerHTML='<tr><td colspan="5" class="empty">Sin datos</td></tr>'}
   }catch(e){document.getElementById('pool-stats-display').innerHTML='<div class="empty">Error</div>'}
 }
 async function savePoolConfig(){
-  var monthly=parseFloat(document.getElementById('pool-apy-monthly').value);if(!monthly)return toast('Ingresa APY','error');
+  var monthly=parseFloat(document.getElementById('pool-apy-monthly').value);
+  if(!monthly)return toast('Ingresa APY','error');
   var btn=document.getElementById('btn-save-pool');btn.disabled=true;btn.textContent='Guardando...';
-  try{var r=await apiFetch('/admin/pool/config',{method:'POST',body:JSON.stringify({monthlyAPY:monthly,annualAPY:parseFloat(document.getElementById('pool-apy-annual').value),totalCapital:parseFloat(document.getElementById('pool-total-capital').value)||0,distribution:parseFloat(document.getElementById('pool-distribution').value)||50,minAmount:parseFloat(document.getElementById('pool-min').value)||50000})});
-  if(!r.ok)return toast('Error','error');toast('✅ Config guardada');loadPool()}catch(e){toast('Error','error')}finally{btn.disabled=false;btn.textContent='Guardar Config'}
+  try{
+    var r=await apiFetch('/admin/pool/config',{method:'POST',body:JSON.stringify({
+      monthlyAPY:monthly,
+      annualAPY:parseFloat(document.getElementById('pool-apy-annual').value),
+      totalCapital:parseFloat(document.getElementById('pool-total-capital').value)||0,
+      distribution:parseFloat(document.getElementById('pool-distribution').value)||50,
+      minAmount:parseFloat(document.getElementById('pool-min').value)||50000
+    })});
+    if(!r.ok){var d=await r.json().catch(function(){return{}});return toast(d.error||'Error','error')}
+    toast('✅ Config guardada');loadPool();
+  }catch(e){toast('Error','error')}
+  finally{btn.disabled=false;btn.textContent='Guardar Config'}
 }
 
-// ═══ POOL STRATEGIES ═══
+// ═══ POOL STRATEGIES (localStorage — solo cosmético) ═══
 var poolStrats=[];
-function loadStrats(){try{var s=localStorage.getItem('sanse_pool_strategies');poolStrats=s?JSON.parse(s):[{name:'Pools de Liquidez',icon:'🌊',pct:30,desc:'Uniswap, PancakeSwap',color:'#5b8dee'},{name:'Delta Neutral',icon:'🛡️',pct:30,desc:'Posiciones hedgeadas',color:'#22c55e'},{name:'Preventas DeFi',icon:'🚀',pct:20,desc:'Early-stage',color:'#8b6cf6'},{name:'Yield Farming',icon:'📈',pct:20,desc:'Optimización',color:'#f59e0b'}]}catch(e){poolStrats=[]}renderStrats()}
-function renderStrats(){
-  var list=document.getElementById('pool-strat-list');if(!list)return;var tot=poolStrats.reduce(function(s,x){return s+(x.pct||0)},0);
-  var te=document.getElementById('strat-total');if(te){te.textContent=tot+'%';te.style.color=tot===100?'var(--grn)':tot>100?'var(--red)':'var(--amb)'}
-  list.innerHTML=poolStrats.length?poolStrats.map(function(s,i){return '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--sur);border-radius:8px;margin-bottom:6px;border:1px solid var(--bd)"><span style="font-size:18px">'+(s.icon||'🔷')+'</span><div style="flex:1"><div style="font-size:12px;font-weight:600">'+s.name+'</div><div style="font-size:10px;color:var(--mut)">'+(s.desc||'')+'</div><div style="height:4px;background:var(--bg);border-radius:2px;margin-top:4px;overflow:hidden"><div style="height:100%;width:'+s.pct+'%;background:'+(s.color||'var(--amb)')+';border-radius:2px"></div></div></div><div class="m" style="font-weight:700;color:var(--amb);min-width:36px;text-align:right">'+s.pct+'%</div><button onclick="rmStrat('+i+')" class="bt bt-s bt-r">✕</button></div>'}).join(''):'<div class="empty" style="padding:12px">Sin estrategias</div>';
+function loadStrats(){
+  try{
+    var s=localStorage.getItem('sanse_pool_strategies');
+    poolStrats=s?JSON.parse(s):[
+      {name:'Pools de Liquidez',icon:'🌊',pct:30,desc:'Uniswap, PancakeSwap',color:'#5b8dee'},
+      {name:'Delta Neutral',icon:'🛡️',pct:30,desc:'Posiciones hedgeadas',color:'#22c55e'},
+      {name:'Preventas DeFi',icon:'🚀',pct:20,desc:'Early-stage',color:'#8b6cf6'},
+      {name:'Yield Farming',icon:'📈',pct:20,desc:'Optimización',color:'#f59e0b'}
+    ];
+  }catch(e){poolStrats=[]}
+  renderStrats();
 }
-function addStrat(){var n=document.getElementById('strat-name').value.trim();var p=parseInt(document.getElementById('strat-pct').value)||0;if(!n||p<=0)return toast('Nombre y % requeridos','error');var tot=poolStrats.reduce(function(s,x){return s+(x.pct||0)},0)+p;if(tot>100)return toast('Excede 100% ('+tot+'%)','error');poolStrats.push({name:n,icon:document.getElementById('strat-icon').value.trim()||'🔷',pct:p,desc:document.getElementById('strat-desc').value.trim(),color:document.getElementById('strat-color').value});document.getElementById('strat-name').value='';document.getElementById('strat-pct').value='';document.getElementById('strat-desc').value='';renderStrats()}
+function renderStrats(){
+  var list=document.getElementById('pool-strat-list');if(!list)return;
+  var tot=poolStrats.reduce(function(s,x){return s+(x.pct||0)},0);
+  var te=document.getElementById('strat-total');
+  if(te){te.textContent=tot+'%';te.style.color=tot===100?'var(--grn)':tot>100?'var(--red)':'var(--amb)'}
+  list.innerHTML=poolStrats.length?poolStrats.map(function(s,i){
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--sur);border-radius:8px;margin-bottom:6px;border:1px solid var(--bd)"><span style="font-size:18px">'+(s.icon||'🔷')+'</span><div style="flex:1"><div style="font-size:12px;font-weight:600">'+s.name+'</div><div style="font-size:10px;color:var(--mut)">'+(s.desc||'')+'</div><div style="height:4px;background:var(--bg);border-radius:2px;margin-top:4px;overflow:hidden"><div style="height:100%;width:'+s.pct+'%;background:'+(s.color||'var(--amb)')+';border-radius:2px"></div></div></div><div class="m" style="font-weight:700;color:var(--amb);min-width:36px;text-align:right">'+s.pct+'%</div><button onclick="rmStrat('+i+')" class="bt bt-s bt-r">✕</button></div>';
+  }).join(''):'<div class="empty" style="padding:12px">Sin estrategias</div>';
+}
+function addStrat(){
+  var n=document.getElementById('strat-name').value.trim();
+  var p=parseInt(document.getElementById('strat-pct').value)||0;
+  if(!n||p<=0)return toast('Nombre y % requeridos','error');
+  var tot=poolStrats.reduce(function(s,x){return s+(x.pct||0)},0)+p;
+  if(tot>100)return toast('Excede 100% ('+tot+'%)','error');
+  poolStrats.push({
+    name:n,
+    icon:document.getElementById('strat-icon').value.trim()||'🔷',
+    pct:p,
+    desc:document.getElementById('strat-desc').value.trim(),
+    color:document.getElementById('strat-color').value
+  });
+  document.getElementById('strat-name').value='';
+  document.getElementById('strat-pct').value='';
+  document.getElementById('strat-desc').value='';
+  renderStrats();
+}
 function rmStrat(i){poolStrats.splice(i,1);renderStrats()}
-async function saveStrats(){var tot=poolStrats.reduce(function(s,x){return s+(x.pct||0)},0);if(tot!==100)return toast('Total debe ser 100% ('+tot+'%)','error');localStorage.setItem('sanse_pool_strategies',JSON.stringify(poolStrats));toast('✅ Estrategias guardadas')}
+async function saveStrats(){
+  var tot=poolStrats.reduce(function(s,x){return s+(x.pct||0)},0);
+  if(tot!==100)return toast('Total debe ser 100% ('+tot+'%)','error');
+  localStorage.setItem('sanse_pool_strategies',JSON.stringify(poolStrats));
+  toast('✅ Estrategias guardadas');
+}
 
 // ═══ USER DETAIL MODAL ═══
 async function viewUser(uid){
-  try{var r=await apiFetch('/admin/users/'+uid+'/details');if(!r||!r.ok)return toast('Error','error');var d=await r.json();var u=d.user||{};
-  var bal=d.balanceHistory&&d.balanceHistory.length?parseFloat(d.balanceHistory[d.balanceHistory.length-1].amount):0;
-  var invs=d.investments||[];var txs=(d.transactions||[]).slice(0,10);var ai=invs.filter(function(i){return i.status==='active'});var ti=ai.reduce(function(s,i){return s+parseFloat(i.amount||0)},0);
-  var ih=invs.length?'<div style="font-size:12px;font-weight:700;margin:14px 0 8px">Inversiones ('+invs.length+')</div>'+invs.map(function(i){var isP=(i.type||'').toLowerCase().includes('pool');return '<div style="padding:10px;background:var(--sur);border-radius:8px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--bd)"><div><div style="font-weight:600;font-size:12px">'+(isP?'Pool':'CDTC')+' · '+(i.duration_months||6)+'m</div><div style="font-size:10px;color:var(--mut)">'+D(i.start_date)+'</div></div><div style="text-align:right"><div class="m cb" style="font-weight:700">'+F(i.amount)+'</div><span style="font-size:10px;color:'+(i.status==='active'?'var(--grn)':'var(--mut)')+'">'+i.status+'</span></div></div>'}).join(''):'';
-  var th=txs.length?'<div style="font-size:12px;font-weight:700;margin:14px 0 8px">Últimos Movimientos</div><div style="border:1px solid var(--bd);border-radius:8px;overflow:hidden">'+txs.map(function(t,idx){var neg=['withdraw','investment'].includes(t.type);return '<div style="padding:8px 12px;'+(idx<txs.length-1?'border-bottom:1px solid var(--bd);':'')+'display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:11px;font-weight:600">'+t.type+'</div><div style="font-size:10px;color:var(--mut)">'+D(t.created_at)+'</div></div><div class="m" style="font-weight:700;color:'+(neg?'var(--red)':'var(--grn)')+'">'+(neg?'-':'+')+F(t.amount)+'</div></div>'}).join('')+'</div>':'';
-  var ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px';
-  ov.onclick=function(e){if(e.target===ov)ov.remove()};
-  ov.innerHTML='<div style="max-width:520px;width:100%;background:var(--bg2);border-radius:14px;overflow:hidden;max-height:90vh;display:flex;flex-direction:column"><div style="padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700;font-size:15px">'+(u.full_name||'Usuario')+'</div><div style="font-size:11px;color:var(--mut)">'+(u.email||'')+'</div></div><button id="ud-x" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;padding:4px 10px;color:var(--mut);cursor:pointer">✕</button></div><div style="padding:20px;overflow-y:auto"><div class="sg"><div class="si"><div class="l">Balance</div><div class="v cg">'+F(bal)+'</div></div><div class="si"><div class="l">Invertido</div><div class="v cb">'+F(ti)+'</div></div></div>'+ih+th+'</div></div>';
-  document.body.appendChild(ov);document.getElementById('ud-x').onclick=function(){ov.remove()};
+  try{
+    var r=await apiFetch('/admin/users/'+uid+'/details');
+    if(!r||!r.ok)return toast('Error','error');
+    var d=await r.json();var u=d.user||{};
+    var bal=d.balanceHistory&&d.balanceHistory.length?parseFloat(d.balanceHistory[d.balanceHistory.length-1].amount):0;
+    var invs=d.investments||[];var txs=(d.transactions||[]).slice(0,10);
+    var ai=invs.filter(function(i){return i.status==='active'});
+    var ti=ai.reduce(function(s,i){return s+parseFloat(i.amount||0)},0);
+    var ih=invs.length?'<div style="font-size:12px;font-weight:700;margin:14px 0 8px">Inversiones ('+invs.length+')</div>'+invs.map(function(i){var isP=(i.type||'').toLowerCase().includes('pool');return '<div style="padding:10px;background:var(--sur);border-radius:8px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--bd)"><div><div style="font-weight:600;font-size:12px">'+(isP?'Pool':'CDTC')+' · '+(i.duration_months||6)+'m</div><div style="font-size:10px;color:var(--mut)">'+D(i.start_date)+'</div></div><div style="text-align:right"><div class="m cb" style="font-weight:700">'+F(i.amount)+'</div><span style="font-size:10px;color:'+(i.status==='active'?'var(--grn)':'var(--mut)')+'">'+i.status+'</span></div></div>'}).join(''):'';
+    var th=txs.length?'<div style="font-size:12px;font-weight:700;margin:14px 0 8px">Últimos Movimientos</div><div style="border:1px solid var(--bd);border-radius:8px;overflow:hidden">'+txs.map(function(t,idx){var neg=['withdraw','investment'].includes(t.type);return '<div style="padding:8px 12px;'+(idx<txs.length-1?'border-bottom:1px solid var(--bd);':'')+'display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:11px;font-weight:600">'+t.type+'</div><div style="font-size:10px;color:var(--mut)">'+D(t.created_at)+'</div></div><div class="m" style="font-weight:700;color:'+(neg?'var(--red)':'var(--grn)')+'">'+(neg?'-':'+')+F(t.amount)+'</div></div>'}).join('')+'</div>':'';
+    var ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px';
+    ov.onclick=function(e){if(e.target===ov)ov.remove()};
+    ov.innerHTML='<div style="max-width:520px;width:100%;background:var(--bg2);border-radius:14px;overflow:hidden;max-height:90vh;display:flex;flex-direction:column"><div style="padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700;font-size:15px">'+(u.full_name||'Usuario')+'</div><div style="font-size:11px;color:var(--mut)">'+(u.email||'')+'</div></div><button id="ud-x" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;padding:4px 10px;color:var(--mut);cursor:pointer">✕</button></div><div style="padding:20px;overflow-y:auto"><div class="sg"><div class="si"><div class="l">Balance</div><div class="v cg">'+F(bal)+'</div></div><div class="si"><div class="l">Invertido</div><div class="v cb">'+F(ti)+'</div></div></div>'+ih+th+'</div></div>';
+    document.body.appendChild(ov);document.getElementById('ud-x').onclick=function(){ov.remove()};
   }catch(e){toast('Error','error')}
 }
 
