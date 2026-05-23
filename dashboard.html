@@ -138,6 +138,7 @@
   /* Pending earnings animated */
   .pulse-dot{width:5px;height:5px;border-radius:50%;background:var(--amb);animation:pulse-live 1.4s ease-in-out infinite}
   @keyframes pulse-live{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
   .earning-live{position:relative}
   .earning-live .inv-cell-val{transition:color .3s}
 
@@ -852,27 +853,45 @@ function renderInvCard(inv){
   const isPending=inv.status==='pending_deposit';
   const isPool=inv.type==='pool'||String(inv.type||'').includes('pool');
   
-  // Para CDTC: ganancia pendiente proporcional animada
-  // Para Pool: separar withdrawable (pendiente) vs ya retirado (neto después del 20%)
+  // Para CDTC y Pool: ahora ambos acumulan en withdrawable_earnings
+  // El cliente hace claim para retirar — Pool descuenta 20% Sanse, CDTC no descuenta Sanse
   const cap=parseFloat(inv.amount)||0;
   const totalEarned=parseFloat(inv.totalEarned)||0;
   const withdrawable=parseFloat(inv.withdrawableEarnings)||parseFloat(inv.withdrawable_earnings)||0;
-  // "Pagadas" = lo que ya retiró, que es el neto (80% de lo retirado)
+  // "Pagadas" = lo que ya retiró (neto)
+  // Pool: neto = 80% del bruto retirado. CDTC: neto = 100% del bruto retirado (sin Sanse).
   const grossWithdrawn=Math.max(0,totalEarned-withdrawable);
-  const netWithdrawn=Math.round(grossWithdrawn*0.8);
-  const paidEarnings=isPool?netWithdrawn:totalEarned;
+  const netWithdrawn=isPool?Math.round(grossWithdrawn*0.8):grossWithdrawn;
+  const paidEarnings=netWithdrawn;
   const start=new Date(inv.startDate||inv.start_date||Date.now());
-  const now=new Date();
-
-  let pendingLive=0;
-  if(!isPool){
-    const daysElapsed=Math.max(0,(now-start)/(1000*60*60*24));
-    const pendingGross=cap*0.02*(daysElapsed/30);
-    pendingLive=Math.max(0,pendingGross-totalEarned);
-  }
 
   // APY personalizado del usuario (promedio de sus propios rendimientos)
   const myAPY=calculateMyAvgAPY(inv.id);
+
+  // Si está pendiente, calcular tiempo restante hasta auto-cancel
+  let pendingBanner='';
+  if(isPending){
+    const deadline=inv.depositDeadline?new Date(inv.depositDeadline):null;
+    const msLeft=deadline?Math.max(0,deadline-new Date()):0;
+    const hoursLeft=Math.floor(msLeft/(1000*60*60));
+    const minsLeft=Math.floor((msLeft%(1000*60*60))/(1000*60));
+    const expired=msLeft<=0;
+    pendingBanner=`
+    <div style="margin-top:12px;padding:14px;background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(124,92,252,.08));border:1px solid rgba(245,158,11,.35);border-radius:10px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--amb),var(--pur));animation:pulse 2s ease infinite"></div>
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <div style="font-size:22px;flex-shrink:0">⚡</div>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:700;color:var(--amb);margin-bottom:2px">Confirma para empezar a recibir rendimientos</div>
+          <div style="font-size:11px;color:var(--mut);line-height:1.4">${expired?'<span style="color:var(--red);font-weight:600">⚠️ El plazo expiró — esta inversión será cancelada automáticamente</span>':`Te quedan <strong style="color:var(--text)">${hoursLeft}h ${minsLeft}m</strong> antes de la cancelación automática`}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button onclick="event.stopPropagation();confirmInvestmentDeposit(${inv.id})" ${expired?'disabled':''} style="flex:1;background:linear-gradient(135deg,var(--grn),var(--blu));border:none;color:white;padding:11px;border-radius:8px;font-weight:700;font-size:12px;cursor:${expired?'not-allowed':'pointer'};opacity:${expired?'.4':'1'}">✓ Confirmar Inversión</button>
+        <button onclick="event.stopPropagation();cancelInvestmentDeposit(${inv.id})" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red);padding:11px 14px;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer">Cancelar</button>
+      </div>
+    </div>`;
+  }
 
   return `<div class="inv-card" onclick="showInvestmentDetail(${inv.id})">
     <div class="inv-head">
@@ -892,15 +911,16 @@ function renderInvCard(inv){
         <div class="inv-cell-val">${myAPY>0?myAPY.toFixed(2)+'%':'~2.0%'}</div>
       </div>
       <div class="inv-cell">
-        <div class="inv-cell-lbl">${isPool?'Ganancias pagadas':'Ganancia pagada'}</div>
+        <div class="inv-cell-lbl">Ganancias retiradas</div>
         <div class="inv-cell-val grn">+${formatCOP(paidEarnings)}</div>
       </div>
-      <div class="inv-cell ${isPool?'':'earning-live'}">
-        <div class="inv-cell-lbl">${isPool?(withdrawable>0?'<span class="pulse-dot"></span>Por retirar':'Sin pendientes'):'<span class="pulse-dot"></span>Pendiente'}</div>
-        <div class="inv-cell-val amb" ${isPool?'':`data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-paid="${totalEarned}"`}>+${formatCOP(isPool?withdrawable:pendingLive)}</div>
+      <div class="inv-cell">
+        <div class="inv-cell-lbl">${withdrawable>0?'<span class="pulse-dot"></span>Por retirar':'Sin pendientes'}</div>
+        <div class="inv-cell-val amb">+${formatCOP(withdrawable)}</div>
       </div>
     </div>
-    ${isPool&&withdrawable>0?`<div style="margin-top:12px"><button class="btn btn-sm" style="width:100%;background:var(--amb);color:white;border:none;padding:10px;border-radius:7px;font-weight:600;font-size:12px" onclick="event.stopPropagation();withdrawPoolEarnings(${inv.id},${withdrawable})">💰 Retirar Ganancias</button></div>`:''}
+    ${pendingBanner}
+    ${!isPending&&withdrawable>0?`<div style="margin-top:12px"><button class="btn btn-sm" style="width:100%;background:var(--amb);color:white;border:none;padding:10px;border-radius:7px;font-weight:600;font-size:12px" onclick="event.stopPropagation();claimInvestmentEarnings(${inv.id},${withdrawable},'${isPool?'pool':'cdtc'}')">💰 Retirar Ganancias</button></div>`:''}
   </div>`;
 }
 
@@ -921,42 +941,101 @@ function startEarningsAnimation(){
   },1000);
 }
 
-// Withdraw pool earnings with 20% commission
-async function withdrawPoolEarnings(invId,earnings){
-  var commission=Math.round(earnings*0.20);
-  var netAmount=earnings-commission;
-  if(!confirm('¿Retirar ganancias del Pool?\n\nBruto: '+formatCOP(earnings)+'\nComisión 20%: -'+formatCOP(commission)+'\nRecibirás: '+formatCOP(netAmount)))return;
+// ══════════════════ CLAIM EARNINGS (Pool & CDTC) ══════════════════
+// Reemplaza la antigua withdrawPoolEarnings con una versión genérica.
+// Pool: descuenta 20% Sanse + 5% referido (si aplica).
+// CDTC: solo descuenta 5% referido (si aplica), sin comisión Sanse.
+async function claimInvestmentEarnings(invId,earnings,kind){
+  var isPool=(kind||'').toLowerCase()==='pool';
+  var label=isPool?'Pool':'CDTC';
+  var sanseRate=isPool?0.20:0;
+  var sanseCommission=Math.round(earnings*sanseRate);
+  // Para mostrar al usuario una estimación: si el usuario sabe que tiene referido, ajustar
+  // (la comisión de referido la calcula el backend; aquí mostramos el caso sin referido como min recibido)
+  var minNet=earnings-sanseCommission;
+
+  var msg='¿Retirar ganancias de '+label+'?\n\nBruto: '+formatCOP(earnings);
+  if(sanseCommission>0)msg+='\nComisión Sanse 20%: -'+formatCOP(sanseCommission);
+  msg+='\nRecibirás: '+formatCOP(minNet)+(sanseCommission>0?'':'\n\n(Si tienes referido, se descuenta 5% adicional)');
+
+  if(!confirm(msg))return;
+
   try{
     var res=await apiFetch('/investments/'+invId+'/withdraw-earnings',{method:'POST'});
     if(res&&res.status===404){
       toast('Solicita el retiro por WhatsApp al admin','error');
-      setTimeout(function(){window.open('https://wa.me/573194552890?text=Quiero retirar mis ganancias del Pool - ID inv: '+invId,'_blank')},500);
+      setTimeout(function(){window.open('https://wa.me/573194552890?text=Quiero retirar mis ganancias de '+label+' - ID inv: '+invId,'_blank')},500);
       return;
     }
     var d=await res.json();
     if(!res.ok)return toast(d.error||'Error al retirar','error');
 
+    // El backend devuelve el desglose real (con comisión de referido si aplica)
+    var realGross=d.grossEarnings||earnings;
+    var realSanse=d.sanseCommission||d.commission||0;
+    var realRef=d.referralCommission||0;
+    var realNet=d.netAmount||(realGross-realSanse-realRef);
+
     // Animación de retiro exitoso
     if(!document.getElementById('wr-anims')){var st=document.createElement('style');st.id='wr-anims';st.textContent='@keyframes wrScale{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}@keyframes wrBounce{0%{transform:scale(0)}50%{transform:scale(1.25)}100%{transform:scale(1)}}@keyframes wrFade{from{opacity:0}to{opacity:1}}';document.head.appendChild(st);}
     var ov=document.createElement('div');
-    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:9999;animation:wrFade .3s ease';
+    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:9999;animation:wrFade .3s ease;padding:16px';
     ov.onclick=function(e){if(e.target===ov)ov.remove()};
-    ov.innerHTML='<div style="background:var(--bg2);border:1px solid rgba(16,185,129,.3);border-radius:20px;padding:32px 40px;text-align:center;max-width:360px;width:90%;animation:wrScale .4s ease">'
-      +'<div style="font-size:52px;margin-bottom:12px;animation:wrBounce .6s ease">💰</div>'
-      +'<div style="font-size:20px;font-weight:700;color:var(--grn);margin-bottom:8px">¡Retiro Exitoso!</div>'
-      +'<div style="font-family:Space Mono,monospace;font-size:30px;font-weight:700;color:var(--text);margin-bottom:4px">+'+formatCOP(netAmount)+'</div>'
-      +'<div style="font-size:12px;color:var(--mut);margin-bottom:18px">Acreditado a tu balance disponible</div>'
-      +'<div style="display:flex;justify-content:space-between;padding:12px 16px;background:var(--sur);border-radius:10px;font-size:12px;margin-bottom:18px">'
-        +'<div style="text-align:left"><div style="color:var(--mut);font-size:10px;text-transform:uppercase">Bruto</div><div style="font-weight:700;font-family:Space Mono,monospace">'+formatCOP(earnings)+'</div></div>'
-        +'<div style="color:var(--mut);font-size:18px;display:flex;align-items:center">→</div>'
-        +'<div style="text-align:right"><div style="color:var(--mut);font-size:10px;text-transform:uppercase">Comisión 20%</div><div style="font-weight:700;color:var(--red);font-family:Space Mono,monospace">-'+formatCOP(commission)+'</div></div>'
-      +'</div>'
+
+    var breakdownRows='';
+    breakdownRows+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd);font-size:12px"><span style="color:var(--mut)">Bruto</span><span style="font-weight:700;font-family:Space Mono,monospace">'+formatCOP(realGross)+'</span></div>';
+    if(realSanse>0)breakdownRows+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd);font-size:12px"><span style="color:var(--mut)">Comisión Sanse 20%</span><span style="font-weight:700;color:var(--red);font-family:Space Mono,monospace">-'+formatCOP(realSanse)+'</span></div>';
+    if(realRef>0)breakdownRows+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd);font-size:12px"><span style="color:var(--mut)">Comisión referido 5%</span><span style="font-weight:700;color:var(--red);font-family:Space Mono,monospace">-'+formatCOP(realRef)+'</span></div>';
+    breakdownRows+='<div style="display:flex;justify-content:space-between;padding:10px 0 0;font-size:13px"><span style="font-weight:700">Recibido</span><span style="font-weight:700;color:var(--grn);font-family:Space Mono,monospace">+'+formatCOP(realNet)+'</span></div>';
+
+    ov.innerHTML='<div style="background:var(--bg2);border:1px solid rgba(16,185,129,.3);border-radius:20px;padding:28px;text-align:center;max-width:380px;width:100%;animation:wrScale .4s ease">'
+      +'<div style="font-size:52px;margin-bottom:8px;animation:wrBounce .6s ease">💰</div>'
+      +'<div style="font-size:20px;font-weight:700;color:var(--grn);margin-bottom:4px">¡Retiro Exitoso!</div>'
+      +'<div style="font-size:11px;color:var(--mut);margin-bottom:18px">'+label+' #'+invId+'</div>'
+      +'<div style="font-family:Space Mono,monospace;font-size:30px;font-weight:700;color:var(--text);margin-bottom:4px">+'+formatCOP(realNet)+'</div>'
+      +'<div style="font-size:11px;color:var(--mut);margin-bottom:18px">Acreditado a tu balance disponible</div>'
+      +'<div style="background:var(--sur);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;margin-bottom:18px;text-align:left">'+breakdownRows+'</div>'
       +'<button id="wr-ok-btn" style="padding:12px 32px;background:linear-gradient(135deg,var(--grn),var(--blu));border:none;border-radius:10px;color:white;font-weight:700;font-size:14px;cursor:pointer;width:100%">Entendido ✓</button>'
     +'</div>';
     document.body.appendChild(ov);
     document.getElementById('wr-ok-btn').onclick=function(){ov.remove()};
 
-    toast('✅ '+formatCOP(netAmount)+' acreditado a tu balance');
+    toast('✅ '+formatCOP(realNet)+' acreditado a tu balance');
+    await loadAllData();
+    renderCurrentView();
+  }catch(e){toast('Error de conexión','error')}
+}
+
+// Alias retro-compat: el código viejo puede seguir llamando withdrawPoolEarnings
+async function withdrawPoolEarnings(invId,earnings){
+  return claimInvestmentEarnings(invId,earnings,'pool');
+}
+
+// ══════════════════ CONFIRM INVESTMENT DEPOSIT ══════════════════
+// Cliente confirma manualmente que ya depositó. Cambia status de
+// pending_deposit → active y arranca el rendimiento.
+async function confirmInvestmentDeposit(invId){
+  if(!confirm('¿Confirmar esta inversión?\n\nSolo confirma si ya realizaste el depósito correspondiente.\nUna vez confirmada empezará a generar rendimientos.'))return;
+  try{
+    var res=await apiFetch('/investments/'+invId+'/confirm',{method:'POST'});
+    if(!res)return toast('Error de conexión','error');
+    var d=await res.json().catch(function(){return{}});
+    if(!res.ok)return toast(d.error||'Error al confirmar','error');
+    toast('✅ Inversión confirmada — Empezará a generar rendimientos');
+    await loadAllData();
+    renderCurrentView();
+  }catch(e){toast('Error de conexión','error')}
+}
+
+// ══════════════════ CANCEL INVESTMENT DEPOSIT ══════════════════
+async function cancelInvestmentDeposit(invId){
+  if(!confirm('¿Cancelar esta inversión?\n\nEl capital regresará a tu saldo disponible.\nEsta acción no se puede deshacer.'))return;
+  try{
+    var res=await apiFetch('/investments/'+invId+'/cancel',{method:'POST'});
+    if(!res)return toast('Error de conexión','error');
+    var d=await res.json().catch(function(){return{}});
+    if(!res.ok)return toast(d.error||'Error al cancelar','error');
+    toast('Inversión cancelada — Capital devuelto a tu saldo');
     await loadAllData();
     renderCurrentView();
   }catch(e){toast('Error de conexión','error')}
