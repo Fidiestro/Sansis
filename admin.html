@@ -220,12 +220,10 @@ tbody tr:hover{background:rgba(255,255,255,.015)}
 <!-- ═══ RENDIMIENTOS ═══ -->
 <div class="section" id="sec-rets">
   <div class="card">
-    <div class="card-t">Registrar Rendimiento</div>
-    <div class="card-d">Selecciona una inversión activa y registra el rendimiento mensual</div>
-    <div class="flt">
-      <button class="fb on" onclick="fRet('all',this)">Todas</button>
-      <button class="fb" onclick="fRet('cdtc',this)">CDTC</button>
-      <button class="fb" onclick="fRet('pool',this)">Pool</button>
+    <div class="card-t">Registrar Rendimiento Pool</div>
+    <div class="card-d">Solo Pool. CDTC genera 2% mensual automático y los clientes reclaman desde su dashboard cada 24h.</div>
+    <div style="padding:10px 14px;background:rgba(91,141,238,.08);border:1px solid rgba(91,141,238,.2);border-radius:8px;margin-bottom:14px;font-size:11px;color:var(--blu);line-height:1.5">
+      ℹ️ <strong>CDTC ya no se registra manualmente.</strong> Tasa fija 2% mensual sobre el capital, calculada en tiempo real. Cliente reclama 1 vez cada 24h. Solo verás inversiones <strong>Pool</strong> en la lista.
     </div>
     <div class="tw"><table>
       <thead><tr><th>Usuario</th><th>Tipo</th><th>Capital</th><th>Inicio</th><th>Ganado</th><th>Estado</th><th></th></tr></thead>
@@ -450,7 +448,7 @@ function sw(tab,el){
   if(tab==='deps')loadDeps('all');
   if(tab==='wrs')loadWrs('all');
   if(tab==='invs')loadSDTC();
-  if(tab==='rets')loadRetInvs('all');
+  if(tab==='rets')loadRetInvs();
   if(tab==='pool'){loadPool();setTimeout(loadStrats,200)}
   if(tab==='txs')loadTxs();
   if(tab==='users')loadUsers();
@@ -723,26 +721,28 @@ async function loadSDTC(){
 
 // ═══ RETURNS ═══
 var selectedInv=null;
-async function loadRetInvs(filter){
+async function loadRetInvs(){
   try{
     var r=await apiFetch('/admin/investments/active');if(!r||!r.ok)return;
     var invs=await r.json();
-    if(filter==='cdtc')invs=invs.filter(function(i){return !(i.type||'').toLowerCase().includes('pool')});
-    if(filter==='pool')invs=invs.filter(function(i){return (i.type||'').toLowerCase().includes('pool')});
+    // SOLO Pool — CDTC se reclama automático desde el dashboard del cliente.
+    invs=invs.filter(function(i){return (i.type||'').toLowerCase().includes('pool')});
     document.getElementById('ret-invs-tbl').innerHTML=invs.length?invs.map(function(i){
-      var isP=(i.type||'').toLowerCase().includes('pool');
-      return '<tr><td>'+(i.userName||i.user_name||'—')+'</td><td><span class="bg bg-'+(isP?'a':'b')+'">'+(isP?'Pool':'CDTC')+'</span></td><td class="m cb">'+F(i.amount)+'</td><td class="m" style="font-size:11px">'+D(i.startDate||i.start_date)+'</td><td class="m cg">+'+F(i.totalEarned||0)+'</td><td><span class="bg bg-g">'+i.status+'</span></td><td><button class="bt bt-s bt-p" onclick="selInv('+i.id+')">Registrar</button></td></tr>';
-    }).join(''):'<tr><td colspan="7" class="empty">Sin inversiones activas</td></tr>';
+      return '<tr><td>'+(i.userName||i.user_name||'—')+'</td><td><span class="bg bg-a">Pool</span></td><td class="m cb">'+F(i.amount)+'</td><td class="m" style="font-size:11px">'+D(i.startDate||i.start_date)+'</td><td class="m cg">+'+F(i.totalEarned||0)+'</td><td><span class="bg bg-g">'+i.status+'</span></td><td><button class="bt bt-s bt-p" onclick="selInv('+i.id+')">Registrar</button></td></tr>';
+    }).join(''):'<tr><td colspan="7" class="empty">Sin inversiones Pool activas</td></tr>';
   }catch(e){}
 }
-function fRet(f,el){document.querySelectorAll('#sec-rets .fb').forEach(function(b){b.classList.remove('on')});el.classList.add('on');loadRetInvs(f)}
 function selInv(id){
   apiFetch('/admin/investments/active').then(function(r){return r.json()}).then(function(invs){
     var inv=invs.find(function(i){return String(i.id)===String(id)});
     if(!inv){toast('Inversión no encontrada','error');return}
-    selectedInv=inv;
     var isP=(inv.type||'').toLowerCase().includes('pool');
-    document.getElementById('rf-label').textContent=(isP?'Pool':'CDTC')+' · '+(inv.userName||inv.user_name||'—')+' · '+F(inv.amount);
+    if(!isP){
+      toast('Las inversiones CDTC ya no se registran manualmente','error');
+      return;
+    }
+    selectedInv=inv;
+    document.getElementById('rf-label').textContent='Pool · '+(inv.userName||inv.user_name||'—')+' · '+F(inv.amount);
     document.getElementById('ret-form-card').style.display='block';
     document.getElementById('ret-form-card').scrollIntoView({behavior:'smooth'});
   }).catch(function(){toast('Error cargando inversión','error')});
@@ -772,7 +772,7 @@ async function registerReturn(){
     document.getElementById('rf-rate').value='';
     document.getElementById('rf-notes').value='';
     document.getElementById('rf-preview').style.display='none';
-    loadRetInvs('all');loadStats();
+    loadRetInvs();loadStats();
   }catch(e){toast('Error','error')}
   finally{btn.disabled=false;btn.textContent='Registrar Rendimiento'}
 }

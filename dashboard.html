@@ -852,21 +852,27 @@ function showViewByName(v){
 function renderInvCard(inv){
   const isPending=inv.status==='pending_deposit';
   const isPool=inv.type==='pool'||String(inv.type||'').includes('pool');
-  
-  // Para CDTC y Pool: ahora ambos acumulan en withdrawable_earnings
-  // El cliente hace claim para retirar — Pool descuenta 20% Sanse, CDTC no descuenta Sanse
+  const isActive=inv.status==='active';
+
   const cap=parseFloat(inv.amount)||0;
   const totalEarned=parseFloat(inv.totalEarned)||0;
+  // Pool tiene withdrawable_earnings (lo que el admin registró acumulado).
+  // CDTC tiene liveClaimable (calculado en tiempo real por el backend).
   const withdrawable=parseFloat(inv.withdrawableEarnings)||parseFloat(inv.withdrawable_earnings)||0;
-  // "Pagadas" = lo que ya retiró (neto)
-  // Pool: neto = 80% del bruto retirado. CDTC: neto = 100% del bruto retirado (sin Sanse).
-  const grossWithdrawn=Math.max(0,totalEarned-withdrawable);
+  const liveClaimable=parseFloat(inv.liveClaimable)||0;
+  const canClaimNow=!!inv.canClaimNow;
+  const nextClaimAt=inv.nextClaimAt?new Date(inv.nextClaimAt):null;
+
+  // "Ganancias retiradas" = neto histórico ya cobrado.
+  // Pool: neto = 80% del bruto retirado.
+  // CDTC: neto = 100% (sin comisión Sanse), pero descuenta 5% si tenía referido.
+  //       Usamos totalEarned (lo registrado en investment_returns) como bruto retirado.
+  const grossWithdrawn=isPool?Math.max(0,totalEarned-withdrawable):totalEarned;
   const netWithdrawn=isPool?Math.round(grossWithdrawn*0.8):grossWithdrawn;
   const paidEarnings=netWithdrawn;
-  const start=new Date(inv.startDate||inv.start_date||Date.now());
 
-  // APY personalizado del usuario (promedio de sus propios rendimientos)
-  const myAPY=calculateMyAvgAPY(inv.id);
+  // APY personalizado: Pool calcula desde returns. CDTC es siempre 2% fijo.
+  const myAPY=isPool?calculateMyAvgAPY(inv.id):2.0;
 
   // Si está pendiente, calcular tiempo restante hasta auto-cancel
   let pendingBanner='';
@@ -893,6 +899,44 @@ function renderInvCard(inv){
     </div>`;
   }
 
+  // CDTC: mostrar contador animado de ganancias acumuladas en tiempo real
+  // (usa data-* para que startEarningsAnimation lo actualice cada segundo)
+  // grossPaid = el "ya reclamado" en BRUTO, calculado por el backend en liveAccrued - liveClaimable.
+  // Lo guardamos como atributo para que la animación local lo descuente del cálculo bruto.
+  const start=new Date(inv.startDate||inv.start_date||Date.now());
+  const liveAccrued=parseFloat(inv.liveAccrued)||0;
+  const grossAlreadyClaimed=Math.max(0,liveAccrued-liveClaimable);
+  const cdtcPendingCell=(!isPool&&isActive)
+    ? `<div class="inv-cell earning-live">
+        <div class="inv-cell-lbl"><span class="pulse-dot"></span>Acumulando (2%)</div>
+        <div class="inv-cell-val amb" data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-claimed="${grossAlreadyClaimed}">+${formatCOP(liveClaimable)}</div>
+      </div>`
+    : `<div class="inv-cell">
+        <div class="inv-cell-lbl">${withdrawable>0?'<span class="pulse-dot"></span>Por retirar':'Sin pendientes'}</div>
+        <div class="inv-cell-val amb">+${formatCOP(withdrawable)}</div>
+      </div>`;
+
+  // Botones de claim
+  let claimButton='';
+  if(!isPending&&isActive){
+    if(isPool&&withdrawable>0){
+      // Pool: botón con monto fijo de withdrawable_earnings
+      claimButton=`<div style="margin-top:12px"><button class="btn btn-sm" style="width:100%;background:var(--amb);color:white;border:none;padding:10px;border-radius:7px;font-weight:600;font-size:12px;cursor:pointer" onclick="event.stopPropagation();claimInvestmentEarnings(${inv.id},${withdrawable},'pool')">💰 Retirar Ganancias</button></div>`;
+    } else if(!isPool && liveClaimable>=100){
+      // CDTC: botón si hay >= $100 acumulado
+      if(canClaimNow){
+        claimButton=`<div style="margin-top:12px"><button class="btn btn-sm" data-cdtc-claim-btn="${inv.id}" style="width:100%;background:linear-gradient(135deg,var(--amb),var(--grn));color:white;border:none;padding:10px;border-radius:7px;font-weight:700;font-size:12px;cursor:pointer" onclick="event.stopPropagation();claimInvestmentEarnings(${inv.id},${liveClaimable},'cdtc')">💰 Reclamar +${formatCOP(liveClaimable)}</button></div>`;
+      } else if(nextClaimAt){
+        const msToNext=nextClaimAt-new Date();
+        const hLeft=Math.max(0,Math.floor(msToNext/(1000*60*60)));
+        const mLeft=Math.max(0,Math.floor((msToNext%(1000*60*60))/(1000*60)));
+        claimButton=`<div style="margin-top:12px"><button class="btn btn-sm" disabled style="width:100%;background:var(--sur);color:var(--mut);border:1px solid var(--bd);padding:10px;border-radius:7px;font-weight:600;font-size:12px;cursor:not-allowed">⏱️ Próximo claim en ${hLeft}h ${mLeft}m</button></div>`;
+      }
+    } else if(!isPool && liveClaimable>0 && liveClaimable<100){
+      claimButton=`<div style="margin-top:12px"><button class="btn btn-sm" disabled style="width:100%;background:var(--sur);color:var(--mut);border:1px solid var(--bd);padding:10px;border-radius:7px;font-weight:600;font-size:11px;cursor:not-allowed">Mínimo $100 para reclamar</button></div>`;
+    }
+  }
+
   return `<div class="inv-card" onclick="showInvestmentDetail(${inv.id})">
     <div class="inv-head">
       <div class="inv-type-wrap">
@@ -907,36 +951,43 @@ function renderInvCard(inv){
         <div class="inv-cell-val blu">${formatCOP(cap)}</div>
       </div>
       <div class="inv-cell">
-        <div class="inv-cell-lbl">Mi APY mensual</div>
-        <div class="inv-cell-val">${myAPY>0?myAPY.toFixed(2)+'%':'~2.0%'}</div>
+        <div class="inv-cell-lbl">${isPool?'Mi APY mensual':'APY mensual'}</div>
+        <div class="inv-cell-val">${myAPY.toFixed(2)}%</div>
       </div>
       <div class="inv-cell">
         <div class="inv-cell-lbl">Ganancias retiradas</div>
         <div class="inv-cell-val grn">+${formatCOP(paidEarnings)}</div>
       </div>
-      <div class="inv-cell">
-        <div class="inv-cell-lbl">${withdrawable>0?'<span class="pulse-dot"></span>Por retirar':'Sin pendientes'}</div>
-        <div class="inv-cell-val amb">+${formatCOP(withdrawable)}</div>
-      </div>
+      ${cdtcPendingCell}
     </div>
     ${pendingBanner}
-    ${!isPending&&withdrawable>0?`<div style="margin-top:12px"><button class="btn btn-sm" style="width:100%;background:var(--amb);color:white;border:none;padding:10px;border-radius:7px;font-weight:600;font-size:12px" onclick="event.stopPropagation();claimInvestmentEarnings(${inv.id},${withdrawable},'${isPool?'pool':'cdtc'}')">💰 Retirar Ganancias</button></div>`:''}
+    ${claimButton}
   </div>`;
 }
 
-// Update pending earnings animation — recalculates every second
+// Update pending earnings animation — recalculates every second.
+// CDTC genera 2% mensual fijo. La animación muestra el "claimable":
+//   liveAccrued = capital × 0.02 × (días/30)
+//   claimable   = liveAccrued - lo ya reclamado en bruto (registrado en data-claimed)
+// También actualiza el monto del botón "Reclamar" si existe.
 function startEarningsAnimation(){
   if(window._earningsInterval)clearInterval(window._earningsInterval);
   window._earningsInterval=setInterval(()=>{
     document.querySelectorAll('[data-pending-live]').forEach(el=>{
       const cap=parseFloat(el.dataset.capital)||0;
       const start=new Date(el.dataset.start);
-      const paid=parseFloat(el.dataset.paid)||0;
+      const claimed=parseFloat(el.dataset.claimed)||0;
       const now=new Date();
       const days=Math.max(0,(now-start)/(1000*60*60*24));
-      const gross=cap*0.02*(days/30);
-      const live=Math.max(0,gross-paid);
+      const gross=Math.floor(cap*0.02*(days/30));
+      const live=Math.max(0,gross-claimed);
       el.textContent='+'+formatCOP(live);
+      // Sincronizar con el botón de claim (si está activo y no en cooldown)
+      const invId=el.getAttribute('data-pending-live');
+      const btn=document.querySelector('[data-cdtc-claim-btn="'+invId+'"]');
+      if(btn&&!btn.disabled){
+        btn.textContent='💰 Reclamar +'+formatCOP(live);
+      }
     });
   },1000);
 }
@@ -1009,6 +1060,59 @@ async function claimInvestmentEarnings(invId,earnings,kind){
 // Alias retro-compat: el código viejo puede seguir llamando withdrawPoolEarnings
 async function withdrawPoolEarnings(invId,earnings){
   return claimInvestmentEarnings(invId,earnings,'pool');
+}
+
+// ══════════════════ CLAIM CDTC (tiempo real, 2% mensual fijo) ══════════════════
+// Llama al endpoint /claim-cdtc que calcula en el backend lo acumulado
+// y descuenta 5% al referido si aplica. Máximo 1 claim cada 24h.
+async function claimCdtcEarnings(invId){
+  if(!confirm('¿Reclamar tus ganancias CDTC?\n\nEl monto exacto lo calcula el sistema en el momento (2% mensual proporcional a los días).\nSi tienes referido se descontará 5% como comisión.\nSolo puedes reclamar 1 vez cada 24 horas.'))return;
+
+  try{
+    var res=await apiFetch('/investments/'+invId+'/claim-cdtc',{method:'POST'});
+    if(!res)return toast('Error de conexión','error');
+    var d=await res.json().catch(function(){return{}});
+
+    if(res.status===429){
+      // Cooldown
+      return toast(d.error||'Espera para reclamar de nuevo','error');
+    }
+    if(!res.ok)return toast(d.error||'Error al reclamar','error');
+
+    var realGross=d.grossEarnings||0;
+    var realRef=d.referralCommission||0;
+    var realNet=d.netAmount||(realGross-realRef);
+    var days=d.periodDays||0;
+
+    // Reusar el mismo modal de éxito
+    if(!document.getElementById('wr-anims')){var st=document.createElement('style');st.id='wr-anims';st.textContent='@keyframes wrScale{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}@keyframes wrBounce{0%{transform:scale(0)}50%{transform:scale(1.25)}100%{transform:scale(1)}}@keyframes wrFade{from{opacity:0}to{opacity:1}}';document.head.appendChild(st);}
+    var ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:9999;animation:wrFade .3s ease;padding:16px';
+    ov.onclick=function(e){if(e.target===ov)ov.remove()};
+
+    var breakdownRows='';
+    breakdownRows+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd);font-size:12px"><span style="color:var(--mut)">Período</span><span style="font-weight:700;font-family:Space Mono,monospace">'+days+' días @ 2%</span></div>';
+    breakdownRows+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd);font-size:12px"><span style="color:var(--mut)">Bruto</span><span style="font-weight:700;font-family:Space Mono,monospace">'+formatCOP(realGross)+'</span></div>';
+    if(realRef>0)breakdownRows+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd);font-size:12px"><span style="color:var(--mut)">Comisión referido 5%</span><span style="font-weight:700;color:var(--red);font-family:Space Mono,monospace">-'+formatCOP(realRef)+'</span></div>';
+    breakdownRows+='<div style="display:flex;justify-content:space-between;padding:10px 0 0;font-size:13px"><span style="font-weight:700">Recibido</span><span style="font-weight:700;color:var(--grn);font-family:Space Mono,monospace">+'+formatCOP(realNet)+'</span></div>';
+
+    ov.innerHTML='<div style="background:var(--bg2);border:1px solid rgba(16,185,129,.3);border-radius:20px;padding:28px;text-align:center;max-width:380px;width:100%;animation:wrScale .4s ease">'
+      +'<div style="font-size:52px;margin-bottom:8px;animation:wrBounce .6s ease">💰</div>'
+      +'<div style="font-size:20px;font-weight:700;color:var(--grn);margin-bottom:4px">¡Claim Exitoso!</div>'
+      +'<div style="font-size:11px;color:var(--mut);margin-bottom:18px">CDTC #'+invId+'</div>'
+      +'<div style="font-family:Space Mono,monospace;font-size:30px;font-weight:700;color:var(--text);margin-bottom:4px">+'+formatCOP(realNet)+'</div>'
+      +'<div style="font-size:11px;color:var(--mut);margin-bottom:18px">Acreditado a tu balance disponible</div>'
+      +'<div style="background:var(--sur);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;margin-bottom:14px;text-align:left">'+breakdownRows+'</div>'
+      +'<div style="font-size:10px;color:var(--mut);margin-bottom:14px">Próximo claim disponible en 24h</div>'
+      +'<button id="wr-ok-btn" style="padding:12px 32px;background:linear-gradient(135deg,var(--grn),var(--blu));border:none;border-radius:10px;color:white;font-weight:700;font-size:14px;cursor:pointer;width:100%">Entendido ✓</button>'
+    +'</div>';
+    document.body.appendChild(ov);
+    document.getElementById('wr-ok-btn').onclick=function(){ov.remove()};
+
+    toast('✅ '+formatCOP(realNet)+' acreditado a tu balance');
+    await loadAllData();
+    renderCurrentView();
+  }catch(e){toast('Error de conexión','error')}
 }
 
 // ══════════════════ CONFIRM INVESTMENT DEPOSIT ══════════════════
@@ -1861,9 +1965,16 @@ async function showInvestmentDetail(id){
     const pendingGross=cap*0.02*(daysElapsed/30);
     const pendingLive=Math.max(0,pendingGross-paidEarnings);
 
-    // APY personal de esta inversión
-    const myRates=returns.map(r=>parseFloat(r.rate)||0).filter(r=>r>0);
-    const myAPY=myRates.length?(myRates.reduce((a,b)=>a+b,0)/myRates.length):2.0;
+    // APY fijo 2% para CDTC. (Pool tiene su propio render.)
+    const myAPY=2.0;
+
+    // Datos de claim del backend (si vienen)
+    const canClaimNow=!!inv.canClaimNow;
+    const nextClaimAt=inv.nextClaimAt?new Date(inv.nextClaimAt):null;
+    let claimMsLeft=0;
+    if(nextClaimAt) claimMsLeft=Math.max(0,nextClaimAt-new Date());
+    const claimHoursLeft=Math.floor(claimMsLeft/(1000*60*60));
+    const claimMinsLeft=Math.floor((claimMsLeft%(1000*60*60))/(1000*60));
 
     c.innerHTML=`
     <div class="anim">
@@ -1886,21 +1997,40 @@ async function showInvestmentDetail(id){
         <div class="dh-cap">${formatCOP(cap)}</div>
       </div>
 
+      ${inv.status==='active'&&pendingLive>=100?`
+      <div style="margin-bottom:14px;padding:18px;background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(34,197,94,.08));border:1px solid rgba(245,158,11,.35);border-radius:12px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--amb),var(--grn))"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--amb);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Ganancias acumuladas</div>
+            <div style="font-family:'Space Mono',monospace;font-size:28px;font-weight:700;color:var(--amb)" data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-claimed="${paidEarnings}">+${formatCOP(pendingLive)}</div>
+            <div style="font-size:11px;color:var(--mut);margin-top:4px">Generándose en tiempo real al 2% mensual</div>
+          </div>
+          ${canClaimNow?`
+          <button onclick="claimCdtcEarnings(${inv.id})" style="padding:14px 24px;background:linear-gradient(135deg,var(--amb),var(--grn));border:none;border-radius:10px;color:white;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap">
+            💰 Reclamar Ahora
+          </button>`:nextClaimAt?`
+          <button disabled style="padding:14px 20px;background:var(--sur);border:1px solid var(--bd);border-radius:10px;color:var(--mut);font-weight:600;font-size:12px;cursor:not-allowed;white-space:nowrap">
+            ⏱️ Próximo en ${claimHoursLeft}h ${claimMinsLeft}m
+          </button>`:''}
+        </div>
+      </div>`:''}
+
       <div class="detail-metrics">
         <div class="dm-item paid">
-          <div class="dm-lbl">Ganancia pagada</div>
+          <div class="dm-lbl">Ganancias retiradas</div>
           <div class="dm-val grn">+${formatCOP(paidEarnings)}</div>
-          <div class="dm-sub">${returns.length} ${returns.length===1?'pago':'pagos'} registrado${returns.length===1?'':'s'}</div>
+          <div class="dm-sub">${returns.length} ${returns.length===1?'claim':'claims'} hecho${returns.length===1?'':'s'}</div>
         </div>
         <div class="dm-item pend earning-live">
-          <div class="dm-lbl"><span class="pulse-dot"></span>Pendiente</div>
-          <div class="dm-val amb" data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-paid="${paidEarnings}">+${formatCOP(pendingLive)}</div>
-          <div class="dm-sub">Generándose en tiempo real</div>
+          <div class="dm-lbl"><span class="pulse-dot"></span>Acumulando</div>
+          <div class="dm-val amb" data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-claimed="${paidEarnings}">+${formatCOP(pendingLive)}</div>
+          <div class="dm-sub">2% mensual fijo</div>
         </div>
         <div class="dm-item apy">
-          <div class="dm-lbl">Mi APY mensual</div>
+          <div class="dm-lbl">APY mensual</div>
           <div class="dm-val blu">${myAPY.toFixed(2)}%</div>
-          <div class="dm-sub">${myRates.length?'Promedio de tus rendimientos':'Estimado histórico'}</div>
+          <div class="dm-sub">Tasa fija garantizada</div>
         </div>
         <div class="dm-item time">
           <div class="dm-lbl">Tiempo activo</div>
@@ -1922,8 +2052,8 @@ async function showInvestmentDetail(id){
       </div>
 
       <div class="timeline-card">
-        <div class="tl-head">Historial de Rendimientos</div>
-        ${returns.length===0?`<div class="tl-empty"><span style="font-size:24px;display:block;margin-bottom:8px;opacity:.4">📋</span>Aún no hay rendimientos registrados.<br><span style="font-size:11px;opacity:.7">Los rendimientos se pagan mensualmente.</span></div>`:returns.map(r=>`
+        <div class="tl-head">Historial de Claims</div>
+        ${returns.length===0?`<div class="tl-empty"><span style="font-size:24px;display:block;margin-bottom:8px;opacity:.4">📋</span>Aún no has reclamado ganancias.<br><span style="font-size:11px;opacity:.7">Reclama desde el botón "💰 Reclamar Ahora" cuando tengas saldo acumulado.</span></div>`:returns.map(r=>`
         <div class="tl-row">
           <div class="tl-dot"></div>
           <div class="tl-month">${formatDate(r.month)}</div>
