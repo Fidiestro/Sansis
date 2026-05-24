@@ -395,6 +395,71 @@
   .pm-label{font-size:13px;font-weight:600}
   .pm-detail{font-size:11px;color:var(--mut)}
   .pm-default{font-size:9px;background:var(--grnd);color:var(--grn);padding:2px 7px;border-radius:10px;font-weight:700;border:1px solid rgba(16,185,129,.2)}
+
+  /* ═══════════ INVEST CTA — sin inversiones ═══════════ */
+  .invest-cta{position:relative;overflow:hidden;background:var(--bg2);border:1px solid var(--bd);border-radius:18px;padding:28px 22px;margin-bottom:14px;cursor:pointer;transition:transform .2s ease,border-color .2s ease}
+  .invest-cta:hover{transform:translateY(-2px);border-color:rgba(91,141,238,.4)}
+  .invest-cta-bg{position:absolute;inset:0;background:
+    radial-gradient(circle at 15% 20%,rgba(91,141,238,.18) 0%,transparent 50%),
+    radial-gradient(circle at 85% 80%,rgba(139,108,246,.18) 0%,transparent 50%),
+    radial-gradient(circle at 50% 50%,rgba(34,197,94,.06) 0%,transparent 60%);
+    pointer-events:none}
+  .invest-cta::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blu),var(--pur),var(--grn));z-index:1}
+  .invest-cta-content{position:relative;z-index:2}
+  .invest-cta-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--grn);padding:5px 11px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:12px}
+  .invest-cta-title{font-size:22px;font-weight:700;line-height:1.2;margin-bottom:6px;letter-spacing:-.3px}
+  .invest-cta-desc{font-size:13px;color:var(--mut);line-height:1.5;margin-bottom:18px;max-width:420px}
+  .invest-cta-stats{display:flex;align-items:center;gap:18px;margin-bottom:20px;padding:14px 16px;background:var(--sur);border:1px solid var(--bd);border-radius:12px}
+  .ic-stat{flex:1;min-width:0}
+  .ic-stat-val{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--text);letter-spacing:.5px;margin-bottom:2px}
+  .ic-stat-lbl{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+  .ic-stat-sep{width:1px;height:32px;background:var(--bd);flex-shrink:0}
+  .invest-cta-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--blu),var(--pur));border:none;color:white;padding:13px 22px;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;box-shadow:0 4px 16px rgba(91,141,238,.25)}
+  .invest-cta-btn:hover{transform:translateX(2px);box-shadow:0 6px 20px rgba(91,141,238,.35)}
+  .invest-cta-btn svg{transition:transform .15s ease}
+  .invest-cta-btn:hover svg{transform:translateX(2px)}
+
+  /* ═══════════ PERFORMANCE CARD ═══════════ */
+  .perf-card{background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:20px 18px;margin-bottom:14px;position:relative;overflow:hidden}
+  .perf-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blu),var(--pur));opacity:.6}
+  .perf-head{margin-bottom:14px}
+  .perf-lbl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:6px}
+  .perf-val{font-family:'Space Mono',monospace;font-size:30px;font-weight:700;letter-spacing:-.5px;line-height:1.05;margin-bottom:8px}
+  .perf-change{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:700;font-family:'Space Mono',monospace}
+  .perf-change.up{background:rgba(34,197,94,.12);color:var(--grn);border:1px solid rgba(34,197,94,.25)}
+  .perf-change.down{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+  .perf-change svg{flex-shrink:0}
+  .perf-period{display:inline-block;margin-left:8px;font-size:11px;color:var(--mut);font-weight:500}
+
+  .perf-tabs{display:flex;gap:4px;padding:4px;background:var(--sur);border:1px solid var(--bd);border-radius:10px;margin-bottom:14px}
+  .perf-tab{flex:1;background:transparent;border:none;color:var(--mut);padding:8px 4px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s ease;letter-spacing:.3px}
+  .perf-tab:hover{color:var(--text)}
+  .perf-tab.active{background:var(--bg2);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+
+  .perf-chart-wrap{position:relative;height:220px;margin-bottom:14px}
+  .perf-chart{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
+  .perf-dot{fill:transparent;stroke:transparent;transition:all .15s ease;pointer-events:none}
+  .perf-dot.active{fill:var(--text);stroke:var(--blu);stroke-width:2;r:5}
+  .perf-tooltip{position:absolute;top:8px;background:var(--bg3);border:1px solid var(--bdh);border-radius:8px;padding:8px 12px;pointer-events:none;opacity:0;transition:opacity .15s ease;min-width:110px;backdrop-filter:blur(8px);z-index:10;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+  .ptt-date{font-size:10px;color:var(--mut);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+  .ptt-val{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--text)}
+
+  .perf-mini-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-top:12px;border-top:1px solid var(--bd)}
+  .perf-mini{padding:10px 8px;text-align:center}
+  .pm-lbl{font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:4px}
+  .pm-val{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:-.2px}
+  .perf-mini .pm-val.grn{color:var(--grn)}
+  .perf-mini .pm-val.blu{color:var(--blu)}
+  .perf-mini .pm-val.amb{color:var(--amb)}
+
+  @media (min-width:768px){
+    .invest-cta{padding:32px 28px}
+    .invest-cta-title{font-size:26px}
+    .perf-card{padding:24px 22px}
+    .perf-val{font-size:36px}
+    .perf-chart-wrap{height:260px}
+    .perf-mini .pm-val{font-size:15px}
+  }
 </style>
 </head>
 <body>
@@ -786,49 +851,90 @@ function renderDashboard(c){
     ${active.slice(0,2).map(inv=>renderInvCard(inv)).join('')}
   </div>`:''}
 
-  <!-- Banner si no hay inversiones -->
-  ${active.length===0?`
-  <div class="notif-banner info anim d2">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <div>Aún no tienes inversiones activas. <strong>Empieza desde $100,000 COP</strong> con un CDTC o <strong>$50,000 COP</strong> con el Pool DeFi.</div>
+  ${(myInvestments.length===0)?`
+  <!-- CTA grande: usuario sin ninguna inversión (ni activa ni histórica) -->
+  <div class="invest-cta anim d2" onclick="showViewByName('investments')">
+    <div class="invest-cta-bg"></div>
+    <div class="invest-cta-content">
+      <div class="invest-cta-badge">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Comienza a generar rendimientos
+      </div>
+      <h3 class="invest-cta-title">Tu dinero puede trabajar por ti</h3>
+      <p class="invest-cta-desc">Explora nuestras opciones de inversión y encuentra la que mejor se ajuste a ti.</p>
+      <div class="invest-cta-stats">
+        <div class="ic-stat">
+          <div class="ic-stat-val">CDTC</div>
+          <div class="ic-stat-lbl">Capital protegido</div>
+        </div>
+        <div class="ic-stat-sep"></div>
+        <div class="ic-stat">
+          <div class="ic-stat-val">Pool</div>
+          <div class="ic-stat-lbl">Mayor rentabilidad</div>
+        </div>
+      </div>
+      <button class="invest-cta-btn">
+        Comenzar a invertir
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
   </div>`:''}
 
-  <div class="sec anim d2">
-    <div class="product-card">
-      <div class="prod-head">
-        <div class="prod-icon">
-          <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+  <!-- ═══ MÓDULO PERFORMANCE: chart interactivo + selector temporal ═══ -->
+  <div class="perf-card anim d3">
+    <div class="perf-head">
+      <div class="perf-head-left">
+        <div class="perf-lbl">Patrimonio total</div>
+        <div class="perf-val" id="perf-value">${formatCOP((b.totalBalance||0)+(b.totalInvested||0))}</div>
+        <div class="perf-change" id="perf-change">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+          <span id="perf-change-amount">+${formatCOP(0)}</span>
+          <span id="perf-change-pct">(0%)</span>
         </div>
-        <div>
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <div class="prod-ttl">Inversión CDTC</div>
-            <span class="risk-tag">Bajo Riesgo</span>
-          </div>
-          <div class="prod-sub">Rendimiento variable · Capital protegido</div>
-        </div>
+        <div class="perf-period" id="perf-period">en el último mes</div>
       </div>
-      <div class="prod-rates">
-        <div class="rate-chip"><strong>~2.0%</strong> mensual</div>
-        <div class="rate-chip"><strong>3/6/12</strong> meses</div>
-        <div class="rate-chip">${active.length}/3 activas</div>
+    </div>
+
+    <!-- Selector temporal -->
+    <div class="perf-tabs">
+      <button class="perf-tab" data-range="1D" onclick="setPerfRange('1D',this)">Día</button>
+      <button class="perf-tab" data-range="1W" onclick="setPerfRange('1W',this)">Semana</button>
+      <button class="perf-tab active" data-range="1M" onclick="setPerfRange('1M',this)">Mes</button>
+      <button class="perf-tab" data-range="1Y" onclick="setPerfRange('1Y',this)">Año</button>
+      <button class="perf-tab" data-range="ALL" onclick="setPerfRange('ALL',this)">Todo</button>
+    </div>
+
+    <!-- Chart interactivo -->
+    <div class="perf-chart-wrap">
+      <svg class="perf-chart" id="perf-chart" viewBox="0 0 600 220" preserveAspectRatio="none"></svg>
+      <div class="perf-tooltip" id="perf-tooltip">
+        <div class="ptt-date" id="ptt-date"></div>
+        <div class="ptt-val" id="ptt-val"></div>
       </div>
-      <button class="prod-cta" onclick="openInvestModal()" ${active.length>=3?'disabled':''}>
-        ${active.length>=3?'Límite alcanzado (3/3)':'Crear nueva inversión →'}
-      </button>
+    </div>
+
+    <!-- Mini-métricas debajo -->
+    <div class="perf-mini-row">
+      <div class="perf-mini">
+        <div class="pm-lbl">Disponible</div>
+        <div class="pm-val grn" id="pm-available">${formatCOP(b.availableBalance||0)}</div>
+      </div>
+      <div class="perf-mini">
+        <div class="pm-lbl">Invertido</div>
+        <div class="pm-val blu" id="pm-invested">${formatCOP(b.totalInvested||0)}</div>
+      </div>
+      <div class="perf-mini">
+        <div class="pm-lbl">Ganancias</div>
+        <div class="pm-val amb" id="pm-earnings">+${formatCOP(b.totalEarnings||0)}</div>
+      </div>
     </div>
   </div>
 
-  <div class="grid-2 anim d3">
-    <div class="chart-card">
-      <div class="chart-head">
-        <div class="chart-ttl">Crecimiento</div>
-        <div class="chart-sub">Evolución de saldo</div>
-      </div>
-      <div class="chart-wrap"><svg class="chart-svg" id="chart-svg" viewBox="0 0 500 160" preserveAspectRatio="none"></svg></div>
-    </div>
+  <!-- Movimientos recientes -->
+  <div class="anim d3" style="margin-top:14px">
     <div class="table-card">
       <div class="table-head">
-        <span class="table-ttl">Movimientos</span>
+        <span class="table-ttl">Movimientos recientes</span>
         <a href="#" class="sec-more" onclick="showViewByName('movements');return false">Ver todo →</a>
       </div>
       <div class="table-wrap">
@@ -840,7 +946,7 @@ function renderDashboard(c){
     </div>
   </div>`;
 
-  setTimeout(()=>drawChart(dashboardData.balanceHistory||[]),100);
+  setTimeout(()=>drawPerfChart('1M'),100);
   startEarningsAnimation();
 }
 
@@ -1065,54 +1171,13 @@ async function withdrawPoolEarnings(invId,earnings){
 // ══════════════════ CLAIM CDTC (tiempo real, 2% mensual fijo) ══════════════════
 // Llama al endpoint /claim-cdtc que calcula en el backend lo acumulado
 // y descuenta 5% al referido si aplica. Máximo 1 claim cada 24h.
+// Alias retro-compat: cualquier código que llame claimCdtcEarnings termina en la función genérica.
+// El monto exacto lo calcula el backend; aquí pasamos 0 como placeholder solo para el confirm dialog.
 async function claimCdtcEarnings(invId){
-  if(!confirm('¿Reclamar tus ganancias CDTC?\n\nEl monto exacto lo calcula el sistema en el momento (2% mensual proporcional a los días).\nSi tienes referido se descontará 5% como comisión.\nSolo puedes reclamar 1 vez cada 24 horas.'))return;
-
-  try{
-    var res=await apiFetch('/investments/'+invId+'/claim-cdtc',{method:'POST'});
-    if(!res)return toast('Error de conexión','error');
-    var d=await res.json().catch(function(){return{}});
-
-    if(res.status===429){
-      // Cooldown
-      return toast(d.error||'Espera para reclamar de nuevo','error');
-    }
-    if(!res.ok)return toast(d.error||'Error al reclamar','error');
-
-    var realGross=d.grossEarnings||0;
-    var realRef=d.referralCommission||0;
-    var realNet=d.netAmount||(realGross-realRef);
-    var days=d.periodDays||0;
-
-    // Reusar el mismo modal de éxito
-    if(!document.getElementById('wr-anims')){var st=document.createElement('style');st.id='wr-anims';st.textContent='@keyframes wrScale{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}@keyframes wrBounce{0%{transform:scale(0)}50%{transform:scale(1.25)}100%{transform:scale(1)}}@keyframes wrFade{from{opacity:0}to{opacity:1}}';document.head.appendChild(st);}
-    var ov=document.createElement('div');
-    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:9999;animation:wrFade .3s ease;padding:16px';
-    ov.onclick=function(e){if(e.target===ov)ov.remove()};
-
-    var breakdownRows='';
-    breakdownRows+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd);font-size:12px"><span style="color:var(--mut)">Período</span><span style="font-weight:700;font-family:Space Mono,monospace">'+days+' días @ 2%</span></div>';
-    breakdownRows+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd);font-size:12px"><span style="color:var(--mut)">Bruto</span><span style="font-weight:700;font-family:Space Mono,monospace">'+formatCOP(realGross)+'</span></div>';
-    if(realRef>0)breakdownRows+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd);font-size:12px"><span style="color:var(--mut)">Comisión referido 5%</span><span style="font-weight:700;color:var(--red);font-family:Space Mono,monospace">-'+formatCOP(realRef)+'</span></div>';
-    breakdownRows+='<div style="display:flex;justify-content:space-between;padding:10px 0 0;font-size:13px"><span style="font-weight:700">Recibido</span><span style="font-weight:700;color:var(--grn);font-family:Space Mono,monospace">+'+formatCOP(realNet)+'</span></div>';
-
-    ov.innerHTML='<div style="background:var(--bg2);border:1px solid rgba(16,185,129,.3);border-radius:20px;padding:28px;text-align:center;max-width:380px;width:100%;animation:wrScale .4s ease">'
-      +'<div style="font-size:52px;margin-bottom:8px;animation:wrBounce .6s ease">💰</div>'
-      +'<div style="font-size:20px;font-weight:700;color:var(--grn);margin-bottom:4px">¡Claim Exitoso!</div>'
-      +'<div style="font-size:11px;color:var(--mut);margin-bottom:18px">CDTC #'+invId+'</div>'
-      +'<div style="font-family:Space Mono,monospace;font-size:30px;font-weight:700;color:var(--text);margin-bottom:4px">+'+formatCOP(realNet)+'</div>'
-      +'<div style="font-size:11px;color:var(--mut);margin-bottom:18px">Acreditado a tu balance disponible</div>'
-      +'<div style="background:var(--sur);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;margin-bottom:14px;text-align:left">'+breakdownRows+'</div>'
-      +'<div style="font-size:10px;color:var(--mut);margin-bottom:14px">Próximo claim disponible en 24h</div>'
-      +'<button id="wr-ok-btn" style="padding:12px 32px;background:linear-gradient(135deg,var(--grn),var(--blu));border:none;border-radius:10px;color:white;font-weight:700;font-size:14px;cursor:pointer;width:100%">Entendido ✓</button>'
-    +'</div>';
-    document.body.appendChild(ov);
-    document.getElementById('wr-ok-btn').onclick=function(){ov.remove()};
-
-    toast('✅ '+formatCOP(realNet)+' acreditado a tu balance');
-    await loadAllData();
-    renderCurrentView();
-  }catch(e){toast('Error de conexión','error')}
+  // Buscar el liveClaimable del investment para mostrarlo en el confirm
+  var inv=(myInvestments||[]).find(function(i){return String(i.id)===String(invId)});
+  var earnings=inv?(parseFloat(inv.liveClaimable)||0):0;
+  return claimInvestmentEarnings(invId,earnings,'cdtc');
 }
 
 // ══════════════════ CONFIRM INVESTMENT DEPOSIT ══════════════════
@@ -1159,21 +1224,216 @@ function renderTxRows(txs){
   }).join('');
 }
 
-function drawChart(data){
-  const svg=document.getElementById('chart-svg');
-  if(!svg||!data||data.length<2){if(svg)svg.innerHTML='<text x="250" y="80" text-anchor="middle" fill="#6b7280" font-size="12">Sin datos suficientes</text>';return}
-  const vals=data.map(d=>parseFloat(d.amount)||0);
-  const min=Math.min(...vals),max=Math.max(...vals),range=max-min||1;
-  const w=500,h=160,pad=10;
-  const step=(w-pad*2)/(data.length-1);
-  const pts=vals.map((v,i)=>[pad+i*step,h-pad-((v-min)/range)*(h-pad*2)]);
-  const path=pts.map((p,i)=>(i===0?'M':'L')+p[0]+','+p[1]).join(' ');
-  const fill=path+` L ${pts[pts.length-1][0]},${h-pad} L ${pad},${h-pad} Z`;
-  svg.innerHTML=`
-    <defs><linearGradient id="cg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#4f8ef7" stop-opacity="0.3"/><stop offset="1" stop-color="#4f8ef7" stop-opacity="0"/></linearGradient></defs>
-    <path d="${fill}" fill="url(#cg)"/>
-    <path d="${path}" fill="none" stroke="#4f8ef7" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+// ═══════════════════════════════════════════════════════════
+// PERFORMANCE CHART — Chart interactivo con selector temporal
+// ═══════════════════════════════════════════════════════════
+// Estado actual del selector
+window._perfRange='1M';
+
+// Filtra balanceHistory según el rango seleccionado y reconstruye una serie temporal
+function getPerfData(range){
+  const raw=(dashboardData&&dashboardData.balanceHistory)||[];
+  if(!raw.length)return [];
+
+  // Normalizar y ordenar por fecha
+  const points=raw.map(d=>({
+    date:new Date(d.snapshot_date||d.snapshotDate||d.date||d.created_at),
+    value:parseFloat(d.amount)||0
+  })).filter(p=>!isNaN(p.date)).sort((a,b)=>a.date-b.date);
+
+  if(!points.length)return [];
+
+  // Calcular fecha mínima según el rango
+  const now=new Date();
+  const cutoff=new Date();
+  switch(range){
+    case '1D':  cutoff.setDate(now.getDate()-1);  break;
+    case '1W':  cutoff.setDate(now.getDate()-7);  break;
+    case '1M':  cutoff.setMonth(now.getMonth()-1);break;
+    case '1Y':  cutoff.setFullYear(now.getFullYear()-1);break;
+    case 'ALL': cutoff.setTime(0); break;
+  }
+
+  let filtered=points.filter(p=>p.date>=cutoff);
+  // Si no hay puntos en el rango pero hay history, mostrar al menos el último valor
+  if(!filtered.length && points.length){
+    filtered=[points[points.length-1]];
+  }
+
+  // Si solo hay 1 punto, duplicarlo para que el chart trace una línea horizontal
+  if(filtered.length===1){
+    filtered=[
+      {date:cutoff,value:filtered[0].value},
+      {date:now,value:filtered[0].value}
+    ];
+  }
+
+  return filtered;
 }
+
+function setPerfRange(range,btn){
+  window._perfRange=range;
+  document.querySelectorAll('.perf-tab').forEach(t=>t.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  drawPerfChart(range);
+}
+
+function drawPerfChart(range){
+  const svg=document.getElementById('perf-chart');
+  if(!svg)return;
+
+  const data=getPerfData(range);
+  const empty=data.length<2;
+
+  // Actualizar header (cambio %, etiqueta de período)
+  const first=data.length?data[0].value:0;
+  const last =data.length?data[data.length-1].value:0;
+  const delta=last-first;
+  const pct=first>0?(delta/first*100):0;
+  const isUp=delta>=0;
+
+  const periodLabels={
+    '1D':'en el último día',
+    '1W':'en la última semana',
+    '1M':'en el último mes',
+    '1Y':'en el último año',
+    'ALL':'desde el inicio'
+  };
+
+  const elPeriod=document.getElementById('perf-period');
+  const elChange=document.getElementById('perf-change');
+  const elAmount=document.getElementById('perf-change-amount');
+  const elPct=document.getElementById('perf-change-pct');
+  if(elPeriod)elPeriod.textContent=periodLabels[range]||'';
+  if(elAmount)elAmount.textContent=(isUp?'+':'-')+formatCOP(Math.abs(delta));
+  if(elPct)elPct.textContent='('+(isUp?'+':'')+pct.toFixed(2)+'%)';
+  if(elChange){
+    elChange.className='perf-change '+(isUp?'up':'down');
+    // Cambiar dirección de la flecha
+    const arrow=elChange.querySelector('svg polyline');
+    if(arrow)arrow.setAttribute('points',isUp?'18 15 12 9 6 15':'6 9 12 15 18 9');
+  }
+
+  if(empty){
+    svg.innerHTML='<text x="300" y="110" text-anchor="middle" fill="rgba(255,255,255,.25)" font-size="13" font-family="Space Grotesk">Aún no hay datos en este período</text>';
+    return;
+  }
+
+  const w=600,h=220,pad=20;
+  const vals=data.map(d=>d.value);
+  const min=Math.min(...vals);
+  const max=Math.max(...vals);
+  const range_y=Math.max(max-min,1);
+
+  // Padding vertical para que la línea no toque los bordes
+  const yScale=v=>h-pad-((v-min)/range_y)*(h-pad*2);
+  const xScale=i=>pad+(i/(data.length-1))*(w-pad*2);
+
+  const pts=data.map((d,i)=>[xScale(i),yScale(d.value)]);
+  const linePath=pts.map((p,i)=>(i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const fillPath=linePath+` L ${pts[pts.length-1][0].toFixed(1)},${h-pad} L ${pts[0][0].toFixed(1)},${h-pad} Z`;
+
+  const strokeColor=isUp?'#22c55e':'#ef4444';
+  const fillId=isUp?'pcgUp':'pcgDown';
+
+  // Construir el SVG con hover dots y tooltip
+  const dots=data.map((d,i)=>{
+    return `<circle class="perf-dot" cx="${pts[i][0].toFixed(1)}" cy="${pts[i][1].toFixed(1)}" r="3" data-i="${i}" data-date="${d.date.toISOString()}" data-val="${d.value}"/>`;
+  }).join('');
+
+  svg.innerHTML=`
+    <defs>
+      <linearGradient id="pcgUp" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stop-color="#22c55e" stop-opacity="0.25"/>
+        <stop offset="1" stop-color="#22c55e" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="pcgDown" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stop-color="#ef4444" stop-opacity="0.25"/>
+        <stop offset="1" stop-color="#ef4444" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path d="${fillPath}" fill="url(#${fillId})"/>
+    <path d="${linePath}" fill="none" stroke="${strokeColor}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+    <line class="perf-hover-line" id="perf-hover-line" x1="0" y1="0" x2="0" y2="${h}" stroke="rgba(255,255,255,.15)" stroke-width="1" style="display:none"/>
+    ${dots}
+  `;
+
+  // Interacción: hover sobre el chart muestra tooltip y línea vertical
+  attachPerfChartInteraction(data,w,h,pad,xScale,yScale);
+}
+
+function attachPerfChartInteraction(data,w,h,pad,xScale,yScale){
+  const svg=document.getElementById('perf-chart');
+  const tooltip=document.getElementById('perf-tooltip');
+  const hoverLine=document.getElementById('perf-hover-line');
+  if(!svg||!tooltip)return;
+
+  function findClosest(svgX){
+    let closestI=0;
+    let minDist=Infinity;
+    for(let i=0;i<data.length;i++){
+      const d=Math.abs(xScale(i)-svgX);
+      if(d<minDist){minDist=d;closestI=i;}
+    }
+    return closestI;
+  }
+
+  function onMove(e){
+    const rect=svg.getBoundingClientRect();
+    const isTouch=e.touches&&e.touches[0];
+    const clientX=isTouch?e.touches[0].clientX:e.clientX;
+    if(clientX===undefined)return;
+    const svgX=((clientX-rect.left)/rect.width)*w;
+    const i=findClosest(svgX);
+    const p=data[i];
+
+    // Posicionar línea vertical
+    if(hoverLine){
+      hoverLine.setAttribute('x1',xScale(i));
+      hoverLine.setAttribute('x2',xScale(i));
+      hoverLine.style.display='block';
+    }
+
+    // Resaltar punto
+    svg.querySelectorAll('.perf-dot').forEach(d=>d.classList.remove('active'));
+    const dot=svg.querySelector('.perf-dot[data-i="'+i+'"]');
+    if(dot)dot.classList.add('active');
+
+    // Mostrar tooltip
+    const dateStr=p.date.toLocaleDateString('es-CO',{day:'numeric',month:'short',year:'numeric'});
+    const valStr=formatCOP(p.value);
+    document.getElementById('ptt-date').textContent=dateStr;
+    document.getElementById('ptt-val').textContent=valStr;
+
+    // Posicionar el tooltip (relativo al wrapper)
+    const wrap=svg.parentElement;
+    const wrapRect=wrap.getBoundingClientRect();
+    const x=clientX-wrapRect.left;
+    const ttWidth=tooltip.offsetWidth||120;
+    const maxX=wrapRect.width-ttWidth-8;
+    tooltip.style.left=Math.max(8,Math.min(maxX,x-ttWidth/2))+'px';
+    tooltip.style.opacity='1';
+    tooltip.style.pointerEvents='none';
+  }
+
+  function onLeave(){
+    if(hoverLine)hoverLine.style.display='none';
+    svg.querySelectorAll('.perf-dot').forEach(d=>d.classList.remove('active'));
+    if(tooltip)tooltip.style.opacity='0';
+  }
+
+  // Limpiar listeners viejos clonando el elemento
+  const newSvg=svg.cloneNode(true);
+  svg.parentNode.replaceChild(newSvg,svg);
+  newSvg.addEventListener('mousemove',onMove);
+  newSvg.addEventListener('mouseleave',onLeave);
+  newSvg.addEventListener('touchstart',onMove,{passive:true});
+  newSvg.addEventListener('touchmove',onMove,{passive:true});
+  newSvg.addEventListener('touchend',onLeave);
+}
+
+// Alias retro-compatible (por si algún código llama drawChart)
+function drawChart(){drawPerfChart(window._perfRange||'1M');}
 
 // ══════════════════ RENDER: INVESTMENTS ══════════════════
 function renderInvestmentsView(c){
@@ -2007,7 +2267,7 @@ async function showInvestmentDetail(id){
             <div style="font-size:11px;color:var(--mut);margin-top:4px">Generándose en tiempo real al 2% mensual</div>
           </div>
           ${canClaimNow?`
-          <button onclick="claimCdtcEarnings(${inv.id})" style="padding:14px 24px;background:linear-gradient(135deg,var(--amb),var(--grn));border:none;border-radius:10px;color:white;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap">
+          <button onclick="claimInvestmentEarnings(${inv.id},${pendingLive},'cdtc')" style="padding:14px 24px;background:linear-gradient(135deg,var(--amb),var(--grn));border:none;border-radius:10px;color:white;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap">
             💰 Reclamar Ahora
           </button>`:nextClaimAt?`
           <button disabled style="padding:14px 20px;background:var(--sur);border:1px solid var(--bd);border-radius:10px;color:var(--mut);font-weight:600;font-size:12px;cursor:not-allowed;white-space:nowrap">
