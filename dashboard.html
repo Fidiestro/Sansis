@@ -1402,11 +1402,15 @@ function getPerfData(range){
   }
 
   // 4) Funciones para calcular balance/invertido en un momento dado
+  //    IMPORTANTE: 'investment' en transactions YA viene con amount negativo,
+  //    así que sumar es correcto. 'investment_withdrawal' viene positivo.
+  //    'withdraw' viene positivo pero es salida → restar Math.abs.
+  //    'fee' viene positivo (es un OUTFLOW_TYPE) → restar.
   function balanceAt(ts){
     let bal=0;
     for(const e of txEvents){
       if(e.date.getTime()>ts)continue;
-      if(e.type==='withdraw')bal-=Math.abs(e.amount);
+      if(e.type==='withdraw'||e.type==='fee')bal-=Math.abs(e.amount);
       else bal+=e.amount;
     }
     return bal;
@@ -1415,7 +1419,9 @@ function getPerfData(range){
     let inv=0;
     for(const e of invEvents){
       if(e.date.getTime()>ts)continue;
-      if(!e.endDate || e.endDate.getTime()>ts)inv+=e.amount;
+      // Si la inversión está activa, suma TODO el rango futuro al patrimonio
+      // Si terminó/canceló antes de ts, NO suma (el dinero ya volvió al balance)
+      if(!e.endDate || e.endDate.getTime()>ts)inv+=Math.abs(e.amount);
     }
     return inv;
   }
@@ -1482,9 +1488,18 @@ function drawPerfChart(range){
   const pct=first>0?(delta/first*100):0;
   const isUp=delta>=0;
 
-  // Sincronizar el valor del patrimonio con el último punto real del chart
+  // Sincronizar el valor del patrimonio con el patrimonio REAL ACTUAL,
+  // no con el último punto del chart (que puede estar mal si los datos están vacíos).
+  // Cálculo simple y a prueba de fallos: disponible + invertido activo.
   const elValue=document.getElementById('perf-value');
-  if(elValue && data.length){elValue.textContent=formatCOP(last)}
+  if(elValue){
+    const availNow=(balanceSummary&&balanceSummary.availableBalance)||0;
+    const investedNow=(myInvestments||[])
+      .filter(i=>i.status==='active'||i.status==='pending_deposit')
+      .reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
+    const patrimonyNow=availNow+investedNow;
+    elValue.textContent=formatCOP(patrimonyNow);
+  }
 
   const periodLabels={
     '1D':'en el último día',
