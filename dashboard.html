@@ -1180,13 +1180,16 @@ function renderInvCard(inv){
 }
 
 // Update pending earnings animation — recalculates every 10 SECONDS
-// (con transición CSS suave para no marear con el contador a 1s).
-// CDTC genera 2% mensual fijo. La animación muestra el "claimable":
-//   liveAccrued = capital × 0.02 × (días/30)
+// con transición CSS suave para no marear con el contador a 1s.
+// CDTC genera 2% mensual fijo, calculado proporcionalmente al segundo.
+//   liveAccrued = capital × 0.02 × (segundos / 2.592.000)   [30 días = 1 mes contable]
 //   claimable   = liveAccrued - lo ya reclamado en bruto (registrado en data-claimed)
+// Mostrar redondeado a entero (los $0.015/segundo dan un cambio visible cada ~65s).
 // También actualiza el monto del botón "Reclamar" si existe.
 function startEarningsAnimation(){
   if(window._earningsInterval)clearInterval(window._earningsInterval);
+
+  const SECONDS_PER_MONTH=30*24*60*60; // 2.592.000
 
   const updateAll=()=>{
     document.querySelectorAll('[data-pending-live]').forEach(el=>{
@@ -1194,9 +1197,9 @@ function startEarningsAnimation(){
       const start=new Date(el.dataset.start);
       const claimed=parseFloat(el.dataset.claimed)||0;
       const now=new Date();
-      const days=Math.max(0,(now-start)/(1000*60*60*24));
-      const gross=Math.floor(cap*0.02*(days/30));
-      const live=Math.max(0,gross-claimed);
+      const seconds=Math.max(0,(now-start)/1000);
+      const gross=cap*0.02*(seconds/SECONDS_PER_MONTH);
+      const live=Math.max(0,Math.floor(gross-claimed));
       const newText='+'+formatCOP(live);
 
       // Solo actualizar si cambió (evita re-pintar innecesario)
@@ -2545,9 +2548,14 @@ async function showInvestmentDetail(id){
     const totalDuration=Math.max(1,lockEnd-start);
     const progressPct=Math.min(100,Math.round((msElapsed/totalDuration)*100));
 
+    // FIX: cálculo basado en SEGUNDOS exactos (no días).
+    // 1 mes contable = 30 días = 2.592.000 segundos.
+    // pendingGross = capital × 2% × (segundos_transcurridos / segundos_de_un_mes)
     const paidEarnings=returns.reduce((s,r)=>s+(parseFloat(r.earned)||0),0);
-    const pendingGross=cap*0.02*(daysElapsed/30);
-    const pendingLive=Math.max(0,pendingGross-paidEarnings);
+    const secondsElapsed=Math.max(0,(now-start)/1000);
+    const SECONDS_PER_MONTH=30*24*60*60; // 2.592.000
+    const pendingGross=cap*0.02*(secondsElapsed/SECONDS_PER_MONTH);
+    const pendingLive=Math.max(0,Math.floor(pendingGross-paidEarnings));
 
     // APY fijo 2% para CDTC. (Pool tiene su propio render.)
     const myAPY=2.0;
