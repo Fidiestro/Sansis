@@ -2975,16 +2975,45 @@ async function init(){
   await loadAllData();
   renderCurrentView();
 
-  // AUTO-REFRESH cada 30 segundos para reflejar cambios del admin sin recargar la página
-  // (transacciones nuevas, rendimientos registrados, etc.)
+  // AUTO-REFRESH cada 30 segundos para reflejar cambios del admin sin recargar la página.
+  // SILENCIOSO: compara un snapshot de los datos relevantes y solo re-renderiza la vista
+  // si algo cambió. Esto evita el "parpadeo" visible al cambiar de tab cada 30s.
   if(window._autoRefresh)clearInterval(window._autoRefresh);
+
+  // Genera una "huella" de los datos que importan para decidir si re-renderizar.
+  // Si esta huella cambia, hay datos nuevos del backend.
+  function dataFingerprint(){
+    try{
+      const inv=(myInvestments||[]).map(i=>[
+        i.id,i.status,i.amount,i.withdrawableEarnings||0,i.totalEarned||0
+      ]);
+      const tx=(dashboardData&&dashboardData.transactions||[]).map(t=>[
+        t.id||t.ref_id,t.amount,t.type
+      ]);
+      const bal=balanceSummary?
+        [balanceSummary.totalBalance,balanceSummary.availableBalance,balanceSummary.totalInvested,balanceSummary.totalEarnings]
+        :[];
+      return JSON.stringify({inv,tx,bal});
+    }catch(e){return ''}
+  }
+
+  // Huella inicial
+  window._lastDataFingerprint=dataFingerprint();
+
   window._autoRefresh=setInterval(async ()=>{
-    // Solo refrescar si la pestaña está activa (evita gasto de batería)
+    // No refrescar si la pestaña está oculta (ahorra batería)
     if(document.hidden)return;
+    // No refrescar si hay un modal abierto (evita romper interacciones del usuario)
+    if(document.querySelector('.modal.open'))return;
     try{
       await loadAllData();
-      // Re-renderizar la vista actual silenciosamente
-      renderCurrentView();
+      const newPrint=dataFingerprint();
+      if(newPrint!==window._lastDataFingerprint){
+        // Datos cambiaron → re-renderizar
+        window._lastDataFingerprint=newPrint;
+        renderCurrentView();
+      }
+      // Si nada cambió, no se toca el DOM (cero parpadeo)
     }catch(e){console.warn('auto-refresh:',e)}
   },30000);
 }
