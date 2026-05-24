@@ -594,11 +594,14 @@ async function createTx(){
 }
 
 // ═══ DEPOSITS ═══
+var depositsCache=[];   // cache para que viewProof no haga otro fetch
+
 async function loadDeps(st){
   try{
     var q=st==='all'?'':'?status='+st;
     var r=await apiFetch('/admin/deposits'+q);if(!r||!r.ok)return;
     var d=await r.json();var deps=d.deposits||d||[];
+    depositsCache=deps;  // cachear para viewProof
     document.getElementById('dep-tbl').innerHTML=deps.length?deps.map(function(dp){
       return '<tr><td class="m" style="font-size:11px">'+(dp.ref_id||dp.id)+'</td><td>'+(dp.user_name||'—')+'</td><td class="m cg">'+F(dp.amount)+'</td><td style="font-size:11px;color:var(--mut);max-width:120px;overflow:hidden;text-overflow:ellipsis">'+(dp.note||'—')+'</td><td><span class="bg bg-'+(dp.status==='pending'?'a':dp.status==='approved'?'g':'r')+'">'+dp.status+'</span></td><td class="m" style="font-size:11px;color:var(--mut)">'+D(dp.created_at)+'</td><td style="white-space:nowrap">'+(dp.proof_image?'<button class="bt bt-s" onclick="viewProof('+dp.id+')" style="color:var(--blu)">🖼️</button> ':'')+(dp.status==='pending'?'<button class="bt bt-s bt-g" onclick="procDep('+dp.id+',\'approve\')">✓</button> <button class="bt bt-s bt-r" onclick="rejectDep('+dp.id+')">✗</button>':'—')+'</td></tr>';
     }).join(''):'<tr><td colspan="7" class="empty">Sin depósitos</td></tr>';
@@ -609,7 +612,6 @@ function fDep(s,el){document.querySelectorAll('#sec-deps .fb').forEach(function(
 async function procDep(id,action){
   if(!confirm('¿'+action+'?'))return;
   try{
-    // FIX: backend espera "adminNote" no "notes" para depósitos
     var r=await apiFetch('/admin/deposits/'+id+'/process',{method:'POST',body:JSON.stringify({action:action})});
     if(!r.ok)return toast('Error','error');
     toast('✅ OK');loadDeps('all');loadStats();
@@ -623,16 +625,20 @@ async function rejectDep(id){
     toast('Rechazado');loadDeps('all');loadStats();
   }catch(e){toast('Error','error')}
 }
+// FIX: el endpoint /admin/deposits/:id/proof no existía y daba 404.
+// Como /admin/deposits YA incluye proof_image en cada fila, usamos el cache local.
 function viewProof(id){
+  var dep=depositsCache.find(function(d){return String(d.id)===String(id)});
   var ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px';
   ov.onclick=function(e){if(e.target===ov)ov.remove()};
-  ov.innerHTML='<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:20px;max-width:500px;width:100%;max-height:90vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div style="font-weight:700">Comprobante #'+id+'</div><button id="cp-close" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;padding:4px 10px;color:var(--mut);cursor:pointer">✕</button></div><div id="proof-img" style="text-align:center;color:var(--mut);padding:20px">Cargando...</div></div>';
+  var imgHtml='';
+  if(dep&&dep.proof_image){
+    imgHtml='<img src="'+dep.proof_image+'" style="width:100%;border-radius:8px;max-height:75vh;object-fit:contain">';
+  }else{
+    imgHtml='<div style="color:var(--mut);padding:20px">Sin comprobante adjunto</div>';
+  }
+  ov.innerHTML='<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:20px;max-width:600px;width:100%;max-height:90vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div><div style="font-weight:700">Comprobante #'+id+'</div>'+(dep?'<div style="font-size:11px;color:var(--mut);margin-top:2px">'+dep.user_name+' · '+F(dep.amount)+'</div>':'')+'</div><button id="cp-close" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;padding:4px 10px;color:var(--mut);cursor:pointer">✕</button></div><div style="text-align:center">'+imgHtml+'</div></div>';
   document.body.appendChild(ov);document.getElementById('cp-close').onclick=function(){ov.remove()};
-  apiFetch('/admin/deposits/'+id+'/proof').then(function(r){return r&&r.ok?r.json():null}).then(function(d){
-    var el=document.getElementById('proof-img');
-    if(d&&(d.proofImage||d.proof_url||d.proof_image))el.innerHTML='<img src="'+(d.proofImage||d.proof_url||d.proof_image)+'" style="width:100%;border-radius:8px">';
-    else el.textContent='Sin comprobante';
-  }).catch(function(){document.getElementById('proof-img').textContent='Error'});
 }
 
 // ═══ WITHDRAWALS ═══

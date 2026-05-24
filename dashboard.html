@@ -725,7 +725,18 @@ async function loadAllData(){
     ]);
     if(dashR&&dashR.ok)dashboardData=await dashR.json();
     if(balR&&balR.ok)balanceSummary=await balR.json();
-    if(invR&&invR.ok)myInvestments=await invR.json();
+    if(invR&&invR.ok){
+      myInvestments=await invR.json();
+      // FIX: ordenar por prioridad de status (active → pending → completed → cancelled)
+      // y dentro de cada grupo, las más recientes primero.
+      const STATUS_ORDER={'active':0,'pending_deposit':1,'completed':2,'cancelled':3};
+      myInvestments.sort(function(a,b){
+        var sa=STATUS_ORDER[a.status]??99;
+        var sb=STATUS_ORDER[b.status]??99;
+        if(sa!==sb)return sa-sb;
+        return new Date(b.createdAt||b.created_at||0)-new Date(a.createdAt||a.created_at||0);
+      });
+    }
     if(poolR&&poolR.ok)poolStats=await poolR.json();
 
     // Fallback balance si falla el endpoint
@@ -885,7 +896,7 @@ function renderDashboard(c){
     <div class="perf-head">
       <div class="perf-head-left">
         <div class="perf-lbl">Patrimonio total</div>
-        <div class="perf-val" id="perf-value">${formatCOP((b.totalBalance||0)+(b.totalInvested||0))}</div>
+        <div class="perf-val" id="perf-value">${formatCOP((b.availableBalance||0)+(b.totalInvested||0))}</div>
         <div class="perf-change" id="perf-change">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
           <span id="perf-change-amount">+${formatCOP(0)}</span>
@@ -1231,19 +1242,27 @@ function renderTxRows(txs){
 window._perfRange='1M';
 
 // Filtra balanceHistory según el rango seleccionado y reconstruye una serie temporal
+// FIX: ahora reconstruye los puntos desde dashboardData.transactions (que SIEMPRE está al día)
+// en lugar de balance_history (que solo se actualiza en momentos específicos).
+// Esto evita el desfase visible donde el chart no coincidía con la suma real.
 function getPerfData(range){
-  const raw=(dashboardData&&dashboardData.balanceHistory)||[];
-  if(!raw.length)return [];
+  const txs=(dashboardData&&dashboardData.transactions)||[];
+  if(!txs.length)return [];
 
-  // Normalizar y ordenar por fecha
-  const points=raw.map(d=>({
-    date:new Date(d.snapshot_date||d.snapshotDate||d.date||d.created_at),
-    value:parseFloat(d.amount)||0
-  })).filter(p=>!isNaN(p.date)).sort((a,b)=>a.date-b.date);
+  // INFLOW/OUTFLOW tipos (sincronizado con balanceHelper del backend)
+  const INFLOWS =['deposit','payment','interest','profit','investment_return','investment_withdrawal','loan'];
+  const OUTFLOWS=['withdraw','investment'];
 
-  if(!points.length)return [];
+  // Ordenar TODAS las transacciones por fecha ascendente
+  const all=txs.map(t=>({
+    date:new Date(t.created_at),
+    amount:parseFloat(t.amount)||0,
+    type:t.type
+  })).filter(t=>!isNaN(t.date)).sort((a,b)=>a.date-b.date);
 
-  // Calcular fecha mínima según el rango
+  if(!all.length)return [];
+
+  // Calcular fecha de corte
   const now=new Date();
   const cutoff=new Date();
   switch(range){
@@ -1254,18 +1273,49 @@ function getPerfData(range){
     case 'ALL': cutoff.setTime(0); break;
   }
 
-  let filtered=points.filter(p=>p.date>=cutoff);
-  // Si no hay puntos en el rango pero hay history, mostrar al menos el último valor
-  if(!filtered.length && points.length){
-    filtered=[points[points.length-1]];
+  // Reconstruir el patrimonio acumulado punto a punto
+  // El patrimonio NO es solo "balance disponible". Es:
+  //   acumulado = sum(inflows) - sum(outflows positivos) + sum(amounts negativos de 'investment')
+  // Para 'investment' que viene con signo negativo en amount, lo sumamos tal cual (es negativo).
+  // Para 'withdraw' que viene positivo, lo restamos.
+  // Esto da el "balance disponible" en cada instante.
+  // Para mostrar PATRIMONIO TOTAL (balance + invertido), sumamos también el monto de las inversiones activas.
+  let runningBalance=0;
+  let runningInvested=0;
+  const points=[];
+
+  // Punto inicial en 0 (si la primera tx es posterior al cutoff, podemos arrancar el chart desde el cutoff)
+  for(const t of all){
+    if(t.type==='deposit'||t.type==='payment'||t.type==='interest'||t.type==='profit'||t.type==='investment_return'||t.type==='loan'){
+      runningBalance+=t.amount;
+    } else if(t.type==='withdraw'){
+      runningBalance-=t.amount;
+    } else if(t.type==='investment'){
+      // amount viene negativo (-1.000.000), sale del balance disponible pero suma al invertido
+      runningBalance+=t.amount;       // ej. balance -= 1.000.000
+      runningInvested+=Math.abs(t.amount); // ej. invertido += 1.000.000
+    } else if(t.type==='investment_withdrawal'){
+      // Cancelación o retiro al vencer — vuelve al balance, sale del invertido
+      runningBalance+=t.amount;
+      runningInvested=Math.max(0,runningInvested-t.amount);
+    }
+    points.push({
+      date:new Date(t.date),
+      value:runningBalance+runningInvested  // patrimonio total
+    });
   }
 
-  // Si solo hay 1 punto, duplicarlo para que el chart trace una línea horizontal
-  if(filtered.length===1){
-    filtered=[
-      {date:cutoff,value:filtered[0].value},
-      {date:now,value:filtered[0].value}
-    ];
+  // Filtrar por rango. Si todas las tx están antes del cutoff, mostrar el último valor estable.
+  let filtered=points.filter(p=>p.date>=cutoff);
+  if(!filtered.length && points.length){
+    const lastVal=points[points.length-1].value;
+    filtered=[{date:cutoff,value:lastVal},{date:now,value:lastVal}];
+  } else if(filtered.length===1){
+    // Solo 1 punto en el rango: dibujar línea horizontal
+    filtered=[{date:cutoff,value:filtered[0].value},filtered[0]];
+  } else if(filtered.length>1){
+    // Agregar un punto al final con la fecha actual para que la línea llegue hasta hoy
+    filtered.push({date:now,value:filtered[filtered.length-1].value});
   }
 
   return filtered;
@@ -1285,12 +1335,16 @@ function drawPerfChart(range){
   const data=getPerfData(range);
   const empty=data.length<2;
 
-  // Actualizar header (cambio %, etiqueta de período)
+  // Actualizar header (cambio %, etiqueta de período, valor actual del patrimonio)
   const first=data.length?data[0].value:0;
   const last =data.length?data[data.length-1].value:0;
   const delta=last-first;
   const pct=first>0?(delta/first*100):0;
   const isUp=delta>=0;
+
+  // Sincronizar el valor del patrimonio con el último punto real del chart
+  const elValue=document.getElementById('perf-value');
+  if(elValue && data.length){elValue.textContent=formatCOP(last)}
 
   const periodLabels={
     '1D':'en el último día',
