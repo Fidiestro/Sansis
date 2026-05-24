@@ -460,6 +460,103 @@
     .perf-chart-wrap{height:260px}
     .perf-mini .pm-val{font-size:15px}
   }
+
+  /* ════════════════════════════════════════════════════════ */
+  /* INVESTMENTS · DeFi/Aave Redesign                          */
+  /* ════════════════════════════════════════════════════════ */
+  .invest-hero{margin-bottom:18px}
+  .ih-head{display:flex;flex-direction:column;gap:2px}
+  .ih-title{font-size:20px;font-weight:700;letter-spacing:-.3px;background:linear-gradient(90deg,#fff,#5b8dee);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .ih-sub{font-size:12px;color:var(--mut);font-family:'Space Mono',monospace;letter-spacing:.3px}
+
+  /* Portfolio donut card */
+  .port-card{background:linear-gradient(135deg,var(--bg2) 0%,rgba(91,141,238,.04) 50%,var(--bg2) 100%);
+    border:1px solid var(--bd);border-radius:18px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden}
+  .port-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(91,141,238,.5),rgba(139,108,246,.5),transparent)}
+  .port-donut-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+  .port-donut{flex-shrink:0;width:170px;height:170px;position:relative}
+  .donut-svg{width:100%;height:100%}
+  .port-stats{flex:1;min-width:140px;display:grid;grid-template-columns:1fr;gap:12px}
+  .port-stat{padding:12px 14px;background:var(--sur);border:1px solid var(--bd);border-radius:10px;transition:border-color .2s ease}
+  .port-stat:hover{border-color:var(--bdh)}
+  .ps-lbl{font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:4px}
+  .ps-val{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;letter-spacing:-.3px}
+  .ps-val.grn{color:var(--grn)} .ps-val.amb{color:var(--amb)} .ps-val.blu{color:var(--blu)}
+  .ps-unit{font-size:11px;color:var(--mut);font-weight:600;margin-left:2px}
+
+  .port-legend{margin-top:18px;padding-top:18px;border-top:1px solid var(--bd);display:flex;flex-direction:column;gap:8px}
+  .legend-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--sur);border:1px solid var(--bd);border-radius:10px;transition:all .15s ease;cursor:default}
+  .legend-item:hover{border-color:var(--bdh);transform:translateX(2px)}
+  .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;box-shadow:0 0 12px currentColor}
+  .legend-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+  .legend-name{font-size:13px;font-weight:600;color:var(--text)}
+  .legend-val{font-family:'Space Mono',monospace;font-size:11px;color:var(--mut)}
+  .legend-pct{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--text);flex-shrink:0}
+
+  /* Markets section */
+  .markets-section{margin-bottom:18px}
+  .markets-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;padding:0 4px}
+  .markets-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.3px;color:var(--text);font-family:'Space Mono',monospace}
+  .markets-sub{font-size:11px;color:var(--mut);font-family:'Space Mono',monospace;letter-spacing:.5px}
+
+  .asset-card{position:relative;background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:20px;margin-bottom:12px;overflow:hidden;transition:border-color .2s ease,transform .2s ease}
+  .asset-card:hover{border-color:var(--bdh);transform:translateY(-1px)}
+  .asset-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(91,141,238,.4),transparent)}
+  .asset-card-pool::before{background:linear-gradient(90deg,transparent,rgba(245,158,11,.4),transparent)}
+  .asset-card-glow{position:absolute;inset:0;pointer-events:none;opacity:.6}
+
+  .asset-top{position:relative;display:flex;align-items:flex-start;gap:14px;margin-bottom:18px}
+  .asset-icon{width:44px;height:44px;border-radius:12px;border:1px solid;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .asset-info{flex:1;min-width:0}
+  .asset-name{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.2px;margin-bottom:6px}
+  .asset-symbol{font-size:11px;color:var(--mut);font-weight:500;font-family:'Space Mono',monospace}
+  .asset-tags{display:flex;gap:6px;flex-wrap:wrap}
+  .tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:3px 9px;border-radius:8px;border:1px solid;letter-spacing:.3px}
+  .tag-safe{background:rgba(34,197,94,.08);color:var(--grn);border-color:rgba(34,197,94,.25)}
+  .tag-medium{background:rgba(245,158,11,.08);color:var(--amb);border-color:rgba(245,158,11,.25)}
+  .tag-locked{background:rgba(139,108,246,.08);color:var(--pur);border-color:rgba(139,108,246,.25)}
+  .tag-flex{background:rgba(91,141,238,.08);color:var(--blu);border-color:rgba(91,141,238,.25)}
+
+  .asset-metrics{position:relative;display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--bd);border-radius:12px;overflow:hidden;margin-bottom:14px}
+  .am-cell{background:var(--sur);padding:12px 14px}
+  .am-lbl{font-size:9px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+  .am-val{font-family:'Space Mono',monospace;font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px;line-height:1.15}
+  .am-val.grn{color:var(--grn)} .am-val.amb{color:var(--amb)} .am-val.blu{color:var(--blu)}
+  .am-val.red{color:var(--red)} .am-val.pur{color:var(--pur)}
+  .am-unit{font-size:11px;color:var(--mut);font-weight:600;margin-left:1px}
+  .am-sub{font-size:10px;color:var(--mut);margin-top:2px;font-family:'Space Mono',monospace}
+
+  .asset-warning{position:relative;display:flex;gap:10px;padding:11px 13px;background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.2);border-radius:10px;margin-bottom:14px}
+  .aw-icon{font-size:14px;flex-shrink:0;line-height:1.4}
+  .aw-text{font-size:11px;color:var(--mut);line-height:1.5}
+
+  .asset-cta{position:relative;width:100%;padding:13px;background:linear-gradient(135deg,var(--blu),var(--pur));border:none;border-radius:11px;color:white;font-size:13px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;text-transform:uppercase}
+  .asset-cta:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 20px rgba(91,141,238,.3)}
+  .asset-cta:disabled{opacity:.4;cursor:not-allowed;background:var(--sur)}
+
+  /* Positions section */
+  .positions-section{margin-top:24px}
+  .positions-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:0 4px}
+  .positions-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.3px;font-family:'Space Mono',monospace}
+  .positions-badge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 8px;background:var(--blud);color:var(--blu);border:1px solid rgba(91,141,238,.25);border-radius:11px;font-size:11px;font-weight:700;font-family:'Space Mono',monospace}
+
+  /* CDTC live earnings — smooth tick every 10s */
+  .cdtc-live-val{transition:color .8s ease,transform .8s cubic-bezier(.4,0,.2,1)}
+  .cdtc-live-val.tick{color:var(--grn)!important}
+
+  /* Desktop optimizations */
+  @media (min-width:768px){
+    .ih-title{font-size:24px}
+    .port-card{padding:26px}
+    .port-donut{width:200px;height:200px}
+    .port-stats{grid-template-columns:repeat(3,1fr)}
+    .port-legend{flex-direction:row;gap:12px}
+    .port-legend .legend-item{flex:1}
+    .asset-card{padding:24px}
+    .asset-metrics{grid-template-columns:repeat(4,1fr)}
+  }
+
 </style>
 </head>
 <body>
@@ -1082,14 +1179,16 @@ function renderInvCard(inv){
   </div>`;
 }
 
-// Update pending earnings animation — recalculates every second.
+// Update pending earnings animation — recalculates every 10 SECONDS
+// (con transición CSS suave para no marear con el contador a 1s).
 // CDTC genera 2% mensual fijo. La animación muestra el "claimable":
 //   liveAccrued = capital × 0.02 × (días/30)
 //   claimable   = liveAccrued - lo ya reclamado en bruto (registrado en data-claimed)
 // También actualiza el monto del botón "Reclamar" si existe.
 function startEarningsAnimation(){
   if(window._earningsInterval)clearInterval(window._earningsInterval);
-  window._earningsInterval=setInterval(()=>{
+
+  const updateAll=()=>{
     document.querySelectorAll('[data-pending-live]').forEach(el=>{
       const cap=parseFloat(el.dataset.capital)||0;
       const start=new Date(el.dataset.start);
@@ -1098,7 +1197,18 @@ function startEarningsAnimation(){
       const days=Math.max(0,(now-start)/(1000*60*60*24));
       const gross=Math.floor(cap*0.02*(days/30));
       const live=Math.max(0,gross-claimed);
-      el.textContent='+'+formatCOP(live);
+      const newText='+'+formatCOP(live);
+
+      // Solo actualizar si cambió (evita re-pintar innecesario)
+      if(el.textContent!==newText){
+        // Animación visual: flash verde sutil durante 800ms
+        el.classList.add('cdtc-live-val','tick');
+        el.textContent=newText;
+        setTimeout(()=>el.classList.remove('tick'),800);
+      } else if(!el.classList.contains('cdtc-live-val')){
+        el.classList.add('cdtc-live-val');
+      }
+
       // Sincronizar con el botón de claim (si está activo y no en cooldown)
       const invId=el.getAttribute('data-pending-live');
       const btn=document.querySelector('[data-cdtc-claim-btn="'+invId+'"]');
@@ -1106,7 +1216,11 @@ function startEarningsAnimation(){
         btn.textContent='💰 Reclamar +'+formatCOP(live);
       }
     });
-  },1000);
+  };
+
+  // Primera ejecución inmediata + intervalo cada 10 segundos
+  updateAll();
+  window._earningsInterval=setInterval(updateAll,10000);
 }
 
 // ══════════════════ CLAIM EARNINGS (Pool & CDTC) ══════════════════
@@ -1241,28 +1355,42 @@ function renderTxRows(txs){
 // Estado actual del selector
 window._perfRange='1M';
 
-// Filtra balanceHistory según el rango seleccionado y reconstruye una serie temporal
-// FIX: ahora reconstruye los puntos desde dashboardData.transactions (que SIEMPRE está al día)
-// en lugar de balance_history (que solo se actualiza en momentos específicos).
-// Esto evita el desfase visible donde el chart no coincidía con la suma real.
+// ─── Reconstruye serie temporal de patrimonio ───
+// Estrategia:
+//   1) Balance disponible en cada instante = suma de inflows - outflows hasta esa fecha.
+//      ('investment' viene con amount negativo, así que sumar todos los amounts da el balance directamente.)
+//   2) Capital invertido en cada instante = suma de amount(absoluto) de inversiones cuya fecha de creación <= ese punto
+//      Y que NO hayan sido canceladas/completadas antes de ese punto.
+//   3) Patrimonio total = balance + invertido.
+//
+// Esto produce una curva que sube en depósitos, baja en retiros, y se mantiene plana
+// al invertir (porque el dinero solo se mueve de "disponible" a "invertido").
 function getPerfData(range){
   const txs=(dashboardData&&dashboardData.transactions)||[];
-  if(!txs.length)return [];
+  const invs=myInvestments||[];
 
-  // INFLOW/OUTFLOW tipos (sincronizado con balanceHelper del backend)
-  const INFLOWS =['deposit','payment','interest','profit','investment_return','investment_withdrawal','loan'];
-  const OUTFLOWS=['withdraw','investment'];
+  // Si no hay nada que graficar, salir limpio
+  if(!txs.length && !invs.length)return [];
 
-  // Ordenar TODAS las transacciones por fecha ascendente
-  const all=txs.map(t=>({
+  // 1) Normalizar transacciones — todas suman al "balance" con su signo natural
+  const txEvents=txs.map(t=>({
     date:new Date(t.created_at),
     amount:parseFloat(t.amount)||0,
     type:t.type
-  })).filter(t=>!isNaN(t.date)).sort((a,b)=>a.date-b.date);
+  })).filter(e=>!isNaN(e.date));
 
-  if(!all.length)return [];
+  // 2) Inversiones activas: cada una "vale" su amount desde su startDate
+  const invEvents=invs.map(i=>({
+    date:new Date(i.startDate||i.start_date||i.createdAt||i.created_at),
+    endDate:(i.status==='completed'||i.status==='cancelled')
+      ? new Date(i.updatedAt||i.updated_at||i.lockEndDate||i.lock_end_date||Date.now())
+      : null,
+    amount:parseFloat(i.amount)||0,
+    status:i.status,
+    id:i.id
+  })).filter(e=>!isNaN(e.date));
 
-  // Calcular fecha de corte
+  // 3) Calcular fecha de corte
   const now=new Date();
   const cutoff=new Date();
   switch(range){
@@ -1273,52 +1401,64 @@ function getPerfData(range){
     case 'ALL': cutoff.setTime(0); break;
   }
 
-  // Reconstruir el patrimonio acumulado punto a punto
-  // El patrimonio NO es solo "balance disponible". Es:
-  //   acumulado = sum(inflows) - sum(outflows positivos) + sum(amounts negativos de 'investment')
-  // Para 'investment' que viene con signo negativo en amount, lo sumamos tal cual (es negativo).
-  // Para 'withdraw' que viene positivo, lo restamos.
-  // Esto da el "balance disponible" en cada instante.
-  // Para mostrar PATRIMONIO TOTAL (balance + invertido), sumamos también el monto de las inversiones activas.
-  let runningBalance=0;
-  let runningInvested=0;
-  const points=[];
-
-  // Punto inicial en 0 (si la primera tx es posterior al cutoff, podemos arrancar el chart desde el cutoff)
-  for(const t of all){
-    if(t.type==='deposit'||t.type==='payment'||t.type==='interest'||t.type==='profit'||t.type==='investment_return'||t.type==='loan'){
-      runningBalance+=t.amount;
-    } else if(t.type==='withdraw'){
-      runningBalance-=t.amount;
-    } else if(t.type==='investment'){
-      // amount viene negativo (-1.000.000), sale del balance disponible pero suma al invertido
-      runningBalance+=t.amount;       // ej. balance -= 1.000.000
-      runningInvested+=Math.abs(t.amount); // ej. invertido += 1.000.000
-    } else if(t.type==='investment_withdrawal'){
-      // Cancelación o retiro al vencer — vuelve al balance, sale del invertido
-      runningBalance+=t.amount;
-      runningInvested=Math.max(0,runningInvested-t.amount);
+  // 4) Funciones para calcular balance/invertido en un momento dado
+  function balanceAt(ts){
+    let bal=0;
+    for(const e of txEvents){
+      if(e.date.getTime()>ts)continue;
+      if(e.type==='withdraw')bal-=Math.abs(e.amount);
+      else bal+=e.amount;
     }
-    points.push({
-      date:new Date(t.date),
-      value:runningBalance+runningInvested  // patrimonio total
-    });
+    return bal;
   }
-
-  // Filtrar por rango. Si todas las tx están antes del cutoff, mostrar el último valor estable.
-  let filtered=points.filter(p=>p.date>=cutoff);
-  if(!filtered.length && points.length){
-    const lastVal=points[points.length-1].value;
-    filtered=[{date:cutoff,value:lastVal},{date:now,value:lastVal}];
-  } else if(filtered.length===1){
-    // Solo 1 punto en el rango: dibujar línea horizontal
-    filtered=[{date:cutoff,value:filtered[0].value},filtered[0]];
-  } else if(filtered.length>1){
-    // Agregar un punto al final con la fecha actual para que la línea llegue hasta hoy
-    filtered.push({date:now,value:filtered[filtered.length-1].value});
+  function investedAt(ts){
+    let inv=0;
+    for(const e of invEvents){
+      if(e.date.getTime()>ts)continue;
+      if(!e.endDate || e.endDate.getTime()>ts)inv+=e.amount;
+    }
+    return inv;
   }
+  function patrimonyAt(ts){return balanceAt(ts)+investedAt(ts);}
 
-  return filtered;
+  // 5) Construir hitos: cutoff (ancla inicial) + eventos dentro del rango + ahora
+  const milestones=new Set();
+  milestones.add(cutoff.getTime());                    // Ancla: empezamos a graficar desde acá
+  milestones.add(now.getTime());                       // Cierre: hoy
+
+  // Solo hitos DENTRO del rango visible
+  txEvents.forEach(e=>{
+    const ts=e.date.getTime();
+    if(ts>=cutoff.getTime() && ts<=now.getTime())milestones.add(ts);
+  });
+  invEvents.forEach(e=>{
+    const ts=e.date.getTime();
+    if(ts>=cutoff.getTime() && ts<=now.getTime())milestones.add(ts);
+    if(e.endDate){
+      const ets=e.endDate.getTime();
+      if(ets>=cutoff.getTime() && ets<=now.getTime())milestones.add(ets);
+    }
+  });
+
+  const sortedMs=[...milestones].sort((a,b)=>a-b);
+
+  // 6) Calcular patrimonio en cada hito (esto incluye TODAS las tx previas al hito,
+  //    incluso las que están antes del cutoff — el "salto" de la tx vieja se ve
+  //    reflejado en el valor del ancla inicial)
+  const points=sortedMs.map(ts=>({
+    date:new Date(ts),
+    value:patrimonyAt(ts)
+  }));
+
+  // 7) Si todos los puntos tienen el mismo valor (línea plana), marcar para UI
+  const uniqueValues=new Set(points.map(p=>Math.round(p.value)));
+  const isFlat=uniqueValues.size<=1;
+
+  // Adjuntar metadata al array (no rompe el chart)
+  points.isFlat=isFlat;
+  points.range=range;
+
+  return points;
 }
 
 function setPerfRange(range,btn){
@@ -1358,7 +1498,11 @@ function drawPerfChart(range){
   const elChange=document.getElementById('perf-change');
   const elAmount=document.getElementById('perf-change-amount');
   const elPct=document.getElementById('perf-change-pct');
-  if(elPeriod)elPeriod.textContent=periodLabels[range]||'';
+
+  // Si el chart está plano (sin actividad en el período), aclararlo en el subtítulo
+  const isFlat=data.isFlat&&data.length>1;
+  if(elPeriod)elPeriod.textContent=isFlat?'sin movimientos en este período':(periodLabels[range]||'');
+
   if(elAmount)elAmount.textContent=(isUp?'+':'-')+formatCOP(Math.abs(delta));
   if(elPct)elPct.textContent='('+(isUp?'+':'')+pct.toFixed(2)+'%)';
   if(elChange){
@@ -1489,7 +1633,7 @@ function attachPerfChartInteraction(data,w,h,pad,xScale,yScale){
 // Alias retro-compatible (por si algún código llama drawChart)
 function drawChart(){drawPerfChart(window._perfRange||'1M');}
 
-// ══════════════════ RENDER: INVESTMENTS ══════════════════
+// ══════════════════ RENDER: INVESTMENTS (Aave/DeFi style) ══════════════════
 function renderInvestmentsView(c){
   const active=myInvestments.filter(i=>['active','pending_deposit'].includes(i.status));
   const done=myInvestments.filter(i=>['completed','cancelled'].includes(i.status));
@@ -1498,115 +1642,226 @@ function renderInvestmentsView(c){
   const activeCDTC=active.filter(i=>!i.type||i.type==='cdtc'||String(i.type).startsWith('cdtc'));
   const activePool=active.filter(i=>i.type==='pool'||String(i.type).includes('pool'));
 
-  // Pool APY real (dinámico): calcula desde historial
+  // APY pool dinámico
   const poolAPY=calculatePoolAPY();
   const poolTotalInvested=activePool.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
   const cdtcTotalInvested=activeCDTC.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
   const totalInvested=poolTotalInvested+cdtcTotalInvested;
-  const cdtcPct=totalInvested>0?Math.round((cdtcTotalInvested/totalInvested)*100):0;
-  const poolPct=100-cdtcPct;
+  const cdtcPct=totalInvested>0?(cdtcTotalInvested/totalInvested)*100:0;
+  const poolPct=totalInvested>0?(poolTotalInvested/totalInvested)*100:0;
+
+  // APY ponderado del portafolio (promedio según peso)
+  const portfolioAPY=totalInvested>0
+    ? ((cdtcTotalInvested*2.0)+(poolTotalInvested*poolAPY.monthly))/totalInvested
+    : 0;
+
+  // Total ganancias (suma de todas las earnings registradas)
+  const totalEarnings=myInvestments.reduce((s,i)=>s+(parseFloat(i.totalEarned)||0),0);
+
+  // ─── DONUT CHART (allocation) ───
+  let donutSVG='';
+  if(totalInvested>0){
+    // Cálculo SVG donut: dos arcos
+    const r=70, cx=85, cy=85, strokeW=18;
+    const C=2*Math.PI*r;  // circunferencia
+    const cdtcLen=(cdtcPct/100)*C;
+    const poolLen=(poolPct/100)*C;
+    donutSVG=`
+      <svg viewBox="0 0 170 170" class="donut-svg">
+        <defs>
+          <linearGradient id="dgCdtc" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stop-color="#5b8dee"/>
+            <stop offset="1" stop-color="#8b6cf6"/>
+          </linearGradient>
+          <linearGradient id="dgPool" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stop-color="#f59e0b"/>
+            <stop offset="1" stop-color="#8b6cf6"/>
+          </linearGradient>
+        </defs>
+        <!-- background ring -->
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="${strokeW}"/>
+        ${cdtcPct>0?`
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="url(#dgCdtc)" stroke-width="${strokeW}"
+          stroke-dasharray="${cdtcLen} ${C}" stroke-linecap="round"
+          transform="rotate(-90 ${cx} ${cy})"/>`:''}
+        ${poolPct>0?`
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="url(#dgPool)" stroke-width="${strokeW}"
+          stroke-dasharray="${poolLen} ${C}" stroke-linecap="round"
+          stroke-dashoffset="${-cdtcLen}"
+          transform="rotate(-90 ${cx} ${cy})"/>`:''}
+        <!-- center text -->
+        <text x="${cx}" y="${cy-2}" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="9" font-family="Space Mono" letter-spacing="1" font-weight="600">CAPITAL</text>
+        <text x="${cx}" y="${cy+16}" text-anchor="middle" fill="#fff" font-size="14" font-weight="700" font-family="Space Mono">${formatCOP(totalInvested).replace('$','$')}</text>
+      </svg>`;
+  }
 
   c.innerHTML=`
   <div class="anim">
-    <h3 style="font-size:18px;font-weight:700;margin-bottom:4px">Mis Inversiones</h3>
-    <p style="font-size:13px;color:var(--mut);margin-bottom:20px">Elige el producto que mejor se ajuste a tu perfil de riesgo</p>
+    <div class="invest-hero">
+      <div class="ih-head">
+        <h3 class="ih-title">Mis Inversiones</h3>
+        <p class="ih-sub">Tu portafolio descentralizado · Estilo DeFi</p>
+      </div>
+    </div>
 
     ${totalInvested>0?`
-    <div class="alloc-block">
-      <div class="alloc-ttl">Distribución de tu capital invertido</div>
-      <div class="alloc-rows">
-        ${cdtcTotalInvested>0?`
-        <div class="alloc-row">
-          <div class="alloc-head">
-            <div class="alloc-name"><span class="dot-sm" style="background:var(--blu)"></span>CDTC — Bajo Riesgo</div>
-            <div><span class="alloc-val">${formatCOP(cdtcTotalInvested)}</span><span class="alloc-pct">${cdtcPct}%</span></div>
+    <!-- ═══ DONUT + STATS PORTFOLIO ═══ -->
+    <div class="port-card">
+      <div class="port-donut-wrap">
+        <div class="port-donut">${donutSVG}</div>
+        <div class="port-stats">
+          <div class="port-stat">
+            <div class="ps-lbl">APY portafolio</div>
+            <div class="ps-val grn">${portfolioAPY.toFixed(2)}<span class="ps-unit">%</span></div>
           </div>
-          <div class="alloc-bar"><div class="alloc-bar-fill" style="width:${cdtcPct}%;background:linear-gradient(90deg,var(--blu),var(--pur))"></div></div>
+          <div class="port-stat">
+            <div class="ps-lbl">Ganancias totales</div>
+            <div class="ps-val amb">+${formatCOP(totalEarnings)}</div>
+          </div>
+          <div class="port-stat">
+            <div class="ps-lbl">Activos</div>
+            <div class="ps-val">${active.length}</div>
+          </div>
+        </div>
+      </div>
+      <div class="port-legend">
+        ${cdtcTotalInvested>0?`
+        <div class="legend-item">
+          <span class="legend-dot" style="background:linear-gradient(135deg,#5b8dee,#8b6cf6)"></span>
+          <div class="legend-info">
+            <div class="legend-name">CDTC</div>
+            <div class="legend-val">${formatCOP(cdtcTotalInvested)}</div>
+          </div>
+          <div class="legend-pct">${cdtcPct.toFixed(1)}%</div>
         </div>`:''}
         ${poolTotalInvested>0?`
-        <div class="alloc-row">
-          <div class="alloc-head">
-            <div class="alloc-name"><span class="dot-sm" style="background:var(--amb)"></span>Pool — Riesgo Medio</div>
-            <div><span class="alloc-val">${formatCOP(poolTotalInvested)}</span><span class="alloc-pct">${poolPct}%</span></div>
+        <div class="legend-item">
+          <span class="legend-dot" style="background:linear-gradient(135deg,#f59e0b,#8b6cf6)"></span>
+          <div class="legend-info">
+            <div class="legend-name">Pool de Liquidez</div>
+            <div class="legend-val">${formatCOP(poolTotalInvested)}</div>
           </div>
-          <div class="alloc-bar"><div class="alloc-bar-fill" style="width:${poolPct}%;background:linear-gradient(90deg,var(--amb),var(--pur))"></div></div>
+          <div class="legend-pct">${poolPct.toFixed(1)}%</div>
         </div>`:''}
       </div>
     </div>`:''}
 
-    <!-- Producto CDTC -->
-    <div class="sec">
-      <div class="product-card" style="margin-bottom:10px">
-        <div class="prod-head">
-          <div class="prod-icon">
-            <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+    <!-- ═══ MARKETS — Cards estilo Aave ═══ -->
+    <div class="markets-section">
+      <div class="markets-head">
+        <div class="markets-title">Markets disponibles</div>
+        <div class="markets-sub">${totalInvested===0?'Comienza tu portafolio':'Agregar más posiciones'}</div>
+      </div>
+
+      <!-- CDTC Asset Card -->
+      <div class="asset-card">
+        <div class="asset-card-glow" style="background:radial-gradient(circle at 20% 50%,rgba(91,141,238,.12),transparent 60%)"></div>
+        <div class="asset-top">
+          <div class="asset-icon" style="background:linear-gradient(135deg,rgba(91,141,238,.2),rgba(139,108,246,.15));border-color:rgba(91,141,238,.3)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5b8dee" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
           </div>
-          <div>
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <div class="prod-ttl">Inversión CDTC</div>
-              <span class="risk-tag">Bajo Riesgo</span>
+          <div class="asset-info">
+            <div class="asset-name">CDTC <span class="asset-symbol">·  Certificado Digital</span></div>
+            <div class="asset-tags">
+              <span class="tag tag-safe">✓ Bajo Riesgo</span>
+              <span class="tag tag-locked">🔒 Plazo fijo</span>
             </div>
-            <div class="prod-sub">Rendimiento histórico ~2.0% mensual · Capital bloqueado</div>
           </div>
         </div>
-        <div class="prod-rates">
-          <div class="rate-chip"><strong>3</strong> meses</div>
-          <div class="rate-chip"><strong>6</strong> meses</div>
-          <div class="rate-chip"><strong>12</strong> meses</div>
-          <div class="rate-chip">${activeCDTC.length}/3 activas</div>
+
+        <div class="asset-metrics">
+          <div class="am-cell">
+            <div class="am-lbl">APY Fijo</div>
+            <div class="am-val grn">2.00<span class="am-unit">%</span></div>
+            <div class="am-sub">mensual</div>
+          </div>
+          <div class="am-cell">
+            <div class="am-lbl">Min. capital</div>
+            <div class="am-val">$100K</div>
+            <div class="am-sub">COP</div>
+          </div>
+          <div class="am-cell">
+            <div class="am-lbl">Plazos</div>
+            <div class="am-val">3/6/12</div>
+            <div class="am-sub">meses</div>
+          </div>
+          <div class="am-cell">
+            <div class="am-lbl">Mis posiciones</div>
+            <div class="am-val blu">${activeCDTC.length}<span class="am-unit">/3</span></div>
+            <div class="am-sub">activas</div>
+          </div>
         </div>
-        <button class="prod-cta" onclick="openInvestModal('cdtc')" ${activeCDTC.length>=3?'disabled':''}>
-          ${activeCDTC.length>=3?'Límite alcanzado':'Invertir en CDTC →'}
+
+        <button class="asset-cta" onclick="openInvestModal('cdtc')" ${activeCDTC.length>=3?'disabled':''}>
+          ${activeCDTC.length>=3?'Límite alcanzado':'Supply →'}
         </button>
       </div>
-    </div>
 
-    <!-- Producto Pool de Liquidez -->
-    <div class="sec">
-      <div class="pool-card">
-        <div class="prod-head">
-          <div class="prod-icon" style="background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.2)">
-            <svg viewBox="0 0 24 24" stroke="var(--amb)"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="10"/></svg>
+      <!-- Pool Asset Card -->
+      <div class="asset-card asset-card-pool">
+        <div class="asset-card-glow" style="background:radial-gradient(circle at 80% 50%,rgba(245,158,11,.12),transparent 60%)"></div>
+        <div class="asset-top">
+          <div class="asset-icon" style="background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(139,108,246,.15));border-color:rgba(245,158,11,.3)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="10"/></svg>
           </div>
-          <div>
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <div class="prod-ttl">Pool de Liquidez</div>
-              <span class="risk-tag medium">Riesgo Medio</span>
+          <div class="asset-info">
+            <div class="asset-name">Pool de Liquidez <span class="asset-symbol">· DeFi</span></div>
+            <div class="asset-tags">
+              <span class="tag tag-medium">⚡ Riesgo Medio</span>
+              <span class="tag tag-flex">💧 Ganancias retirables</span>
             </div>
-            <div class="prod-sub">Exposición diversificada · Plazo mínimo 1 año</div>
           </div>
         </div>
-        <div class="pool-apy-big">${poolAPY.monthly.toFixed(2)}%<span style="font-size:14px;color:var(--mut);font-weight:500"> mensual</span></div>
-        <div class="pool-apy-sub">APY anual real: <strong style="color:var(--amb);font-family:'Space Mono',monospace">${poolAPY.annual.toFixed(1)}%</strong> · Basado en ${poolAPY.months} meses de rendimientos históricos</div>
-        
-        <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:12px;margin:14px 0;font-size:11px;color:var(--mut);line-height:1.7">
-          <div style="font-weight:700;color:var(--amb);margin-bottom:6px;font-size:12px">⚠️ Comisiones y Condiciones</div>
-          • <strong style="color:var(--text)">Plazo mínimo:</strong> 12 meses (1 año bloqueado)<br>
-          • <strong style="color:var(--text)">Comisión de entrada:</strong> 2% del capital depositado<br>
-          • <strong style="color:var(--text)">Ganancias:</strong> Retirables mensualmente<br>
-          • <strong style="color:var(--text)">Volatilidad:</strong> Puede haber meses negativos. El plazo largo asegura mejores resultados.
+
+        <div class="asset-metrics">
+          <div class="am-cell">
+            <div class="am-lbl">APY actual</div>
+            <div class="am-val amb">${poolAPY.monthly.toFixed(2)}<span class="am-unit">%</span></div>
+            <div class="am-sub">mensual variable</div>
+          </div>
+          <div class="am-cell">
+            <div class="am-lbl">APY anual</div>
+            <div class="am-val amb">${poolAPY.annual.toFixed(0)}<span class="am-unit">%</span></div>
+            <div class="am-sub">${poolAPY.months}m tracked</div>
+          </div>
+          <div class="am-cell">
+            <div class="am-lbl">Entry fee</div>
+            <div class="am-val red">2<span class="am-unit">%</span></div>
+            <div class="am-sub">una vez</div>
+          </div>
+          <div class="am-cell">
+            <div class="am-lbl">Lock period</div>
+            <div class="am-val pur">12<span class="am-unit">m</span></div>
+            <div class="am-sub">desbloqueo</div>
+          </div>
         </div>
 
-        <div class="prod-rates">
-          <div class="rate-chip">🔒 Bloqueado 12 meses</div>
-          <div class="rate-chip">📊 APY variable</div>
-          <div class="rate-chip">💰 Ganancias retirables</div>
+        <div class="asset-warning">
+          <div class="aw-icon">⚠️</div>
+          <div class="aw-text">El Pool puede tener meses negativos. Las ganancias se reclaman manualmente · Comisión de retiro 20% (descontada del bruto retirado)</div>
         </div>
-        <button class="prod-cta" style="background:linear-gradient(135deg,var(--amb),var(--pur))" onclick="openInvestModal('pool')">
-          Invertir en Pool →
+
+        <button class="asset-cta" onclick="openInvestModal('pool')" style="background:linear-gradient(135deg,var(--amb),var(--pur))">
+          Supply →
         </button>
       </div>
     </div>
 
     ${active.length>0?`
-    <div class="sec">
-      <div class="sec-head"><div class="sec-ttl">Activas (${active.length})</div></div>
+    <div class="positions-section">
+      <div class="positions-head">
+        <div class="positions-title">Mis posiciones activas</div>
+        <div class="positions-badge">${active.length}</div>
+      </div>
       ${active.map(inv=>renderInvCard(inv)).join('')}
-    </div>`:'<div class="empty"><span class="empty-icon">📊</span>No tienes inversiones activas aún</div>'}
+    </div>`:''}
 
     ${done.length>0?`
-    <div class="sec">
-      <div class="sec-head"><div class="sec-ttl">Historial (${done.length})</div></div>
+    <div class="positions-section">
+      <div class="positions-head">
+        <div class="positions-title" style="color:var(--mut)">Historial</div>
+        <div class="positions-badge" style="background:var(--sur)">${done.length}</div>
+      </div>
       ${done.map(inv=>renderInvCard(inv)).join('')}
     </div>`:''}
   </div>`;
@@ -2696,6 +2951,19 @@ async function init(){
 
   await loadAllData();
   renderCurrentView();
+
+  // AUTO-REFRESH cada 30 segundos para reflejar cambios del admin sin recargar la página
+  // (transacciones nuevas, rendimientos registrados, etc.)
+  if(window._autoRefresh)clearInterval(window._autoRefresh);
+  window._autoRefresh=setInterval(async ()=>{
+    // Solo refrescar si la pestaña está activa (evita gasto de batería)
+    if(document.hidden)return;
+    try{
+      await loadAllData();
+      // Re-renderizar la vista actual silenciosamente
+      renderCurrentView();
+    }catch(e){console.warn('auto-refresh:',e)}
+  },30000);
 }
 init();
 </script>
