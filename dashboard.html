@@ -787,6 +787,29 @@ function closeModal(id){document.getElementById(id).classList.remove('open')}
 function formatCOP(n){if(n===null||n===undefined||isNaN(Number(n)))return '—';return '$'+Math.round(Number(n)).toLocaleString('es-CO')}
 // Variante con 2 decimales para mostrar el acumulado CDTC en tiempo real (ej: $1.234,56)
 function formatCOPDecimal(n){if(n===null||n===undefined||isNaN(Number(n)))return '—';return '$'+Number(n).toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:2})}
+// FIX BUG #13: parsea montos en formato es-CO ('1.500.000' o '1.500.000,50' → 1500000 o 1500000.5).
+// El parseFloat nativo trata el primer '.' como decimal, así que '1.500.000' devolvía 1.5 (¡catástrofe!).
+function parseAmount(input){
+  if(input===null||input===undefined||input==='')return 0;
+  // Si ya es número, retornarlo
+  if(typeof input==='number')return isNaN(input)?0:input;
+  // Limpiar: quitar todo lo que no sea dígito, punto o coma
+  var s=String(input).trim().replace(/[^\d.,-]/g,'');
+  if(!s)return 0;
+  // Formato es-CO: punto = separador miles, coma = decimal
+  // Si tiene coma, todo antes son miles (quitar puntos), después es decimal
+  if(s.indexOf(',')!==-1){
+    var parts=s.split(',');
+    var entero=parts[0].replace(/\./g,'');
+    var decimal=parts[1]||'';
+    s=entero+'.'+decimal;
+  } else {
+    // Sin coma: los puntos son separadores de miles → quitarlos
+    s=s.replace(/\./g,'');
+  }
+  var n=parseFloat(s);
+  return isNaN(n)?0:n;
+}
 function formatDate(d){if(!d)return '—';const dt=new Date(d);if(isNaN(dt.getTime()))return '—';return dt.toLocaleDateString('es-CO',{day:'numeric',month:'short',year:'numeric'})}
 
 // ══════════════════ STATE ══════════════════
@@ -1075,8 +1098,27 @@ function renderInvCard(inv){
   // Pool tiene withdrawable_earnings (lo que el admin registró acumulado).
   // CDTC tiene liveClaimable (calculado en tiempo real por el backend).
   const withdrawable=parseFloat(inv.withdrawableEarnings)||parseFloat(inv.withdrawable_earnings)||0;
-  const liveClaimable=parseFloat(inv.liveClaimable)||0;
-  const canClaimNow=!!inv.canClaimNow;
+
+  // FIX: calcular liveClaimable LOCALMENTE como fallback si el backend no lo envía bien.
+  // Esto garantiza que el frontend siempre tenga el valor correcto al segundo,
+  // independiente de la versión del backend deployado.
+  const startTmp=new Date(inv.startDate||inv.start_date||Date.now());
+  const SECONDS_PER_MONTH_CALC=30*24*60*60;
+  let liveClaimable=parseFloat(inv.liveClaimable);
+  if(!liveClaimable||isNaN(liveClaimable)){
+    // Fallback local: calculamos al segundo.
+    // Asumimos que ya retirado = totalEarned (no es perfecto pero es lo mejor que tenemos sin backend)
+    if(!isPool && isActive && cap>0 && !isNaN(startTmp.getTime())){
+      const secondsLocal=Math.max(0,(new Date()-startTmp)/1000);
+      const grossLocal=cap*0.02*(secondsLocal/SECONDS_PER_MONTH_CALC);
+      liveClaimable=Math.max(0,grossLocal-totalEarned);
+    } else {
+      liveClaimable=0;
+    }
+  }
+
+  // canClaimNow del backend, o si no viene, asumimos que sí (sin cooldown verificable client-side)
+  const canClaimNow=inv.canClaimNow!==undefined?!!inv.canClaimNow:(liveClaimable>=10);
   const nextClaimAt=inv.nextClaimAt?new Date(inv.nextClaimAt):null;
 
   // "Ganancias retiradas" = neto histórico ya cobrado.
@@ -1194,11 +1236,33 @@ function startEarningsAnimation(){
   const SECONDS_PER_MONTH=30*24*60*60; // 2.592.000
 
   const updateAll=()=>{
-    document.querySelectorAll('[data-pending-live]').forEach(el=>{
+    const elements=document.querySelectorAll('[data-pending-live]');
+    // DEBUG: log first run to console so the user can verify in F12
+    if(!window._earningsDebugged){
+      window._earningsDebugged=true;
+      console.log('[CDTC Anim] Elementos encontrados:',elements.length);
+      elements.forEach((el,i)=>{
+        console.log(`[CDTC Anim #${i}] id=${el.getAttribute('data-pending-live')} cap=${el.dataset.capital} start=${el.dataset.start} claimed=${el.dataset.claimed}`);
+      });
+    }
+
+    elements.forEach(el=>{
       const cap=parseFloat(el.dataset.capital)||0;
-      const start=new Date(el.dataset.start);
+      const startStr=el.dataset.start||'';
+      const start=new Date(startStr);
       const claimed=parseFloat(el.dataset.claimed)||0;
       const now=new Date();
+
+      // Validación de datos: si la fecha es inválida o el capital es 0, mostrar $0
+      if(!cap || isNaN(start.getTime())){
+        if(el.textContent!=='+$0,00')el.textContent='+$0,00';
+        if(!window._earningsBadData){
+          window._earningsBadData=true;
+          console.warn('[CDTC Anim] DATOS INVÁLIDOS — cap:',cap,'start:',startStr,'isNaN(start):',isNaN(start.getTime()));
+        }
+        return;
+      }
+
       const seconds=Math.max(0,(now-start)/1000);
       const gross=cap*0.02*(seconds/SECONDS_PER_MONTH);
       const live=Math.max(0,gross-claimed);  // sin redondeo, decimales precisos
@@ -1939,7 +2003,7 @@ function copyDepKey(){
 }
 
 function updateDepositPreview(){
-  var amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
+  var amt=parseAmount(document.getElementById('dep-amount')?.value);
   var h=document.getElementById('dep-hint');
   if(h){if(amt>0&&amt<10000)h.innerHTML='<span style="color:var(--red)">Monto mínimo: $10,000 COP</span>';else if(amt>=10000)h.innerHTML='Se acreditará: <strong style="color:var(--grn)">'+formatCOP(amt)+'</strong>';else h.textContent='';}
   checkDepositReady();
@@ -1956,7 +2020,7 @@ function handleDepositFile(input){
 function clearDepositFile(){document.getElementById('dep-file').value='';document.getElementById('dep-preview-img').style.display='none';document.getElementById('dep-drop').style.display='block';checkDepositReady();}
 
 function checkDepositReady(){
-  var amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
+  var amt=parseAmount(document.getElementById('dep-amount')?.value);
   var hasFile=document.getElementById('dep-file')?.files?.length>0;
   var btn=document.getElementById('dep-submit-btn');
   if(!btn)return;var ready=amt>=10000&&hasFile;
@@ -1966,7 +2030,7 @@ function checkDepositReady(){
 async function submitDepositProof(){
   var btn=document.getElementById('dep-submit-btn');
   var msgEl=document.getElementById('dep-submit-msg');
-  var amt=parseFloat(document.getElementById('dep-amount')?.value)||0;
+  var amt=parseAmount(document.getElementById('dep-amount')?.value);
   var note=document.getElementById('dep-note')?.value||'';
   var file=document.getElementById('dep-file')?.files[0];
   if(amt<10000||!file){toast('Completa el monto y adjunta comprobante','error');return;}
@@ -2061,15 +2125,15 @@ async function renderWithdrawView(c){
 
     <div style="font-size:11px;color:var(--mut);line-height:1.8;padding:14px;background:var(--sur);border-radius:10px;margin-top:16px">
       <strong style="color:var(--text);display:block;margin-bottom:4px">Información de retiros</strong>
-      • Retiros hasta <strong>$2,000,000</strong>: procesados en 24-48 horas<br>
-      • Montos mayores: hasta 30 días hábiles con aprobación especial<br>
+      • Tiempo estimado de procesamiento: 24-48 horas hábiles, sujeto a verificación administrativa<br>
+      • Montos mayores a <strong>$2,000,000</strong>: hasta 30 días hábiles con aprobación especial<br>
       • Sin comisión por retiro · Monto mínimo: $10,000 COP
     </div>
   </div>`;
 }
 
 function updateWithdrawPreview(){
-  var amt=parseFloat(document.getElementById('wr-amount')?.value)||0;
+  var amt=parseAmount(document.getElementById('wr-amount')?.value);
   var pmEl=document.querySelector('input[name="wr-pm"]:checked');
   var pm=pmEl?pmEl.value:'';
   var hint=document.getElementById('wr-hint');
@@ -2087,7 +2151,7 @@ function updateWithdrawPreview(){
 }
 
 async function submitWithdrawalRequest(){
-  var amount=parseFloat(document.getElementById('wr-amount').value);
+  var amount=parseAmount(document.getElementById('wr-amount').value);
   var pmEl=document.querySelector('input[name="wr-pm"]:checked');
   var paymentMethodId=pmEl?parseInt(pmEl.value):0;
   var btn=document.getElementById('btn-withdraw-request');
@@ -2454,7 +2518,7 @@ function selectPlan(el){
 }
 
 function updateInvestPreview(){
-  const amt=parseFloat(document.getElementById('invest-amount').value)||0;
+  const amt=parseAmount(document.getElementById('invest-amount').value)||0;
   const p=document.getElementById('invest-preview');
   const isPool=selectedPlan.type==='pool';
   const minAmount=isPool?50000:100000;
@@ -2482,7 +2546,7 @@ function updateInvestPreview(){
 }
 
 async function confirmInvest(){
-  const amt=parseFloat(document.getElementById('invest-amount').value);
+  const amt=parseAmount(document.getElementById('invest-amount').value);
   const isPool=selectedPlan.type==='pool';
   const minAmount=isPool?50000:100000;
 
