@@ -545,6 +545,30 @@
   .cdtc-live-val{transition:color .8s ease,transform .8s cubic-bezier(.4,0,.2,1)}
   .cdtc-live-val.tick{color:var(--grn)!important}
 
+  /* ──────── INFO TOOLTIPS (?) ──────── */
+  .info-ico{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:var(--sur);border:1px solid var(--bd);color:var(--mut);font-size:9px;font-weight:700;cursor:pointer;margin-left:5px;transition:all .15s ease;vertical-align:middle;font-family:'Space Mono',monospace;user-select:none;flex-shrink:0}
+  .info-ico:hover{background:var(--blud);border-color:var(--blu);color:var(--blu);transform:scale(1.1)}
+  .info-ico.active{background:var(--blu);color:#fff;border-color:var(--blu)}
+
+  /* Tooltip popup container */
+  .tip-pop{position:fixed;z-index:9999;max-width:280px;padding:12px 14px;background:linear-gradient(135deg,#1a1f2e,#0f1419);border:1px solid var(--blu);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.4),0 0 0 1px rgba(91,141,238,.2);font-size:12px;color:var(--text);line-height:1.55;opacity:0;transform:translateY(4px);transition:opacity .18s ease,transform .18s ease;pointer-events:none}
+  .tip-pop.show{opacity:1;transform:translateY(0);pointer-events:auto}
+  .tip-pop::before{content:'';position:absolute;width:10px;height:10px;background:#1a1f2e;border-left:1px solid var(--blu);border-top:1px solid var(--blu);transform:rotate(45deg);top:-6px;left:20px}
+  .tip-pop[data-pos="bottom"]::before{top:auto;bottom:-6px;border-left:none;border-top:none;border-right:1px solid var(--blu);border-bottom:1px solid var(--blu)}
+  .tip-ttl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--blu);margin-bottom:5px;font-family:'Space Mono',monospace}
+  .tip-body{font-size:12px;color:var(--text);opacity:.92}
+  .tip-body strong{color:var(--blu)}
+  .tip-pop.amb{border-color:var(--amb);box-shadow:0 8px 30px rgba(0,0,0,.4),0 0 0 1px rgba(245,158,11,.2)}
+  .tip-pop.amb::before{border-color:var(--amb)}
+  .tip-pop.amb .tip-ttl{color:var(--amb)}
+  .tip-pop.amb .tip-body strong{color:var(--amb)}
+
+  /* ──────── "AGREGAR CAPITAL" BUTTON ──────── */
+  .add-cap-btn{margin-top:10px;width:100%;padding:10px;background:linear-gradient(135deg,rgba(91,141,238,.12),rgba(124,92,252,.12));border:1px dashed rgba(91,141,238,.4);border-radius:8px;color:var(--blu);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s ease;display:flex;align-items:center;justify-content:center;gap:6px}
+  .add-cap-btn:hover{background:linear-gradient(135deg,rgba(91,141,238,.18),rgba(124,92,252,.18));border-style:solid;border-color:var(--blu)}
+  .add-cap-btn.amb{color:var(--amb);border-color:rgba(245,158,11,.4);background:linear-gradient(135deg,rgba(245,158,11,.10),rgba(124,92,252,.10))}
+  .add-cap-btn.amb:hover{background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(124,92,252,.18));border-color:var(--amb)}
+
   /* Desktop optimizations */
   @media (min-width:768px){
     .ih-title{font-size:24px}
@@ -700,7 +724,7 @@
         </div>
       </div>
 
-      <div class="info-row"><span class="l">Producto</span><span class="v" id="inf-producto">CDTC — Bajo Riesgo</span></div>
+      <div class="info-row"><span class="l">Producto</span><span class="v" id="inf-producto">LP COP — Bajo Riesgo</span></div>
       <div class="info-row"><span class="l" id="inf-apy-l">APY mensual</span><span class="v blu" id="inf-apy">~2.0%</span></div>
       <div class="info-row"><span class="l">Mínimo</span><span class="v" id="inf-min">$100,000 COP</span></div>
 
@@ -849,6 +873,8 @@ async function loadAllData(){
     if(balR&&balR.ok)balanceSummary=await balR.json();
     if(invR&&invR.ok){
       myInvestments=await invR.json();
+      // Reset debug flag → log fresco en cada carga (útil para diagnosticar)
+      window._invDebugDone=false;
       // FIX: ordenar por prioridad de status (active → pending → completed → cancelled)
       // y dentro de cada grupo, las más recientes primero.
       const STATUS_ORDER={'active':0,'pending_deposit':1,'completed':2,'cancelled':3};
@@ -997,12 +1023,12 @@ function renderDashboard(c){
       <p class="invest-cta-desc">Explora nuestras opciones de inversión y encuentra la que mejor se ajuste a ti.</p>
       <div class="invest-cta-stats">
         <div class="ic-stat">
-          <div class="ic-stat-val">CDTC</div>
+          <div class="ic-stat-val">LP COP</div>
           <div class="ic-stat-lbl">Capital protegido</div>
         </div>
         <div class="ic-stat-sep"></div>
         <div class="ic-stat">
-          <div class="ic-stat-val">Pool</div>
+          <div class="ic-stat-val">DGP</div>
           <div class="ic-stat-lbl">Mayor rentabilidad</div>
         </div>
       </div>
@@ -1195,10 +1221,20 @@ function renderInvCard(inv){
     }
   }
 
+  // Botón "Agregar capital" (solo si está activa, no pendiente)
+  // Permite sumar al monto existente sin afectar la fecha de inicio.
+  let addCapButton='';
+  if(!isPending && isActive){
+    addCapButton=`<button class="add-cap-btn ${isPool?'amb':''}" onclick="event.stopPropagation();openAddCapitalModal(${inv.id},'${isPool?'pool':'cdtc'}',${cap})">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Agregar capital
+    </button>`;
+  }
+
   return `<div class="inv-card" onclick="showInvestmentDetail(${inv.id})">
     <div class="inv-head">
       <div class="inv-type-wrap">
-        <div class="inv-type">${isPool?'Pool':'CDTC'} <span class="plazo">— ${isPool?'12 meses':((inv.durationMonths||6)+' meses')}</span></div>
+        <div class="inv-type">${isPool?'Fondo DGP':'LP COP'} <span class="plazo">— ${isPool?'12 meses':((inv.durationMonths||6)+' meses')}</span></div>
         <span class="risk-tag${isPool?' medium':''}">${isPool?'Riesgo Medio':'Bajo Riesgo'}</span>
       </div>
       <span class="inv-status ${isPending?'pending':'active'}">${isPending?'Pendiente':'Activa'}</span>
@@ -1220,6 +1256,7 @@ function renderInvCard(inv){
     </div>
     ${pendingBanner}
     ${claimButton}
+    ${addCapButton}
   </div>`;
 }
 
@@ -1298,7 +1335,7 @@ function startEarningsAnimation(){
 // CDTC: solo descuenta 5% referido (si aplica), sin comisión Sanse.
 async function claimInvestmentEarnings(invId,earnings,kind){
   var isPool=(kind||'').toLowerCase()==='pool';
-  var label=isPool?'Pool':'CDTC';
+  var label=isPool?'Fondo DGP':'LP COP';
   var sanseRate=isPool?0.20:0;
   var sanseCommission=Math.round(earnings*sanseRate);
   // Para mostrar al usuario una estimación: si el usuario sabe que tiene referido, ajustar
@@ -1406,7 +1443,7 @@ async function cancelInvestmentDeposit(invId){
 
 function renderTxRows(txs){
   if(!txs.length)return '<tr><td colspan="3" style="text-align:center;color:var(--mut);padding:30px">Sin movimientos</td></tr>';
-  const labels={deposit:'Depósito',profit:'Rendimiento',withdraw:'Retiro',payment:'Abono',interest:'Intereses',investment:'Inversión',investment_return:'Rendimiento',investment_withdrawal:'Retiro CDTC',loan:'Préstamo'};
+  const labels={deposit:'Depósito',profit:'Rendimiento',withdraw:'Retiro',payment:'Abono',interest:'Intereses',investment:'Inversión',investment_return:'Rendimiento',investment_withdrawal:'Retiro LP COP',loan:'Préstamo'};
   const badges={deposit:'b-dep',profit:'b-prof',withdraw:'b-wth',investment:'b-inv',investment_return:'b-prof',investment_withdrawal:'b-dep',interest:'b-prof',payment:'b-dep',loan:'b-inv'};
   return txs.map(tx=>{
     const neg=['withdraw','investment','investment_withdrawal'].includes(tx.type);
@@ -1722,14 +1759,34 @@ function renderInvestmentsView(c){
   const active=myInvestments.filter(i=>['active','pending_deposit'].includes(i.status));
   const done=myInvestments.filter(i=>['completed','cancelled'].includes(i.status));
 
-  // Separate CDTC vs pool
-  const activeCDTC=active.filter(i=>!i.type||i.type==='cdtc'||String(i.type).startsWith('cdtc'));
-  const activePool=active.filter(i=>i.type==='pool'||String(i.type).includes('pool'));
+  // Separate CDTC vs pool (case-insensitive, robusto)
+  // Pool: cualquier tipo que contenga "pool" (en cualquier case)
+  // CDTC/LP COP: TODO lo demás (incluyendo null, undefined, "cdtc", "CDTC", "cdtc_3m", etc.)
+  // Esto garantiza que ninguna inversión activa quede fuera de la suma.
+  const isPoolType=(t)=>{const s=String(t||'').toLowerCase().trim();return s==='pool'||s.includes('pool');};
+  const activePool=active.filter(i=>isPoolType(i.type));
+  const activeCDTC=active.filter(i=>!isPoolType(i.type));
+
+  // DEBUG: log para diagnosticar si alguna inversión no se está sumando
+  if(!window._invDebugDone){
+    window._invDebugDone=true;
+    console.log('[Inversiones] Total activas:',active.length,'| LP COP:',activeCDTC.length,'| Fondo DGP:',activePool.length);
+    active.forEach((inv,i)=>{
+      console.log(`  [${i}] id=${inv.id} type="${inv.type}" status=${inv.status} amount=${inv.amount} → ${isPoolType(inv.type)?'POOL':'CDTC/LP COP'}`);
+    });
+  }
 
   // APY pool dinámico
   const poolAPY=calculatePoolAPY();
-  const poolTotalInvested=activePool.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
-  const cdtcTotalInvested=activeCDTC.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
+  // FIX: suma defensiva — convertir explícitamente a número y filtrar NaN
+  const poolTotalInvested=activePool.reduce((s,i)=>{
+    const v=parseFloat(i.amount);
+    return s+(isFinite(v)?v:0);
+  },0);
+  const cdtcTotalInvested=activeCDTC.reduce((s,i)=>{
+    const v=parseFloat(i.amount);
+    return s+(isFinite(v)?v:0);
+  },0);
   const totalInvested=poolTotalInvested+cdtcTotalInvested;
   const cdtcPct=totalInvested>0?(cdtcTotalInvested/totalInvested)*100:0;
   const poolPct=totalInvested>0?(poolTotalInvested/totalInvested)*100:0;
@@ -1813,7 +1870,7 @@ function renderInvestmentsView(c){
         <div class="legend-item">
           <span class="legend-dot" style="background:linear-gradient(135deg,#5b8dee,#8b6cf6)"></span>
           <div class="legend-info">
-            <div class="legend-name">CDTC</div>
+            <div class="legend-name">LP COP <span class="info-ico" data-tip="lpcop">?</span></div>
             <div class="legend-val">${formatCOP(cdtcTotalInvested)}</div>
           </div>
           <div class="legend-pct">${cdtcPct.toFixed(1)}%</div>
@@ -1822,7 +1879,7 @@ function renderInvestmentsView(c){
         <div class="legend-item">
           <span class="legend-dot" style="background:linear-gradient(135deg,#f59e0b,#8b6cf6)"></span>
           <div class="legend-info">
-            <div class="legend-name">Pool de Liquidez</div>
+            <div class="legend-name">Fondo DGP <span class="info-ico" data-tip="dgp">?</span></div>
             <div class="legend-val">${formatCOP(poolTotalInvested)}</div>
           </div>
           <div class="legend-pct">${poolPct.toFixed(1)}%</div>
@@ -1830,14 +1887,24 @@ function renderInvestmentsView(c){
       </div>
     </div>`:''}
 
-    <!-- ═══ MARKETS — Cards estilo Aave ═══ -->
-    <div class="markets-section">
+    <!-- ═══ MIS POSICIONES ACTIVAS (primero) ═══ -->
+    ${active.length>0?`
+    <div class="positions-section" style="margin-top:0">
+      <div class="positions-head">
+        <div class="positions-title">Mis posiciones activas</div>
+        <div class="positions-badge">${active.length}</div>
+      </div>
+      ${active.map(inv=>renderInvCard(inv)).join('')}
+    </div>`:''}
+
+    <!-- ═══ INVERSIONES DISPONIBLES (después) ═══ -->
+    <div class="markets-section" style="margin-top:24px">
       <div class="markets-head">
-        <div class="markets-title">Markets disponibles</div>
+        <div class="markets-title">Inversiones Disponibles</div>
         <div class="markets-sub">${totalInvested===0?'Comienza tu portafolio':'Agregar más posiciones'}</div>
       </div>
 
-      <!-- CDTC Asset Card -->
+      <!-- LP COP Asset Card (antes CDTC) -->
       <div class="asset-card">
         <div class="asset-card-glow" style="background:radial-gradient(circle at 20% 50%,rgba(91,141,238,.12),transparent 60%)"></div>
         <div class="asset-top">
@@ -1845,7 +1912,7 @@ function renderInvestmentsView(c){
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5b8dee" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
           </div>
           <div class="asset-info">
-            <div class="asset-name">CDTC <span class="asset-symbol">·  Certificado Digital</span></div>
+            <div class="asset-name">LP COP <span class="info-ico" data-tip="lpcop">?</span> <span class="asset-symbol">·  Liquidity Provider COP</span></div>
             <div class="asset-tags">
               <span class="tag tag-safe">✓ Bajo Riesgo</span>
               <span class="tag tag-locked">🔒 Plazo fijo</span>
@@ -1855,7 +1922,7 @@ function renderInvestmentsView(c){
 
         <div class="asset-metrics">
           <div class="am-cell">
-            <div class="am-lbl">APY Fijo</div>
+            <div class="am-lbl">APY Fijo <span class="info-ico" data-tip="apyfijo">?</span></div>
             <div class="am-val grn">2.00<span class="am-unit">%</span></div>
             <div class="am-sub">mensual</div>
           </div>
@@ -1865,7 +1932,7 @@ function renderInvestmentsView(c){
             <div class="am-sub">COP</div>
           </div>
           <div class="am-cell">
-            <div class="am-lbl">Plazos</div>
+            <div class="am-lbl">Plazos <span class="info-ico" data-tip="plazos">?</span></div>
             <div class="am-val">3/6/12</div>
             <div class="am-sub">meses</div>
           </div>
@@ -1877,11 +1944,11 @@ function renderInvestmentsView(c){
         </div>
 
         <button class="asset-cta" onclick="openInvestModal('cdtc')" ${activeCDTC.length>=3?'disabled':''}>
-          ${activeCDTC.length>=3?'Límite alcanzado':'Supply →'}
+          ${activeCDTC.length>=3?'Límite alcanzado':'Invertir →'}
         </button>
       </div>
 
-      <!-- Pool Asset Card -->
+      <!-- Fondo DGP Asset Card (antes Pool) -->
       <div class="asset-card asset-card-pool">
         <div class="asset-card-glow" style="background:radial-gradient(circle at 80% 50%,rgba(245,158,11,.12),transparent 60%)"></div>
         <div class="asset-top">
@@ -1889,7 +1956,7 @@ function renderInvestmentsView(c){
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="10"/></svg>
           </div>
           <div class="asset-info">
-            <div class="asset-name">Pool de Liquidez <span class="asset-symbol">· DeFi</span></div>
+            <div class="asset-name">Fondo DGP <span class="info-ico" data-tip="dgp">?</span> <span class="asset-symbol">· DeFi Growth Portfolio</span></div>
             <div class="asset-tags">
               <span class="tag tag-medium">⚡ Riesgo Medio</span>
               <span class="tag tag-flex">💧 Ganancias retirables</span>
@@ -1899,7 +1966,7 @@ function renderInvestmentsView(c){
 
         <div class="asset-metrics">
           <div class="am-cell">
-            <div class="am-lbl">APY actual</div>
+            <div class="am-lbl">APY actual <span class="info-ico" data-tip="apyvar">?</span></div>
             <div class="am-val amb">${poolAPY.monthly.toFixed(2)}<span class="am-unit">%</span></div>
             <div class="am-sub">mensual variable</div>
           </div>
@@ -1909,12 +1976,12 @@ function renderInvestmentsView(c){
             <div class="am-sub">${poolAPY.months}m tracked</div>
           </div>
           <div class="am-cell">
-            <div class="am-lbl">Entry fee</div>
+            <div class="am-lbl">Entry fee <span class="info-ico" data-tip="entryfee">?</span></div>
             <div class="am-val red">2<span class="am-unit">%</span></div>
             <div class="am-sub">una vez</div>
           </div>
           <div class="am-cell">
-            <div class="am-lbl">Lock period</div>
+            <div class="am-lbl">Lock period <span class="info-ico" data-tip="lock">?</span></div>
             <div class="am-val pur">12<span class="am-unit">m</span></div>
             <div class="am-sub">desbloqueo</div>
           </div>
@@ -1922,23 +1989,14 @@ function renderInvestmentsView(c){
 
         <div class="asset-warning">
           <div class="aw-icon">⚠️</div>
-          <div class="aw-text">El Pool puede tener meses negativos. Las ganancias se reclaman manualmente · Comisión de retiro 20% (descontada del bruto retirado)</div>
+          <div class="aw-text">El Fondo DGP puede tener meses negativos. Las ganancias se reclaman manualmente · Comisión de retiro 20% (descontada del bruto retirado)</div>
         </div>
 
         <button class="asset-cta" onclick="openInvestModal('pool')" style="background:linear-gradient(135deg,var(--amb),var(--pur))">
-          Supply →
+          Invertir →
         </button>
       </div>
     </div>
-
-    ${active.length>0?`
-    <div class="positions-section">
-      <div class="positions-head">
-        <div class="positions-title">Mis posiciones activas</div>
-        <div class="positions-badge">${active.length}</div>
-      </div>
-      ${active.map(inv=>renderInvCard(inv)).join('')}
-    </div>`:''}
 
     ${done.length>0?`
     <div class="positions-section">
@@ -2180,7 +2238,7 @@ function renderMovementsView(c){
         <table>
           <thead><tr><th>Fecha</th><th>Tipo</th><th>Descripción</th><th style="text-align:right">Monto</th></tr></thead>
           <tbody>${txs.length?txs.map(tx=>{
-            const labels={deposit:'Depósito',profit:'Rendimiento',withdraw:'Retiro',payment:'Abono',interest:'Intereses',investment:'Inversión',investment_return:'Rendimiento',investment_withdrawal:'Retiro CDTC',loan:'Préstamo'};
+            const labels={deposit:'Depósito',profit:'Rendimiento',withdraw:'Retiro',payment:'Abono',interest:'Intereses',investment:'Inversión',investment_return:'Rendimiento',investment_withdrawal:'Retiro LP COP',loan:'Préstamo'};
             const badges={deposit:'b-dep',profit:'b-prof',withdraw:'b-wth',investment:'b-inv',investment_return:'b-prof',investment_withdrawal:'b-dep',interest:'b-prof',payment:'b-dep',loan:'b-inv'};
             const neg=['withdraw','investment','investment_withdrawal'].includes(tx.type);
             return `<tr>
@@ -2462,7 +2520,7 @@ async function deletePM(id){
 function openInvestModal(type='cdtc'){
   selectedPlan={plan:type==='pool'?'pool':'cdtc_6m',months:type==='pool'?12:6,type:type};
   const isPool=type==='pool';
-  document.getElementById('modal-title').textContent=isPool?'Invertir en Pool':'Nueva Inversión CDTC';
+  document.getElementById('modal-title').textContent=isPool?'Invertir en Fondo DGP':'Nueva Inversión LP COP';
   const tag=document.getElementById('modal-risk-tag');
   tag.textContent=isPool?'Riesgo Medio':'Bajo Riesgo';
   tag.className='risk-tag'+(isPool?' medium':'');
@@ -2475,7 +2533,7 @@ function openInvestModal(type='cdtc'){
   // Update info rows
   if(isPool){
     const apy=calculatePoolAPY();
-    document.getElementById('inf-producto').textContent='Pool de Liquidez — Riesgo Medio';
+    document.getElementById('inf-producto').textContent='Fondo DGP — Riesgo Medio';
     document.getElementById('inf-apy-l').textContent='APY anual';
     document.getElementById('inf-apy').textContent='~'+apy.annual.toFixed(1)+'%';
     document.getElementById('inf-apy').style.color='var(--amb)';
@@ -2488,7 +2546,7 @@ function openInvestModal(type='cdtc'){
     // Update button style
     document.getElementById('btn-invest').style.background='linear-gradient(135deg,var(--amb),var(--pur))';
   } else {
-    document.getElementById('inf-producto').textContent='CDTC — Bajo Riesgo';
+    document.getElementById('inf-producto').textContent='LP COP — Bajo Riesgo';
     document.getElementById('inf-apy-l').textContent='APY mensual';
     document.getElementById('inf-apy').textContent='~2.0%';
     document.getElementById('inf-apy').style.color='var(--blu)';
@@ -2569,7 +2627,7 @@ async function confirmInvest(){
     const d=await res.json();
     if(!res.ok){toast(d.error||'Error','error');return}
     closeModal('investModal');
-    toast(`✅ Inversión ${isPool?'en Pool':'CDTC'} de ${formatCOP(amt)} creada`);
+    toast(`✅ Inversión ${isPool?'en Fondo DGP':'LP COP'} de ${formatCOP(amt)} creada`);
     await loadAllData();renderCurrentView();
   }catch(e){toast('Error','error')}
   finally{btn.disabled=false;btn.textContent='Confirmar Inversión'}
@@ -2646,7 +2704,7 @@ async function showInvestmentDetail(id){
       <div class="detail-hero">
         <div class="dh-top">
           <div class="inv-type-wrap">
-            <div class="inv-type">Inversión CDTC <span class="plazo">— ${inv.durationMonths||6} meses</span></div>
+            <div class="inv-type">LP COP <span class="plazo">— ${inv.durationMonths||6} meses</span></div>
             <span class="risk-tag">Bajo Riesgo</span>
           </div>
           <span class="inv-status ${inv.status==='pending_deposit'?'pending':'active'}">${inv.status==='pending_deposit'?'Pendiente':isMatured?'Vencida':'Activa'}</span>
@@ -2795,7 +2853,7 @@ function renderPoolDetail(c, inv, returns, transactions){
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--amb),var(--pur))"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <div style="font-size:15px;font-weight:700">Pool de Liquidez DeFi</div>
+          <div style="font-size:15px;font-weight:700">Fondo DGP — DeFi Growth Portfolio</div>
           <span class="risk-tag medium">Riesgo Medio</span>
           <span style="font-size:9px;background:rgba(124,92,252,.15);color:var(--pur);padding:3px 8px;border-radius:10px;font-weight:700;border:1px solid rgba(124,92,252,.3)">⛓️ CRYPTO</span>
         </div>
@@ -3083,6 +3141,290 @@ async function init(){
     }catch(e){console.warn('auto-refresh:',e)}
   },30000);
 }
+// ══════════════════ INFO TOOLTIPS SYSTEM ══════════════════
+// Tooltips de explicación de términos (estilo DeFi/Aave)
+// Se activan al hacer click en cualquier <span class="info-ico" data-tip="key">?</span>
+const TIPS={
+  lpcop:{
+    color:'blu',
+    title:'LP COP — Liquidity Provider COP',
+    body:'<strong>Plazo fijo en pesos colombianos</strong> con rendimiento garantizado del <strong>2% mensual</strong>. Tu capital queda bloqueado por el plazo elegido (3, 6 o 12 meses) y al vencer recibes el capital + intereses. <strong>Riesgo bajo</strong> — pensado para quienes priorizan seguridad.'
+  },
+  dgp:{
+    color:'amb',
+    title:'Fondo DGP — DeFi Growth Portfolio',
+    body:'Fondo de gestión activa que invierte en <strong>estrategias DeFi</strong> (pools de liquidez, delta neutral, yield farming). Rendimientos <strong>variables</strong> con APY anual histórico de 25–40%. Las ganancias se reclaman manualmente. <strong>Riesgo medio</strong> — algunos meses pueden ser negativos.'
+  },
+  apyfijo:{
+    color:'blu',
+    title:'APY Fijo',
+    body:'<strong>Annual Percentage Yield</strong> garantizado. En LP COP es del <strong>2% mensual</strong> sobre tu capital, sin variación. Si inviertes $100.000, ganas $2.000 cada mes hasta el vencimiento.'
+  },
+  apyvar:{
+    color:'amb',
+    title:'APY Variable',
+    body:'Rendimiento <strong>no garantizado</strong> que cambia mes a mes según el desempeño del fondo. El valor mostrado es el <strong>promedio histórico</strong> de los últimos meses tracked. Puede haber meses positivos altos y meses negativos.'
+  },
+  plazos:{
+    color:'blu',
+    title:'Plazos disponibles',
+    body:'Tiempo durante el cual tu capital queda bloqueado: <strong>3, 6 o 12 meses</strong>. Mientras más largo el plazo, mayor el rendimiento total acumulado. Al vencer puedes retirar el capital completo o reinvertirlo.'
+  },
+  entryfee:{
+    color:'amb',
+    title:'Entry Fee — Comisión de entrada',
+    body:'Comisión única del <strong>2%</strong> que se descuenta al momento de invertir. Si depositas $1.000.000, $20.000 son comisión y $980.000 quedan invertidos generando rendimientos. Solo se cobra una vez al entrar.'
+  },
+  lock:{
+    color:'amb',
+    title:'Lock Period — Período de bloqueo',
+    body:'Tiempo mínimo durante el cual <strong>no puedes retirar el capital</strong>: 12 meses. Sin embargo, las <strong>ganancias mensuales sí son retirables</strong> en cualquier momento (con comisión Sanse del 20% sobre lo retirado).'
+  }
+};
+
+// Render del tooltip flotante
+let __tipCurrent=null;
+function showTip(iconEl,key){
+  // Si ya hay uno abierto, ciérralo primero
+  hideTip();
+  const data=TIPS[key];
+  if(!data)return;
+
+  const tip=document.createElement('div');
+  tip.className='tip-pop '+(data.color||'blu');
+  tip.innerHTML=`<div class="tip-ttl">${data.title}</div><div class="tip-body">${data.body}</div>`;
+  document.body.appendChild(tip);
+
+  // Posicionar (debajo del icono por defecto, arriba si no cabe)
+  const rect=iconEl.getBoundingClientRect();
+  const vw=window.innerWidth, vh=window.innerHeight;
+  const tipW=Math.min(280,vw-24);
+  tip.style.width=tipW+'px';
+
+  // Default: debajo del ícono
+  let top=rect.bottom+10;
+  let left=Math.max(12,Math.min(vw-tipW-12,rect.left-10));
+
+  // Si no cabe debajo, mostrar arriba
+  if(top+tip.offsetHeight>vh-12){
+    top=rect.top-tip.offsetHeight-10;
+    tip.dataset.pos='bottom';
+  }
+
+  tip.style.top=top+'px';
+  tip.style.left=left+'px';
+
+  // Trigger animación
+  requestAnimationFrame(()=>tip.classList.add('show'));
+
+  iconEl.classList.add('active');
+  __tipCurrent={tip,icon:iconEl};
+}
+
+function hideTip(){
+  if(!__tipCurrent)return;
+  __tipCurrent.tip.classList.remove('show');
+  __tipCurrent.icon.classList.remove('active');
+  const t=__tipCurrent.tip;
+  setTimeout(()=>{if(t.parentNode)t.parentNode.removeChild(t);},200);
+  __tipCurrent=null;
+}
+
+// Delegación global: cualquier click en .info-ico abre/cierra su tooltip
+document.addEventListener('click',(e)=>{
+  const ico=e.target.closest('.info-ico');
+  if(ico){
+    e.preventDefault();
+    e.stopPropagation();
+    const key=ico.dataset.tip;
+    // Si ya está activo, cerrar; si no, abrir
+    if(__tipCurrent && __tipCurrent.icon===ico){
+      hideTip();
+    } else {
+      showTip(ico,key);
+    }
+    return;
+  }
+  // Click fuera del tooltip → cerrar
+  if(__tipCurrent && !e.target.closest('.tip-pop')){
+    hideTip();
+  }
+});
+
+// Cerrar tooltip al scrollear o resize
+window.addEventListener('scroll',()=>hideTip(),true);
+window.addEventListener('resize',()=>hideTip());
+
+// ══════════════════ AGREGAR CAPITAL (re-invertir) ══════════════════
+// Permite sumar capital a una inversión activa SIN crear una nueva
+// y SIN reiniciar la fecha de inicio. El backend debe soportar
+// POST /api/investments/:id/add-capital con { amount }.
+// Si el endpoint no existe, el front cae al flujo legacy (nueva inversión).
+let __addCapTarget=null;
+function openAddCapitalModal(invId,type,currentCap){
+  __addCapTarget={id:invId,type:type,currentCap:currentCap};
+  const isPool=type==='pool';
+  const minAmount=isPool?50000:100000;
+  const productName=isPool?'Fondo DGP':'LP COP';
+  const colorVar=isPool?'var(--amb)':'var(--blu)';
+
+  // Crear modal dinámicamente (no necesitamos modificar el HTML existente)
+  let modal=document.getElementById('addCapitalModal');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='addCapitalModal';
+    modal.className='modal-overlay';
+    modal.style.cssText='display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px)';
+    modal.innerHTML=`
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:22px;max-width:420px;width:100%;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blu),var(--pur))" id="ac-topbar"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <h3 style="font-size:17px;font-weight:700;margin:0">Agregar capital</h3>
+        <button onclick="closeAddCapitalModal()" style="background:none;border:none;color:var(--mut);font-size:22px;cursor:pointer;padding:0;line-height:1">×</button>
+      </div>
+      <p style="font-size:12px;color:var(--mut);margin-bottom:18px">Suma capital a esta inversión <strong style="color:var(--text)" id="ac-product">${productName}</strong> sin reiniciar el tiempo. Mantiene la fecha de inicio original y suma a los rendimientos actuales.</p>
+
+      <div style="background:var(--sur);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mut);margin-bottom:8px">
+          <span>Capital actual</span>
+          <strong id="ac-current" style="color:var(--text);font-family:'Space Mono',monospace;font-size:14px"></strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mut)">
+          <span>Saldo disponible</span>
+          <strong id="ac-avail" style="color:var(--grn);font-family:'Space Mono',monospace;font-size:14px"></strong>
+        </div>
+      </div>
+
+      <label style="display:block;font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Monto a agregar (COP)</label>
+      <input type="number" id="ac-amount" inputmode="numeric" placeholder="0" min="${minAmount}" oninput="updateAddCapPreview()" style="width:100%;font-family:'Space Mono',monospace;font-size:24px;font-weight:700;background:var(--sur);border:1px solid var(--bd);border-radius:10px;outline:none;color:var(--text);padding:14px;box-sizing:border-box;margin-bottom:6px">
+      <div id="ac-hint" style="font-size:11px;color:var(--mut);margin-bottom:14px;min-height:16px"></div>
+
+      <div id="ac-preview" style="display:none;background:linear-gradient(135deg,rgba(91,141,238,.08),rgba(124,92,252,.05));border:1px solid var(--bd);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
+          <span style="color:var(--mut)">Capital total después</span>
+          <strong id="ac-new-total" style="font-family:'Space Mono',monospace;color:var(--blu)"></strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--mut)" id="ac-fee-row" style="display:none">
+          <span>Comisión de entrada (2%)</span>
+          <strong id="ac-fee" style="font-family:'Space Mono',monospace;color:var(--red)"></strong>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px">
+        <button onclick="closeAddCapitalModal()" style="flex:1;padding:13px;background:var(--sur);border:1px solid var(--bd);border-radius:10px;color:var(--text);font-size:13px;font-weight:600;cursor:pointer">Cancelar</button>
+        <button id="ac-confirm-btn" onclick="confirmAddCapital()" style="flex:2;padding:13px;background:linear-gradient(135deg,var(--blu),var(--pur));border:none;border-radius:10px;color:white;font-size:13px;font-weight:700;cursor:pointer">Agregar Capital</button>
+      </div>
+    </div>`;
+    document.body.appendChild(modal);
+  }
+
+  // Setup según tipo
+  document.getElementById('ac-product').textContent=productName;
+  document.getElementById('ac-current').textContent=formatCOP(currentCap);
+  document.getElementById('ac-avail').textContent=formatCOP(balanceSummary.availableBalance);
+  document.getElementById('ac-amount').value='';
+  document.getElementById('ac-amount').min=minAmount;
+  document.getElementById('ac-amount').placeholder='Mín. '+formatCOP(minAmount);
+  document.getElementById('ac-preview').style.display='none';
+  document.getElementById('ac-hint').textContent='';
+  document.getElementById('ac-topbar').style.background=isPool?'linear-gradient(90deg,var(--amb),var(--pur))':'linear-gradient(90deg,var(--blu),var(--pur))';
+  document.getElementById('ac-confirm-btn').style.background=isPool?'linear-gradient(135deg,var(--amb),var(--pur))':'linear-gradient(135deg,var(--blu),var(--pur))';
+
+  modal.style.display='flex';
+}
+
+function closeAddCapitalModal(){
+  const m=document.getElementById('addCapitalModal');
+  if(m)m.style.display='none';
+  __addCapTarget=null;
+}
+
+function updateAddCapPreview(){
+  if(!__addCapTarget)return;
+  const amt=parseAmount(document.getElementById('ac-amount').value)||0;
+  const isPool=__addCapTarget.type==='pool';
+  const minAmount=isPool?50000:100000;
+  const hint=document.getElementById('ac-hint');
+  const prev=document.getElementById('ac-preview');
+
+  if(amt>0 && amt<minAmount){
+    hint.innerHTML=`<span style="color:var(--red)">Mínimo: ${formatCOP(minAmount)}</span>`;
+    prev.style.display='none';
+    return;
+  }
+  if(amt>balanceSummary.availableBalance){
+    hint.innerHTML=`<span style="color:var(--red)">Saldo insuficiente. Disponible: ${formatCOP(balanceSummary.availableBalance)}</span>`;
+    prev.style.display='none';
+    return;
+  }
+  if(amt>=minAmount){
+    hint.textContent='';
+    if(isPool){
+      const fee=Math.round(amt*0.02);
+      const net=amt-fee;
+      document.getElementById('ac-new-total').textContent=formatCOP(__addCapTarget.currentCap+net);
+      const feeRow=document.getElementById('ac-fee-row');
+      feeRow.style.display='flex';
+      document.getElementById('ac-fee').textContent='-'+formatCOP(fee);
+    } else {
+      document.getElementById('ac-new-total').textContent=formatCOP(__addCapTarget.currentCap+amt);
+      const feeRow=document.getElementById('ac-fee-row');
+      if(feeRow)feeRow.style.display='none';
+    }
+    prev.style.display='block';
+  } else {
+    prev.style.display='none';
+  }
+}
+
+async function confirmAddCapital(){
+  if(!__addCapTarget)return;
+  const amt=parseAmount(document.getElementById('ac-amount').value);
+  const isPool=__addCapTarget.type==='pool';
+  const minAmount=isPool?50000:100000;
+
+  if(!amt||amt<minAmount)return toast(`Mínimo ${formatCOP(minAmount)}`,'error');
+  if(amt>balanceSummary.availableBalance)return toast('Saldo insuficiente','error');
+
+  const btn=document.getElementById('ac-confirm-btn');
+  btn.disabled=true;
+  const originalText=btn.textContent;
+  btn.textContent='Procesando...';
+
+  try{
+    // Intentar endpoint específico de agregar capital
+    let res=await apiFetch(`/investments/${__addCapTarget.id}/add-capital`,{
+      method:'POST',
+      body:JSON.stringify({amount:amt})
+    });
+
+    // Fallback: si el endpoint no existe (404) o falla, crear inversión nueva
+    if(!res||res.status===404){
+      console.warn('[add-capital] Endpoint no disponible, creando inversión nueva como fallback');
+      toast('Creando inversión nueva (endpoint add-capital pendiente en backend)','info');
+      const payload=isPool?{type:'pool',amount:amt,durationMonths:12}:{productId:'cdtc_6m',amount:amt};
+      res=await apiFetch('/investments/create',{method:'POST',body:JSON.stringify(payload)});
+    }
+
+    const d=await res.json();
+    if(!res.ok){
+      toast(d.error||'Error al agregar capital','error');
+      btn.disabled=false;
+      btn.textContent=originalText;
+      return;
+    }
+    closeAddCapitalModal();
+    toast(`✅ Capital agregado: +${formatCOP(amt)}`);
+    await loadAllData();
+    renderCurrentView();
+  }catch(e){
+    console.error('[add-capital]',e);
+    toast('Error de conexión','error');
+    btn.disabled=false;
+    btn.textContent=originalText;
+  }
+}
+
 init();
 </script>
 </body>
