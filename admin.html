@@ -237,6 +237,7 @@ img{max-width:100%;display:block}
   color:var(--txt-3);white-space:nowrap;
   border-bottom:2px solid transparent;
   transition:all .15s;position:relative;
+  flex-shrink:0;
 }
 .subtab.active{color:var(--txt);border-bottom-color:var(--acc)}
 .subtab:hover:not(.active){color:var(--txt-2)}
@@ -266,6 +267,7 @@ img{max-width:100%;display:block}
   color:var(--txt-2);background:transparent;
   border:1px solid var(--line);
   white-space:nowrap;transition:all .12s;
+  flex-shrink:0;
 }
 .filter:hover{border-color:var(--line-2)}
 .filter.on{background:var(--txt);color:#000;border-color:var(--txt)}
@@ -459,35 +461,38 @@ img{max-width:100%;display:block}
 ───────────────────────────────────────── */
 .bnav{
   position:fixed;left:0;right:0;bottom:0;z-index:90;
-  background:rgba(10,10,10,.96);
+  background:rgba(10,10,10,.98);
   backdrop-filter:blur(20px);
   -webkit-backdrop-filter:blur(20px);
-  border-top:1px solid var(--line);
+  border-top:1px solid var(--line-2);
   padding-bottom:var(--safe-bottom);
   display:grid;grid-template-columns:repeat(5,1fr);
+  box-shadow:0 -4px 20px rgba(0,0,0,.4);
 }
 .bn{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:3px;padding:10px 4px;
-  color:var(--txt-3);transition:color .12s;
-  position:relative;min-height:62px;
+  gap:4px;padding:10px 4px;
+  color:var(--txt-2);transition:color .12s;
+  position:relative;min-height:64px;
+  cursor:pointer;
 }
-.bn:active{transform:scale(.94)}
+.bn:active{transform:scale(.94);background:var(--surface)}
 .bn.active{color:var(--acc)}
 .bn.active::before{
   content:'';position:absolute;top:0;left:50%;
   transform:translateX(-50%);
-  width:24px;height:2px;background:var(--acc);
+  width:30px;height:2px;background:var(--acc);
 }
-.bn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6}
+.bn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6}
 .bn span{
   font-family:var(--f-mono);font-size:9px;
-  letter-spacing:1px;text-transform:uppercase;
+  letter-spacing:.8px;text-transform:uppercase;
   font-weight:500;
 }
 .bn-dot{
-  position:absolute;top:8px;right:calc(50% - 16px);
-  width:6px;height:6px;border-radius:50%;background:var(--neg);
+  position:absolute;top:8px;right:calc(50% - 18px);
+  width:7px;height:7px;border-radius:50%;background:var(--neg);
+  box-shadow:0 0 6px var(--neg);
 }
 
 /* ─────────────────────────────────────────
@@ -790,10 +795,10 @@ img{max-width:100%;display:block}
       <button class="icon-btn" onclick="openSearch()" aria-label="Buscar">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
       </button>
-      <a class="icon-btn" href="dashboard.html" aria-label="Dashboard cliente">
-        <svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-      </a>
-      <button class="icon-btn" onclick="logout()" aria-label="Cerrar sesión">
+      <button class="icon-btn" onclick="refreshCurrentView()" aria-label="Actualizar" title="Actualizar">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      </button>
+      <button class="icon-btn" onclick="logout()" aria-label="Cerrar sesión" title="Cerrar sesión">
         <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
     </div>
@@ -1880,7 +1885,12 @@ function updatePoolAnnual(){
 async function loadPool(){
   State.cacheFlags.pool=true;
   try{
-    const r=await apiFetch('/investments/pool-stats');
+    // Intentamos primero el endpoint admin completo (con strategies)
+    let r=await apiFetch('/admin/pool/config-full');
+    if(!r||!r.ok){
+      // Fallback al endpoint público (sin strategies, los lee de localStorage)
+      r=await apiFetch('/investments/pool-stats');
+    }
     if(!r||!r.ok) return;
     const d=await r.json();
     State.poolConfig=d;
