@@ -7,7 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Admin — Sanse Capital · v2.3</title>
+<title>Admin — Sanse Capital · v2.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -793,7 +793,7 @@ img{max-width:100%;display:block}
       <div class="brand-mark">S</div>
       <div class="brand-text">
         <div class="brand-name">Sanse</div>
-        <div class="brand-sub">Admin · v2.3</div>
+        <div class="brand-sub">Admin · v2.4</div>
       </div>
     </div>
     <div class="top-actions">
@@ -2137,7 +2137,7 @@ async function fetchBulkPreview(){
   const btn = $('#bulk-btn');
   const prev = $('#bulk-preview');
 
-  // Sin datos suficientes → ocultar preview y deshabilitar botón
+  // Sin tasa válida → ocultar preview
   if (!rate || rate <= 0 || rate > 100) {
     prev.classList.add('hide');
     btn.disabled = true;
@@ -2145,27 +2145,54 @@ async function fetchBulkPreview(){
     return;
   }
 
+  // Mostrar estado de carga mientras consulta
+  prev.innerHTML = '<div class="dim">Consultando preview...</div>';
+  prev.classList.remove('hide');
+
   try {
-    const params = new URLSearchParams({ rate });
+    const params = new URLSearchParams({ rate: String(rate) });
     if (month) params.set('periodMonth', month);
-    const r = await apiFetch('/admin/pool/reward-preview?' + params.toString());
-    if (!r || !r.ok) {
-      // Endpoint no existe todavía (backend sin desplegar)
-      prev.innerHTML = `<div style="color:var(--warn)">⚠️ Endpoint backend no disponible. Verifica que <code>poolRewardsController</code> esté en el backend.</div>`;
-      prev.classList.remove('hide');
+    // Cache busting agresivo
+    params.set('_t', Date.now());
+
+    const url = '/admin/pool/reward-preview?' + params.toString();
+    console.log('[bulk preview] fetching:', url);
+
+    const r = await apiFetch(url);
+    console.log('[bulk preview] status:', r ? r.status : 'no-response');
+
+    if (!r) {
+      prev.innerHTML = `<div style="color:var(--neg)">⚠️ Sin respuesta del servidor</div>`;
+      btn.disabled = true;
+      return;
+    }
+
+    if (r.status === 404) {
+      prev.innerHTML = `<div style="color:var(--warn)">⚠️ Endpoint no encontrado (404). Verifica que <code>poolRewardsController</code> esté en el backend y que <code>routes/admin.js</code> esté actualizado.</div>`;
+      btn.disabled = true;
+      btn.textContent = 'Backend no listo';
+      return;
+    }
+
+    if (!r.ok) {
+      let errMsg = 'Error ' + r.status;
+      try {
+        const e = await r.json();
+        if (e.error) errMsg = e.error;
+      } catch(_) {}
+      prev.innerHTML = `<div style="color:var(--neg)">⚠️ ${errMsg}</div>`;
       btn.disabled = true;
       return;
     }
 
     const d = await r.json();
+    console.log('[bulk preview] response:', d);
     BulkReward.preview = d;
 
-    // Si no es la respuesta esperada (eligibleCount undefined), tratar como backend no listo
-    if (d.eligibleCount === undefined) {
-      prev.innerHTML = `<div style="color:var(--warn)">⚠️ El backend no devolvió un preview válido. Verifica que <code>poolRewardsController</code> esté desplegado.</div>`;
-      prev.classList.remove('hide');
+    // Validar estructura
+    if (typeof d.eligibleCount !== 'number') {
+      prev.innerHTML = `<div style="color:var(--warn)">⚠️ Respuesta inválida del backend. Revisa los logs.</div>`;
       btn.disabled = true;
-      btn.textContent = 'Backend no disponible';
       return;
     }
 
@@ -2173,19 +2200,19 @@ async function fetchBulkPreview(){
       prev.innerHTML = `
         <strong style="color:var(--warn)">⚠️ Sin pools elegibles</strong><br>
         ${d.skippedCount > 0
-          ? `<span class="dim">Los ${d.skippedCount} pools activos ya tienen rendimiento registrado para <strong>${d.periodMonth}</strong>.</span>`
+          ? `<span class="dim">Los ${d.skippedCount} pools activos ya tienen rendimiento registrado para <strong>${d.periodMonth || month || 'ese período'}</strong>.</span>`
           : `<span class="dim">No hay inversiones Pool con status='active'.</span>`}
       `;
-      prev.classList.remove('hide');
       btn.disabled = true;
       btn.textContent = 'Sin pools elegibles';
       return;
     }
 
+    // ÉXITO: mostrar preview con datos
     prev.innerHTML = `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;font-size:12px">
         <div><span class="dim">Pools elegibles</span><br><strong class="acc mono" style="font-size:18px">${d.eligibleCount}</strong></div>
-        <div><span class="dim">Ya pagados (skip)</span><br><strong class="dim mono" style="font-size:18px">${d.skippedCount}</strong></div>
+        <div><span class="dim">Ya pagados (skip)</span><br><strong class="dim mono" style="font-size:18px">${d.skippedCount || 0}</strong></div>
         <div><span class="dim">Capital base total</span><br><strong class="mono">${F(d.totalCapital)}</strong></div>
         <div><span class="dim">Bruto a registrar</span><br><strong class="pos mono">+${F(d.totalGross)}</strong></div>
       </div>
@@ -2195,15 +2222,13 @@ async function fetchBulkPreview(){
         <span class="pos mono">Neto a usuarios: ${F(d.referenceNet)}</span>
       </div>
     `;
-    prev.classList.remove('hide');
-    btn.disabled = !month;  // requiere mes para habilitar
+    btn.disabled = !month;
     btn.textContent = month
       ? `Aplicar ${rate}% a ${d.eligibleCount} pool${d.eligibleCount === 1 ? '' : 's'}`
       : 'Selecciona el mes del período';
   } catch (e) {
-    console.error('[fetchBulkPreview]', e);
-    prev.innerHTML = `<div style="color:var(--neg)">Error de conexión</div>`;
-    prev.classList.remove('hide');
+    console.error('[fetchBulkPreview] error:', e);
+    prev.innerHTML = `<div style="color:var(--neg)">⚠️ Error de conexión: ${e.message || 'desconocido'}</div>`;
     btn.disabled = true;
   }
 }
