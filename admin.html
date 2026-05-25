@@ -937,12 +937,12 @@ img{max-width:100%;display:block}
   </div>
 
   <div class="section">
-    <!-- Inversiones (CDTC) -->
+    <!-- Inversiones (LP COP) -->
     <div class="sub-view active" data-sub-view="invs">
       <div id="invs-stats"></div>
       <div class="card">
-        <div class="card-h">CDTC · Inversiones <em>activas</em></div>
-        <div class="card-d">Todas las inversiones tipo CDTC actualmente activas.</div>
+        <div class="card-h">LP COP · Inversiones <em>activas</em></div>
+        <div class="card-d">Todas las inversiones tipo LP COP actualmente activas.</div>
         <div id="invs-list"><div class="empty">Cargando…</div></div>
       </div>
     </div>
@@ -1013,11 +1013,31 @@ img{max-width:100%;display:block}
     <!-- Rendimientos -->
     <div class="sub-view hide" data-sub-view="rets">
       <div class="info-box">
-        <strong>CDTC ya no se registra manualmente.</strong> Tasa fija 2% mensual sobre el capital, calculada en tiempo real. El cliente reclama 1 vez cada 24h. Aquí solo verás inversiones <strong>Pool</strong>.
+        <strong>LP COP ya no se registra manualmente.</strong> Tasa fija 2% mensual sobre el capital, calculada en tiempo real. El cliente reclama 1 vez cada 24h. Aquí solo verás inversiones <strong>Pool</strong>.
       </div>
+
+      <!-- ═══ RECOMPENSA MASIVA (BULK) ═══ -->
+      <div class="card" style="border-color:var(--acc-dim)">
+        <div class="card-h">⚡ Recompensa <em>masiva</em> Pool</div>
+        <div class="card-d">Aplica una tasa a <strong>TODOS los pools activos</strong> de una sola vez. No tienes que ir uno por uno.</div>
+
+        <div class="fg-row">
+          <div class="fg"><label>Tasa (%)</label><input id="bulk-rate" type="number" step="0.01" min="0" max="100" placeholder="20" oninput="updateBulkPreview()"></div>
+          <div class="fg"><label>Mes del período</label><input id="bulk-month" type="month" onchange="updateBulkPreview()"></div>
+        </div>
+        <div class="fg"><label>Notas (opcional)</label><input id="bulk-notes" placeholder="Ej: Recompensa mayo 2026"></div>
+
+        <div id="bulk-preview" class="info-box hide" style="border-left-color:var(--acc)"></div>
+
+        <button class="btn btn-primary btn-block" id="bulk-btn" onclick="confirmBulkReward()" disabled>
+          Aplicar a todos los pools
+        </button>
+      </div>
+
+      <!-- ═══ RENDIMIENTO INDIVIDUAL ═══ -->
       <div class="card">
-        <div class="card-h">Registrar <em>rendimiento</em> pool</div>
-        <div class="card-d">Selecciona una inversión Pool activa para registrarle su rendimiento mensual.</div>
+        <div class="card-h">Rendimiento <em>individual</em></div>
+        <div class="card-d">Selecciona una inversión Pool específica para registrarle un rendimiento manualmente.</div>
         <div id="ret-list"><div class="empty">Cargando…</div></div>
       </div>
 
@@ -1633,7 +1653,7 @@ async function viewUser(uid){
         return `<div class="row">
           <div class="row-top">
             <div>
-              <div class="row-id">${isP?'POOL':'CDTC'} · ${i.duration_months||6}m</div>
+              <div class="row-id">${isP?'POOL':'LP COP'} · ${i.duration_months||6}m</div>
               <div class="row-name">${D(i.start_date)}</div>
             </div>
             <div class="row-amount acc">${F(i.amount)}</div>
@@ -1837,7 +1857,7 @@ async function procReg(id, action){
   }catch(e){toast('Error','error')}
 }
 
-// ─── INVESTMENTS (CDTC) ───
+// ─── INVESTMENTS (LP COP) ───
 async function loadInvestments(){
   State.cacheFlags.invs=true;
   try{
@@ -1850,14 +1870,25 @@ async function loadInvestments(){
     const invs = allI.filter(i => !(i.type||'').toLowerCase().includes('pool'));
     State.investments=invs;
 
+    // FIX: el backend devuelve totalLockedCapital y avgMonthlyAPY,
+    // no totalLocked ni apyReal. Soportamos ambos por compatibilidad.
+    const totalLocked = gs.totalLockedCapital ?? gs.totalLocked ?? 0;
+    const apyReal = gs.avgMonthlyAPY ?? gs.apyReal ?? 0;
+    // FIX: totalEarnedGlobal NO viene en /global-stats — lo calculamos
+    // sumando los totalEarned de cada inversión LP COP que SÍ vienen
+    // en /admin/investments/active
+    const totalEarned = invs.reduce((s,i) => s + (parseFloat(i.totalEarned||0)), 0);
+    // Capital total invertido en LP COP (suma de amounts de la lista filtrada)
+    const lpcopCapital = invs.reduce((s,i) => s + (parseFloat(i.amount||0)), 0);
+
     $('#invs-stats').innerHTML = `<div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr 1fr;margin-bottom:14px">
-      <div class="stat"><div class="stat-label">Capital bloqueado</div><div class="stat-value acc mono">${F(gs.totalLocked||0)}</div></div>
-      <div class="stat"><div class="stat-label">APY real</div><div class="stat-value pos mono">${(parseFloat(gs.apyReal||0)).toFixed(1)}%</div></div>
-      <div class="stat"><div class="stat-label">Ganancias pagadas</div><div class="stat-value mono">${F(gs.totalEarnedGlobal||0)}</div></div>
-      <div class="stat"><div class="stat-label">Activas</div><div class="stat-value mono">${invs.length}</div></div>
+      <div class="stat"><div class="stat-label">Capital LP COP</div><div class="stat-value acc mono">${F(lpcopCapital)}</div></div>
+      <div class="stat"><div class="stat-label">APY real</div><div class="stat-value pos mono">${(parseFloat(apyReal)).toFixed(2)}%</div></div>
+      <div class="stat"><div class="stat-label">Ganancias pagadas</div><div class="stat-value mono">${F(totalEarned)}</div></div>
+      <div class="stat"><div class="stat-label">Inv. activas</div><div class="stat-value mono">${invs.length}</div></div>
     </div>`;
 
-    $('#invs-list').innerHTML = invs.length ? renderInvList(invs) : '<div class="empty">Sin inversiones CDTC activas</div>';
+    $('#invs-list').innerHTML = invs.length ? renderInvList(invs) : '<div class="empty">Sin inversiones LP COP activas</div>';
   }catch(e){console.error('loadInvestments:',e)}
 }
 function renderInvList(invs){
@@ -1865,7 +1896,7 @@ function renderInvList(invs){
     <div class="row">
       <div class="row-top">
         <div>
-          <div class="row-id">CDTC · ID ${i.id}</div>
+          <div class="row-id">LP COP · ID ${i.id}</div>
           <div class="row-name">${i.userName||i.user_name||'—'}</div>
         </div>
         <div class="row-amount acc">${F(i.amount)}</div>
@@ -1913,13 +1944,32 @@ async function loadPool(){
     const ir=await apiFetch('/admin/investments/active?type=pool');
     if(ir&&ir.ok){
       const invs=await ir.json();
+      // Mes actual en formato YYYY-MM (para columna "Ganado este mes")
+      const now=new Date();
+      const currentMonth=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
       $('#pool-invs').innerHTML = invs.length ? '<div class="list">'+invs.map(i=>{
         const s=new Date(i.startDate||i.start_date);
         const days=Math.floor((Date.now()-s)/(864e5));
+
+        // Calcular "Ganado este mes" desde el array de returns
+        let earnedThisMonth=0;
+        if(Array.isArray(i.returns)){
+          i.returns.forEach(r=>{
+            // r.month puede venir como "2026-05" o "2026-05-01" — comparamos los primeros 7 chars
+            const rm=(r.month||'').toString().slice(0,7);
+            if(rm===currentMonth) earnedThisMonth += parseFloat(r.earned||0);
+          });
+        }
+        const hasMonthlyReward = earnedThisMonth>0;
+
+        // withdrawable_earnings = ganado acumulado sin reclamar
+        const pending=parseFloat(i.withdrawableEarnings||i.withdrawable_earnings||0);
+
         return `<div class="row">
           <div class="row-top">
             <div>
-              <div class="row-id">POOL · ID ${i.id}</div>
+              <div class="row-id">POOL · ID ${i.id} ${hasMonthlyReward?`<span class="tag" style="background:var(--acc-soft);color:var(--acc);border-color:var(--acc-dim);margin-left:6px">${currentMonth}</span>`:''}</div>
               <div class="row-name">${i.userName||i.user_name||'—'}</div>
             </div>
             <div class="row-amount acc">${F(i.amount)}</div>
@@ -1929,7 +1979,11 @@ async function loadPool(){
             <span>${D(i.startDate||i.start_date)}</span>
             <span>${Math.floor(days/30)}m ${days%30}d</span>
           </div>
-          <div class="row-meta"><span class="pos">Ganado: ${F(i.totalEarned||0)}</span></div>
+          <div class="row-meta" style="flex-wrap:wrap;gap:14px">
+            <span class="pos">Total ganado: <strong class="mono">${F(i.totalEarned||0)}</strong></span>
+            <span class="${hasMonthlyReward?'acc':'dim'}">Este mes: <strong class="mono">${F(earnedThisMonth)}</strong></span>
+            <span class="warn">Sin reclamar: <strong class="mono">${F(pending)}</strong></span>
+          </div>
         </div>`;
       }).join('')+'</div>' : '<div class="empty">Sin inversiones en pool</div>';
     }
@@ -2058,6 +2112,188 @@ async function registerReturn(){
     loadReturns(); loadStats();
   }catch(e){toast('Error','error')}
   finally{btn.disabled=false; btn.textContent='Registrar rendimiento'}
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// BULK REWARD — Recompensa masiva del Pool
+// ═══════════════════════════════════════════════════════════════════════
+const BulkReward = {
+  preview: null,
+  _debounce: null,
+};
+
+function updateBulkPreview(){
+  // Debounce: solo llamar al backend tras 350ms sin tipear
+  clearTimeout(BulkReward._debounce);
+  BulkReward._debounce = setTimeout(fetchBulkPreview, 350);
+}
+
+async function fetchBulkPreview(){
+  const rate = parseFloat($('#bulk-rate').value);
+  const month = $('#bulk-month').value;
+  const btn = $('#bulk-btn');
+  const prev = $('#bulk-preview');
+
+  // Sin datos suficientes → ocultar preview y deshabilitar botón
+  if (!rate || rate <= 0 || rate > 100) {
+    prev.classList.add('hide');
+    btn.disabled = true;
+    btn.textContent = 'Aplicar a todos los pools';
+    return;
+  }
+
+  try {
+    const params = new URLSearchParams({ rate });
+    if (month) params.set('periodMonth', month);
+    const r = await apiFetch('/admin/pool/reward-preview?' + params.toString());
+    if (!r || !r.ok) {
+      // Endpoint no existe todavía (backend sin desplegar)
+      prev.innerHTML = `<div style="color:var(--warn)">⚠️ Endpoint backend no disponible. Verifica que <code>poolRewardsController</code> esté en el backend.</div>`;
+      prev.classList.remove('hide');
+      btn.disabled = true;
+      return;
+    }
+
+    const d = await r.json();
+    BulkReward.preview = d;
+
+    // Si no es la respuesta esperada (eligibleCount undefined), tratar como backend no listo
+    if (d.eligibleCount === undefined) {
+      prev.innerHTML = `<div style="color:var(--warn)">⚠️ El backend no devolvió un preview válido. Verifica que <code>poolRewardsController</code> esté desplegado.</div>`;
+      prev.classList.remove('hide');
+      btn.disabled = true;
+      btn.textContent = 'Backend no disponible';
+      return;
+    }
+
+    if (d.eligibleCount === 0) {
+      prev.innerHTML = `
+        <strong style="color:var(--warn)">⚠️ Sin pools elegibles</strong><br>
+        ${d.skippedCount > 0
+          ? `<span class="dim">Los ${d.skippedCount} pools activos ya tienen rendimiento registrado para <strong>${d.periodMonth}</strong>.</span>`
+          : `<span class="dim">No hay inversiones Pool con status='active'.</span>`}
+      `;
+      prev.classList.remove('hide');
+      btn.disabled = true;
+      btn.textContent = 'Sin pools elegibles';
+      return;
+    }
+
+    prev.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;font-size:12px">
+        <div><span class="dim">Pools elegibles</span><br><strong class="acc mono" style="font-size:18px">${d.eligibleCount}</strong></div>
+        <div><span class="dim">Ya pagados (skip)</span><br><strong class="dim mono" style="font-size:18px">${d.skippedCount}</strong></div>
+        <div><span class="dim">Capital base total</span><br><strong class="mono">${F(d.totalCapital)}</strong></div>
+        <div><span class="dim">Bruto a registrar</span><br><strong class="pos mono">+${F(d.totalGross)}</strong></div>
+      </div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)">
+        <span class="dim" style="font-size:11px">Cuando los usuarios reclamen:</span><br>
+        <span class="warn mono">Comisión Sanse 20%: ${F(d.referenceCommission)}</span> · 
+        <span class="pos mono">Neto a usuarios: ${F(d.referenceNet)}</span>
+      </div>
+    `;
+    prev.classList.remove('hide');
+    btn.disabled = !month;  // requiere mes para habilitar
+    btn.textContent = month
+      ? `Aplicar ${rate}% a ${d.eligibleCount} pool${d.eligibleCount === 1 ? '' : 's'}`
+      : 'Selecciona el mes del período';
+  } catch (e) {
+    console.error('[fetchBulkPreview]', e);
+    prev.innerHTML = `<div style="color:var(--neg)">Error de conexión</div>`;
+    prev.classList.remove('hide');
+    btn.disabled = true;
+  }
+}
+
+function confirmBulkReward(){
+  const rate = parseFloat($('#bulk-rate').value);
+  const month = $('#bulk-month').value;
+  const d = BulkReward.preview;
+  if (!rate || !month || !d || !d.eligibleCount) return toast('Datos incompletos', 'error');
+
+  // Modal de confirmación
+  const html = `
+    <div style="font-size:14px;line-height:1.6;margin-bottom:14px">
+      Vas a aplicar <strong class="acc">${rate}%</strong> de recompensa al período
+      <strong class="acc mono">${month}</strong>.
+    </div>
+    <div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr 1fr;margin-bottom:14px">
+      <div class="stat"><div class="stat-label">Pools afectados</div><div class="stat-value acc mono">${d.eligibleCount}</div></div>
+      <div class="stat"><div class="stat-label">Bruto total</div><div class="stat-value pos mono">+${F(d.totalGross)}</div></div>
+    </div>
+    <div style="padding:12px;background:rgba(255,184,77,.08);border-left:2px solid var(--warn);font-size:12px;color:var(--txt-2);line-height:1.5;margin-bottom:14px">
+      <strong style="color:var(--warn)">⚠️ Esta acción NO se puede deshacer.</strong><br>
+      Se registrará en <code>investment_returns</code> y se sumará a <code>withdrawable_earnings</code> de cada pool.
+      Los usuarios verán la recompensa disponible para reclamar desde su dashboard.
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" onclick="closeModal()" style="flex:1">Cancelar</button>
+      <button class="btn btn-primary" onclick="executeBulkReward()" style="flex:1">Confirmar y aplicar</button>
+    </div>
+  `;
+  openModal('Confirmar <em>recompensa masiva</em>', `${rate}% · ${month} · ${d.eligibleCount} pools`, html);
+}
+
+async function executeBulkReward(){
+  const rate = parseFloat($('#bulk-rate').value);
+  const month = $('#bulk-month').value;
+  const notes = $('#bulk-notes').value.trim();
+
+  // Cerrar modal y deshabilitar botón inmediatamente
+  closeModal();
+  const btn = $('#bulk-btn');
+  btn.disabled = true;
+  btn.textContent = 'Procesando…';
+
+  try {
+    const r = await apiFetch('/admin/pool/pay-returns-bulk', {
+      method: 'POST',
+      body: JSON.stringify({ rate, periodMonth: month, notes: notes || undefined }),
+    });
+    const d = await r.json();
+    if (!r.ok) {
+      toast(d.error || 'Error al aplicar recompensa', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Aplicar a todos los pools';
+      return;
+    }
+
+    // Éxito — mostrar resumen en modal
+    const summary = `
+      <div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr 1fr;margin-bottom:14px">
+        <div class="stat"><div class="stat-label">Aplicados</div><div class="stat-value acc mono">${d.applied}</div></div>
+        <div class="stat"><div class="stat-label">Saltados</div><div class="stat-value mono">${d.skipped}</div></div>
+        <div class="stat"><div class="stat-label">Bruto registrado</div><div class="stat-value pos mono">+${F(d.totalGross)}</div></div>
+        <div class="stat"><div class="stat-label">Tasa</div><div class="stat-value mono">${d.rate}%</div></div>
+      </div>
+      <div style="padding:12px;background:var(--acc-soft);border-left:2px solid var(--acc);font-size:12px;line-height:1.5;margin-bottom:14px">
+        <strong class="acc">✓ Recompensa aplicada</strong><br>
+        Los usuarios ahora pueden reclamar desde su dashboard. La comisión Sanse del 20% se descontará cuando reclamen.
+      </div>
+      <button class="btn btn-block btn-primary" onclick="closeModal()">Listo</button>
+    `;
+    openModal('✓ <em>Aplicado</em>', `${d.applied} pool${d.applied === 1 ? '' : 's'} · ${d.periodMonth}`, summary);
+
+    // Limpiar formulario y recargar
+    $('#bulk-rate').value = '';
+    $('#bulk-notes').value = '';
+    $('#bulk-preview').classList.add('hide');
+    btn.disabled = true;
+    btn.textContent = 'Aplicar a todos los pools';
+    BulkReward.preview = null;
+
+    // Recargar pool y rendimientos
+    State.cacheFlags.pool = false;
+    State.cacheFlags.rets = false;
+    loadPool();
+    loadReturns();
+    loadStats();
+  } catch (e) {
+    console.error('[executeBulkReward]', e);
+    toast('Error de conexión', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Aplicar a todos los pools';
+  }
 }
 
 // ─── LOANS ───
