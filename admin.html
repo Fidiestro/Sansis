@@ -2,918 +2,2476 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
 <title>Admin — Sanse Capital</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+/* ═══════════════════════════════════════════════════════════════
+   SANSE CAPITAL — ADMIN
+   Estética: Editorial Brutalist + Terminal
+   Mobile-first · Bottom nav · Cards en móvil · Tablas en desktop
+═══════════════════════════════════════════════════════════════ */
+
 :root{
-  --bg:#080b14;--bg2:#0d1120;--bg3:#111628;--sur:rgba(255,255,255,.03);
-  --bd:rgba(255,255,255,.07);--bdh:rgba(255,255,255,.12);
-  --text:#e4e7ef;--mut:#6b7280;--dim:#3b4252;
-  --blu:#5b8dee;--blud:rgba(91,141,238,.1);
-  --pur:#8b6cf6;--purd:rgba(139,108,246,.1);
-  --tea:#34d4b0;--grn:#22c55e;--grnd:rgba(34,197,94,.1);
-  --amb:#f59e0b;--ambd:rgba(245,158,11,.1);
-  --red:#ef4444;--redd:rgba(239,68,68,.08);
-  --r:12px;
+  /* Surfaces */
+  --bg:#0a0a0a;
+  --bg-1:#111111;
+  --bg-2:#161616;
+  --bg-3:#1c1c1c;
+  --surface:rgba(255,255,255,.02);
+  --surface-h:rgba(255,255,255,.04);
+
+  /* Borders */
+  --line:rgba(255,255,255,.08);
+  --line-2:rgba(255,255,255,.14);
+  --line-3:rgba(255,255,255,.22);
+
+  /* Text */
+  --txt:#f0f0ee;
+  --txt-2:#8a8a87;
+  --txt-3:#5a5a57;
+  --txt-4:#3a3a37;
+
+  /* Single accent: terminal phosphor green */
+  --acc:#a3ff12;
+  --acc-dim:rgba(163,255,18,.12);
+  --acc-soft:rgba(163,255,18,.06);
+
+  /* Semantic (muted) */
+  --pos:#7ed957;
+  --neg:#ff6b6b;
+  --warn:#ffb84d;
+  --info:#7eb6ff;
+
+  /* Layout */
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-top:env(safe-area-inset-top,0px);
+
+  /* Fonts */
+  --f-display:'Instrument Serif',Georgia,serif;
+  --f-body:'Inter Tight','Inter',-apple-system,sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,monospace;
 }
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+html,body{background:var(--bg);color:var(--txt);overscroll-behavior-y:none}
+body{
+  font-family:var(--f-body);
+  font-size:14px;
+  line-height:1.5;
+  font-feature-settings:"ss01","cv11";
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  padding-bottom:calc(72px + var(--safe-bottom));
+}
+
 a{color:inherit;text-decoration:none}
-button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
-input,select,textarea{font-family:inherit}
+button{font-family:inherit;cursor:pointer;background:none;border:none;color:inherit}
+input,select,textarea{font-family:inherit;color:inherit}
+img{max-width:100%;display:block}
 
-/* ─── LAYOUT ─── */
-.topbar{position:sticky;top:0;z-index:50;background:rgba(8,11,20,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
-.tb-brand{display:flex;align-items:center;gap:10px}
-.tb-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--blu),var(--pur));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:white;font-weight:700}
-.tb-name{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
-.tb-name em{font-style:normal;color:var(--blu)}
-.tb-sub{font-size:9px;color:var(--mut);letter-spacing:.5px;text-transform:uppercase;margin-top:1px}
-.tb-right{display:flex;gap:8px;align-items:center}
-.tb-right a,.tb-right button{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--bd);background:var(--sur);color:var(--mut);transition:all .15s}
-.tb-right a:hover,.tb-right button:hover{color:var(--text);border-color:var(--bdh)}
-
-/* Quick stats */
-.qstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;padding:12px 20px;border-bottom:1px solid var(--bd);background:var(--bg2)}
-.qs{padding:12px 14px;border-radius:10px;background:var(--sur);border:1px solid var(--bd)}
-.qs-l{font-size:9px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-.qs-v{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700}
-
-/* Tabs */
-.tabs{display:flex;gap:3px;padding:8px 20px;background:var(--bg);border-bottom:1px solid var(--bd);overflow-x:auto;-webkit-overflow-scrolling:touch}
-.tabs::-webkit-scrollbar{height:0}
-.tab{padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;border:none;background:transparent;color:var(--mut);white-space:nowrap;transition:all .12s}
-.tab:hover{color:var(--text);background:rgba(255,255,255,.03)}
-.tab.active{background:var(--blu);color:white}
-
-/* Container */
-.container{max-width:1100px;margin:0 auto;padding:20px}
-.section{display:none}
-.section.active{display:block;animation:fadeUp .3s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-/* Cards */
-.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:20px;margin-bottom:12px}
-.card-t{font-size:15px;font-weight:700;margin-bottom:3px}
-.card-d{font-size:12px;color:var(--mut);margin-bottom:16px;line-height:1.5}
-
-/* Tables */
-.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--bd);border-radius:10px;overflow:hidden}
-table{width:100%;border-collapse:collapse;font-size:12px}
-thead th{background:var(--bg3);padding:10px 12px;font-size:9px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;text-align:left;white-space:nowrap}
-tbody td{padding:10px 12px;border-top:1px solid var(--bd);vertical-align:middle}
-tbody tr:hover{background:rgba(255,255,255,.015)}
-
-/* Badges */
-.bg{font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.3px;display:inline-block}
-.bg-g{background:rgba(34,197,94,.12);color:var(--grn);border:1px solid rgba(34,197,94,.2)}
-.bg-a{background:rgba(245,158,11,.12);color:var(--amb);border:1px solid rgba(245,158,11,.2)}
-.bg-r{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2)}
-.bg-b{background:rgba(91,141,238,.1);color:var(--blu);border:1px solid rgba(91,141,238,.2)}
-
-/* Buttons */
-.bt{padding:7px 14px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid var(--bd);background:var(--sur);color:var(--text);transition:all .12s}
-.bt:hover{background:rgba(255,255,255,.05)}
-.bt-p{background:var(--blu);color:white;border-color:var(--blu)}
-.bt-g{background:rgba(34,197,94,.1);color:var(--grn);border-color:rgba(34,197,94,.25)}
-.bt-r{background:rgba(239,68,68,.08);color:var(--red);border-color:rgba(239,68,68,.2)}
-.bt-s{padding:5px 10px;font-size:10px}
-
-/* Filters */
-.flt{display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap}
-.fb{padding:6px 13px;border-radius:7px;font-size:11px;font-weight:600;border:1px solid var(--bd);background:transparent;color:var(--mut);transition:all .12s}
-.fb:hover{color:var(--text)}
-.fb.on{background:var(--blu);color:white;border-color:var(--blu)}
-
-/* Forms */
-.fg{margin-bottom:12px}
-.fg label{display:block;font-size:9px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
-.fg input,.fg select,.fg textarea{width:100%;padding:10px 12px;background:var(--sur);border:1px solid var(--bd);border-radius:8px;color:var(--text);font-size:13px;box-sizing:border-box;transition:border-color .12s;outline:none}
-.fg input:focus,.fg select:focus{border-color:var(--blu)}
-.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-
-/* Grid stats */
-.sg{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
-.si{padding:14px;background:var(--sur);border:1px solid var(--bd);border-radius:10px}
-.si .l{font-size:9px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
-.si .v{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700}
-
-/* Utilities */
-.m{font-family:'JetBrains Mono',monospace}
-.cg{color:var(--grn)}.cr{color:var(--red)}.cb{color:var(--blu)}.ca{color:var(--amb)}.cp{color:var(--pur)}.ct{color:var(--tea)}
-.empty{text-align:center;color:var(--mut);padding:28px!important;font-size:12px}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg3);border:1px solid var(--bd);color:var(--text);padding:12px 24px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:all .3s ease;pointer-events:none}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.err{border-color:rgba(239,68,68,.3);color:var(--red)}
-
-::-webkit-scrollbar{width:5px;height:5px}
+/* Scrollbars */
+::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:2px}
+
+/* ─────────────────────────────────────────
+   TOPBAR
+───────────────────────────────────────── */
+.top{
+  position:sticky;top:0;z-index:80;
+  padding-top:var(--safe-top);
+  background:rgba(10,10,10,.92);
+  backdrop-filter:blur(20px) saturate(1.2);
+  -webkit-backdrop-filter:blur(20px) saturate(1.2);
+  border-bottom:1px solid var(--line);
+}
+.top-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;gap:12px;
+}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{
+  width:30px;height:30px;
+  background:var(--acc);color:#000;
+  display:grid;place-items:center;
+  font-family:var(--f-mono);font-size:14px;font-weight:700;
+  letter-spacing:-.5px;
+}
+.brand-text{display:flex;flex-direction:column;line-height:1}
+.brand-name{
+  font-family:var(--f-display);font-size:20px;letter-spacing:-.5px;
+  font-style:italic;
+}
+.brand-sub{
+  font-family:var(--f-mono);font-size:9px;
+  letter-spacing:1.5px;color:var(--txt-3);
+  text-transform:uppercase;margin-top:3px;
+}
+.top-actions{display:flex;gap:6px;align-items:center}
+.icon-btn{
+  width:36px;height:36px;display:grid;place-items:center;
+  border:1px solid var(--line);
+  background:var(--surface);
+  transition:all .15s;
+}
+.icon-btn:hover,.icon-btn:active{border-color:var(--line-2);background:var(--surface-h)}
+.icon-btn svg{width:16px;height:16px;stroke:var(--txt-2);fill:none;stroke-width:1.5}
+
+/* ─────────────────────────────────────────
+   SEARCH OVERLAY
+───────────────────────────────────────── */
+.search-ov{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(10,10,10,.96);
+  backdrop-filter:blur(16px);
+  display:none;flex-direction:column;
+  padding-top:var(--safe-top);
+}
+.search-ov.open{display:flex}
+.search-head{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 18px;border-bottom:1px solid var(--line);
+}
+.search-head input{
+  flex:1;background:transparent;border:none;outline:none;
+  font-size:16px;color:var(--txt);
+  font-family:var(--f-mono);letter-spacing:-.3px;
+}
+.search-head input::placeholder{color:var(--txt-3)}
+.search-results{flex:1;overflow-y:auto;padding:0 18px}
+.search-section{margin-top:18px}
+.search-section h4{
+  font-family:var(--f-mono);font-size:9px;letter-spacing:2px;
+  color:var(--txt-3);text-transform:uppercase;margin-bottom:8px;
+}
+.search-item{
+  padding:12px 0;border-bottom:1px solid var(--line);
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+}
+.search-item:last-child{border-bottom:none}
+.search-item-main{min-width:0;flex:1}
+.search-item-name{font-size:14px;font-weight:500;truncate}
+.search-item-meta{font-size:11px;color:var(--txt-3);margin-top:2px;font-family:var(--f-mono)}
+
+/* ─────────────────────────────────────────
+   PAGE HEADER (per section)
+───────────────────────────────────────── */
+.page-head{
+  padding:24px 18px 18px;
+  border-bottom:1px solid var(--line);
+  background:var(--bg);
+}
+.page-eyebrow{
+  font-family:var(--f-mono);font-size:10px;
+  letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--txt-3);margin-bottom:8px;
+}
+.page-title{
+  font-family:var(--f-display);
+  font-size:38px;line-height:1;letter-spacing:-1.2px;
+  color:var(--txt);font-weight:400;
+}
+.page-title em{font-style:italic;color:var(--acc)}
+.page-meta{
+  font-family:var(--f-mono);font-size:11px;
+  color:var(--txt-3);margin-top:10px;letter-spacing:.3px;
+}
+
+/* ─────────────────────────────────────────
+   CONTENT
+───────────────────────────────────────── */
+.view{display:none;animation:fadeUp .25s ease}
+.view.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.content{padding:0}
+.section{padding:18px}
+
+/* ─────────────────────────────────────────
+   STATS GRID
+───────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stat{
+  background:var(--bg);padding:18px;
+  position:relative;
+}
+.stat-label{
+  font-family:var(--f-mono);font-size:9px;
+  letter-spacing:1.8px;text-transform:uppercase;
+  color:var(--txt-3);margin-bottom:8px;
+}
+.stat-value{
+  font-family:var(--f-mono);font-size:22px;font-weight:500;
+  letter-spacing:-.5px;line-height:1;
+}
+.stat-value.acc{color:var(--acc)}
+.stat-value.pos{color:var(--pos)}
+.stat-value.neg{color:var(--neg)}
+.stat-value.warn{color:var(--warn)}
+.stat-sub{
+  font-family:var(--f-mono);font-size:10px;
+  color:var(--txt-3);margin-top:6px;
+}
+
+/* ─────────────────────────────────────────
+   SUB-TABS (within a view)
+───────────────────────────────────────── */
+.subtabs{
+  display:flex;gap:0;
+  border-bottom:1px solid var(--line);
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  background:var(--bg);
+  position:sticky;top:calc(var(--safe-top) + 58px);z-index:40;
+}
+.subtabs::-webkit-scrollbar{display:none}
+.subtab{
+  padding:14px 18px;
+  font-family:var(--f-mono);font-size:11px;font-weight:500;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--txt-3);white-space:nowrap;
+  border-bottom:2px solid transparent;
+  transition:all .15s;position:relative;
+}
+.subtab.active{color:var(--txt);border-bottom-color:var(--acc)}
+.subtab:hover:not(.active){color:var(--txt-2)}
+.subtab-badge{
+  display:inline-block;margin-left:6px;
+  background:var(--acc);color:#000;
+  font-family:var(--f-mono);font-size:9px;font-weight:700;
+  padding:1px 5px;border-radius:8px;
+  vertical-align:1px;min-width:16px;text-align:center;
+}
+.subtab-badge.warn{background:var(--warn)}
+.subtab-badge.neg{background:var(--neg);color:#fff}
+
+/* ─────────────────────────────────────────
+   FILTERS
+───────────────────────────────────────── */
+.filters{
+  display:flex;gap:6px;margin-bottom:14px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;padding-bottom:2px;
+}
+.filters::-webkit-scrollbar{display:none}
+.filter{
+  padding:7px 14px;
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--txt-2);background:transparent;
+  border:1px solid var(--line);
+  white-space:nowrap;transition:all .12s;
+}
+.filter:hover{border-color:var(--line-2)}
+.filter.on{background:var(--txt);color:#000;border-color:var(--txt)}
+
+/* ─────────────────────────────────────────
+   LIST (cards on mobile)
+───────────────────────────────────────── */
+.list{display:flex;flex-direction:column;gap:8px}
+
+.row{
+  background:var(--bg-1);
+  border:1px solid var(--line);
+  padding:14px;
+  transition:border-color .12s;
+  position:relative;
+}
+.row:hover{border-color:var(--line-2)}
+
+.row-top{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:10px;margin-bottom:8px;
+}
+.row-id{
+  font-family:var(--f-mono);font-size:10px;
+  color:var(--txt-3);letter-spacing:.5px;
+}
+.row-name{
+  font-size:14px;font-weight:500;
+  line-height:1.3;margin-top:2px;
+  word-break:break-word;
+}
+.row-amount{
+  font-family:var(--f-mono);font-size:15px;font-weight:600;
+  text-align:right;white-space:nowrap;
+}
+.row-amount.pos{color:var(--pos)}
+.row-amount.neg{color:var(--neg)}
+.row-amount.acc{color:var(--acc)}
+
+.row-meta{
+  display:flex;gap:10px;align-items:center;
+  font-family:var(--f-mono);font-size:10px;
+  color:var(--txt-3);letter-spacing:.3px;
+  margin-bottom:10px;flex-wrap:wrap;
+}
+.row-meta>span{display:flex;align-items:center;gap:4px}
+
+.row-note{
+  font-size:12px;color:var(--txt-2);
+  margin-bottom:10px;line-height:1.4;
+  border-left:2px solid var(--line);padding-left:8px;
+}
+
+.row-actions{
+  display:flex;gap:6px;flex-wrap:wrap;
+  margin-top:10px;
+  padding-top:10px;border-top:1px solid var(--line);
+}
+
+/* Status pill */
+.pill{
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:var(--f-mono);font-size:9px;font-weight:600;
+  padding:3px 8px;border-radius:12px;
+  letter-spacing:1px;text-transform:uppercase;
+}
+.pill::before{
+  content:'';width:5px;height:5px;border-radius:50%;
+  background:currentColor;
+}
+.pill.pending{background:rgba(255,184,77,.08);color:var(--warn);border:1px solid rgba(255,184,77,.2)}
+.pill.approved{background:rgba(126,182,255,.08);color:var(--info);border:1px solid rgba(126,182,255,.2)}
+.pill.completed,.pill.active,.pill.paid{background:rgba(126,217,87,.08);color:var(--pos);border:1px solid rgba(126,217,87,.2)}
+.pill.rejected,.pill.blocked,.pill.overdue{background:rgba(255,107,107,.08);color:var(--neg);border:1px solid rgba(255,107,107,.2)}
+.pill.neutral{background:var(--surface);color:var(--txt-2);border:1px solid var(--line)}
+
+/* ─────────────────────────────────────────
+   BUTTONS
+───────────────────────────────────────── */
+.btn{
+  padding:10px 16px;
+  font-family:var(--f-mono);font-size:11px;font-weight:500;
+  letter-spacing:1.2px;text-transform:uppercase;
+  border:1px solid var(--line-2);
+  background:var(--surface);color:var(--txt);
+  transition:all .12s;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;
+  min-height:38px;
+}
+.btn:hover:not(:disabled){background:var(--surface-h);border-color:var(--line-3)}
+.btn:active:not(:disabled){transform:scale(.98)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+.btn-sm{padding:6px 10px;font-size:10px;min-height:30px}
+.btn-block{width:100%;justify-content:center}
+
+.btn-primary{background:var(--acc);color:#000;border-color:var(--acc)}
+.btn-primary:hover:not(:disabled){background:#b8ff35;border-color:#b8ff35}
+
+.btn-pos{background:rgba(126,217,87,.08);color:var(--pos);border-color:rgba(126,217,87,.25)}
+.btn-pos:hover:not(:disabled){background:rgba(126,217,87,.14)}
+
+.btn-neg{background:rgba(255,107,107,.06);color:var(--neg);border-color:rgba(255,107,107,.2)}
+.btn-neg:hover:not(:disabled){background:rgba(255,107,107,.12)}
+
+.btn-ghost{background:transparent;border-color:var(--line)}
+
+/* ─────────────────────────────────────────
+   CARDS / FORMS
+───────────────────────────────────────── */
+.card{
+  background:var(--bg-1);
+  border:1px solid var(--line);
+  padding:18px;margin-bottom:14px;
+}
+.card-h{
+  font-family:var(--f-display);font-size:22px;
+  letter-spacing:-.5px;line-height:1.1;
+  margin-bottom:4px;font-weight:400;
+}
+.card-h em{font-style:italic;color:var(--acc)}
+.card-d{
+  font-size:13px;color:var(--txt-2);
+  line-height:1.5;margin-bottom:16px;
+}
+
+.fg{margin-bottom:12px}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.fg-row-3{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px}
+@media(min-width:600px){
+  .fg-row-3{grid-template-columns:1fr 1fr 1fr}
+}
+
+.fg label{
+  display:block;
+  font-family:var(--f-mono);font-size:9px;font-weight:600;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--txt-3);margin-bottom:6px;
+}
+.fg input,.fg select,.fg textarea{
+  width:100%;padding:11px 12px;
+  background:var(--bg);
+  border:1px solid var(--line-2);
+  color:var(--txt);font-size:14px;
+  font-family:var(--f-mono);letter-spacing:-.3px;
+  outline:none;transition:border-color .12s;
+  border-radius:0;
+  -webkit-appearance:none;appearance:none;
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--acc)}
+.fg input::placeholder{color:var(--txt-3)}
+.fg select{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%23666' fill='none' stroke-width='1.5'/></svg>");
+  background-repeat:no-repeat;background-position:right 12px center;
+  padding-right:32px;
+}
+.fg input[readonly]{opacity:.5;cursor:not-allowed}
+
+.info-box{
+  padding:12px;background:var(--acc-soft);
+  border-left:2px solid var(--acc);
+  font-size:12px;color:var(--txt-2);
+  line-height:1.6;margin-bottom:14px;
+}
+.info-box strong{color:var(--txt)}
+
+/* ─────────────────────────────────────────
+   EMPTY / LOADING
+───────────────────────────────────────── */
+.empty{
+  text-align:center;padding:48px 18px;
+  color:var(--txt-3);font-family:var(--f-mono);
+  font-size:12px;letter-spacing:.5px;
+}
+.empty::before{
+  content:'';display:block;width:30px;height:1px;
+  background:var(--line-2);margin:0 auto 14px;
+}
+
+.skel{
+  background:linear-gradient(90deg,var(--bg-1),var(--bg-2),var(--bg-1));
+  background-size:200% 100%;
+  animation:skel 1.4s ease-in-out infinite;
+  border-radius:0;
+}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-row{height:80px;margin-bottom:8px}
+
+/* ─────────────────────────────────────────
+   BOTTOM NAV (mobile primary)
+───────────────────────────────────────── */
+.bnav{
+  position:fixed;left:0;right:0;bottom:0;z-index:90;
+  background:rgba(10,10,10,.96);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--line);
+  padding-bottom:var(--safe-bottom);
+  display:grid;grid-template-columns:repeat(5,1fr);
+}
+.bn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;padding:10px 4px;
+  color:var(--txt-3);transition:color .12s;
+  position:relative;min-height:62px;
+}
+.bn:active{transform:scale(.94)}
+.bn.active{color:var(--acc)}
+.bn.active::before{
+  content:'';position:absolute;top:0;left:50%;
+  transform:translateX(-50%);
+  width:24px;height:2px;background:var(--acc);
+}
+.bn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6}
+.bn span{
+  font-family:var(--f-mono);font-size:9px;
+  letter-spacing:1px;text-transform:uppercase;
+  font-weight:500;
+}
+.bn-dot{
+  position:absolute;top:8px;right:calc(50% - 16px);
+  width:6px;height:6px;border-radius:50%;background:var(--neg);
+}
+
+/* ─────────────────────────────────────────
+   MODAL / BOTTOM SHEET
+───────────────────────────────────────── */
+.modal-ov{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,.75);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  display:none;align-items:flex-end;justify-content:center;
+  animation:fadeIn .2s;
+}
+.modal-ov.open{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.modal{
+  width:100%;max-width:500px;
+  background:var(--bg-1);
+  border-top:1px solid var(--line-2);
+  border-radius:0;
+  max-height:92vh;
+  display:flex;flex-direction:column;
+  animation:slideUp .25s cubic-bezier(.2,.8,.3,1);
+  padding-bottom:var(--safe-bottom);
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+.modal-head{
+  padding:18px;border-bottom:1px solid var(--line);
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  position:sticky;top:0;background:var(--bg-1);z-index:5;
+}
+.modal-handle{
+  width:36px;height:3px;background:var(--line-3);
+  border-radius:2px;margin:8px auto 0;
+}
+.modal-title{
+  font-family:var(--f-display);font-size:22px;
+  letter-spacing:-.4px;line-height:1.1;font-weight:400;
+}
+.modal-title em{font-style:italic;color:var(--acc)}
+.modal-sub{
+  font-family:var(--f-mono);font-size:10px;
+  color:var(--txt-3);letter-spacing:.5px;margin-top:3px;
+}
+.modal-x{
+  width:32px;height:32px;display:grid;place-items:center;
+  border:1px solid var(--line);background:var(--surface);
+  color:var(--txt-2);flex-shrink:0;
+}
+.modal-x:hover{color:var(--txt);border-color:var(--line-2)}
+.modal-body{padding:18px;overflow-y:auto;flex:1}
+
+@media(min-width:720px){
+  .modal-ov{align-items:center}
+  .modal{border-radius:0;border:1px solid var(--line-2);max-height:85vh}
+  .modal-handle{display:none}
+}
+
+/* ─────────────────────────────────────────
+   TOAST
+───────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:calc(80px + var(--safe-bottom));
+  left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--bg-2);border:1px solid var(--line-2);
+  color:var(--txt);padding:12px 18px;
+  font-family:var(--f-mono);font-size:12px;font-weight:500;
+  letter-spacing:.3px;
+  z-index:999;opacity:0;
+  transition:all .25s cubic-bezier(.2,.8,.3,1);
+  pointer-events:none;max-width:90%;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{border-color:rgba(255,107,107,.4);color:var(--neg)}
+.toast.ok{border-color:rgba(163,255,18,.4);color:var(--acc)}
+
+/* ─────────────────────────────────────────
+   PULL TO REFRESH
+───────────────────────────────────────── */
+.ptr{
+  position:fixed;top:calc(var(--safe-top) + 58px);left:50%;
+  transform:translate(-50%,-60px);
+  z-index:60;
+  display:flex;align-items:center;gap:8px;
+  padding:8px 14px;
+  background:var(--bg-2);border:1px solid var(--line-2);
+  font-family:var(--f-mono);font-size:10px;
+  letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--txt-2);
+  transition:transform .2s ease,opacity .2s;
+  pointer-events:none;
+  opacity:0;
+}
+.ptr.show{opacity:1}
+.ptr.refreshing{transform:translate(-50%,12px);opacity:1}
+.ptr-spin{
+  width:12px;height:12px;
+  border:1.5px solid var(--line-3);
+  border-top-color:var(--acc);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─────────────────────────────────────────
+   STRATEGIES (pool)
+───────────────────────────────────────── */
+.strat{
+  display:flex;align-items:center;gap:10px;
+  padding:12px;background:var(--bg);
+  border:1px solid var(--line);
+  margin-bottom:6px;
+}
+.strat-main{flex:1;min-width:0}
+.strat-name{font-size:13px;font-weight:500;line-height:1.2;margin-bottom:6px;word-break:break-word}
+.strat-bar{height:4px;background:var(--bg-3);overflow:hidden;border-radius:0}
+.strat-bar-fill{height:100%;background:var(--acc);transition:width .25s}
+.strat-pct{
+  font-family:var(--f-mono);font-size:14px;font-weight:600;color:var(--acc);
+  min-width:50px;text-align:right;
+}
+.strat-input{
+  width:64px;padding:8px;
+  background:var(--bg-2);border:1px solid var(--line-2);
+  color:var(--acc);font-family:var(--f-mono);font-size:13px;
+  text-align:right;outline:none;
+  -webkit-appearance:none;appearance:none;
+}
+.strat-input:focus{border-color:var(--acc)}
+.strat-input::-webkit-outer-spin-button,.strat-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.strat-rm{
+  width:30px;height:30px;display:grid;place-items:center;
+  border:1px solid var(--line);color:var(--txt-3);
+  background:var(--surface);transition:all .12s;
+}
+.strat-rm:hover{color:var(--neg);border-color:var(--neg)}
+.strat-rm svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+
+.strat-total{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px;background:var(--bg);
+  border:1px solid var(--line-2);
+  margin-top:10px;
+}
+.strat-total-l{
+  font-family:var(--f-mono);font-size:10px;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--txt-3);
+}
+.strat-total-v{
+  font-family:var(--f-mono);font-size:18px;font-weight:600;
+}
+.strat-total-v.ok{color:var(--acc)}
+.strat-total-v.over{color:var(--neg)}
+.strat-total-v.under{color:var(--warn)}
+
+/* ─────────────────────────────────────────
+   PAGINATION
+───────────────────────────────────────── */
+.pagi{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:14px;padding:12px;
+  background:var(--bg-1);border:1px solid var(--line);
+  font-family:var(--f-mono);font-size:11px;
+}
+.pagi-info{color:var(--txt-3);letter-spacing:.3px}
+.pagi-info strong{color:var(--txt)}
+.pagi-ctrls{display:flex;gap:6px}
+.pagi-btn{
+  width:34px;height:34px;display:grid;place-items:center;
+  border:1px solid var(--line-2);
+  background:var(--surface);color:var(--txt);
+  transition:all .12s;
+}
+.pagi-btn:hover:not(:disabled){background:var(--surface-h);border-color:var(--line-3)}
+.pagi-btn:disabled{opacity:.3;cursor:not-allowed}
+.pagi-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+/* Active filter indicator */
+.filter-active-dot{
+  display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--acc);margin-left:6px;vertical-align:1px;
+}
+
+/* ─────────────────────────────────────────
+   TABLE (desktop only)
+───────────────────────────────────────── */
+.table-wrap{display:none}
+
+@media(min-width:920px){
+  body{padding-bottom:0}
+  .bnav{display:none}
+
+  /* Sidebar navigation on desktop */
+  .top-inner{padding:18px 32px}
+
+  /* Show side nav on desktop */
+  .desktop-nav{
+    display:flex;gap:0;
+    border-bottom:1px solid var(--line);
+    padding:0 32px;
+    background:var(--bg);
+    position:sticky;top:calc(var(--safe-top) + 70px);z-index:50;
+  }
+  .dn{
+    padding:14px 20px;
+    font-family:var(--f-mono);font-size:11px;font-weight:500;
+    letter-spacing:1.5px;text-transform:uppercase;
+    color:var(--txt-3);
+    border-bottom:2px solid transparent;transition:all .12s;
+    position:relative;display:flex;align-items:center;gap:8px;
+  }
+  .dn:hover{color:var(--txt-2)}
+  .dn.active{color:var(--txt);border-bottom-color:var(--acc)}
+  .dn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6}
+  .dn-dot{
+    width:6px;height:6px;border-radius:50%;background:var(--neg);
+    margin-left:2px;
+  }
+
+  .page-head{padding:36px 32px 24px}
+  .page-title{font-size:54px;letter-spacing:-1.8px}
+  .section{padding:24px 32px;max-width:1400px;margin:0 auto}
+  .subtabs{top:calc(var(--safe-top) + 130px);padding:0 32px}
+
+  /* Show table on desktop */
+  .table-wrap{
+    display:block;
+    border:1px solid var(--line);
+    overflow-x:auto;-webkit-overflow-scrolling:touch;
+  }
+  .table-wrap+.list{display:none}
+
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{
+    background:var(--bg-2);padding:11px 14px;
+    font-family:var(--f-mono);font-size:9px;font-weight:600;
+    color:var(--txt-3);letter-spacing:1.2px;text-transform:uppercase;
+    text-align:left;white-space:nowrap;
+    border-bottom:1px solid var(--line);
+  }
+  tbody td{
+    padding:14px;border-top:1px solid var(--line);
+    vertical-align:middle;
+  }
+  tbody tr:hover{background:var(--surface)}
+  td.mono{font-family:var(--f-mono);letter-spacing:-.3px}
+  td.dim{color:var(--txt-3);font-size:11px}
+
+  .stats{grid-template-columns:repeat(4,1fr)}
+  .stat-value{font-size:28px}
+  .stat{padding:24px}
+
+  .fg-row-3{grid-template-columns:1fr 1fr 1fr}
+}
+
+/* Hide desktop nav on mobile */
+.desktop-nav{display:none}
+
+/* ─────────────────────────────────────────
+   UTILITIES
+───────────────────────────────────────── */
+.mono{font-family:var(--f-mono);letter-spacing:-.3px}
+.dim{color:var(--txt-3)}
+.muted{color:var(--txt-2)}
+.acc{color:var(--acc)}
+.pos{color:var(--pos)}
+.neg{color:var(--neg)}
+.warn{color:var(--warn)}
+.txt-c{text-align:center}
+.txt-r{text-align:right}
+.hide{display:none!important}
+.divider{height:1px;background:var(--line);margin:14px 0}
+.tag{
+  display:inline-block;
+  font-family:var(--f-mono);font-size:9px;font-weight:600;
+  padding:2px 7px;border:1px solid var(--line-2);
+  color:var(--txt-2);letter-spacing:1px;text-transform:uppercase;
+}
+.row-clickable{cursor:pointer}
+.row-clickable:active{transform:scale(.99)}
+
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <div class="tb-brand">
-    <div class="tb-icon">⚡</div>
-    <div>
-      <div class="tb-name">Sanse <em>Capital</em></div>
-      <div class="tb-sub">Panel de Administración</div>
+<!-- ═══════ TOPBAR ═══════ -->
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <div class="brand-mark">S</div>
+      <div class="brand-text">
+        <div class="brand-name">Sanse</div>
+        <div class="brand-sub">Admin · v2</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" onclick="openSearch()" aria-label="Buscar">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+      <a class="icon-btn" href="dashboard.html" aria-label="Dashboard cliente">
+        <svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </a>
+      <button class="icon-btn" onclick="logout()" aria-label="Cerrar sesión">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
     </div>
   </div>
-  <div class="tb-right">
-    <a href="dashboard.html">Dashboard</a>
-    <button onclick="logout()">Cerrar Sesión</button>
-  </div>
+</header>
+
+<!-- Pull to refresh indicator -->
+<div class="ptr" id="ptr">
+  <div class="ptr-spin"></div>
+  <span id="ptr-text">Tira para actualizar</span>
 </div>
 
-<!-- QUICK STATS -->
-<div class="qstats">
-  <div class="qs"><div class="qs-l">Usuarios</div><div class="qs-v" id="qs-users">—</div></div>
-  <div class="qs"><div class="qs-l">Capital Total</div><div class="qs-v cg" id="qs-capital">—</div></div>
-  <div class="qs"><div class="qs-l">Dep. Pendientes</div><div class="qs-v ca" id="qs-dep">—</div></div>
-  <div class="qs"><div class="qs-l">Retiros Pend.</div><div class="qs-v cr" id="qs-wr">—</div></div>
-</div>
+<!-- ═══════ DESKTOP TOP NAV ═══════ -->
+<nav class="desktop-nav">
+  <button class="dn active" data-nav="home" onclick="nav('home')">
+    <svg viewBox="0 0 24 24"><path d="M3 12 12 3l9 9M5 10v10h14V10"/></svg>
+    Inicio
+  </button>
+  <button class="dn" data-nav="pending" onclick="nav('pending')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    Pendientes
+    <span class="dn-dot hide" id="dn-pending-dot"></span>
+  </button>
+  <button class="dn" data-nav="finance" onclick="nav('finance')">
+    <svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M14 7h7v7"/></svg>
+    Financiero
+  </button>
+  <button class="dn" data-nav="users" onclick="nav('users')">
+    <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Usuarios
+  </button>
+  <button class="dn" data-nav="tx" onclick="nav('tx')">
+    <svg viewBox="0 0 24 24"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+    Movimientos
+  </button>
+</nav>
 
-<!-- TABS -->
-<div class="tabs">
-  <button class="tab active" onclick="sw('dash',this)">📊 Resumen</button>
-  <button class="tab" onclick="sw('deps',this)">📥 Depósitos</button>
-  <button class="tab" onclick="sw('wrs',this)">📤 Retiros</button>
-  <button class="tab" onclick="sw('invs',this)">💰 Inversiones</button>
-  <button class="tab" onclick="sw('rets',this)">📈 Rendimientos</button>
-  <button class="tab" onclick="sw('pool',this)">🌊 Pool</button>
-  <button class="tab" onclick="sw('txs',this)">🔄 Transacciones</button>
-  <button class="tab" onclick="sw('users',this)">👥 Usuarios</button>
-  <button class="tab" onclick="sw('regs',this)">📝 Registros</button>
-  <button class="tab" onclick="sw('loans',this)">🏦 Préstamos</button>
-</div>
+<!-- ═══════ VIEWS ═══════ -->
 
-<div class="container">
+<!-- HOME -->
+<div class="view active" id="view-home">
+  <div class="page-head">
+    <div class="page-eyebrow">Panel · Sanse Capital</div>
+    <h1 class="page-title">Buenas, <em>operador</em>.</h1>
+    <div class="page-meta" id="home-meta">Cargando estado del sistema…</div>
+  </div>
 
-<!-- ═══ DASHBOARD / RESUMEN ═══ -->
-<div class="section active" id="sec-dash">
-  <div class="sg" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
-    <div class="si"><div class="l">Total Depositado</div><div class="v cg" id="st-dep">—</div></div>
-    <div class="si"><div class="l">Total Invertido</div><div class="v cb" id="st-inv">—</div></div>
-    <div class="si"><div class="l">Ganancias Pagadas</div><div class="v ct" id="st-earn">—</div></div>
-    <div class="si"><div class="l">Inv. Activas</div><div class="v" id="st-active">—</div></div>
+  <div class="stats" id="stats-grid">
+    <div class="stat"><div class="stat-label">Usuarios</div><div class="stat-value" id="qs-users">—</div></div>
+    <div class="stat"><div class="stat-label">Capital total</div><div class="stat-value acc mono" id="qs-capital">—</div></div>
+    <div class="stat"><div class="stat-label">Dep. pendientes</div><div class="stat-value warn" id="qs-dep">—</div></div>
+    <div class="stat"><div class="stat-label">Retiros pend.</div><div class="stat-value neg" id="qs-wr">—</div></div>
   </div>
-  <div class="card">
-    <div class="card-t">Últimas Transacciones</div>
-    <div class="card-d">Movimientos recientes del sistema</div>
-    <div class="tw"><table>
-      <thead><tr><th>Fecha</th><th>Usuario</th><th>Tipo</th><th>Monto</th><th>Descripción</th></tr></thead>
-      <tbody id="dash-tx-tbl"><tr><td colspan="5" class="empty">Cargando...</td></tr></tbody>
-    </table></div>
-  </div>
-</div>
 
-<!-- ═══ DEPÓSITOS ═══ -->
-<div class="section" id="sec-deps">
-  <div class="card">
-    <div class="card-t">Solicitudes de Depósito</div>
-    <div class="card-d">Revisa comprobantes y aprueba o rechaza depósitos</div>
-    <div class="flt">
-      <button class="fb on" onclick="fDep('all',this)">Todas</button>
-      <button class="fb" onclick="fDep('pending',this)">Pendientes</button>
-      <button class="fb" onclick="fDep('approved',this)">Aprobadas</button>
-      <button class="fb" onclick="fDep('rejected',this)">Rechazadas</button>
+  <div class="section">
+    <div class="card">
+      <div class="card-h">Resumen <em>financiero</em></div>
+      <div class="card-d">Estado actual del capital gestionado.</div>
+      <div class="stats" style="border:1px solid var(--line);margin:0;grid-template-columns:1fr 1fr">
+        <div class="stat"><div class="stat-label">Total depositado</div><div class="stat-value pos mono" id="st-dep">—</div></div>
+        <div class="stat"><div class="stat-label">Total invertido</div><div class="stat-value acc mono" id="st-inv">—</div></div>
+        <div class="stat"><div class="stat-label">Ganancias pagadas</div><div class="stat-value mono" id="st-earn">—</div></div>
+        <div class="stat"><div class="stat-label">Inv. activas</div><div class="stat-value mono" id="st-active">—</div></div>
+      </div>
     </div>
-    <div class="tw"><table>
-      <thead><tr><th>Ref</th><th>Usuario</th><th>Monto</th><th>Nota</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
-      <tbody id="dep-tbl"><tr><td colspan="7" class="empty">Cargando...</td></tr></tbody>
-    </table></div>
-  </div>
-</div>
 
-<!-- ═══ RETIROS ═══ -->
-<div class="section" id="sec-wrs">
-  <div class="card">
-    <div class="card-t">Solicitudes de Retiro</div>
-    <div class="card-d">Aprueba, completa o rechaza retiros</div>
-    <div class="flt">
-      <button class="fb on" onclick="fWr('all',this)">Todas</button>
-      <button class="fb" onclick="fWr('pending',this)">Pendientes</button>
-      <button class="fb" onclick="fWr('approved',this)">Aprobadas</button>
-      <button class="fb" onclick="fWr('completed',this)">Completadas</button>
-      <button class="fb" onclick="fWr('rejected',this)">Rechazadas</button>
-    </div>
-    <div class="tw"><table>
-      <thead><tr><th>Ref</th><th>Usuario</th><th>Monto</th><th>Método</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
-      <tbody id="wr-tbl"><tr><td colspan="7" class="empty">Cargando...</td></tr></tbody>
-    </table></div>
-  </div>
-</div>
-
-<!-- ═══ INVERSIONES ═══ -->
-<div class="section" id="sec-invs">
-  <div class="card">
-    <div class="card-t">CDTC — Inversiones Activas</div>
-    <div id="sdtc-content"><div class="empty">Cargando...</div></div>
-  </div>
-</div>
-
-<!-- ═══ RENDIMIENTOS ═══ -->
-<div class="section" id="sec-rets">
-  <div class="card">
-    <div class="card-t">Registrar Rendimiento Pool</div>
-    <div class="card-d">Solo Pool. CDTC genera 2% mensual automático y los clientes reclaman desde su dashboard cada 24h.</div>
-    <div style="padding:10px 14px;background:rgba(91,141,238,.08);border:1px solid rgba(91,141,238,.2);border-radius:8px;margin-bottom:14px;font-size:11px;color:var(--blu);line-height:1.5">
-      ℹ️ <strong>CDTC ya no se registra manualmente.</strong> Tasa fija 2% mensual sobre el capital, calculada en tiempo real. Cliente reclama 1 vez cada 24h. Solo verás inversiones <strong>Pool</strong> en la lista.
-    </div>
-    <div class="tw"><table>
-      <thead><tr><th>Usuario</th><th>Tipo</th><th>Capital</th><th>Inicio</th><th>Ganado</th><th>Estado</th><th></th></tr></thead>
-      <tbody id="ret-invs-tbl"><tr><td colspan="7" class="empty">Cargando...</td></tr></tbody>
-    </table></div>
-  </div>
-  <div class="card" id="ret-form-card" style="display:none">
-    <div class="card-t">Rendimiento para: <span id="rf-label" class="cb"></span></div>
-    <div class="fr" style="margin-top:14px">
-      <div class="fg"><label>Tasa (%)</label><input id="rf-rate" type="number" step="0.01" min="0" max="100" placeholder="2.0" oninput="updateRetPrev()"></div>
-      <div class="fg"><label>Mes del período</label><input id="rf-month" type="month"></div>
-    </div>
-    <div class="fg"><label>Notas (opcional)</label><input id="rf-notes" placeholder="Ej: Rendimiento febrero 2025"></div>
-    <div id="rf-preview" style="display:none;padding:12px;background:var(--sur);border:1px solid var(--bd);border-radius:8px;margin-bottom:14px;font-size:12px"></div>
-    <button class="bt bt-p" onclick="registerReturn()" id="rf-btn">Registrar Rendimiento</button>
-  </div>
-</div>
-
-<!-- ═══ POOL ═══ -->
-<div class="section" id="sec-pool">
-  <div class="card">
-    <div class="card-t">Pool de Liquidez — Configuración</div>
-    <div class="card-d">Parámetros del pool. Los usuarios ven estos valores en su dashboard.</div>
-    <div class="fr3" style="margin-bottom:14px">
-      <div class="fg"><label>APY Mensual (%)</label><input id="pool-apy-monthly" type="number" step="0.01" placeholder="2.0" oninput="updatePoolAnnual()"></div>
-      <div class="fg"><label>APY Anual (auto)</label><input id="pool-apy-annual" type="number" readonly style="opacity:.6"></div>
-      <div class="fg"><label>Mínimo (COP)</label><input id="pool-min" type="number" value="50000"></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label>Capital Total Pool</label><input id="pool-total-capital" type="number" placeholder="0"></div>
-      <div class="fg"><label>% Distribución Pool/CDTC</label><input id="pool-distribution" type="number" placeholder="50"></div>
-    </div>
-    <button class="bt bt-p" onclick="savePoolConfig()" id="btn-save-pool">Guardar Config</button>
-  </div>
-  <div class="card">
-    <div class="card-t">Estado del Pool</div>
-    <div id="pool-stats-display"><div class="empty">Cargando...</div></div>
-  </div>
-  <div class="card">
-    <div class="card-t">Inversiones en el Pool</div>
-    <div class="tw"><table>
-      <thead><tr><th>Usuario</th><th>Capital</th><th>Inicio</th><th>Tiempo</th><th>Ganado</th><th>Estado</th></tr></thead>
-      <tbody id="pool-invs-tbl"><tr><td colspan="6" class="empty">Cargando...</td></tr></tbody>
-    </table></div>
-  </div>
-  <div class="card">
-    <div class="card-t">📋 Comisiones Pool (20%)</div>
-    <div class="card-d">Registro contable de retiros de ganancias</div>
-    <div class="sg" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:14px">
-      <div class="si"><div class="l">Bruto Retirado</div><div class="v cg" id="pwk-gross">—</div></div>
-      <div class="si"><div class="l">Comisión Sanse</div><div class="v ca" id="pwk-commission">—</div></div>
-      <div class="si"><div class="l">Neto Pagado</div><div class="v cb" id="pwk-net">—</div></div>
-    </div>
-    <div class="tw"><table>
-      <thead><tr><th>Fecha</th><th>Usuario</th><th>Bruto</th><th>Comisión</th><th>Neto</th></tr></thead>
-      <tbody id="pool-comm-tbl"><tr><td colspan="5" class="empty">Cargando...</td></tr></tbody>
-    </table></div>
-  </div>
-  <div class="card">
-    <div class="card-t">Estrategias DeFi</div>
-    <div class="card-d">Asignación del capital del pool</div>
-    <div id="pool-strat-list"></div>
-    <div style="height:1px;background:var(--bd);margin:14px 0"></div>
-    <div class="fr">
-      <div class="fg"><label>Nombre</label><input id="strat-name" placeholder="Ej: Delta Neutral"></div>
-      <div class="fg"><label>Ícono</label><input id="strat-icon" placeholder="🛡️" style="width:60px"></div>
-    </div>
-    <div class="fr3">
-      <div class="fg"><label>%</label><input id="strat-pct" type="number" min="0" max="100" placeholder="25"></div>
-      <div class="fg"><label>Descripción</label><input id="strat-desc" placeholder="Posiciones hedgeadas"></div>
-      <div class="fg"><label>Color</label><input id="strat-color" type="color" value="#f59e0b" style="height:38px;padding:3px"></div>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button class="bt" onclick="addStrat()">+ Agregar</button>
-      <button class="bt bt-p" onclick="saveStrats()">Guardar</button>
-      <span class="m" style="font-size:12px;margin-left:auto" id="strat-total">0%</span>
+    <div class="card">
+      <div class="card-h">Últimos <em>movimientos</em></div>
+      <div class="card-d">Las 15 transacciones más recientes del sistema.</div>
+      <div id="home-tx-list"><div class="empty">Cargando…</div></div>
     </div>
   </div>
 </div>
 
-<!-- ═══ TRANSACCIONES ═══ -->
-<div class="section" id="sec-txs">
-  <div class="card">
-    <div class="card-t">Nueva Transacción</div>
-    <div class="card-d">Crear transacción manual para un usuario</div>
-    <div class="fr3">
-      <div class="fg"><label>Usuario</label><select id="tx-user"></select></div>
-      <div class="fg"><label>Tipo</label><select id="tx-type">
-        <option value="deposit">Depósito</option>
-        <option value="withdraw">Retiro</option>
-        <option value="profit">Ganancia</option>
-        <option value="payment">Abono</option>
-        <option value="interest">Interés</option>
-        <option value="investment_return">Rendimiento inversión</option>
-        <option value="investment_withdrawal">Retiro inversión</option>
-        <option value="loan">Préstamo</option>
-      </select></div>
-      <div class="fg"><label>Monto (COP)</label><input id="tx-amount" type="number" placeholder="0"></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label>Descripción</label><input id="tx-desc" placeholder="Opcional"></div>
-      <div class="fg"><label>Fecha (opcional)</label><input id="tx-date" type="datetime-local"></div>
-    </div>
-    <button class="bt bt-p" onclick="createTx()">Crear Transacción</button>
+<!-- PENDIENTES -->
+<div class="view" id="view-pending">
+  <div class="page-head">
+    <div class="page-eyebrow">Operativa diaria</div>
+    <h1 class="page-title"><em>Pendientes</em></h1>
+    <div class="page-meta">Lo que requiere tu acción ahora mismo.</div>
   </div>
-  <div class="card">
-    <div class="card-t">Historial</div>
-    <div class="tw"><table>
-      <thead><tr><th>Fecha</th><th>Usuario</th><th>Tipo</th><th>Monto</th><th>Descripción</th></tr></thead>
-      <tbody id="tx-tbl"><tr><td colspan="5" class="empty">Cargando...</td></tr></tbody>
-    </table></div>
+  <div class="subtabs">
+    <button class="subtab active" data-sub="deps" onclick="sub('pending','deps')">Depósitos <span class="subtab-badge hide" id="bdg-deps"></span></button>
+    <button class="subtab" data-sub="wrs" onclick="sub('pending','wrs')">Retiros <span class="subtab-badge neg hide" id="bdg-wrs"></span></button>
+    <button class="subtab" data-sub="regs" onclick="sub('pending','regs')">Registros <span class="subtab-badge warn hide" id="bdg-regs"></span></button>
+  </div>
+
+  <div class="section">
+    <div class="sub-view active" data-sub-view="deps">
+      <div class="filters" id="dep-filters">
+        <button class="filter on" onclick="fDep('all',this)">Todas</button>
+        <button class="filter" onclick="fDep('pending',this)">Pendientes</button>
+        <button class="filter" onclick="fDep('approved',this)">Aprobadas</button>
+        <button class="filter" onclick="fDep('rejected',this)">Rechazadas</button>
+      </div>
+      <div id="dep-content"><div class="empty">Cargando…</div></div>
+    </div>
+
+    <div class="sub-view hide" data-sub-view="wrs">
+      <div class="filters">
+        <button class="filter on" onclick="fWr('all',this)">Todas</button>
+        <button class="filter" onclick="fWr('pending',this)">Pendientes</button>
+        <button class="filter" onclick="fWr('approved',this)">Aprobadas</button>
+        <button class="filter" onclick="fWr('completed',this)">Completadas</button>
+        <button class="filter" onclick="fWr('rejected',this)">Rechazadas</button>
+      </div>
+      <div id="wr-content"><div class="empty">Cargando…</div></div>
+    </div>
+
+    <div class="sub-view hide" data-sub-view="regs">
+      <div class="filters">
+        <button class="filter on" onclick="fReg('all',this)">Todas</button>
+        <button class="filter" onclick="fReg('pending',this)">Pendientes</button>
+        <button class="filter" onclick="fReg('approved',this)">Aprobadas</button>
+        <button class="filter" onclick="fReg('rejected',this)">Rechazadas</button>
+      </div>
+      <div id="reg-content"><div class="empty">Cargando…</div></div>
+    </div>
   </div>
 </div>
 
-<!-- ═══ USUARIOS ═══ -->
-<div class="section" id="sec-users">
-  <div class="card">
-    <div class="card-t">Registrar Usuario</div>
-    <div class="fr3">
-      <div class="fg"><label>Nombre completo</label><input id="u-name" placeholder="Juan Pérez"></div>
-      <div class="fg"><label>Email</label><input id="u-email" type="email" placeholder="email@ejemplo.com"></div>
-      <div class="fg"><label>Contraseña</label><input id="u-pass" type="password" placeholder="Min 8 caracteres"></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label>Teléfono</label><input id="u-phone" placeholder="3001234567"></div>
-      <div class="fg"><label>Cédula</label><input id="u-cc" placeholder="1234567890"></div>
-    </div>
-    <button class="bt bt-p" onclick="createUser()">Crear Usuario</button>
+<!-- FINANCIERO -->
+<div class="view" id="view-finance">
+  <div class="page-head">
+    <div class="page-eyebrow">Gestión profunda</div>
+    <h1 class="page-title"><em>Financiero</em></h1>
+    <div class="page-meta">Inversiones, pool, rendimientos y préstamos.</div>
   </div>
-  <div class="card">
-    <div class="card-t">Todos los Usuarios</div>
-    <div class="tw"><table>
-      <thead><tr><th>Nombre</th><th>Email</th><th>Balance</th><th>Inversiones</th><th>Estado</th><th></th></tr></thead>
-      <tbody id="users-tbl"><tr><td colspan="6" class="empty">Cargando...</td></tr></tbody>
-    </table></div>
+  <div class="subtabs">
+    <button class="subtab active" data-sub="invs" onclick="sub('finance','invs')">Inversiones</button>
+    <button class="subtab" data-sub="pool" onclick="sub('finance','pool')">Pool</button>
+    <button class="subtab" data-sub="rets" onclick="sub('finance','rets')">Rendimientos</button>
+    <button class="subtab" data-sub="loans" onclick="sub('finance','loans')">Préstamos</button>
+  </div>
+
+  <div class="section">
+    <!-- Inversiones (CDTC) -->
+    <div class="sub-view active" data-sub-view="invs">
+      <div id="invs-stats"></div>
+      <div class="card">
+        <div class="card-h">CDTC · Inversiones <em>activas</em></div>
+        <div class="card-d">Todas las inversiones tipo CDTC actualmente activas.</div>
+        <div id="invs-list"><div class="empty">Cargando…</div></div>
+      </div>
+    </div>
+
+    <!-- Pool -->
+    <div class="sub-view hide" data-sub-view="pool">
+      <div class="card">
+        <div class="card-h">Configuración del <em>Pool</em></div>
+        <div class="card-d">Estos valores son visibles para todos los usuarios en su dashboard.</div>
+        <div class="fg-row-3">
+          <div class="fg"><label>APY Mensual (%)</label><input id="pool-apy-monthly" type="number" step="0.01" placeholder="2.0" oninput="updatePoolAnnual()"></div>
+          <div class="fg"><label>APY Anual (auto)</label><input id="pool-apy-annual" type="number" readonly></div>
+          <div class="fg"><label>Mínimo (COP)</label><input id="pool-min" type="number" value="50000"></div>
+        </div>
+        <div class="fg-row">
+          <div class="fg"><label>Capital total pool</label><input id="pool-total-capital" type="number" placeholder="0"></div>
+          <div class="fg"><label>% Distribución</label><input id="pool-distribution" type="number" placeholder="50"></div>
+        </div>
+        <button class="btn btn-primary btn-block" id="btn-save-pool" onclick="savePoolConfig()">Guardar configuración</button>
+      </div>
+
+      <div class="card">
+        <div class="card-h">Estado del <em>Pool</em></div>
+        <div id="pool-stats"><div class="empty">Cargando…</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">Inversiones en el <em>pool</em></div>
+        <div id="pool-invs"><div class="empty">Cargando…</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">Comisiones <em>20%</em></div>
+        <div class="card-d">Registro contable de retiros de ganancias del pool.</div>
+        <div class="stats" style="grid-template-columns:1fr 1fr 1fr;border:1px solid var(--line);margin-bottom:14px">
+          <div class="stat"><div class="stat-label">Bruto</div><div class="stat-value pos mono" id="pwk-gross">—</div></div>
+          <div class="stat"><div class="stat-label">Comisión</div><div class="stat-value warn mono" id="pwk-commission">—</div></div>
+          <div class="stat"><div class="stat-label">Neto</div><div class="stat-value acc mono" id="pwk-net">—</div></div>
+        </div>
+        <div id="pool-comm"><div class="empty">Cargando…</div></div>
+      </div>
+
+      <!-- ESTRATEGIAS DE ASIGNACIÓN -->
+      <div class="card">
+        <div class="card-h">Asignación de <em>capital</em></div>
+        <div class="card-d">Distribución del capital del pool entre estrategias. La suma debe ser 100%.</div>
+
+        <div id="strat-list"></div>
+
+        <div class="strat-total">
+          <span class="strat-total-l">Total asignado</span>
+          <span class="strat-total-v" id="strat-total">0%</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="fg-row" style="margin-bottom:0">
+          <div class="fg"><label>Nombre de la estrategia</label><input id="strat-name" placeholder="Ej: Delta Neutral" onkeydown="if(event.key==='Enter'){event.preventDefault();addStrat()}"></div>
+          <div class="fg"><label>% asignado</label><input id="strat-pct" type="number" min="0" max="100" step="0.1" placeholder="25"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-ghost" onclick="addStrat()" style="flex:1">+ Agregar</button>
+          <button class="btn btn-primary" onclick="saveStrats()" id="btn-save-strats" style="flex:1">Guardar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rendimientos -->
+    <div class="sub-view hide" data-sub-view="rets">
+      <div class="info-box">
+        <strong>CDTC ya no se registra manualmente.</strong> Tasa fija 2% mensual sobre el capital, calculada en tiempo real. El cliente reclama 1 vez cada 24h. Aquí solo verás inversiones <strong>Pool</strong>.
+      </div>
+      <div class="card">
+        <div class="card-h">Registrar <em>rendimiento</em> pool</div>
+        <div class="card-d">Selecciona una inversión Pool activa para registrarle su rendimiento mensual.</div>
+        <div id="ret-list"><div class="empty">Cargando…</div></div>
+      </div>
+
+      <div class="card hide" id="ret-form-card">
+        <div class="card-h">Rendimiento para</div>
+        <div class="card-d mono acc" id="rf-label">—</div>
+        <div class="fg-row">
+          <div class="fg"><label>Tasa (%)</label><input id="rf-rate" type="number" step="0.01" min="0" max="100" placeholder="2.0" oninput="updateRetPrev()"></div>
+          <div class="fg"><label>Mes del período</label><input id="rf-month" type="month"></div>
+        </div>
+        <div class="fg"><label>Notas (opcional)</label><input id="rf-notes" placeholder="Ej: Rendimiento febrero 2026"></div>
+        <div id="rf-preview" class="info-box hide"></div>
+        <button class="btn btn-primary btn-block" id="rf-btn" onclick="registerReturn()">Registrar rendimiento</button>
+      </div>
+    </div>
+
+    <!-- Préstamos -->
+    <div class="sub-view hide" data-sub-view="loans">
+      <div class="filters">
+        <button class="filter on" onclick="fLoan('all',this)">Todas</button>
+        <button class="filter" onclick="fLoan('pending',this)">Pendientes</button>
+        <button class="filter" onclick="fLoan('active',this)">Activos</button>
+        <button class="filter" onclick="fLoan('paid',this)">Pagados</button>
+      </div>
+      <div id="loans-content"><div class="empty">Cargando…</div></div>
+    </div>
   </div>
 </div>
 
-<!-- ═══ REGISTROS ═══ -->
-<div class="section" id="sec-regs">
-  <div class="card">
-    <div class="card-t">Solicitudes de Registro</div>
-    <div class="flt">
-      <button class="fb on" onclick="fReg('all',this)">Todas</button>
-      <button class="fb" onclick="fReg('pending',this)">Pendientes</button>
-      <button class="fb" onclick="fReg('approved',this)">Aprobadas</button>
-      <button class="fb" onclick="fReg('rejected',this)">Rechazadas</button>
-    </div>
-    <div class="tw"><table>
-      <thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
-      <tbody id="reg-tbl"><tr><td colspan="6" class="empty">Cargando...</td></tr></tbody>
-    </table></div>
+<!-- USUARIOS -->
+<div class="view" id="view-users">
+  <div class="page-head">
+    <div class="page-eyebrow">Gestión de cuentas</div>
+    <h1 class="page-title"><em>Usuarios</em></h1>
+    <div class="page-meta"><span id="users-count">—</span> cuentas registradas en el sistema.</div>
+  </div>
+  <div class="section">
+    <div id="users-content"><div class="empty">Cargando…</div></div>
   </div>
 </div>
 
-<!-- ═══ PRÉSTAMOS ═══ -->
-<div class="section" id="sec-loans">
-  <div class="card">
-    <div class="card-t">Solicitudes de Préstamo</div>
-    <div class="flt">
-      <button class="fb on" onclick="fLoan('all',this)">Todas</button>
-      <button class="fb" onclick="fLoan('pending',this)">Pendientes</button>
-      <button class="fb" onclick="fLoan('active',this)">Activos</button>
-      <button class="fb" onclick="fLoan('completed',this)">Pagados</button>
+<!-- TRANSACCIONES -->
+<div class="view" id="view-tx">
+  <div class="page-head">
+    <div class="page-eyebrow">Registro contable</div>
+    <h1 class="page-title"><em>Movimientos</em></h1>
+    <div class="page-meta"><span id="tx-meta">Historial de transacciones y creación manual.</span></div>
+  </div>
+  <div class="subtabs">
+    <button class="subtab active" data-sub="hist" onclick="sub('tx','hist')">Historial</button>
+    <button class="subtab" data-sub="new" onclick="sub('tx','new')">Nueva</button>
+  </div>
+
+  <div class="section">
+    <div class="sub-view active" data-sub-view="hist">
+      <!-- Filtros avanzados -->
+      <div class="card">
+        <div class="card-h">Filtros</div>
+        <div class="fg-row">
+          <div class="fg">
+            <label>Buscar</label>
+            <input id="txf-search" type="text" placeholder="Nombre, ref, descripción..." oninput="debounceTxFilter()">
+          </div>
+          <div class="fg">
+            <label>Tipo</label>
+            <select id="txf-type" onchange="applyTxFilters()">
+              <option value="">Todos</option>
+              <option value="deposit">Depósito</option>
+              <option value="withdraw">Retiro</option>
+              <option value="investment">Inversión</option>
+              <option value="investment_return">Rendimiento</option>
+              <option value="investment_withdrawal">Retiro inv.</option>
+              <option value="profit">Ganancia</option>
+              <option value="payment">Abono</option>
+              <option value="interest">Interés</option>
+              <option value="loan">Préstamo</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg-row">
+          <div class="fg">
+            <label>Desde</label>
+            <input id="txf-from" type="date" onchange="applyTxFilters()">
+          </div>
+          <div class="fg">
+            <label>Hasta</label>
+            <input id="txf-to" type="date" onchange="applyTxFilters()">
+          </div>
+        </div>
+        <div class="fg">
+          <label>Usuario</label>
+          <select id="txf-user" onchange="applyTxFilters()">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="clearTxFilters()">Limpiar filtros</button>
+          <span style="flex:1"></span>
+          <span class="mono dim" style="align-self:center;font-size:11px" id="txf-count">—</span>
+        </div>
+      </div>
+
+      <div id="tx-content"><div class="empty">Cargando…</div></div>
+
+      <!-- Pagination -->
+      <div class="pagi hide" id="tx-pagi">
+        <div class="pagi-info">
+          Página <strong id="tx-page">1</strong> de <strong id="tx-pages">1</strong>
+          · <strong id="tx-total">0</strong> registros
+        </div>
+        <div class="pagi-ctrls">
+          <button class="pagi-btn" id="tx-prev" onclick="txPage(-1)" aria-label="Anterior">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="pagi-btn" id="tx-next" onclick="txPage(1)" aria-label="Siguiente">
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="tw"><table>
-      <thead><tr><th>Usuario</th><th>Monto</th><th>Tasa</th><th>Plazo</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
-      <tbody id="loan-tbl"><tr><td colspan="7" class="empty">Cargando...</td></tr></tbody>
-    </table></div>
+
+    <div class="sub-view hide" data-sub-view="new">
+      <div class="card">
+        <div class="card-h">Nueva <em>transacción</em></div>
+        <div class="card-d">Crear movimiento manual para un usuario. Actualiza el balance automáticamente.</div>
+        <div class="fg"><label>Usuario</label><select id="tx-user"></select></div>
+        <div class="fg-row">
+          <div class="fg"><label>Tipo</label><select id="tx-type">
+            <option value="deposit">Depósito</option>
+            <option value="withdraw">Retiro</option>
+            <option value="profit">Ganancia</option>
+            <option value="payment">Abono</option>
+            <option value="interest">Interés</option>
+            <option value="investment_return">Rendimiento inversión</option>
+            <option value="investment_withdrawal">Retiro inversión</option>
+            <option value="loan">Préstamo</option>
+          </select></div>
+          <div class="fg"><label>Monto (COP)</label><input id="tx-amount" type="number" placeholder="0"></div>
+        </div>
+        <div class="fg"><label>Descripción</label><input id="tx-desc" placeholder="Opcional"></div>
+        <div class="fg"><label>Fecha (opcional)</label><input id="tx-date" type="datetime-local"></div>
+        <button class="btn btn-primary btn-block" onclick="createTx()">Crear transacción</button>
+      </div>
+    </div>
   </div>
 </div>
 
-</div><!-- /container -->
+<!-- ═══════ BOTTOM NAV (mobile) ═══════ -->
+<nav class="bnav">
+  <button class="bn active" data-nav="home" onclick="nav('home')">
+    <svg viewBox="0 0 24 24"><path d="M3 12 12 3l9 9M5 10v10h14V10"/></svg>
+    <span>Inicio</span>
+  </button>
+  <button class="bn" data-nav="pending" onclick="nav('pending')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    <span>Pendientes</span>
+    <span class="bn-dot hide" id="bn-pending-dot"></span>
+  </button>
+  <button class="bn" data-nav="finance" onclick="nav('finance')">
+    <svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M14 7h7v7"/></svg>
+    <span>Financiero</span>
+  </button>
+  <button class="bn" data-nav="users" onclick="nav('users')">
+    <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+    <span>Usuarios</span>
+  </button>
+  <button class="bn" data-nav="tx" onclick="nav('tx')">
+    <svg viewBox="0 0 24 24"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+    <span>Tx</span>
+  </button>
+</nav>
 
+<!-- ═══════ SEARCH OVERLAY ═══════ -->
+<div class="search-ov" id="search-ov">
+  <div class="search-head">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--txt-3)"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+    <input id="search-input" placeholder="Buscar usuarios, transacciones, refs..." oninput="doSearch(this.value)">
+    <button class="icon-btn" onclick="closeSearch()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="search-results" id="search-results">
+    <div class="empty">Escribe para empezar a buscar</div>
+  </div>
+</div>
+
+<!-- ═══════ MODAL ROOT ═══════ -->
+<div class="modal-ov" id="modal-ov" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="modal-title">Detalle</div>
+        <div class="modal-sub" id="modal-sub"></div>
+      </div>
+      <button class="modal-x" onclick="closeModal()" aria-label="Cerrar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ═══════ TOAST ═══════ -->
 <div class="toast" id="toast"></div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════════
-   SANSE CAPITAL — ADMIN PANEL (FIXED)
-   Cambios principales vs versión anterior:
-   - GET  /admin/users               (existe ahora en backend)
-   - POST /admin/users/create        (existe ahora en backend)
-   - POST /admin/users/:id/block     (alias backend, sin body)
-   - POST /admin/pool/config         (existe ahora en backend)
-   - Lectura correcta de status (no "is_blocked")
-   - Loans usa term_months (no duration_months)
-   - tx-type incluye todos los tipos válidos del balanceHelper
-═══════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   SANSE CAPITAL — ADMIN v2
+   Mobile-first refactor
+   ▸ Estructura: 5 vistas, navegación bottom-nav (mobile) / top-nav (desktop)
+   ▸ Cards en móvil · tablas en desktop
+   ▸ Carga inicial paralela · cache por sub-vista
+   ▸ Búsqueda global · pull-to-refresh listo
+   ▸ Endpoints sin cambios (compatible con backend actual)
+══════════════════════════════════════════════════════════════ */
 
 const API='https://sanse-backend-production.up.railway.app/api';
 
-function getToken(){return localStorage.getItem('sanse_access_token')||sessionStorage.getItem('sanse_access_token')}
-function logout(){['sanse_access_token','sanse_refresh_token','sanse_user'].forEach(k=>{localStorage.removeItem(k);sessionStorage.removeItem(k)});location.href='login.html'}
+// ─── STATE ───
+const State = {
+  users: [],
+  stats: {},
+  deposits: [],
+  withdrawals: [],
+  registrations: [],
+  loans: [],
+  investments: [],
+  transactions: [],
+  poolConfig: {},
+  poolWithdrawals: [],
+  cacheFlags: {}, // controla si una sección ya cargó
+  currentNav: 'home',
+  currentSub: { pending:'deps', finance:'invs', tx:'hist' },
+  selectedInv: null,
+};
 
-async function apiFetch(ep,opts={}){
-  const tk=getToken();if(!tk){location.href='login.html';return}
-  opts.headers={'Content-Type':'application/json','Authorization':'Bearer '+tk,...(opts.headers||{})};
-  let res=await fetch(API+ep,opts);
-  if(res.status===401){const ok=await refreshTk();if(ok){opts.headers.Authorization='Bearer '+getToken();res=await fetch(API+ep,opts)}else{logout();return}}
-  return res;
+// ─── AUTH ───
+function getToken(){return localStorage.getItem('sanse_access_token')||sessionStorage.getItem('sanse_access_token')}
+function logout(){
+  ['sanse_access_token','sanse_refresh_token','sanse_user'].forEach(k=>{
+    localStorage.removeItem(k);sessionStorage.removeItem(k);
+  });
+  location.href='login.html';
 }
 async function refreshTk(){
-  const rt=localStorage.getItem('sanse_refresh_token')||sessionStorage.getItem('sanse_refresh_token');if(!rt)return false;
-  try{const r=await fetch(API+'/auth/refresh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refreshToken:rt})});
-  if(!r.ok)return false;const d=await r.json();const s=localStorage.getItem('sanse_access_token')?localStorage:sessionStorage;s.setItem('sanse_access_token',d.accessToken);if(d.refreshToken)s.setItem('sanse_refresh_token',d.refreshToken);return true}catch(e){return false}
+  const rt=localStorage.getItem('sanse_refresh_token')||sessionStorage.getItem('sanse_refresh_token');
+  if(!rt) return false;
+  try{
+    const r=await fetch(API+'/auth/refresh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refreshToken:rt})});
+    if(!r.ok) return false;
+    const d=await r.json();
+    const s=localStorage.getItem('sanse_access_token')?localStorage:sessionStorage;
+    s.setItem('sanse_access_token',d.accessToken);
+    if(d.refreshToken) s.setItem('sanse_refresh_token',d.refreshToken);
+    return true;
+  }catch(e){return false}
+}
+async function apiFetch(ep,opts={}){
+  const tk=getToken();
+  if(!tk){location.href='login.html';return null}
+  opts.headers={'Content-Type':'application/json','Authorization':'Bearer '+tk,...(opts.headers||{})};
+  let res=await fetch(API+ep,opts);
+  if(res.status===401){
+    const ok=await refreshTk();
+    if(ok){opts.headers.Authorization='Bearer '+getToken();res=await fetch(API+ep,opts)}
+    else{logout();return null}
+  }
+  return res;
 }
 
-function toast(m,t){var el=document.getElementById('toast');el.textContent=m;el.className='toast'+(t==='error'?' err':'')+' show';setTimeout(function(){el.className='toast'},3000)}
-function F(n){if(n===null||n===undefined||isNaN(Number(n)))return '—';return '$'+Math.round(Number(n)).toLocaleString('es-CO')}
-function D(d){if(!d)return '—';var dt=new Date(d);return isNaN(dt)?'—':dt.toLocaleDateString('es-CO',{day:'numeric',month:'short',year:'numeric'})}
+// ─── HELPERS ───
+function $(s){return document.querySelector(s)}
+function $$(s){return document.querySelectorAll(s)}
 
-// FIX: helper unificado para saber si un user está bloqueado.
-// El backend devuelve `status` ('active'|'blocked'); aceptamos también `is_blocked` por compatibilidad.
-function isBlocked(u){ return u && (u.status === 'blocked' || u.is_blocked === true || u.is_blocked === 1); }
-
-// ═══ TAB SWITCHING ═══
-function sw(tab,el){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  el.classList.add('active');
-  var sec=document.getElementById('sec-'+tab);if(sec)sec.classList.add('active');
-  if(tab==='deps')loadDeps('all');
-  if(tab==='wrs')loadWrs('all');
-  if(tab==='invs')loadSDTC();
-  if(tab==='rets')loadRetInvs();
-  if(tab==='pool'){loadPool();setTimeout(loadStrats,200)}
-  if(tab==='txs')loadTxs();
-  if(tab==='users')loadUsers();
-  if(tab==='regs')loadRegs('all');
-  if(tab==='loans')loadLoans('all');
-  if(tab==='dash')loadDashTx();
+function F(n){
+  if(n===null||n===undefined||isNaN(Number(n))) return '—';
+  return '$'+Math.round(Number(n)).toLocaleString('es-CO');
+}
+function D(d){
+  if(!d) return '—';
+  const dt=new Date(d);
+  if(isNaN(dt)) return '—';
+  return dt.toLocaleDateString('es-CO',{day:'numeric',month:'short',year:'numeric'});
+}
+function Dt(d){
+  if(!d) return '—';
+  const dt=new Date(d);
+  if(isNaN(dt)) return '—';
+  return dt.toLocaleString('es-CO',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+}
+function isBlocked(u){
+  return u && (u.status==='blocked' || u.is_blocked===true || u.is_blocked===1);
+}
+function toast(msg,kind){
+  const el=$('#toast');
+  el.textContent=msg;
+  el.className='toast '+(kind==='error'?'err':kind==='ok'?'ok':'')+' show';
+  setTimeout(()=>el.className='toast',2800);
 }
 
-// ═══ INITIAL LOAD ═══
-var allUsers=[];
-async function init(){await loadUsers();await loadStats();loadDashTx()}
+// Status pill HTML
+function pill(status){
+  if(!status) return '';
+  const cls = ['pending','approved','completed','active','paid','rejected','blocked','overdue'].includes(status)?status:'neutral';
+  return `<span class="pill ${cls}">${status}</span>`;
+}
+
+// Type translation
+const TX_LABEL = {
+  deposit:'Depósito', withdraw:'Retiro', investment:'Inversión',
+  investment_return:'Rendimiento', investment_withdrawal:'Retiro inv.',
+  profit:'Ganancia', payment:'Abono', loan:'Préstamo', interest:'Interés'
+};
+function txLabel(t){return TX_LABEL[t]||t}
+function isNegTx(t){return ['withdraw','investment','investment_withdrawal'].includes(t)}
+
+// ─── NAV ───
+function nav(view){
+  State.currentNav=view;
+  $$('.view').forEach(v=>v.classList.remove('active'));
+  $('#view-'+view).classList.add('active');
+  $$('.bn,.dn').forEach(b=>b.classList.toggle('active', b.dataset.nav===view));
+  // Trigger load if needed
+  loadView(view);
+  // Scroll to top
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function sub(view,sub){
+  State.currentSub[view]=sub;
+  const viewEl=$('#view-'+view);
+  viewEl.querySelectorAll('.subtab').forEach(t=>t.classList.toggle('active', t.dataset.sub===sub));
+  viewEl.querySelectorAll('.sub-view').forEach(v=>v.classList.toggle('hide', v.dataset.subView!==sub));
+  // Trigger lazy load
+  if(view==='pending'){
+    if(sub==='deps' && !State.cacheFlags.deps) loadDeposits('all');
+    if(sub==='wrs' && !State.cacheFlags.wrs) loadWithdrawals('all');
+    if(sub==='regs' && !State.cacheFlags.regs) loadRegistrations('all');
+  }
+  if(view==='finance'){
+    if(sub==='invs' && !State.cacheFlags.invs) loadInvestments();
+    if(sub==='pool' && !State.cacheFlags.pool) loadPool();
+    if(sub==='rets' && !State.cacheFlags.rets) loadReturns();
+    if(sub==='loans' && !State.cacheFlags.loans) loadLoans('all');
+  }
+  if(view==='tx'){
+    if(sub==='hist' && !State.cacheFlags.txs) loadTransactions();
+    if(sub==='new') populateTxUserSelect();
+  }
+}
+
+function loadView(view){
+  if(view==='home' && !State.cacheFlags.home) loadHome();
+  if(view==='pending'){
+    const sb=State.currentSub.pending;
+    if(sb==='deps' && !State.cacheFlags.deps) loadDeposits('all');
+    if(sb==='wrs' && !State.cacheFlags.wrs) loadWithdrawals('all');
+    if(sb==='regs' && !State.cacheFlags.regs) loadRegistrations('all');
+  }
+  if(view==='finance'){
+    const sb=State.currentSub.finance;
+    if(sb==='invs' && !State.cacheFlags.invs) loadInvestments();
+    if(sb==='pool' && !State.cacheFlags.pool) loadPool();
+    if(sb==='rets' && !State.cacheFlags.rets) loadReturns();
+    if(sb==='loans' && !State.cacheFlags.loans) loadLoans('all');
+  }
+  if(view==='users' && !State.cacheFlags.users) loadUsers();
+  if(view==='tx' && !State.cacheFlags.txs) loadTransactions();
+}
+
+// ─── MODAL ───
+function openModal(title, sub, html){
+  $('#modal-title').innerHTML=title;
+  $('#modal-sub').textContent=sub||'';
+  $('#modal-body').innerHTML=html;
+  $('#modal-ov').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  $('#modal-ov').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// ─── SEARCH ───
+function openSearch(){
+  $('#search-ov').classList.add('open');
+  setTimeout(()=>$('#search-input').focus(),50);
+  document.body.style.overflow='hidden';
+}
+function closeSearch(){
+  $('#search-ov').classList.remove('open');
+  $('#search-input').value='';
+  $('#search-results').innerHTML='<div class="empty">Escribe para empezar a buscar</div>';
+  document.body.style.overflow='';
+}
+function doSearch(q){
+  q=q.trim().toLowerCase();
+  if(q.length<2){
+    $('#search-results').innerHTML='<div class="empty">Escribe al menos 2 caracteres</div>';
+    return;
+  }
+  const usrs = State.users.filter(u=>
+    (u.full_name||'').toLowerCase().includes(q) ||
+    (u.email||'').toLowerCase().includes(q) ||
+    String(u.id).includes(q)
+  ).slice(0,10);
+  const txs = State.transactions.filter(t=>
+    (t.user_name||'').toLowerCase().includes(q) ||
+    (t.description||'').toLowerCase().includes(q) ||
+    (t.ref_id||'').toLowerCase().includes(q)
+  ).slice(0,10);
+  let html='';
+  if(usrs.length){
+    html+='<div class="search-section"><h4>Usuarios</h4>'+usrs.map(u=>`
+      <div class="search-item" onclick="closeSearch();viewUser(${u.id})">
+        <div class="search-item-main">
+          <div class="search-item-name">${u.full_name||'—'}</div>
+          <div class="search-item-meta">${u.email||''} · ID ${u.id}</div>
+        </div>
+        <div class="mono dim">${F(u.balance||0)}</div>
+      </div>`).join('')+'</div>';
+  }
+  if(txs.length){
+    html+='<div class="search-section"><h4>Transacciones</h4>'+txs.map(t=>`
+      <div class="search-item">
+        <div class="search-item-main">
+          <div class="search-item-name">${t.user_name||'—'} · ${txLabel(t.type)}</div>
+          <div class="search-item-meta">${t.ref_id||t.id} · ${D(t.created_at)}</div>
+        </div>
+        <div class="mono ${isNegTx(t.type)?'neg':'pos'}">${F(t.amount)}</div>
+      </div>`).join('')+'</div>';
+  }
+  if(!html) html='<div class="empty">Sin resultados</div>';
+  $('#search-results').innerHTML=html;
+}
+
+// ─── HOME / STATS ───
+async function loadHome(){
+  State.cacheFlags.home=true;
+  await Promise.all([loadStats(), loadHomeTx(), loadUsersQuiet()]);
+  updateBadges();
+  $('#home-meta').textContent=`Última sincronización · ${new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'})}`;
+}
 
 async function loadStats(){
   try{
-    var r=await apiFetch('/admin/stats');
-    if(!r||!r.ok){console.warn('loadStats failed:',r&&r.status);return}
-    var s=await r.json();
-    var e=function(id,v){var el=document.getElementById(id);if(el)el.textContent=v};
-    e('qs-users',s.totalUsers||0);
-    // FIX: usar totalBalance (que el backend sí devuelve) con fallbacks por compat
-    e('qs-capital',F(s.totalBalance!=null?s.totalBalance:(s.totalInvested||s.totalCapital||0)));
-    e('qs-dep',s.pendingDeposits||0);
-    e('qs-wr',s.pendingWithdrawals||0);
-    e('st-dep',F(s.totalDeposited||0));
-    e('st-inv',F(s.totalInvested||0));
-    e('st-earn',F(s.totalEarnings||0));
-    e('st-active',s.activeInvestments||0);
-  }catch(e){console.error('loadStats error:',e)}
+    const r=await apiFetch('/admin/stats');
+    if(!r||!r.ok) return;
+    const s=await r.json();
+    State.stats=s;
+    const set=(id,v)=>{const el=$('#'+id);if(el)el.textContent=v};
+    set('qs-users', s.totalUsers||0);
+    set('qs-capital', F(s.totalBalance!=null?s.totalBalance:(s.totalInvested||s.totalCapital||0)));
+    set('qs-dep', s.pendingDeposits||0);
+    set('qs-wr', s.pendingWithdrawals||0);
+    set('st-dep', F(s.totalDeposited||0));
+    set('st-inv', F(s.totalInvested||0));
+    set('st-earn', F(s.totalEarnings||0));
+    set('st-active', s.activeInvestments||0);
+  }catch(e){console.error('loadStats:',e)}
 }
 
-async function loadDashTx(){
+async function loadHomeTx(){
   try{
-    var r=await apiFetch('/admin/transactions/recent');if(!r||!r.ok)return;
-    var d=await r.json();var txs=d.transactions||d||[];
-    var tl={deposit:'Depósito',withdraw:'Retiro',investment:'Inversión',investment_return:'Rendimiento',investment_withdrawal:'Retiro inv.',profit:'Ganancia',payment:'Abono',loan:'Préstamo',interest:'Interés'};
-    document.getElementById('dash-tx-tbl').innerHTML=txs.length?txs.slice(0,15).map(function(t){
-      var neg=['withdraw','investment'].includes(t.type);
-      return '<tr><td class="m" style="font-size:11px;color:var(--mut)">'+D(t.created_at)+'</td><td>'+(t.user_name||'—')+'</td><td><span class="bg bg-'+(neg?'r':'g')+'">'+(tl[t.type]||t.type)+'</span></td><td class="m '+(neg?'cr':'cg')+'">'+F(t.amount)+'</td><td style="font-size:11px;color:var(--mut);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(t.description||'—')+'</td></tr>';
-    }).join(''):'<tr><td colspan="5" class="empty">Sin transacciones</td></tr>';
-  }catch(e){}
+    const r=await apiFetch('/admin/transactions/recent');
+    if(!r||!r.ok) return;
+    const d=await r.json();
+    const txs=(d.transactions||d||[]).slice(0,15);
+    State.transactions=txs;
+    $('#home-tx-list').innerHTML = txs.length
+      ? renderTxList(txs)
+      : '<div class="empty">Sin transacciones registradas</div>';
+  }catch(e){console.error('loadHomeTx:',e)}
 }
 
-// ═══ USERS ═══
+function renderTxList(txs){
+  return '<div class="list">'+txs.map(t=>{
+    const neg=isNegTx(t.type);
+    return `<div class="row">
+      <div class="row-top">
+        <div>
+          <div class="row-id">${t.ref_id||'TX-'+t.id}</div>
+          <div class="row-name">${t.user_name||'—'}</div>
+        </div>
+        <div class="row-amount ${neg?'neg':'pos'}">${neg?'−':'+'}${F(t.amount)}</div>
+      </div>
+      <div class="row-meta">
+        <span class="tag">${txLabel(t.type)}</span>
+        <span>${Dt(t.created_at)}</span>
+      </div>
+      ${t.description?`<div class="row-note">${t.description}</div>`:''}
+    </div>`;
+  }).join('')+'</div>';
+}
+
+function updateBadges(){
+  const s=State.stats;
+  const pend=(s.pendingDeposits||0)+(s.pendingWithdrawals||0);
+  $('#bn-pending-dot').classList.toggle('hide', pend===0);
+  $('#dn-pending-dot').classList.toggle('hide', pend===0);
+
+  // Sub-badges
+  const setBdg=(id, n, neg)=>{
+    const el=$('#'+id);
+    if(!el) return;
+    if(n>0){el.textContent=n;el.classList.remove('hide')}
+    else el.classList.add('hide');
+  };
+  setBdg('bdg-deps', s.pendingDeposits||0);
+  setBdg('bdg-wrs', s.pendingWithdrawals||0);
+  // regs: tendremos count cuando carguemos esa lista
+}
+
+// ─── USERS ───
 async function loadUsers(){
+  await loadUsersQuiet();
+  State.cacheFlags.users=true;
+  renderUsers();
+}
+async function loadUsersQuiet(){
   try{
-    var r=await apiFetch('/admin/users');
-    if(!r||!r.ok){
-      // Fallback amistoso si el endpoint aún no está desplegado
-      document.getElementById('users-tbl').innerHTML='<tr><td colspan="6" class="empty">No se pudo cargar usuarios (endpoint GET /admin/users)</td></tr>';
-      return;
-    }
-    var data=await r.json();
-    // Soporta ambas respuestas: array directo o {users:[]}
-    allUsers=Array.isArray(data)?data:(data.users||[]);
+    const r=await apiFetch('/admin/users');
+    if(!r||!r.ok){State.users=[];return}
+    const data=await r.json();
+    State.users=Array.isArray(data)?data:(data.users||[]);
+    $('#users-count').textContent=State.users.length;
+  }catch(e){State.users=[];console.error('loadUsers:',e)}
+}
+function renderUsers(){
+  const us=State.users;
+  if(!us.length){$('#users-content').innerHTML='<div class="empty">Sin usuarios</div>';return}
+  // Mobile: list of cards
+  let html='<div class="list">'+us.map(u=>{
+    const b=isBlocked(u);
+    return `<div class="row row-clickable" onclick="viewUser(${u.id})">
+      <div class="row-top">
+        <div style="min-width:0;flex:1">
+          <div class="row-id">ID ${u.id}</div>
+          <div class="row-name">${u.full_name||'—'}</div>
+          <div class="row-meta" style="margin-top:4px">
+            <span>${u.email||'—'}</span>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div class="row-amount acc">${F(u.balance||0)}</div>
+          <div style="margin-top:6px">${pill(b?'blocked':'active')}</div>
+        </div>
+      </div>
+      <div class="row-actions" onclick="event.stopPropagation()">
+        <button class="btn btn-sm btn-ghost" onclick="viewUser(${u.id})">Ver detalle</button>
+        <button class="btn btn-sm ${b?'btn-pos':'btn-neg'}" onclick="toggleBlock(${u.id},${b})">${b?'Desbloquear':'Bloquear'}</button>
+      </div>
+    </div>`;
+  }).join('')+'</div>';
 
-    var sel=document.getElementById('tx-user');
-    if(sel)sel.innerHTML=allUsers.map(function(u){return '<option value="'+u.id+'">'+u.full_name+' ('+u.email+')</option>'}).join('');
+  // Desktop: table
+  html+='<div class="table-wrap"><table><thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Balance</th><th>Invertido</th><th>Estado</th><th></th></tr></thead><tbody>'+
+    us.map(u=>{
+      const b=isBlocked(u);
+      return `<tr>
+        <td class="mono dim">${u.id}</td>
+        <td>${u.full_name||'—'}</td>
+        <td class="dim">${u.email||'—'}</td>
+        <td class="mono acc">${F(u.balance||0)}</td>
+        <td class="mono">${F(u.totalInvested||0)}</td>
+        <td>${pill(b?'blocked':'active')}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-sm btn-ghost" onclick="viewUser(${u.id})">Ver</button>
+          <button class="btn btn-sm ${b?'btn-pos':'btn-neg'}" onclick="toggleBlock(${u.id},${b})">${b?'Desbloquear':'Bloquear'}</button>
+        </td>
+      </tr>`;
+    }).join('')+'</tbody></table></div>';
 
-    document.getElementById('users-tbl').innerHTML=allUsers.length?allUsers.map(function(u){
-      var blocked=isBlocked(u);
-      return '<tr>'
-        +'<td style="font-weight:600">'+u.full_name+'</td>'
-        +'<td style="font-size:11px;color:var(--mut)">'+u.email+'</td>'
-        +'<td class="m cg">'+F(u.balance||0)+'</td>'
-        +'<td class="m cb">'+F(u.totalInvested||0)+'</td>'
-        +'<td><span class="bg '+(blocked?'bg-r':'bg-g')+'">'+(blocked?'Bloqueado':'Activo')+'</span></td>'
-        +'<td style="display:flex;gap:4px">'
-          +'<button class="bt bt-s" onclick="viewUser('+u.id+')">Ver</button> '
-          +'<button class="bt bt-s '+(blocked?'bt-g':'bt-r')+'" onclick="toggleBlock('+u.id+','+blocked+')">'+(blocked?'Desbloquear':'Bloquear')+'</button>'
-        +'</td>'
-      +'</tr>';
-    }).join(''):'<tr><td colspan="6" class="empty">Sin usuarios</td></tr>';
-  }catch(e){console.error('loadUsers error:',e)}
+  $('#users-content').innerHTML=html;
 }
 
-async function createUser(){
-  var name=document.getElementById('u-name').value.trim();
-  var email=document.getElementById('u-email').value.trim();
-  var pass=document.getElementById('u-pass').value;
-  if(!name||!email||!pass)return toast('Completa todos los campos','error');
-  if(pass.length<8)return toast('La contraseña debe tener mínimo 8 caracteres','error');
+async function toggleBlock(id, blocked){
+  if(!confirm(blocked?'¿Desbloquear este usuario?':'¿Bloquear este usuario?')) return;
   try{
-    var r=await apiFetch('/admin/users/create',{method:'POST',body:JSON.stringify({
-      fullName:name,
-      email:email,
-      password:pass,
-      phone:document.getElementById('u-phone').value.trim()||undefined,
-      documentNumber:document.getElementById('u-cc').value.trim()||undefined
-    })});
-    if(!r.ok){var d=await r.json().catch(function(){return{}});return toast(d.error||'Error creando usuario','error')}
-    toast('✅ Usuario creado');
-    loadUsers();
-    ['u-name','u-email','u-pass','u-phone','u-cc'].forEach(function(id){document.getElementById(id).value=''});
-  }catch(e){toast('Error de red','error')}
-}
-
-// FIX: endpoint correcto es /toggle-block. Mantenemos el alias /block por compat con backend nuevo.
-async function toggleBlock(id,blocked){
-  if(!confirm(blocked?'¿Desbloquear este usuario?':'¿Bloquear este usuario?'))return;
-  try{
-    var r=await apiFetch('/admin/users/'+id+'/toggle-block',{method:'POST',body:JSON.stringify({})});
+    const r=await apiFetch('/admin/users/'+id+'/toggle-block',{method:'POST',body:JSON.stringify({})});
     if(!r||!r.ok){
-      var d=await (r?r.json().catch(function(){return{}}):{});
+      const d=await(r?r.json().catch(()=>({})):{});
       return toast(d.error||'Error','error');
     }
-    toast('✅ OK');loadUsers();
+    toast('Listo','ok');
+    State.cacheFlags.users=false;
+    await loadUsers();
   }catch(e){toast('Error','error')}
 }
 
-// ═══ TRANSACTIONS ═══
-async function loadTxs(){
+async function viewUser(uid){
   try{
-    var r=await apiFetch('/admin/transactions/recent');if(!r||!r.ok)return;
-    var d=await r.json();var txs=d.transactions||d||[];
-    var tl={deposit:'Depósito',withdraw:'Retiro',investment:'Inversión',investment_return:'Rendimiento',investment_withdrawal:'Retiro inv.',profit:'Ganancia',payment:'Abono',loan:'Préstamo',interest:'Interés'};
-    document.getElementById('tx-tbl').innerHTML=txs.length?txs.map(function(t){
-      var neg=['withdraw','investment'].includes(t.type);
-      return '<tr><td class="m" style="font-size:11px;color:var(--mut)">'+D(t.created_at)+'</td><td>'+(t.user_name||'—')+'</td><td><span class="bg bg-'+(neg?'r':'g')+'">'+(tl[t.type]||t.type)+'</span></td><td class="m '+(neg?'cr':'cg')+'">'+F(t.amount)+'</td><td style="font-size:11px;color:var(--mut);max-width:200px;overflow:hidden;text-overflow:ellipsis">'+(t.description||'—')+'</td></tr>';
-    }).join(''):'<tr><td colspan="5" class="empty">Sin transacciones</td></tr>';
-  }catch(e){}
-}
+    const r=await apiFetch('/admin/users/'+uid+'/details');
+    if(!r||!r.ok) return toast('Error cargando','error');
+    const d=await r.json();
+    const u=d.user||{};
+    const bal=d.balanceHistory&&d.balanceHistory.length?parseFloat(d.balanceHistory[d.balanceHistory.length-1].amount):0;
+    const invs=d.investments||[];
+    const txs=(d.transactions||[]).slice(0,10);
+    const ai=invs.filter(i=>i.status==='active');
+    const ti=ai.reduce((s,i)=>s+parseFloat(i.amount||0),0);
 
-async function createTx(){
-  var uid=document.getElementById('tx-user').value;
-  var type=document.getElementById('tx-type').value;
-  var amt=parseFloat(document.getElementById('tx-amount').value);
-  if(!uid)return toast('Selecciona un usuario','error');
-  if(!amt)return toast('Ingresa un monto','error');
-  var desc=document.getElementById('tx-desc').value.trim();
-  var date=document.getElementById('tx-date').value;
-  try{
-    var r=await apiFetch('/admin/transactions',{method:'POST',body:JSON.stringify({
-      userId:uid,type:type,amount:amt,
-      description:desc||undefined,
-      date:date?new Date(date).toISOString():undefined
-    })});
-    if(!r.ok){var d=await r.json().catch(function(){return{}});return toast(d.error||'Error','error')}
-    toast('✅ Transacción creada');
-    document.getElementById('tx-amount').value='';
-    document.getElementById('tx-desc').value='';
-    loadTxs();loadStats();
+    let html=`<div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr 1fr;margin-bottom:14px">
+      <div class="stat"><div class="stat-label">Balance</div><div class="stat-value acc mono">${F(bal)}</div></div>
+      <div class="stat"><div class="stat-label">Invertido</div><div class="stat-value pos mono">${F(ti)}</div></div>
+    </div>`;
+
+    if(invs.length){
+      html+=`<div style="font-family:var(--f-mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt-3);margin:18px 0 10px">Inversiones (${invs.length})</div>`;
+      html+='<div class="list">'+invs.map(i=>{
+        const isP=(i.type||'').toLowerCase().includes('pool');
+        return `<div class="row">
+          <div class="row-top">
+            <div>
+              <div class="row-id">${isP?'POOL':'CDTC'} · ${i.duration_months||6}m</div>
+              <div class="row-name">${D(i.start_date)}</div>
+            </div>
+            <div class="row-amount acc">${F(i.amount)}</div>
+          </div>
+          <div class="row-meta"><span>${pill(i.status)}</span></div>
+        </div>`;
+      }).join('')+'</div>';
+    }
+
+    if(txs.length){
+      html+=`<div style="font-family:var(--f-mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt-3);margin:18px 0 10px">Últimos movimientos</div>`;
+      html+=renderTxList(txs);
+    }
+
+    openModal(`<em>${u.full_name||'Usuario'}</em>`, u.email||'', html);
   }catch(e){toast('Error','error')}
 }
 
-// ═══ DEPOSITS ═══
-var depositsCache=[];   // cache para que viewProof no haga otro fetch
-
-async function loadDeps(st){
+// ─── DEPOSITS ───
+async function loadDeposits(status){
+  State.cacheFlags.deps=true;
   try{
-    var q=st==='all'?'':'?status='+st;
-    var r=await apiFetch('/admin/deposits'+q);if(!r||!r.ok)return;
-    var d=await r.json();var deps=d.deposits||d||[];
-    depositsCache=deps;  // cachear para viewProof
-    document.getElementById('dep-tbl').innerHTML=deps.length?deps.map(function(dp){
-      return '<tr><td class="m" style="font-size:11px">'+(dp.ref_id||dp.id)+'</td><td>'+(dp.user_name||'—')+'</td><td class="m cg">'+F(dp.amount)+'</td><td style="font-size:11px;color:var(--mut);max-width:120px;overflow:hidden;text-overflow:ellipsis">'+(dp.note||'—')+'</td><td><span class="bg bg-'+(dp.status==='pending'?'a':dp.status==='approved'?'g':'r')+'">'+dp.status+'</span></td><td class="m" style="font-size:11px;color:var(--mut)">'+D(dp.created_at)+'</td><td style="white-space:nowrap">'+(dp.proof_image?'<button class="bt bt-s" onclick="viewProof('+dp.id+')" style="color:var(--blu)">🖼️</button> ':'')+(dp.status==='pending'?'<button class="bt bt-s bt-g" onclick="procDep('+dp.id+',\'approve\')">✓</button> <button class="bt bt-s bt-r" onclick="rejectDep('+dp.id+')">✗</button>':'—')+'</td></tr>';
-    }).join(''):'<tr><td colspan="7" class="empty">Sin depósitos</td></tr>';
-  }catch(e){}
+    const q=status==='all'?'':'?status='+status;
+    const r=await apiFetch('/admin/deposits'+q);
+    if(!r||!r.ok) return;
+    const d=await r.json();
+    const deps=d.deposits||d||[];
+    State.deposits=deps;
+    $('#dep-content').innerHTML = deps.length ? renderDeposits(deps) : '<div class="empty">Sin depósitos</div>';
+  }catch(e){console.error('loadDeposits:',e)}
 }
-function fDep(s,el){document.querySelectorAll('#sec-deps .fb').forEach(function(b){b.classList.remove('on')});el.classList.add('on');loadDeps(s)}
-
-async function procDep(id,action){
-  if(!confirm('¿'+action+'?'))return;
+function renderDeposits(deps){
+  return '<div class="list">'+deps.map(d=>`
+    <div class="row">
+      <div class="row-top">
+        <div>
+          <div class="row-id">${d.ref_id||'DEP-'+d.id}</div>
+          <div class="row-name">${d.user_name||'—'}</div>
+        </div>
+        <div class="row-amount pos">${F(d.amount)}</div>
+      </div>
+      <div class="row-meta">
+        ${pill(d.status)}
+        <span>${Dt(d.created_at)}</span>
+      </div>
+      ${d.note?`<div class="row-note">${d.note}</div>`:''}
+      <div class="row-actions">
+        ${d.proof_image?`<button class="btn btn-sm btn-ghost" onclick="viewProof(${d.id})">Ver comprobante</button>`:''}
+        ${d.status==='pending'?`
+          <button class="btn btn-sm btn-pos" onclick="procDep(${d.id},'approve')">Aprobar</button>
+          <button class="btn btn-sm btn-neg" onclick="rejectDep(${d.id})">Rechazar</button>
+        `:''}
+      </div>
+    </div>`).join('')+'</div>';
+}
+function fDep(s, btn){
+  $$('#dep-filters .filter').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  $('#dep-content').innerHTML='<div class="empty">Cargando…</div>';
+  loadDeposits(s);
+}
+async function procDep(id, action){
+  if(!confirm('¿'+action+' este depósito?')) return;
   try{
-    var r=await apiFetch('/admin/deposits/'+id+'/process',{method:'POST',body:JSON.stringify({action:action})});
-    if(!r.ok)return toast('Error','error');
-    toast('✅ OK');loadDeps('all');loadStats();
+    const r=await apiFetch('/admin/deposits/'+id+'/process',{method:'POST',body:JSON.stringify({action})});
+    if(!r||!r.ok) return toast('Error','error');
+    toast('Listo','ok');
+    State.cacheFlags.deps=false;
+    loadDeposits('all'); loadStats();
   }catch(e){toast('Error','error')}
 }
 async function rejectDep(id){
-  var n=prompt('Motivo del rechazo:');if(n===null)return;
+  const n=prompt('Motivo del rechazo:');
+  if(n===null) return;
   try{
-    var r=await apiFetch('/admin/deposits/'+id+'/process',{method:'POST',body:JSON.stringify({action:'reject',adminNote:n||''})});
-    if(!r.ok)return toast('Error','error');
-    toast('Rechazado');loadDeps('all');loadStats();
+    const r=await apiFetch('/admin/deposits/'+id+'/process',{method:'POST',body:JSON.stringify({action:'reject',adminNote:n||''})});
+    if(!r||!r.ok) return toast('Error','error');
+    toast('Rechazado','ok');
+    loadDeposits('all'); loadStats();
   }catch(e){toast('Error','error')}
 }
-// FIX: el endpoint /admin/deposits/:id/proof no existía y daba 404.
-// Como /admin/deposits YA incluye proof_image en cada fila, usamos el cache local.
 function viewProof(id){
-  var dep=depositsCache.find(function(d){return String(d.id)===String(id)});
-  var ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px';
-  ov.onclick=function(e){if(e.target===ov)ov.remove()};
-  var imgHtml='';
+  const dep=State.deposits.find(d=>String(d.id)===String(id));
+  let html='';
   if(dep&&dep.proof_image){
-    imgHtml='<img src="'+dep.proof_image+'" style="width:100%;border-radius:8px;max-height:75vh;object-fit:contain">';
+    html=`<img src="${dep.proof_image}" alt="Comprobante" style="width:100%;border:1px solid var(--line)">`;
   }else{
-    imgHtml='<div style="color:var(--mut);padding:20px">Sin comprobante adjunto</div>';
+    html='<div class="empty">Sin comprobante adjunto</div>';
   }
-  ov.innerHTML='<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:20px;max-width:600px;width:100%;max-height:90vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div><div style="font-weight:700">Comprobante #'+id+'</div>'+(dep?'<div style="font-size:11px;color:var(--mut);margin-top:2px">'+dep.user_name+' · '+F(dep.amount)+'</div>':'')+'</div><button id="cp-close" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;padding:4px 10px;color:var(--mut);cursor:pointer">✕</button></div><div style="text-align:center">'+imgHtml+'</div></div>';
-  document.body.appendChild(ov);document.getElementById('cp-close').onclick=function(){ov.remove()};
+  openModal('Comprobante <em>#'+id+'</em>', dep?(dep.user_name+' · '+F(dep.amount)):'', html);
 }
 
-// ═══ WITHDRAWALS ═══
-async function loadWrs(st){
+// ─── WITHDRAWALS ───
+async function loadWithdrawals(status){
+  State.cacheFlags.wrs=true;
   try{
-    var q=st==='all'?'':'?status='+st;
-    var r=await apiFetch('/admin/withdrawals'+q);if(!r||!r.ok)return;
-    var d=await r.json();var wr=d.withdrawals||d||[];
-    document.getElementById('wr-tbl').innerHTML=wr.length?wr.map(function(w){
-      return '<tr><td class="m" style="font-size:11px">'+(w.ref_id||w.id)+'</td><td>'+(w.user_name||'—')+'</td><td class="m cr">'+F(w.amount)+'</td><td style="font-size:11px">'+(w.pm_type||w.pm_label||w.method||'—')+(w.pm_phone?' · '+w.pm_phone:'')+'</td><td><span class="bg bg-'+(w.status==='pending'?'a':w.status==='approved'?'b':w.status==='completed'?'g':'r')+'">'+w.status+'</span></td><td class="m" style="font-size:11px;color:var(--mut)">'+D(w.created_at)+'</td><td style="white-space:nowrap">'+(w.status==='pending'?'<button class="bt bt-s bt-g" onclick="procWr('+w.id+',\'approve\')">Aprobar</button> <button class="bt bt-s bt-r" onclick="procWr('+w.id+',\'reject\')">Rechazar</button>':w.status==='approved'?'<button class="bt bt-s bt-p" onclick="procWr('+w.id+',\'complete\')">Completar</button>':'—')+'</td></tr>';
-    }).join(''):'<tr><td colspan="7" class="empty">Sin retiros</td></tr>';
-  }catch(e){}
+    const q=status==='all'?'':'?status='+status;
+    const r=await apiFetch('/admin/withdrawals'+q);
+    if(!r||!r.ok) return;
+    const d=await r.json();
+    const wrs=d.withdrawals||d||[];
+    State.withdrawals=wrs;
+    $('#wr-content').innerHTML = wrs.length ? renderWithdrawals(wrs) : '<div class="empty">Sin retiros</div>';
+  }catch(e){console.error('loadWithdrawals:',e)}
 }
-function fWr(s,el){document.querySelectorAll('#sec-wrs .fb').forEach(function(b){b.classList.remove('on')});el.classList.add('on');loadWrs(s)}
-async function procWr(id,action){
-  if(!confirm('¿'+action+'?'))return;
+function renderWithdrawals(wrs){
+  return '<div class="list">'+wrs.map(w=>{
+    const method = w.pm_type ? `${w.pm_type}${w.pm_phone?' · '+w.pm_phone:''}${w.pm_account?' · '+w.pm_account:''}` : (w.pm_label||w.method||'—');
+    return `<div class="row">
+      <div class="row-top">
+        <div>
+          <div class="row-id">${w.ref_id||'WR-'+w.id}</div>
+          <div class="row-name">${w.user_name||'—'}</div>
+        </div>
+        <div class="row-amount neg">−${F(w.amount)}</div>
+      </div>
+      <div class="row-meta">
+        ${pill(w.status)}
+        <span>${Dt(w.created_at)}</span>
+      </div>
+      <div class="row-note">${method}</div>
+      <div class="row-actions">
+        ${w.status==='pending'?`
+          <button class="btn btn-sm btn-pos" onclick="procWr(${w.id},'approve')">Aprobar</button>
+          <button class="btn btn-sm btn-neg" onclick="procWr(${w.id},'reject')">Rechazar</button>
+        `:w.status==='approved'?`
+          <button class="btn btn-sm btn-primary" onclick="procWr(${w.id},'complete')">Marcar completado</button>
+        `:''}
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+}
+function fWr(s, btn){
+  btn.parentElement.querySelectorAll('.filter').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  $('#wr-content').innerHTML='<div class="empty">Cargando…</div>';
+  loadWithdrawals(s);
+}
+async function procWr(id, action){
+  if(!confirm('¿'+action+' este retiro?')) return;
   try{
-    var r=await apiFetch('/admin/withdrawals/'+id+'/process',{method:'POST',body:JSON.stringify({action:action})});
-    if(!r.ok)return toast('Error','error');
-    toast('✅ OK');loadWrs('all');loadStats();
+    const r=await apiFetch('/admin/withdrawals/'+id+'/process',{method:'POST',body:JSON.stringify({action})});
+    if(!r||!r.ok) return toast('Error','error');
+    toast('Listo','ok');
+    loadWithdrawals('all'); loadStats();
   }catch(e){toast('Error','error')}
 }
 
-// ═══ REGISTRATIONS ═══
-async function loadRegs(st){
+// ─── REGISTRATIONS ───
+async function loadRegistrations(status){
+  State.cacheFlags.regs=true;
   try{
-    var q=st==='all'?'':'?status='+st;
-    var r=await apiFetch('/admin/registrations'+q);if(!r||!r.ok)return;
-    var d=await r.json();var regs=d.registrations||d||[];
-    document.getElementById('reg-tbl').innerHTML=regs.length?regs.map(function(rg){
-      return '<tr><td style="font-weight:600">'+(rg.full_name||'—')+'</td><td style="font-size:11px">'+rg.email+'</td><td class="m" style="font-size:11px">'+(rg.phone||'—')+'</td><td><span class="bg bg-'+(rg.status==='pending'?'a':rg.status==='approved'?'g':'r')+'">'+rg.status+'</span></td><td class="m" style="font-size:11px;color:var(--mut)">'+D(rg.created_at)+'</td><td>'+(rg.status==='pending'?'<button class="bt bt-s bt-g" onclick="procReg('+rg.id+',\'approve\')">✓</button> <button class="bt bt-s bt-r" onclick="procReg('+rg.id+',\'reject\')">✗</button>':'—')+'</td></tr>';
-    }).join(''):'<tr><td colspan="6" class="empty">Sin registros</td></tr>';
-  }catch(e){}
+    const q=status==='all'?'':'?status='+status;
+    const r=await apiFetch('/admin/registrations'+q);
+    if(!r||!r.ok) return;
+    const d=await r.json();
+    const regs=d.registrations||d||[];
+    State.registrations=regs;
+    const pending=regs.filter(r=>r.status==='pending').length;
+    const bdg=$('#bdg-regs');
+    if(pending>0){bdg.textContent=pending;bdg.classList.remove('hide')}else bdg.classList.add('hide');
+    $('#reg-content').innerHTML = regs.length ? renderRegs(regs) : '<div class="empty">Sin registros</div>';
+  }catch(e){console.error('loadRegistrations:',e)}
 }
-function fReg(s,el){document.querySelectorAll('#sec-regs .fb').forEach(function(b){b.classList.remove('on')});el.classList.add('on');loadRegs(s)}
-async function procReg(id,action){
-  if(!confirm('¿'+action+'?'))return;
+function renderRegs(regs){
+  return '<div class="list">'+regs.map(r=>`
+    <div class="row">
+      <div class="row-top">
+        <div style="min-width:0;flex:1">
+          <div class="row-name">${r.full_name||'—'}</div>
+          <div class="row-meta" style="margin-top:4px">
+            <span>${r.email}</span>
+            ${r.phone?`<span>${r.phone}</span>`:''}
+          </div>
+        </div>
+        <div>${pill(r.status)}</div>
+      </div>
+      <div class="row-meta"><span>${Dt(r.created_at)}</span></div>
+      ${r.status==='pending'?`
+        <div class="row-actions">
+          <button class="btn btn-sm btn-pos" onclick="procReg(${r.id},'approve')">Aprobar</button>
+          <button class="btn btn-sm btn-neg" onclick="procReg(${r.id},'reject')">Rechazar</button>
+        </div>
+      `:''}
+    </div>`).join('')+'</div>';
+}
+function fReg(s, btn){
+  btn.parentElement.querySelectorAll('.filter').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  $('#reg-content').innerHTML='<div class="empty">Cargando…</div>';
+  loadRegistrations(s);
+}
+async function procReg(id, action){
+  if(!confirm('¿'+action+' este registro?')) return;
   try{
-    var r=await apiFetch('/admin/registrations/'+id+'/process',{method:'POST',body:JSON.stringify({action:action})});
-    if(!r.ok)return toast('Error','error');
-    toast('✅ OK');loadRegs('all');loadUsers();
+    const r=await apiFetch('/admin/registrations/'+id+'/process',{method:'POST',body:JSON.stringify({action})});
+    if(!r||!r.ok) return toast('Error','error');
+    toast('Listo','ok');
+    loadRegistrations('all');
+    State.cacheFlags.users=false;
   }catch(e){toast('Error','error')}
 }
 
-// ═══ LOANS ═══
-async function loadLoans(st){
+// ─── INVESTMENTS (CDTC) ───
+async function loadInvestments(){
+  State.cacheFlags.invs=true;
   try{
-    var q=st==='all'?'':'?status='+st;
-    var r=await apiFetch('/admin/loans'+q);if(!r||!r.ok)return;
-    var d=await r.json();var loans=d.loans||d||[];
-    document.getElementById('loan-tbl').innerHTML=loans.length?loans.map(function(l){
-      // FIX: columna real es term_months (no duration_months)
-      var term=l.term_months||l.duration_months||'—';
-      var rate=l.approved_rate||l.monthly_rate||l.rate||'—';
-      return '<tr><td>'+(l.user_name||'—')+'</td><td class="m cb">'+F(l.amount||l.requested_amount)+'</td><td class="m">'+rate+'%</td><td>'+term+'m</td><td><span class="bg bg-'+(l.status==='pending'?'a':l.status==='active'?'b':(l.status==='completed'||l.status==='paid')?'g':'r')+'">'+l.status+'</span></td><td class="m" style="font-size:11px;color:var(--mut)">'+D(l.created_at)+'</td><td>'+(l.status==='pending'?'<button class="bt bt-s bt-g" onclick="procLoan('+l.id+',\'approve\')">Aprobar</button> <button class="bt bt-s bt-r" onclick="procLoan('+l.id+',\'reject\')">Rechazar</button>':'—')+'</td></tr>';
-    }).join(''):'<tr><td colspan="7" class="empty">Sin préstamos</td></tr>';
-  }catch(e){}
+    const [gr, ir] = await Promise.all([
+      apiFetch('/investments/global-stats'),
+      apiFetch('/admin/investments/active'),
+    ]);
+    const gs = gr&&gr.ok ? await gr.json() : {};
+    const allI = ir&&ir.ok ? await ir.json() : [];
+    const invs = allI.filter(i => !(i.type||'').toLowerCase().includes('pool'));
+    State.investments=invs;
+
+    $('#invs-stats').innerHTML = `<div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr 1fr;margin-bottom:14px">
+      <div class="stat"><div class="stat-label">Capital bloqueado</div><div class="stat-value acc mono">${F(gs.totalLocked||0)}</div></div>
+      <div class="stat"><div class="stat-label">APY real</div><div class="stat-value pos mono">${(parseFloat(gs.apyReal||0)).toFixed(1)}%</div></div>
+      <div class="stat"><div class="stat-label">Ganancias pagadas</div><div class="stat-value mono">${F(gs.totalEarnedGlobal||0)}</div></div>
+      <div class="stat"><div class="stat-label">Activas</div><div class="stat-value mono">${invs.length}</div></div>
+    </div>`;
+
+    $('#invs-list').innerHTML = invs.length ? renderInvList(invs) : '<div class="empty">Sin inversiones CDTC activas</div>';
+  }catch(e){console.error('loadInvestments:',e)}
 }
-function fLoan(s,el){document.querySelectorAll('#sec-loans .fb').forEach(function(b){b.classList.remove('on')});el.classList.add('on');loadLoans(s)}
-async function procLoan(id,action){
-  if(!confirm('¿'+action+'?'))return;
-  try{
-    var r=await apiFetch('/admin/loans/'+id+'/process',{method:'POST',body:JSON.stringify({action:action})});
-    if(!r.ok)return toast('Error','error');
-    toast('✅ OK');loadLoans('all');
-  }catch(e){toast('Error','error')}
+function renderInvList(invs){
+  return '<div class="list">'+invs.map(i=>`
+    <div class="row">
+      <div class="row-top">
+        <div>
+          <div class="row-id">CDTC · ID ${i.id}</div>
+          <div class="row-name">${i.userName||i.user_name||'—'}</div>
+        </div>
+        <div class="row-amount acc">${F(i.amount)}</div>
+      </div>
+      <div class="row-meta">
+        ${pill(i.status)}
+        <span>Inicio ${D(i.startDate||i.start_date)}</span>
+        <span>Vence ${D(i.lockEndDate||i.lock_end_date||i.endDate||i.end_date)}</span>
+      </div>
+      <div class="row-meta"><span class="pos">Ganado: ${F(i.totalEarned||0)}</span></div>
+    </div>`).join('')+'</div>';
 }
 
-// ═══ INVESTMENTS (CDTC) ═══
-async function loadSDTC(){
-  try{
-    var gr=await apiFetch('/investments/global-stats');
-    var ir=await apiFetch('/admin/investments/active');
-    var gs=gr&&gr.ok?await gr.json():{};
-    var allI=ir&&ir.ok?await ir.json():[];
-    var invs=allI.filter(function(i){return !(i.type||'').toLowerCase().includes('pool')});
-    document.getElementById('sdtc-content').innerHTML=
-      '<div class="sg"><div class="si"><div class="l">Capital Bloqueado</div><div class="v cb">'+F(gs.totalLocked||0)+'</div></div><div class="si"><div class="l">APY Real</div><div class="v cg">'+(parseFloat(gs.apyReal||0)).toFixed(1)+'%</div></div><div class="si"><div class="l">Ganancias Pagadas</div><div class="v ct">'+F(gs.totalEarnedGlobal||0)+'</div></div><div class="si"><div class="l">Inv. Activas</div><div class="v">'+invs.length+'</div></div></div>'
-      +'<div class="tw"><table><thead><tr><th>Usuario</th><th>Capital</th><th>Inicio</th><th>Vence</th><th>Ganado</th><th>Estado</th></tr></thead><tbody>'
-      +(invs.length?invs.map(function(i){
-        return '<tr><td>'+(i.userName||i.user_name||'—')+'</td><td class="m cb">'+F(i.amount)+'</td><td class="m" style="font-size:11px">'+D(i.startDate||i.start_date)+'</td><td class="m" style="font-size:11px">'+D(i.lockEndDate||i.lock_end_date||i.endDate||i.end_date)+'</td><td class="m cg">+'+F(i.totalEarned||0)+'</td><td><span class="bg bg-g">'+i.status+'</span></td></tr>';
-      }).join(''):'<tr><td colspan="6" class="empty">Sin inversiones</td></tr>')
-      +'</tbody></table></div>';
-  }catch(e){document.getElementById('sdtc-content').innerHTML='<div class="empty">Error cargando</div>'}
-}
-
-// ═══ RETURNS ═══
-var selectedInv=null;
-async function loadRetInvs(){
-  try{
-    var r=await apiFetch('/admin/investments/active');if(!r||!r.ok)return;
-    var invs=await r.json();
-    // SOLO Pool — CDTC se reclama automático desde el dashboard del cliente.
-    invs=invs.filter(function(i){return (i.type||'').toLowerCase().includes('pool')});
-    document.getElementById('ret-invs-tbl').innerHTML=invs.length?invs.map(function(i){
-      return '<tr><td>'+(i.userName||i.user_name||'—')+'</td><td><span class="bg bg-a">Pool</span></td><td class="m cb">'+F(i.amount)+'</td><td class="m" style="font-size:11px">'+D(i.startDate||i.start_date)+'</td><td class="m cg">+'+F(i.totalEarned||0)+'</td><td><span class="bg bg-g">'+i.status+'</span></td><td><button class="bt bt-s bt-p" onclick="selInv('+i.id+')">Registrar</button></td></tr>';
-    }).join(''):'<tr><td colspan="7" class="empty">Sin inversiones Pool activas</td></tr>';
-  }catch(e){}
-}
-function selInv(id){
-  apiFetch('/admin/investments/active').then(function(r){return r.json()}).then(function(invs){
-    var inv=invs.find(function(i){return String(i.id)===String(id)});
-    if(!inv){toast('Inversión no encontrada','error');return}
-    var isP=(inv.type||'').toLowerCase().includes('pool');
-    if(!isP){
-      toast('Las inversiones CDTC ya no se registran manualmente','error');
-      return;
-    }
-    selectedInv=inv;
-    document.getElementById('rf-label').textContent='Pool · '+(inv.userName||inv.user_name||'—')+' · '+F(inv.amount);
-    document.getElementById('ret-form-card').style.display='block';
-    document.getElementById('ret-form-card').scrollIntoView({behavior:'smooth'});
-  }).catch(function(){toast('Error cargando inversión','error')});
-}
-function updateRetPrev(){
-  var rate=parseFloat(document.getElementById('rf-rate').value)||0;
-  if(!selectedInv||!rate)return;
-  var cap=parseFloat(selectedInv.amount)||0;var earned=Math.round(cap*(rate/100));
-  document.getElementById('rf-preview').style.display='block';
-  document.getElementById('rf-preview').innerHTML='Capital: <strong class="cb">'+F(cap)+'</strong> × '+rate+'% = <strong class="cg">+'+F(earned)+'</strong>';
-}
-async function registerReturn(){
-  if(!selectedInv)return toast('Selecciona inversión','error');
-  var rate=parseFloat(document.getElementById('rf-rate').value);
-  if(!rate)return toast('Ingresa la tasa','error');
-  var month=document.getElementById('rf-month').value;
-  if(!month)return toast('Selecciona el mes del período','error');
-  var notes=document.getElementById('rf-notes').value;
-  var btn=document.getElementById('rf-btn');btn.disabled=true;btn.textContent='Registrando...';
-  try{
-    var r=await apiFetch('/admin/investments/'+selectedInv.id+'/return',{method:'POST',body:JSON.stringify({rate:rate,periodMonth:month,notes:notes||undefined})});
-    var d=await r.json();
-    if(!r.ok)return toast(d.error||'Error','error');
-    toast('✅ '+(d.message||'Rendimiento registrado'));
-    document.getElementById('ret-form-card').style.display='none';
-    selectedInv=null;
-    document.getElementById('rf-rate').value='';
-    document.getElementById('rf-notes').value='';
-    document.getElementById('rf-preview').style.display='none';
-    loadRetInvs();loadStats();
-  }catch(e){toast('Error','error')}
-  finally{btn.disabled=false;btn.textContent='Registrar Rendimiento'}
-}
-
-// ═══ POOL ═══
+// ─── POOL ───
 function updatePoolAnnual(){
-  var m=parseFloat(document.getElementById('pool-apy-monthly').value)||0;
-  document.getElementById('pool-apy-annual').value=((Math.pow(1+m/100,12)-1)*100).toFixed(2);
+  const m=parseFloat($('#pool-apy-monthly').value)||0;
+  $('#pool-apy-annual').value=((Math.pow(1+m/100,12)-1)*100).toFixed(2);
 }
 async function loadPool(){
+  State.cacheFlags.pool=true;
   try{
-    var r=await apiFetch('/investments/pool-stats');if(!r||!r.ok)return;
-    var d=await r.json();
-    document.getElementById('pool-apy-monthly').value=d.monthlyAPY||2;
-    document.getElementById('pool-apy-annual').value=((Math.pow(1+(d.monthlyAPY||2)/100,12)-1)*100).toFixed(2);
-    document.getElementById('pool-total-capital').value=d.totalCapital||0;
-    document.getElementById('pool-distribution').value=d.distribution||50;
-    document.getElementById('pool-min').value=d.minAmount||50000;
-    var ann=((Math.pow(1+(d.monthlyAPY||2)/100,12)-1)*100);
-    document.getElementById('pool-stats-display').innerHTML='<div class="sg"><div class="si"><div class="l">Capital Pool</div><div class="v cb">'+F(d.totalCapital||0)+'</div></div><div class="si"><div class="l">APY Mensual</div><div class="v ca">'+(parseFloat(d.monthlyAPY||0)).toFixed(2)+'%</div></div><div class="si"><div class="l">APY Anual</div><div class="v cg">'+ann.toFixed(1)+'%</div></div><div class="si"><div class="l">Meses</div><div class="v">'+(d.monthsTracked||0)+'</div></div></div>';
+    const r=await apiFetch('/investments/pool-stats');
+    if(!r||!r.ok) return;
+    const d=await r.json();
+    State.poolConfig=d;
+    $('#pool-apy-monthly').value=d.monthlyAPY||2;
+    $('#pool-apy-annual').value=((Math.pow(1+(d.monthlyAPY||2)/100,12)-1)*100).toFixed(2);
+    $('#pool-total-capital').value=d.totalCapital||0;
+    $('#pool-distribution').value=d.distribution||50;
+    $('#pool-min').value=d.minAmount||50000;
+    const ann=((Math.pow(1+(d.monthlyAPY||2)/100,12)-1)*100);
+    $('#pool-stats').innerHTML=`<div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr 1fr;margin:0">
+      <div class="stat"><div class="stat-label">Capital pool</div><div class="stat-value acc mono">${F(d.totalCapital||0)}</div></div>
+      <div class="stat"><div class="stat-label">APY mensual</div><div class="stat-value warn mono">${(parseFloat(d.monthlyAPY||0)).toFixed(2)}%</div></div>
+      <div class="stat"><div class="stat-label">APY anual</div><div class="stat-value pos mono">${ann.toFixed(1)}%</div></div>
+      <div class="stat"><div class="stat-label">Meses</div><div class="stat-value mono">${d.monthsTracked||0}</div></div>
+    </div>`;
 
-    var ir=await apiFetch('/admin/investments/active?type=pool');
+    // Inversiones del pool
+    const ir=await apiFetch('/admin/investments/active?type=pool');
     if(ir&&ir.ok){
-      var invs=await ir.json();
-      document.getElementById('pool-invs-tbl').innerHTML=invs.length?invs.map(function(i){
-        var s=new Date(i.startDate||i.start_date);
-        var days=Math.floor((Date.now()-s)/(864e5));
-        return '<tr><td>'+(i.userName||i.user_name||'—')+'</td><td class="m cb">'+F(i.amount)+'</td><td class="m" style="font-size:11px">'+D(i.startDate||i.start_date)+'</td><td>'+Math.floor(days/30)+'m '+days%30+'d</td><td class="m cg">+'+F(i.totalEarned||0)+'</td><td><span class="bg bg-g">'+i.status+'</span></td></tr>';
-      }).join(''):'<tr><td colspan="6" class="empty">Sin inversiones</td></tr>';
+      const invs=await ir.json();
+      $('#pool-invs').innerHTML = invs.length ? '<div class="list">'+invs.map(i=>{
+        const s=new Date(i.startDate||i.start_date);
+        const days=Math.floor((Date.now()-s)/(864e5));
+        return `<div class="row">
+          <div class="row-top">
+            <div>
+              <div class="row-id">POOL · ID ${i.id}</div>
+              <div class="row-name">${i.userName||i.user_name||'—'}</div>
+            </div>
+            <div class="row-amount acc">${F(i.amount)}</div>
+          </div>
+          <div class="row-meta">
+            ${pill(i.status)}
+            <span>${D(i.startDate||i.start_date)}</span>
+            <span>${Math.floor(days/30)}m ${days%30}d</span>
+          </div>
+          <div class="row-meta"><span class="pos">Ganado: ${F(i.totalEarned||0)}</span></div>
+        </div>`;
+      }).join('')+'</div>' : '<div class="empty">Sin inversiones en pool</div>';
     }
+
     // Comisiones
     try{
-      var pr=await apiFetch('/admin/pool/withdrawals');
+      const pr=await apiFetch('/admin/pool/withdrawals');
       if(pr&&pr.ok){
-        var pws=await pr.json();
-        var tg=pws.reduce(function(s,r){return s+parseFloat(r.gross_amount||0)},0);
-        var tc=pws.reduce(function(s,r){return s+parseFloat(r.commission||0)},0);
-        var tn=pws.reduce(function(s,r){return s+parseFloat(r.net_amount||0)},0);
-        document.getElementById('pwk-gross').textContent=F(tg);
-        document.getElementById('pwk-commission').textContent=F(tc);
-        document.getElementById('pwk-net').textContent=F(tn);
-        document.getElementById('pool-comm-tbl').innerHTML=pws.length?pws.map(function(r){
-          return '<tr><td class="m" style="font-size:11px;color:var(--mut)">'+D(r.withdrawal_date||r.created_at)+'</td><td>'+(r.user_name||'—')+'</td><td class="m cg">'+F(r.gross_amount)+'</td><td class="m ca">'+F(r.commission)+'</td><td class="m cb">'+F(r.net_amount)+'</td></tr>';
-        }).join(''):'<tr><td colspan="5" class="empty">Sin retiros</td></tr>';
+        const pws=await pr.json();
+        State.poolWithdrawals=pws;
+        const tg=pws.reduce((s,r)=>s+parseFloat(r.gross_amount||0),0);
+        const tc=pws.reduce((s,r)=>s+parseFloat(r.commission||0),0);
+        const tn=pws.reduce((s,r)=>s+parseFloat(r.net_amount||0),0);
+        $('#pwk-gross').textContent=F(tg);
+        $('#pwk-commission').textContent=F(tc);
+        $('#pwk-net').textContent=F(tn);
+        $('#pool-comm').innerHTML = pws.length ? '<div class="list">'+pws.map(r=>`
+          <div class="row">
+            <div class="row-top">
+              <div>
+                <div class="row-id">${D(r.withdrawal_date||r.created_at)}</div>
+                <div class="row-name">${r.user_name||'—'}</div>
+              </div>
+              <div class="row-amount acc">${F(r.net_amount)}</div>
+            </div>
+            <div class="row-meta">
+              <span>Bruto <strong class="pos mono">${F(r.gross_amount)}</strong></span>
+              <span>Comisión <strong class="warn mono">${F(r.commission)}</strong></span>
+            </div>
+          </div>`).join('')+'</div>' : '<div class="empty">Sin retiros</div>';
       }
-    }catch(e){document.getElementById('pool-comm-tbl').innerHTML='<tr><td colspan="5" class="empty">Sin datos</td></tr>'}
-  }catch(e){document.getElementById('pool-stats-display').innerHTML='<div class="empty">Error</div>'}
+    }catch(e){}
+
+    // Cargar estrategias al final
+    await loadStrats();
+  }catch(e){console.error('loadPool:',e)}
 }
 async function savePoolConfig(){
-  var monthly=parseFloat(document.getElementById('pool-apy-monthly').value);
-  if(!monthly)return toast('Ingresa APY','error');
-  var btn=document.getElementById('btn-save-pool');btn.disabled=true;btn.textContent='Guardando...';
+  const monthly=parseFloat($('#pool-apy-monthly').value);
+  if(!monthly) return toast('Ingresa APY','error');
+  const btn=$('#btn-save-pool');
+  btn.disabled=true; btn.textContent='Guardando…';
   try{
-    var r=await apiFetch('/admin/pool/config',{method:'POST',body:JSON.stringify({
+    const r=await apiFetch('/admin/pool/config',{method:'POST',body:JSON.stringify({
       monthlyAPY:monthly,
-      annualAPY:parseFloat(document.getElementById('pool-apy-annual').value),
-      totalCapital:parseFloat(document.getElementById('pool-total-capital').value)||0,
-      distribution:parseFloat(document.getElementById('pool-distribution').value)||50,
-      minAmount:parseFloat(document.getElementById('pool-min').value)||50000
+      annualAPY:parseFloat($('#pool-apy-annual').value),
+      totalCapital:parseFloat($('#pool-total-capital').value)||0,
+      distribution:parseFloat($('#pool-distribution').value)||50,
+      minAmount:parseFloat($('#pool-min').value)||50000
     })});
-    if(!r.ok){var d=await r.json().catch(function(){return{}});return toast(d.error||'Error','error')}
-    toast('✅ Config guardada');loadPool();
+    if(!r||!r.ok){const d=await r.json().catch(()=>({}));return toast(d.error||'Error','error')}
+    toast('Configuración guardada','ok');
+    State.cacheFlags.pool=false;
+    loadPool();
   }catch(e){toast('Error','error')}
-  finally{btn.disabled=false;btn.textContent='Guardar Config'}
+  finally{btn.disabled=false; btn.textContent='Guardar configuración'}
 }
 
-// ═══ POOL STRATEGIES (localStorage — solo cosmético) ═══
-var poolStrats=[];
-function loadStrats(){
+// ─── RETURNS ───
+async function loadReturns(){
+  State.cacheFlags.rets=true;
   try{
-    var s=localStorage.getItem('sanse_pool_strategies');
-    poolStrats=s?JSON.parse(s):[
-      {name:'Pools de Liquidez',icon:'🌊',pct:30,desc:'Uniswap, PancakeSwap',color:'#5b8dee'},
-      {name:'Delta Neutral',icon:'🛡️',pct:30,desc:'Posiciones hedgeadas',color:'#22c55e'},
-      {name:'Preventas DeFi',icon:'🚀',pct:20,desc:'Early-stage',color:'#8b6cf6'},
-      {name:'Yield Farming',icon:'📈',pct:20,desc:'Optimización',color:'#f59e0b'}
-    ];
-  }catch(e){poolStrats=[]}
-  renderStrats();
+    const r=await apiFetch('/admin/investments/active');
+    if(!r||!r.ok) return;
+    let invs=await r.json();
+    invs=invs.filter(i=>(i.type||'').toLowerCase().includes('pool'));
+    $('#ret-list').innerHTML = invs.length ? '<div class="list">'+invs.map(i=>`
+      <div class="row">
+        <div class="row-top">
+          <div>
+            <div class="row-id">POOL · ID ${i.id}</div>
+            <div class="row-name">${i.userName||i.user_name||'—'}</div>
+          </div>
+          <div class="row-amount acc">${F(i.amount)}</div>
+        </div>
+        <div class="row-meta">
+          ${pill(i.status)}
+          <span>${D(i.startDate||i.start_date)}</span>
+          <span class="pos">+${F(i.totalEarned||0)}</span>
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-sm btn-primary" onclick="selInv(${i.id})">Registrar rendimiento</button>
+        </div>
+      </div>`).join('')+'</div>' : '<div class="empty">Sin inversiones Pool activas</div>';
+  }catch(e){console.error('loadReturns:',e)}
 }
+async function selInv(id){
+  try{
+    const r=await apiFetch('/admin/investments/active');
+    const invs=await r.json();
+    const inv=invs.find(i=>String(i.id)===String(id));
+    if(!inv) return toast('Inversión no encontrada','error');
+    if(!(inv.type||'').toLowerCase().includes('pool')) return toast('Solo Pool','error');
+    State.selectedInv=inv;
+    $('#rf-label').textContent='Pool · '+(inv.userName||inv.user_name||'—')+' · '+F(inv.amount);
+    $('#ret-form-card').classList.remove('hide');
+    $('#ret-form-card').scrollIntoView({behavior:'smooth',block:'center'});
+  }catch(e){toast('Error','error')}
+}
+function updateRetPrev(){
+  const rate=parseFloat($('#rf-rate').value)||0;
+  if(!State.selectedInv||!rate) return;
+  const cap=parseFloat(State.selectedInv.amount)||0;
+  const earned=Math.round(cap*(rate/100));
+  $('#rf-preview').classList.remove('hide');
+  $('#rf-preview').innerHTML=`Capital <strong class="acc mono">${F(cap)}</strong> × ${rate}% = <strong class="pos mono">+${F(earned)}</strong>`;
+}
+async function registerReturn(){
+  if(!State.selectedInv) return toast('Selecciona inversión','error');
+  const rate=parseFloat($('#rf-rate').value);
+  if(!rate) return toast('Ingresa la tasa','error');
+  const month=$('#rf-month').value;
+  if(!month) return toast('Selecciona el mes','error');
+  const notes=$('#rf-notes').value;
+  const btn=$('#rf-btn');
+  btn.disabled=true; btn.textContent='Registrando…';
+  try{
+    const r=await apiFetch('/admin/investments/'+State.selectedInv.id+'/return',{method:'POST',body:JSON.stringify({rate,periodMonth:month,notes:notes||undefined})});
+    const d=await r.json();
+    if(!r.ok) return toast(d.error||'Error','error');
+    toast('Rendimiento registrado','ok');
+    $('#ret-form-card').classList.add('hide');
+    State.selectedInv=null;
+    $('#rf-rate').value=''; $('#rf-notes').value='';
+    $('#rf-preview').classList.add('hide');
+    loadReturns(); loadStats();
+  }catch(e){toast('Error','error')}
+  finally{btn.disabled=false; btn.textContent='Registrar rendimiento'}
+}
+
+// ─── LOANS ───
+async function loadLoans(status){
+  State.cacheFlags.loans=true;
+  try{
+    const q=status==='all'?'':'?status='+status;
+    const r=await apiFetch('/admin/loans'+q);
+    if(!r||!r.ok) return;
+    const d=await r.json();
+    const loans=d.loans||d||[];
+    State.loans=loans;
+    $('#loans-content').innerHTML = loans.length ? renderLoans(loans) : '<div class="empty">Sin préstamos</div>';
+  }catch(e){console.error('loadLoans:',e)}
+}
+function renderLoans(loans){
+  return '<div class="list">'+loans.map(l=>{
+    const term=l.term_months||l.duration_months||'—';
+    const rate=l.approved_rate||l.monthly_rate||l.rate||'—';
+    return `<div class="row">
+      <div class="row-top">
+        <div>
+          <div class="row-id">${l.ref_id||'LN-'+l.id}</div>
+          <div class="row-name">${l.user_name||'—'}</div>
+        </div>
+        <div class="row-amount acc">${F(l.amount||l.requested_amount)}</div>
+      </div>
+      <div class="row-meta">
+        ${pill(l.status)}
+        <span>${rate}%/mes</span>
+        <span>${term}m plazo</span>
+        <span>${Dt(l.created_at)}</span>
+      </div>
+      ${l.status==='pending'?`
+        <div class="row-actions">
+          <button class="btn btn-sm btn-pos" onclick="procLoan(${l.id},'approve')">Aprobar</button>
+          <button class="btn btn-sm btn-neg" onclick="procLoan(${l.id},'reject')">Rechazar</button>
+        </div>
+      `:''}
+    </div>`;
+  }).join('')+'</div>';
+}
+function fLoan(s, btn){
+  btn.parentElement.querySelectorAll('.filter').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  $('#loans-content').innerHTML='<div class="empty">Cargando…</div>';
+  loadLoans(s);
+}
+async function procLoan(id, action){
+  if(!confirm('¿'+action+' este préstamo?')) return;
+  try{
+    const r=await apiFetch('/admin/loans/'+id+'/process',{method:'POST',body:JSON.stringify({action})});
+    if(!r||!r.ok) return toast('Error','error');
+    toast('Listo','ok');
+    loadLoans('all');
+  }catch(e){toast('Error','error')}
+}
+
+// ─── TRANSACTIONS (con filtros + paginación) ───
+const TxFilter = {
+  page:1, limit:20, total:0, pages:1,
+  search:'', type:'', userId:'', dateFrom:'', dateTo:'',
+  _debounce:null,
+};
+
+async function loadTransactions(){
+  State.cacheFlags.txs=true;
+  await fetchTxPage();
+}
+
+async function fetchTxPage(){
+  try{
+    const params = new URLSearchParams();
+    params.set('page', TxFilter.page);
+    params.set('limit', TxFilter.limit);
+    if(TxFilter.search) params.set('search', TxFilter.search);
+    if(TxFilter.type) params.set('type', TxFilter.type);
+    if(TxFilter.userId) params.set('userId', TxFilter.userId);
+    if(TxFilter.dateFrom) params.set('dateFrom', TxFilter.dateFrom);
+    if(TxFilter.dateTo) params.set('dateTo', TxFilter.dateTo);
+
+    const r=await apiFetch('/admin/transactions/all?'+params.toString());
+    if(!r||!r.ok){
+      // Fallback al endpoint /recent si /all no está disponible o falla
+      const fb=await apiFetch('/admin/transactions/recent');
+      if(fb&&fb.ok){
+        const fd=await fb.json();
+        const txs=fd.transactions||fd||[];
+        State.transactions=txs;
+        $('#tx-content').innerHTML=txs.length?renderTxList(txs):'<div class="empty">Sin transacciones</div>';
+        $('#tx-pagi').classList.add('hide');
+        $('#txf-count').textContent=txs.length+' resultados';
+      }
+      return;
+    }
+    const d=await r.json();
+    const txs=d.transactions||[];
+    State.transactions=txs;
+    TxFilter.total=d.total||txs.length;
+    TxFilter.pages=d.pages||1;
+
+    $('#tx-content').innerHTML = txs.length ? renderTxList(txs) : '<div class="empty">Sin resultados con esos filtros</div>';
+    $('#tx-page').textContent=d.page||TxFilter.page;
+    $('#tx-pages').textContent=TxFilter.pages;
+    $('#tx-total').textContent=TxFilter.total;
+    $('#tx-prev').disabled=(d.page||1)<=1;
+    $('#tx-next').disabled=(d.page||1)>=TxFilter.pages;
+    $('#tx-pagi').classList.toggle('hide', TxFilter.total<=TxFilter.limit);
+    $('#txf-count').textContent=TxFilter.total+' resultado'+(TxFilter.total===1?'':'s');
+
+    // Actualizar indicador "filtros activos" en page-meta
+    const activeFilters=[TxFilter.search,TxFilter.type,TxFilter.userId,TxFilter.dateFrom,TxFilter.dateTo].filter(Boolean).length;
+    $('#tx-meta').innerHTML = activeFilters>0
+      ? `${TxFilter.total} resultados <span class="filter-active-dot"></span> ${activeFilters} filtro${activeFilters===1?'':'s'} activo${activeFilters===1?'':'s'}`
+      : `${TxFilter.total} transacciones totales`;
+  }catch(e){console.error('fetchTxPage:',e)}
+}
+
+function txPage(delta){
+  const np=TxFilter.page+delta;
+  if(np<1||np>TxFilter.pages) return;
+  TxFilter.page=np;
+  $('#tx-content').innerHTML='<div class="empty">Cargando…</div>';
+  fetchTxPage();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function debounceTxFilter(){
+  clearTimeout(TxFilter._debounce);
+  TxFilter._debounce=setTimeout(applyTxFilters,400);
+}
+
+function applyTxFilters(){
+  TxFilter.search=$('#txf-search').value.trim();
+  TxFilter.type=$('#txf-type').value;
+  TxFilter.userId=$('#txf-user').value;
+  TxFilter.dateFrom=$('#txf-from').value;
+  TxFilter.dateTo=$('#txf-to').value;
+  TxFilter.page=1;
+  $('#tx-content').innerHTML='<div class="empty">Cargando…</div>';
+  fetchTxPage();
+}
+
+function clearTxFilters(){
+  $('#txf-search').value='';
+  $('#txf-type').value='';
+  $('#txf-user').value='';
+  $('#txf-from').value='';
+  $('#txf-to').value='';
+  applyTxFilters();
+}
+
+function populateTxFilterUsers(){
+  const sel=$('#txf-user');
+  if(!sel) return;
+  const current=sel.value;
+  if(!State.users.length){
+    loadUsersQuiet().then(populateTxFilterUsers);
+    return;
+  }
+  sel.innerHTML='<option value="">Todos</option>'+
+    State.users.map(u=>`<option value="${u.id}">${u.full_name}</option>`).join('');
+  sel.value=current;
+}
+
+function populateTxUserSelect(){
+  const sel=$('#tx-user');
+  if(!sel) return;
+  if(!State.users.length){loadUsersQuiet().then(populateTxUserSelect);return}
+  sel.innerHTML=State.users.map(u=>`<option value="${u.id}">${u.full_name} (${u.email})</option>`).join('');
+  populateTxFilterUsers();
+}
+async function createTx(){
+  const uid=$('#tx-user').value;
+  const type=$('#tx-type').value;
+  const amt=parseFloat($('#tx-amount').value);
+  if(!uid) return toast('Selecciona usuario','error');
+  if(!amt) return toast('Ingresa monto','error');
+  const desc=$('#tx-desc').value.trim();
+  const date=$('#tx-date').value;
+  try{
+    const r=await apiFetch('/admin/transactions',{method:'POST',body:JSON.stringify({
+      userId:uid, type, amount:amt,
+      description: desc||undefined,
+      date: date ? new Date(date).toISOString() : undefined
+    })});
+    if(!r||!r.ok){const d=await r.json().catch(()=>({}));return toast(d.error||'Error','error')}
+    toast('Transacción creada','ok');
+    $('#tx-amount').value=''; $('#tx-desc').value='';
+    State.cacheFlags.txs=false;
+    fetchTxPage(); loadStats();
+  }catch(e){toast('Error','error')}
+}
+
+// ─── ESC / TAP OUT ───
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    if($('#search-ov').classList.contains('open')) closeSearch();
+    else if($('#modal-ov').classList.contains('open')) closeModal();
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// POOL STRATEGIES — Asignación de capital
+// Persistencia: pool_config.strategies (JSON) — fallback localStorage
+// ═══════════════════════════════════════════════════════════════
+const Strats = {
+  list: [],
+  dirty: false,
+};
+
 function renderStrats(){
-  var list=document.getElementById('pool-strat-list');if(!list)return;
-  var tot=poolStrats.reduce(function(s,x){return s+(x.pct||0)},0);
-  var te=document.getElementById('strat-total');
-  if(te){te.textContent=tot+'%';te.style.color=tot===100?'var(--grn)':tot>100?'var(--red)':'var(--amb)'}
-  list.innerHTML=poolStrats.length?poolStrats.map(function(s,i){
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--sur);border-radius:8px;margin-bottom:6px;border:1px solid var(--bd)"><span style="font-size:18px">'+(s.icon||'🔷')+'</span><div style="flex:1"><div style="font-size:12px;font-weight:600">'+s.name+'</div><div style="font-size:10px;color:var(--mut)">'+(s.desc||'')+'</div><div style="height:4px;background:var(--bg);border-radius:2px;margin-top:4px;overflow:hidden"><div style="height:100%;width:'+s.pct+'%;background:'+(s.color||'var(--amb)')+';border-radius:2px"></div></div></div><div class="m" style="font-weight:700;color:var(--amb);min-width:36px;text-align:right">'+s.pct+'%</div><button onclick="rmStrat('+i+')" class="bt bt-s bt-r">✕</button></div>';
-  }).join(''):'<div class="empty" style="padding:12px">Sin estrategias</div>';
+  const list=$('#strat-list');
+  if(!list) return;
+
+  list.innerHTML = Strats.list.length ? Strats.list.map((s,i)=>`
+    <div class="strat">
+      <div class="strat-main">
+        <div class="strat-name">${escapeHtml(s.name)}</div>
+        <div class="strat-bar"><div class="strat-bar-fill" style="width:${Math.min(100,s.pct)}%"></div></div>
+      </div>
+      <input class="strat-input" type="number" min="0" max="100" step="0.1" value="${s.pct}" oninput="updateStratPct(${i}, this.value)">
+      <button class="strat-rm" onclick="rmStrat(${i})" aria-label="Eliminar">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  `).join('') : '<div class="empty" style="padding:20px">Sin estrategias. Agrega la primera abajo.</div>';
+
+  updateStratTotal();
 }
+
+function updateStratTotal(){
+  const tot=Strats.list.reduce((s,x)=>s+(parseFloat(x.pct)||0),0);
+  const totRound=Math.round(tot*10)/10;
+  const el=$('#strat-total');
+  if(!el) return;
+  el.textContent=totRound+'%';
+  el.classList.remove('ok','over','under');
+  if(totRound===100) el.classList.add('ok');
+  else if(totRound>100) el.classList.add('over');
+  else el.classList.add('under');
+
+  const btn=$('#btn-save-strats');
+  if(btn){
+    btn.disabled = totRound!==100;
+    btn.textContent = totRound===100 ? 'Guardar' : (totRound>100 ? `Excede ${(totRound-100).toFixed(1)}%` : `Falta ${(100-totRound).toFixed(1)}%`);
+  }
+}
+
+function updateStratPct(idx, val){
+  const v=parseFloat(val);
+  Strats.list[idx].pct = isNaN(v)?0:Math.max(0,Math.min(100,v));
+  Strats.dirty=true;
+  // Solo actualizar la barra y el total (no re-render completo para no perder foco)
+  const bar = $$('.strat-bar-fill')[idx];
+  if(bar) bar.style.width=Math.min(100,Strats.list[idx].pct)+'%';
+  updateStratTotal();
+}
+
 function addStrat(){
-  var n=document.getElementById('strat-name').value.trim();
-  var p=parseInt(document.getElementById('strat-pct').value)||0;
-  if(!n||p<=0)return toast('Nombre y % requeridos','error');
-  var tot=poolStrats.reduce(function(s,x){return s+(x.pct||0)},0)+p;
-  if(tot>100)return toast('Excede 100% ('+tot+'%)','error');
-  poolStrats.push({
-    name:n,
-    icon:document.getElementById('strat-icon').value.trim()||'🔷',
-    pct:p,
-    desc:document.getElementById('strat-desc').value.trim(),
-    color:document.getElementById('strat-color').value
-  });
-  document.getElementById('strat-name').value='';
-  document.getElementById('strat-pct').value='';
-  document.getElementById('strat-desc').value='';
+  const name=$('#strat-name').value.trim();
+  const pct=parseFloat($('#strat-pct').value);
+  if(!name) return toast('Falta el nombre','error');
+  if(isNaN(pct)||pct<=0) return toast('% inválido','error');
+  Strats.list.push({name, pct: Math.round(pct*10)/10});
+  Strats.dirty=true;
+  $('#strat-name').value=''; $('#strat-pct').value='';
+  renderStrats();
+  $('#strat-name').focus();
+}
+
+function rmStrat(idx){
+  if(!confirm('¿Eliminar esta estrategia?')) return;
+  Strats.list.splice(idx,1);
+  Strats.dirty=true;
   renderStrats();
 }
-function rmStrat(i){poolStrats.splice(i,1);renderStrats()}
+
+async function loadStrats(){
+  // Intentar leerlas desde pool_config (vía /investments/pool-stats)
+  // Fallback a localStorage si no vienen del backend
+  let loaded=null;
+  if(State.poolConfig && State.poolConfig.strategies){
+    try{
+      loaded = typeof State.poolConfig.strategies==='string'
+        ? JSON.parse(State.poolConfig.strategies)
+        : State.poolConfig.strategies;
+    }catch(e){}
+  }
+  if(!loaded){
+    try{
+      const s=localStorage.getItem('sanse_pool_strategies_v2');
+      if(s) loaded=JSON.parse(s);
+    }catch(e){}
+  }
+  Strats.list = Array.isArray(loaded) ? loaded.filter(s=>s&&s.name).map(s=>({
+    name:String(s.name),
+    pct: parseFloat(s.pct)||0,
+  })) : [];
+  Strats.dirty=false;
+  renderStrats();
+}
+
 async function saveStrats(){
-  var tot=poolStrats.reduce(function(s,x){return s+(x.pct||0)},0);
-  if(tot!==100)return toast('Total debe ser 100% ('+tot+'%)','error');
-  localStorage.setItem('sanse_pool_strategies',JSON.stringify(poolStrats));
-  toast('✅ Estrategias guardadas');
-}
+  const tot=Strats.list.reduce((s,x)=>s+(parseFloat(x.pct)||0),0);
+  if(Math.round(tot*10)/10!==100) return toast('Total debe ser 100%','error');
+  const btn=$('#btn-save-strats');
+  btn.disabled=true; btn.textContent='Guardando…';
 
-// ═══ USER DETAIL MODAL ═══
-async function viewUser(uid){
+  // Guardar siempre en localStorage como respaldo inmediato
   try{
-    var r=await apiFetch('/admin/users/'+uid+'/details');
-    if(!r||!r.ok)return toast('Error','error');
-    var d=await r.json();var u=d.user||{};
-    var bal=d.balanceHistory&&d.balanceHistory.length?parseFloat(d.balanceHistory[d.balanceHistory.length-1].amount):0;
-    var invs=d.investments||[];var txs=(d.transactions||[]).slice(0,10);
-    var ai=invs.filter(function(i){return i.status==='active'});
-    var ti=ai.reduce(function(s,i){return s+parseFloat(i.amount||0)},0);
-    var ih=invs.length?'<div style="font-size:12px;font-weight:700;margin:14px 0 8px">Inversiones ('+invs.length+')</div>'+invs.map(function(i){var isP=(i.type||'').toLowerCase().includes('pool');return '<div style="padding:10px;background:var(--sur);border-radius:8px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--bd)"><div><div style="font-weight:600;font-size:12px">'+(isP?'Pool':'CDTC')+' · '+(i.duration_months||6)+'m</div><div style="font-size:10px;color:var(--mut)">'+D(i.start_date)+'</div></div><div style="text-align:right"><div class="m cb" style="font-weight:700">'+F(i.amount)+'</div><span style="font-size:10px;color:'+(i.status==='active'?'var(--grn)':'var(--mut)')+'">'+i.status+'</span></div></div>'}).join(''):'';
-    var th=txs.length?'<div style="font-size:12px;font-weight:700;margin:14px 0 8px">Últimos Movimientos</div><div style="border:1px solid var(--bd);border-radius:8px;overflow:hidden">'+txs.map(function(t,idx){var neg=['withdraw','investment'].includes(t.type);return '<div style="padding:8px 12px;'+(idx<txs.length-1?'border-bottom:1px solid var(--bd);':'')+'display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:11px;font-weight:600">'+t.type+'</div><div style="font-size:10px;color:var(--mut)">'+D(t.created_at)+'</div></div><div class="m" style="font-weight:700;color:'+(neg?'var(--red)':'var(--grn)')+'">'+(neg?'-':'+')+F(t.amount)+'</div></div>'}).join('')+'</div>':'';
-    var ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px';
-    ov.onclick=function(e){if(e.target===ov)ov.remove()};
-    ov.innerHTML='<div style="max-width:520px;width:100%;background:var(--bg2);border-radius:14px;overflow:hidden;max-height:90vh;display:flex;flex-direction:column"><div style="padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700;font-size:15px">'+(u.full_name||'Usuario')+'</div><div style="font-size:11px;color:var(--mut)">'+(u.email||'')+'</div></div><button id="ud-x" style="background:var(--sur);border:1px solid var(--bd);border-radius:6px;padding:4px 10px;color:var(--mut);cursor:pointer">✕</button></div><div style="padding:20px;overflow-y:auto"><div class="sg"><div class="si"><div class="l">Balance</div><div class="v cg">'+F(bal)+'</div></div><div class="si"><div class="l">Invertido</div><div class="v cb">'+F(ti)+'</div></div></div>'+ih+th+'</div></div>';
-    document.body.appendChild(ov);document.getElementById('ud-x').onclick=function(){ov.remove()};
-  }catch(e){toast('Error','error')}
+    localStorage.setItem('sanse_pool_strategies_v2', JSON.stringify(Strats.list));
+  }catch(e){}
+
+  // Intentar guardar en backend (en pool_config como campo strategies)
+  try{
+    const r=await apiFetch('/admin/pool/config',{method:'POST',body:JSON.stringify({
+      monthlyAPY: parseFloat($('#pool-apy-monthly').value)||State.poolConfig.monthlyAPY||2,
+      annualAPY: parseFloat($('#pool-apy-annual').value)||0,
+      totalCapital: parseFloat($('#pool-total-capital').value)||0,
+      distribution: parseFloat($('#pool-distribution').value)||50,
+      minAmount: parseFloat($('#pool-min').value)||50000,
+      strategies: Strats.list,
+    })});
+    if(r&&r.ok){
+      toast('Estrategias guardadas','ok');
+      Strats.dirty=false;
+    }else{
+      toast('Guardado local (backend pendiente)','ok');
+    }
+  }catch(e){
+    toast('Guardado local (sin conexión)','ok');
+  }finally{
+    updateStratTotal(); // re-habilita el botón con su texto correcto
+  }
 }
 
-// INIT
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PULL TO REFRESH — touch-based refresh para mobile
+// ═══════════════════════════════════════════════════════════════
+const PTR = {
+  startY:0, currentY:0, pulling:false, threshold:70, max:120,
+};
+
+function setupPullToRefresh(){
+  const ptr=$('#ptr');
+  if(!ptr) return;
+
+  window.addEventListener('touchstart', e=>{
+    // Solo activar si estamos en el tope de la página
+    if(window.scrollY>0) return;
+    // No activar si hay un modal o búsqueda abierta
+    if($('#modal-ov').classList.contains('open')) return;
+    if($('#search-ov').classList.contains('open')) return;
+    PTR.startY=e.touches[0].clientY;
+    PTR.pulling=true;
+  }, {passive:true});
+
+  window.addEventListener('touchmove', e=>{
+    if(!PTR.pulling) return;
+    if(window.scrollY>0){PTR.pulling=false;return}
+    PTR.currentY=e.touches[0].clientY;
+    const dy=PTR.currentY-PTR.startY;
+    if(dy<=0) return;
+    // Resistencia (curva no-lineal)
+    const pull=Math.min(PTR.max, dy*0.5);
+    ptr.style.transform=`translate(-50%, ${-60+pull}px)`;
+    ptr.classList.add('show');
+    $('#ptr-text').textContent = pull>=PTR.threshold ? 'Suelta para actualizar' : 'Tira para actualizar';
+  }, {passive:true});
+
+  window.addEventListener('touchend', async ()=>{
+    if(!PTR.pulling) return;
+    PTR.pulling=false;
+    const dy=PTR.currentY-PTR.startY;
+    const pull=Math.min(PTR.max, dy*0.5);
+    if(pull>=PTR.threshold){
+      ptr.classList.add('refreshing');
+      $('#ptr-text').textContent='Actualizando…';
+      await refreshCurrentView();
+      setTimeout(()=>{
+        ptr.classList.remove('refreshing','show');
+        ptr.style.transform='';
+      }, 400);
+    }else{
+      ptr.classList.remove('show');
+      ptr.style.transform='';
+    }
+  }, {passive:true});
+}
+
+async function refreshCurrentView(){
+  // Invalidar caches relevantes y recargar la vista actual
+  const v=State.currentNav;
+  if(v==='home'){
+    State.cacheFlags.home=false;
+    await loadHome();
+  }else if(v==='pending'){
+    const s=State.currentSub.pending;
+    if(s==='deps'){State.cacheFlags.deps=false; await loadDeposits('all')}
+    if(s==='wrs'){State.cacheFlags.wrs=false; await loadWithdrawals('all')}
+    if(s==='regs'){State.cacheFlags.regs=false; await loadRegistrations('all')}
+    loadStats();
+  }else if(v==='finance'){
+    const s=State.currentSub.finance;
+    if(s==='invs'){State.cacheFlags.invs=false; await loadInvestments()}
+    if(s==='pool'){State.cacheFlags.pool=false; await loadPool(); loadStrats()}
+    if(s==='rets'){State.cacheFlags.rets=false; await loadReturns()}
+    if(s==='loans'){State.cacheFlags.loans=false; await loadLoans('all')}
+  }else if(v==='users'){
+    State.cacheFlags.users=false; await loadUsers();
+  }else if(v==='tx'){
+    State.cacheFlags.txs=false; await fetchTxPage();
+  }
+  toast('Actualizado','ok');
+}
+
+// ─── INIT ───
+async function init(){
+  setupPullToRefresh();
+  await loadHome();
+}
 init();
 </script>
 </body>
