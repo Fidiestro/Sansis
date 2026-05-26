@@ -2469,6 +2469,23 @@ async function loadLoanPayments(loanId){
     if(!r||!r.ok)return;
     const payments=await r.json();
     const container=document.getElementById('loan-payments-'+loanId);
+
+    // ★ Si hubo pagos, mover la "fecha de corte" del tick en vivo al último pago.
+    // Esto hace que el interés mostrado coincida con lo que el backend cobrará:
+    // ambos calculan desde el último pago (no desde el inicio del préstamo).
+    if(payments.length>0){
+      const liveEl=document.querySelector('[data-loan-live="'+loanId+'"]');
+      if(liveEl){
+        const lastPayDate=new Date(payments[0].created_at); // payments vienen DESC
+        liveEl.setAttribute('data-loan-start', lastPayDate.toISOString());
+        // También actualizar el capital pendiente (puede haber cambiado por capitalización)
+        const lastRemaining=parseFloat(payments[0].remaining_capital);
+        if(!isNaN(lastRemaining)){
+          liveEl.setAttribute('data-loan-cap', lastRemaining);
+        }
+      }
+    }
+
     if(!container)return;
     if(!payments.length){
       container.innerHTML=`<div style="font-size:11px;color:var(--mut);text-align:center;padding:8px;border-top:1px solid var(--bd);margin-top:8px">Sin pagos registrados aún</div>`;
@@ -2487,7 +2504,7 @@ async function loadLoanPayments(loanId){
                   <span style="color:var(--text);font-weight:600">${dateLbl}</span>
                   <span style="color:var(--neg);font-weight:700;font-family:'Space Mono',monospace">−${formatCOP(p.amount)}</span>
                 </div>
-                <div style="display:flex;gap:10px;color:var(--mut);font-size:10px">
+                <div style="display:flex;gap:10px;color:var(--mut);font-size:10px;flex-wrap:wrap">
                   <span>Interés: <strong style="color:var(--amb)">${formatCOP(p.interest_amount)}</strong></span>
                   <span>Capital: <strong style="color:var(--blu)">${formatCOP(p.capital_amount)}</strong></span>
                   <span>Saldo: <strong style="color:var(--text)">${formatCOP(p.remaining_capital)}</strong></span>
