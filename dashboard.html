@@ -2388,6 +2388,8 @@ function renderLoansView(c){
 
   // Iniciar tick de intereses en vivo
   startLoanInterestAnimation();
+  // Cargar historial de pagos por cada préstamo activo (en paralelo)
+  active.forEach(l=>loadLoanPayments(l.id));
 }
 
 // Renderiza una card de préstamo activo con intereses en tiempo real
@@ -2433,7 +2435,7 @@ function renderLoanCard(loan){
 
     <div class="inv-grid" style="margin-top:12px">
       <div class="inv-cell">
-        <div class="inv-cell-lbl">Capital prestado</div>
+        <div class="inv-cell-lbl">Capital pendiente</div>
         <div class="inv-cell-val">${formatCOP(cap)}</div>
       </div>
       <div class="inv-cell earning-live">
@@ -2454,7 +2456,48 @@ function renderLoanCard(loan){
       <button class="btn btn-sm" style="flex:1;background:linear-gradient(135deg,var(--blu),var(--pur));color:#fff;border:none;padding:11px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer" onclick="openLoanPayModal(${loan.id},${cap},${rate},'${start.toISOString()}','partial')">💸 Abonar</button>
       <button class="btn btn-sm" style="flex:1;background:linear-gradient(135deg,var(--grn),var(--blu));color:#fff;border:none;padding:11px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer" onclick="openLoanPayModal(${loan.id},${cap},${rate},'${start.toISOString()}','full')">✓ Pagar total</button>
     </div>
+
+    <!-- Historial de pagos (se carga vía loadLoanPayments) -->
+    <div id="loan-payments-${loan.id}" style="margin-top:14px"></div>
   </div>`;
+}
+
+// Carga el historial de pagos de un préstamo y lo renderiza dentro de la card
+async function loadLoanPayments(loanId){
+  try{
+    const r=await apiFetch('/loans/'+loanId+'/payments');
+    if(!r||!r.ok)return;
+    const payments=await r.json();
+    const container=document.getElementById('loan-payments-'+loanId);
+    if(!container)return;
+    if(!payments.length){
+      container.innerHTML=`<div style="font-size:11px;color:var(--mut);text-align:center;padding:8px;border-top:1px solid var(--bd);margin-top:8px">Sin pagos registrados aún</div>`;
+      return;
+    }
+    container.innerHTML=`
+      <div style="border-top:1px solid var(--bd);padding-top:10px;margin-top:6px">
+        <div style="font-size:10px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Historial de pagos (${payments.length})</div>
+        <div style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto">
+          ${payments.map(p=>{
+            const d=new Date(p.created_at);
+            const dateLbl=d.toLocaleDateString('es-CO',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+            return `
+              <div style="background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:6px;padding:8px 10px;font-size:11px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+                  <span style="color:var(--text);font-weight:600">${dateLbl}</span>
+                  <span style="color:var(--neg);font-weight:700;font-family:'Space Mono',monospace">−${formatCOP(p.amount)}</span>
+                </div>
+                <div style="display:flex;gap:10px;color:var(--mut);font-size:10px">
+                  <span>Interés: <strong style="color:var(--amb)">${formatCOP(p.interest_amount)}</strong></span>
+                  <span>Capital: <strong style="color:var(--blu)">${formatCOP(p.capital_amount)}</strong></span>
+                  <span>Saldo: <strong style="color:var(--text)">${formatCOP(p.remaining_capital)}</strong></span>
+                </div>
+                ${p.is_fully_paid?`<div style="color:var(--grn);font-size:10px;font-weight:600;margin-top:3px">✓ Pago final — préstamo saldado</div>`:''}
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }catch(e){console.error('Error cargando pagos préstamo',loanId,e)}
 }
 
 // Tick de intereses en vivo (cada 10s, igual que LP COP)
@@ -2499,15 +2542,17 @@ function openLoanPayModal(loanId,cap,rate,startISO,mode){
   const secondsElapsed=Math.max(0,(new Date()-start)/1000);
   const interestAccrued=cap*(rate/100)*(secondsElapsed/SECONDS_PER_MONTH);
   const totalDueNow=cap+interestAccrued;
-  const balance=parseFloat(balanceSummary.totalBalance||balanceSummary.availableBalance||0);
+
+  // FIX: usar availableBalance (lo que de verdad puede gastar), no totalBalance
+  const totalBal=parseFloat(balanceSummary.totalBalance||0);
+  const availBal=parseFloat(balanceSummary.availableBalance!==undefined?balanceSummary.availableBalance:totalBal);
+  const invested=parseFloat(balanceSummary.totalInvested||0);
 
   const isFull=mode==='full';
   const defaultAmount=isFull?Math.round(totalDueNow):Math.round(interestAccrued);
   const title=isFull?'Pagar préstamo completo':'Abonar al préstamo';
 
-  const modal=document.getElementById('modalGeneric')||document.getElementById('modal');
-  // Si no hay modal genérico, usar prompt
-  const insufficientFunds=balance<defaultAmount;
+  const insufficientFunds=availBal<defaultAmount;
 
   const bodyHtml=`
     <div style="background:var(--bg2,#1a1d2e);border:1px solid var(--bd,rgba(255,255,255,.08));border-radius:12px;padding:20px;max-width:420px;margin:0 auto">
@@ -2519,8 +2564,12 @@ function openLoanPayModal(loanId,cap,rate,startISO,mode){
       </div>
       <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);margin-bottom:6px">Monto a ${isFull?'pagar':'abonar'} (COP)</label>
       <input id="lp-amount" type="number" min="1000" step="1000" value="${defaultAmount}" ${isFull?'readonly':''} style="width:100%;padding:12px;background:var(--sur,rgba(255,255,255,.04));border:1px solid var(--bd,rgba(255,255,255,.08));border-radius:8px;color:#fff;font-size:16px;font-weight:600">
-      <div style="font-size:11px;color:var(--mut);margin-top:6px">Balance disponible: <strong style="color:${insufficientFunds?'var(--red)':'var(--grn)'}">${formatCOP(balance)}</strong></div>
-      ${insufficientFunds?`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red);padding:10px;border-radius:8px;font-size:12px;margin-top:10px">⚠️ Balance insuficiente para este pago</div>`:''}
+      <div style="background:var(--sur,rgba(255,255,255,.04));border:1px solid var(--bd,rgba(255,255,255,.08));border-radius:8px;padding:10px;margin-top:10px;font-size:11px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--mut)"><span>Balance total:</span><strong style="color:var(--text)">${formatCOP(totalBal)}</strong></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--mut)"><span>Invertido (bloqueado):</span><strong style="color:var(--text)">−${formatCOP(invested)}</strong></div>
+        <div style="display:flex;justify-content:space-between;border-top:1px solid var(--bd,rgba(255,255,255,.08));margin-top:4px;padding-top:4px"><span style="color:var(--mut)">Disponible para pagar:</span><strong style="color:${insufficientFunds?'var(--red)':'var(--grn)'};font-size:13px">${formatCOP(availBal)}</strong></div>
+      </div>
+      ${insufficientFunds?`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red);padding:10px;border-radius:8px;font-size:12px;margin-top:10px">⚠️ Balance disponible insuficiente. ${invested>0?'Tu dinero invertido no se puede usar.':''}</div>`:''}
       <div style="display:flex;gap:8px;margin-top:16px">
         <button onclick="closeLoanPayModal()" style="flex:1;background:var(--sur,rgba(255,255,255,.04));border:1px solid var(--bd,rgba(255,255,255,.08));color:var(--text);padding:11px;border-radius:8px;font-weight:600;cursor:pointer">Cancelar</button>
         <button onclick="submitLoanPay(${loanId})" ${insufficientFunds?'disabled':''} style="flex:2;background:linear-gradient(135deg,var(--grn),var(--blu));color:#fff;border:none;padding:11px;border-radius:8px;font-weight:700;cursor:${insufficientFunds?'not-allowed':'pointer'};opacity:${insufficientFunds?'.5':'1'}">${isFull?'Confirmar pago total':'Confirmar abono'}</button>
@@ -2551,17 +2600,34 @@ async function submitLoanPay(loanId){
     const r=await apiFetch('/loans/pay',{method:'POST',body:JSON.stringify({loanId,amount:amt})});
     const d=await(r?r.json().catch(()=>({})):{});
     if(!r||!r.ok)return toast(d.error||'Error al pagar','error');
-    toast('Pago registrado ✓','success');
+    toast(d.message||'Pago registrado ✓','success');
     closeLoanPayModal();
-    // Refrescar datos y vista
+
+    // FIX: Refrescar TODOS los datos del dashboard, no solo los préstamos.
+    // El backend ya recalculó balance_history, pero el frontend tenía datos en caché
+    // de dashboardData (header) y balanceSummary (tarjetas).
     try{
-      const [balR,loanR]=await Promise.all([apiFetch('/investments/balance-summary'),apiFetch('/loans/my')]);
-      if(balR&&balR.ok){const bd=await balR.json();if(bd)Object.assign(balanceSummary,bd);}
-      if(loanR&&loanR.ok){myLoans=await loanR.json();}
-    }catch(e){}
-    // Re-renderizar la vista de préstamos
-    const c=document.getElementById('dashboard-content');
-    if(c&&typeof renderLoansView==='function')renderLoansView(c);
+      const [dashR,balR,loanR,invR]=await Promise.all([
+        apiFetch('/dashboard/summary'),
+        apiFetch('/investments/balance-summary'),
+        apiFetch('/loans/my'),
+        apiFetch('/investments/my')
+      ]);
+      if(dashR&&dashR.ok){const dd=await dashR.json();if(dd)dashboardData=dd;}
+      if(balR&&balR.ok){const bd=await balR.json();if(bd)balanceSummary=bd;}
+      if(loanR&&loanR.ok){const ld=await loanR.json();if(ld)myLoans=ld;}
+      if(invR&&invR.ok){const id=await invR.json();if(Array.isArray(id))myInvestments=id;}
+    }catch(e){console.error('Error refrescando datos post-pago:',e)}
+
+    // Re-renderizar la VISTA ACTUAL completa (no solo préstamos).
+    // Esto actualiza el header con el balance nuevo + lo que esté visible.
+    if(typeof renderCurrentView==='function'){
+      renderCurrentView();
+    }else{
+      // Fallback: si renderCurrentView no existe, renderizar préstamos
+      const c=document.getElementById('dashboard-content');
+      if(c&&typeof renderLoansView==='function')renderLoansView(c);
+    }
   }catch(e){toast('Error de red','error')}
 }
 

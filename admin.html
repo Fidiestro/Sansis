@@ -2793,15 +2793,26 @@ function rmStrat(idx){
 }
 
 async function loadStrats(){
-  // Intentar leerlas desde pool_config (vía /investments/pool-stats)
-  // Fallback a localStorage si no vienen del backend
+  // FIX: Cargar SIEMPRE desde el backend (endpoint dedicado /admin/pool/strategies).
+  // localStorage solo como fallback offline; ya no es la fuente de verdad.
   let loaded=null;
-  if(State.poolConfig && State.poolConfig.strategies){
-    try{
-      loaded = typeof State.poolConfig.strategies==='string'
-        ? JSON.parse(State.poolConfig.strategies)
-        : State.poolConfig.strategies;
-    }catch(e){}
+  try{
+    const r=await apiFetch('/admin/pool/strategies');
+    if(r&&r.ok){
+      const data=await r.json();
+      if(Array.isArray(data))loaded=data;
+    }
+  }catch(e){console.warn('[loadStrats] backend falló, usando fallback',e)}
+
+  // Fallback: poolConfig embebido o localStorage
+  if(!loaded){
+    if(State.poolConfig && State.poolConfig.strategies){
+      try{
+        loaded = typeof State.poolConfig.strategies==='string'
+          ? JSON.parse(State.poolConfig.strategies)
+          : State.poolConfig.strategies;
+      }catch(e){}
+    }
   }
   if(!loaded){
     try{
@@ -2809,9 +2820,13 @@ async function loadStrats(){
       if(s) loaded=JSON.parse(s);
     }catch(e){}
   }
+
   Strats.list = Array.isArray(loaded) ? loaded.filter(s=>s&&s.name).map(s=>({
     name:String(s.name),
+    icon:s.icon||'🔷',
     pct: parseFloat(s.pct)||0,
+    desc:s.desc||'',
+    color:s.color||'#5b8dee',
   })) : [];
   Strats.dirty=false;
   renderStrats();
@@ -2823,26 +2838,32 @@ async function saveStrats(){
   const btn=$('#btn-save-strats');
   btn.disabled=true; btn.textContent='Guardando…';
 
-  // Guardar siempre en localStorage como respaldo inmediato
+  // Respaldo en localStorage (instantáneo, por si falla red)
   try{
     localStorage.setItem('sanse_pool_strategies_v2', JSON.stringify(Strats.list));
   }catch(e){}
 
-  // Intentar guardar en backend (en pool_config como campo strategies)
+  // FIX: Guardar en endpoint dedicado /admin/pool/strategies
+  // (separado de /admin/pool/config para no mezclar responsabilidades)
   try{
-    const r=await apiFetch('/admin/pool/config',{method:'POST',body:JSON.stringify({
-      monthlyAPY: parseFloat($('#pool-apy-monthly').value)||State.poolConfig.monthlyAPY||2,
-      annualAPY: parseFloat($('#pool-apy-annual').value)||0,
-      totalCapital: parseFloat($('#pool-total-capital').value)||0,
-      distribution: parseFloat($('#pool-distribution').value)||50,
-      minAmount: parseFloat($('#pool-min').value)||50000,
-      strategies: Strats.list,
-    })});
+    const payload={strategies: Strats.list.map(s=>({
+      name:String(s.name||''),
+      icon:String(s.icon||'🔷'),
+      pct: Number(s.pct)||0,
+      desc:String(s.desc||''),
+      color:String(s.color||'#5b8dee'),
+    }))};
+    const r=await apiFetch('/admin/pool/strategies',{method:'POST',body:JSON.stringify(payload)});
     if(r&&r.ok){
-      toast('Estrategias guardadas','ok');
+      toast('Estrategias guardadas ✓','ok');
       Strats.dirty=false;
     }else{
-      toast('Guardado local (backend pendiente)','ok');
+      const d=await(r?r.json().catch(()=>({})):{});
+      if(r&&r.status===503){
+        toast('Falta correr migración 002_add_pool_strategies.sql','error');
+      }else{
+        toast(d.error||'Guardado local (backend pendiente)','ok');
+      }
     }
   }catch(e){
     toast('Guardado local (sin conexión)','ok');
