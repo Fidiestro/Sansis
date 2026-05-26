@@ -1638,15 +1638,32 @@ async function viewUser(uid){
     if(!r||!r.ok) return toast('Error cargando','error');
     const d=await r.json();
     const u=d.user||{};
-    const bal=d.balanceHistory&&d.balanceHistory.length?parseFloat(d.balanceHistory[d.balanceHistory.length-1].amount):0;
+    // FIX: usar freshBalance del backend (calculado live), fallback a balanceHistory
+    const bal = (d.freshBalance !== undefined && d.freshBalance !== null)
+      ? parseFloat(d.freshBalance)
+      : (d.balanceHistory&&d.balanceHistory.length
+          ? parseFloat(d.balanceHistory[d.balanceHistory.length-1].amount)
+          : 0);
     const invs=d.investments||[];
-    const txs=(d.transactions||[]).slice(0,10);
+    const txs=(d.transactions||[]).slice(0,20);
+    const loans=d.loans||[];
     const ai=invs.filter(i=>i.status==='active');
     const ti=ai.reduce((s,i)=>s+parseFloat(i.amount||0),0);
+    const activeLoans=loans.filter(l=>l.status==='active'||l.status==='overdue');
+    const totalLoaned=activeLoans.reduce((s,l)=>s+parseFloat(l.approved_amount||l.amount||0),0);
 
-    let html=`<div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr 1fr;margin-bottom:14px">
+    // Guardar uid en State para que delTx() pueda recargar el modal
+    State._viewingUserId = uid;
+
+    let html=`<div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr 1fr 1fr;margin-bottom:14px">
       <div class="stat"><div class="stat-label">Balance</div><div class="stat-value acc mono">${F(bal)}</div></div>
       <div class="stat"><div class="stat-label">Invertido</div><div class="stat-value pos mono">${F(ti)}</div></div>
+      <div class="stat"><div class="stat-label">Préstamos</div><div class="stat-value mono" style="color:${totalLoaned>0?'var(--neg)':'var(--txt-3)'}">${F(totalLoaned)}</div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button class="btn btn-sm" style="flex:1;background:linear-gradient(135deg,#5b8dee,#8b6cf6);color:#fff;border:none;padding:10px;border-radius:8px;font-weight:600;cursor:pointer" onclick="openCreateLoanModal(${uid},'${(u.full_name||'').replace(/'/g,'')}')">
+        💰 Crear Préstamo
+      </button>
     </div>`;
 
     if(invs.length){
@@ -1666,13 +1683,188 @@ async function viewUser(uid){
       }).join('')+'</div>';
     }
 
+    // Préstamos del usuario
+    if(loans.length){
+      html+=`<div style="font-family:var(--f-mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt-3);margin:18px 0 10px">Préstamos (${loans.length})</div>`;
+      html+='<div class="list">'+loans.map(l=>{
+        const amt = parseFloat(l.approved_amount||l.amount||0);
+        return `<div class="row">
+          <div class="row-top">
+            <div>
+              <div class="row-id">${l.ref_id||'LOAN-'+l.id}</div>
+              <div class="row-name">${l.term_months||0}m · ${l.monthly_rate||0}%/mes</div>
+            </div>
+            <div class="row-amount" style="color:var(--neg)">${F(amt)}</div>
+          </div>
+          <div class="row-meta">
+            <span>${pill(l.status)}</span>
+            <span>${l.start_date?D(l.start_date):'—'}</span>
+            ${l.due_date?`<span>Vence: ${D(l.due_date)}</span>`:''}
+          </div>
+        </div>`;
+      }).join('')+'</div>';
+    }
+
     if(txs.length){
       html+=`<div style="font-family:var(--f-mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt-3);margin:18px 0 10px">Últimos movimientos</div>`;
-      html+=renderTxList(txs);
+      html+=renderTxListWithDelete(txs);
     }
 
     openModal(`<em>${u.full_name||'Usuario'}</em>`, u.email||'', html);
   }catch(e){toast('Error','error')}
+}
+
+// Variante de renderTxList que incluye botón 🗑️ para borrar (solo en modal de detalle de usuario)
+function renderTxListWithDelete(txs){
+  return '<div class="list">'+txs.map(t=>{
+    const neg=isNegTx(t.type);
+    return `<div class="row">
+      <div class="row-top">
+        <div>
+          <div class="row-id">${t.ref_id||'TX-'+t.id}</div>
+          <div class="row-name">${txLabel(t.type)}</div>
+        </div>
+        <div class="row-amount ${neg?'neg':'pos'}">${neg?'−':'+'}${F(t.amount)}</div>
+      </div>
+      <div class="row-meta">
+        <span>${Dt(t.created_at)}</span>
+      </div>
+      ${t.description?`<div class="row-note">${t.description}</div>`:''}
+      <div class="row-actions">
+        <button class="btn btn-sm btn-neg" onclick="delTx(${t.id})">🗑️ Borrar</button>
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+}
+
+// Borrar una transacción (recalcula balance automáticamente en el backend)
+async function delTx(txId){
+  if(!confirm('¿Borrar esta transacción? El balance se recalculará automáticamente.')) return;
+  try{
+    const r=await apiFetch('/admin/transactions/'+txId,{method:'DELETE'});
+    if(!r||!r.ok){
+      const d=await(r?r.json().catch(()=>({})):{});
+      return toast(d.error||'Error al borrar','error');
+    }
+    toast('Transacción borrada','ok');
+    // Recargar el modal de detalle del usuario
+    State.cacheFlags.users=false;
+    if(State._viewingUserId){
+      await viewUser(State._viewingUserId);
+    }
+    // Refrescar lista de usuarios en segundo plano para que el balance se actualice
+    loadUsersQuiet().then(()=>{ if(typeof renderUsers==='function') renderUsers(); });
+  }catch(e){toast('Error','error')}
+}
+
+// ─── CREAR PRÉSTAMO DESDE ADMIN ───
+function openCreateLoanModal(userId, userName){
+  const body=`
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Usuario</label>
+        <input type="text" value="${userName||('ID '+userId)}" disabled style="width:100%;padding:11px;background:var(--sur);border:1px solid var(--line);border-radius:8px;color:var(--txt-2);font-size:14px">
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Monto del préstamo (COP) *</label>
+        <input id="lc-amount" type="number" min="100000" step="10000" placeholder="500000" style="width:100%;padding:11px;background:var(--sur);border:1px solid var(--line);border-radius:8px;color:var(--txt-1);font-size:14px">
+        <div style="font-size:11px;color:var(--txt-3);margin-top:4px">Mínimo $100.000 COP</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Tasa mensual (%) *</label>
+          <input id="lc-rate" type="number" min="1" max="20" step="0.1" placeholder="5" value="5" style="width:100%;padding:11px;background:var(--sur);border:1px solid var(--line);border-radius:8px;color:var(--txt-1);font-size:14px">
+          <div style="font-size:11px;color:var(--txt-3);margin-top:4px">1% a 20% mensual</div>
+        </div>
+        <div>
+          <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Plazo (meses) *</label>
+          <select id="lc-term" style="width:100%;padding:11px;background:var(--sur);border:1px solid var(--line);border-radius:8px;color:var(--txt-1);font-size:14px">
+            <option value="1">1 mes</option>
+            <option value="2">2 meses</option>
+            <option value="3" selected>3 meses</option>
+            <option value="6">6 meses</option>
+            <option value="12">12 meses</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Propósito</label>
+        <input id="lc-purpose" type="text" placeholder="Capital de trabajo, gastos, etc." style="width:100%;padding:11px;background:var(--sur);border:1px solid var(--line);border-radius:8px;color:var(--txt-1);font-size:14px">
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Fecha de inicio (opcional)</label>
+        <input id="lc-startdate" type="date" style="width:100%;padding:11px;background:var(--sur);border:1px solid var(--line);border-radius:8px;color:var(--txt-1);font-size:14px">
+        <div style="font-size:11px;color:var(--txt-3);margin-top:4px">Si está vacío, usa hoy</div>
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Notas internas</label>
+        <textarea id="lc-notes" rows="2" placeholder="Observaciones del admin" style="width:100%;padding:11px;background:var(--sur);border:1px solid var(--line);border-radius:8px;color:var(--txt-1);font-size:14px;resize:vertical;font-family:inherit"></textarea>
+      </div>
+      <div id="lc-preview" style="background:var(--sur);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:12px;color:var(--txt-2);display:none">
+        <div style="font-weight:600;color:var(--txt-1);margin-bottom:6px">Resumen</div>
+        <div id="lc-preview-content"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-sm btn-ghost" style="flex:1" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-sm" style="flex:2;background:linear-gradient(135deg,#5b8dee,#8b6cf6);color:#fff;border:none;font-weight:600" onclick="submitCreateLoan(${userId})">Crear préstamo</button>
+      </div>
+    </div>`;
+  openModal('💰 Crear préstamo', userName||'', body);
+  // Live preview de intereses totales
+  setTimeout(()=>{
+    const upd=()=>{
+      const a=parseFloat(document.getElementById('lc-amount')?.value||0);
+      const r=parseFloat(document.getElementById('lc-rate')?.value||0);
+      const t=parseInt(document.getElementById('lc-term')?.value||0);
+      const pv=document.getElementById('lc-preview');
+      const pc=document.getElementById('lc-preview-content');
+      if(!a||!r||!t||!pv||!pc){if(pv)pv.style.display='none';return}
+      const interesMes=Math.round(a*(r/100));
+      const interesTotal=interesMes*t;
+      pv.style.display='block';
+      pc.innerHTML=`
+        <div style="display:flex;justify-content:space-between"><span>Capital:</span><strong>${F(a)}</strong></div>
+        <div style="display:flex;justify-content:space-between"><span>Interés mensual (${r}%):</span><strong style="color:var(--amb)">${F(interesMes)}</strong></div>
+        <div style="display:flex;justify-content:space-between"><span>Interés total (${t}m):</span><strong style="color:var(--amb)">${F(interesTotal)}</strong></div>
+        <div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:6px;padding-top:6px"><span>Total a pagar:</span><strong style="color:var(--neg)">${F(a+interesTotal)}</strong></div>`;
+    };
+    ['lc-amount','lc-rate','lc-term'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.addEventListener('input',upd);
+    });
+    upd();
+  },50);
+}
+
+async function submitCreateLoan(userId){
+  const amount=parseFloat(document.getElementById('lc-amount')?.value||0);
+  const rate=parseFloat(document.getElementById('lc-rate')?.value||0);
+  const term=parseInt(document.getElementById('lc-term')?.value||0);
+  const purpose=(document.getElementById('lc-purpose')?.value||'').trim();
+  const startDate=(document.getElementById('lc-startdate')?.value||'').trim();
+  const notes=(document.getElementById('lc-notes')?.value||'').trim();
+
+  if(!amount||amount<100000)return toast('Monto mínimo $100.000','error');
+  if(!rate||rate<1||rate>20)return toast('Tasa entre 1% y 20%','error');
+  if(!term||![1,2,3,6,12].includes(term))return toast('Plazo inválido','error');
+
+  if(!confirm(`Crear préstamo de ${F(amount)} al ${rate}%/mes por ${term} meses?`))return;
+
+  try{
+    const body={userId, amount, termMonths:term, monthlyRate:rate};
+    if(purpose)body.purpose=purpose;
+    if(startDate)body.startDate=startDate;
+    if(notes)body.notes=notes;
+    const r=await apiFetch('/admin/loans/create',{method:'POST',body:JSON.stringify(body)});
+    const d=await(r?r.json().catch(()=>({})):{});
+    if(!r||!r.ok)return toast(d.error||'Error al crear','error');
+    toast('Préstamo creado ✓','ok');
+    closeModal();
+    // Refrescar usuarios y reabrir detalle
+    State.cacheFlags.users=false;
+    await loadUsersQuiet();
+    if(State._viewingUserId)await viewUser(State._viewingUserId);
+  }catch(e){toast('Error de red','error')}
 }
 
 // ─── DEPOSITS ───

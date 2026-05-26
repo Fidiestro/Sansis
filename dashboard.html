@@ -2297,26 +2297,272 @@ function renderMovementsView(c){
 
 // ══════════════════ RENDER: LOANS ══════════════════
 function renderLoansView(c){
+  // Combinar préstamos: nuevos (loan_requests con status='active'|'overdue') + legacy (loans)
+  const reqs=(myLoans.loanRequests||[]).filter(l=>['active','overdue','pending','paid','rejected'].includes(l.status));
+  const legacy=(myLoans.legacyLoans||[]).map(l=>({
+    id:'leg-'+l.id, source:'legacy', amount:l.amount, monthlyRate:l.monthlyRate,
+    startDate:l.startDate, status:l.status, approvedAmount:l.amount, term:null,
+  }));
+
+  const allLoans=[...reqs,...legacy];
+  const active=allLoans.filter(l=>l.status==='active'||l.status==='overdue');
+  const pending=allLoans.filter(l=>l.status==='pending');
+  const historical=allLoans.filter(l=>['paid','rejected'].includes(l.status));
+
+  // Si no hay préstamos → mostrar CTA
+  if(!allLoans.length){
+    c.innerHTML=`
+    <div class="anim" style="max-width:600px;text-align:center;padding:40px 0">
+      <div style="font-size:64px;margin-bottom:16px">🏦</div>
+      <h3 style="font-size:22px;font-weight:700;margin-bottom:8px">Préstamos Sanse</h3>
+      <p style="font-size:14px;color:var(--mut);margin-bottom:8px;line-height:1.7;max-width:420px;margin-left:auto;margin-right:auto">
+        Solicita un préstamo directamente con nuestro equipo. Tasas preferenciales para inversionistas activos.
+      </p>
+      <p style="font-size:13px;color:var(--mut);margin-bottom:28px">Aún no tienes préstamos activos.</p>
+      <a href="https://wa.me/573194552890?text=Hola,%20quiero%20solicitar%20un%20préstamo%20en%20Sanse%20Capital"
+         target="_blank"
+         style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:#25D366;border:none;border-radius:12px;color:white;font-size:14px;font-weight:700;text-decoration:none">
+        💬 Solicitar por WhatsApp
+      </a>
+    </div>`;
+    return;
+  }
+
   c.innerHTML=`
-  <div class="anim" style="max-width:600px;text-align:center;padding:40px 0">
-    <div style="font-size:64px;margin-bottom:16px">🚧</div>
-    <h3 style="font-size:22px;font-weight:700;margin-bottom:8px">Préstamos — En Construcción</h3>
-    <p style="font-size:14px;color:var(--mut);margin-bottom:8px;line-height:1.7;max-width:420px;margin-left:auto;margin-right:auto">
-      Estamos trabajando en nuestro sistema de préstamos para ofrecerte una experiencia más rápida y con mejores tasas.
-    </p>
-    <p style="font-size:13px;color:var(--mut);margin-bottom:28px">Vuelve pronto — estaremos de vuelta con novedades.</p>
-    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:20px;max-width:380px;margin:0 auto 24px;text-align:left">
-      <div style="font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Mientras tanto</div>
-      <div style="font-size:13px;color:var(--text);line-height:1.8">
-        📱 Consulta disponibilidad de préstamos directamente por WhatsApp con nuestro equipo.
+    <div class="anim">
+      <div class="invest-hero">
+        <div class="ih-head">
+          <h3 class="ih-title">Mis Préstamos</h3>
+          <p class="ih-sub">${active.length} activo${active.length!==1?'s':''} · Intereses corriendo al segundo</p>
+        </div>
+      </div>
+
+      ${active.length>0?`
+      <div class="positions-section" style="margin-top:0">
+        <div class="positions-head">
+          <div class="positions-title">Préstamos activos</div>
+          <div class="positions-badge">${active.length}</div>
+        </div>
+        ${active.map(l=>renderLoanCard(l)).join('')}
+      </div>`:''}
+
+      ${pending.length>0?`
+      <div class="positions-section" style="margin-top:18px">
+        <div class="positions-head">
+          <div class="positions-title" style="color:var(--amb)">Solicitudes pendientes</div>
+          <div class="positions-badge">${pending.length}</div>
+        </div>
+        ${pending.map(l=>`
+          <div class="inv-card" style="border-color:rgba(245,158,11,.3)">
+            <div class="inv-card-top">
+              <div>
+                <div class="inv-name">Préstamo solicitado</div>
+                <div class="inv-sub">${formatCOP(l.amount)} · ${l.term||'?'} meses · ${l.purpose||'Sin propósito'}</div>
+              </div>
+              <span style="background:rgba(245,158,11,.15);color:var(--amb);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">PENDIENTE</span>
+            </div>
+            <div class="row-note" style="margin-top:8px;font-size:12px;color:var(--mut)">⏱️ En revisión por el equipo de Sanse Capital</div>
+          </div>
+        `).join('')}
+      </div>`:''}
+
+      ${historical.length>0?`
+      <div class="positions-section" style="margin-top:18px">
+        <div class="positions-head">
+          <div class="positions-title" style="color:var(--mut)">Historial</div>
+          <div class="positions-badge">${historical.length}</div>
+        </div>
+        ${historical.map(l=>`
+          <div class="inv-card" style="opacity:.7">
+            <div class="inv-card-top">
+              <div>
+                <div class="inv-name">${formatCOP(l.approvedAmount||l.amount)}</div>
+                <div class="inv-sub">${l.startDate?formatDate(l.startDate):''} ${l.term?'· '+l.term+'m':''}</div>
+              </div>
+              <span style="background:${l.status==='paid'?'rgba(16,185,129,.15)':'rgba(239,68,68,.1)'};color:${l.status==='paid'?'var(--grn)':'var(--red)'};padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">${l.status==='paid'?'PAGADO':'RECHAZADO'}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>`:''}
+    </div>`;
+
+  // Iniciar tick de intereses en vivo
+  startLoanInterestAnimation();
+}
+
+// Renderiza una card de préstamo activo con intereses en tiempo real
+function renderLoanCard(loan){
+  const cap=parseFloat(loan.approvedAmount||loan.amount)||0;
+  const rate=parseFloat(loan.monthlyRate||loan.approvedRate)||0;
+  const term=loan.term||0;
+  const start=new Date(loan.startDate||loan.createdAt||Date.now());
+  const due=loan.dueDate?new Date(loan.dueDate):null;
+  const isOverdue=loan.status==='overdue';
+
+  // Tiempo transcurrido
+  const now=new Date();
+  const daysElapsed=Math.max(0,Math.floor((now-start)/(1000*60*60*24)));
+  const monthsElapsed=daysElapsed/30;
+
+  // Interés acumulado en vivo: capital × tasa × (segundos / segundos_por_mes)
+  const SECONDS_PER_MONTH=30*24*60*60;
+  const secondsElapsed=Math.max(0,(now-start)/1000);
+  const interestAccrued=cap*(rate/100)*(secondsElapsed/SECONDS_PER_MONTH);
+
+  // Total a pagar HOY (capital + interés acumulado)
+  const totalDueNow=cap+interestAccrued;
+
+  // Días hasta vencimiento
+  let dueLabel='—';
+  if(due){
+    const daysToDue=Math.floor((due-now)/(1000*60*60*24));
+    if(daysToDue<0)dueLabel=`Vencido hace ${Math.abs(daysToDue)}d`;
+    else if(daysToDue===0)dueLabel='Vence hoy';
+    else dueLabel=`Vence en ${daysToDue}d`;
+  }
+
+  return `
+  <div class="inv-card" style="border-color:${isOverdue?'rgba(239,68,68,.35)':'rgba(91,141,238,.2)'}">
+    <div class="inv-card-top">
+      <div>
+        <div class="inv-name">Préstamo SANSE ${loan.term?'· '+loan.term+'m':''}</div>
+        <div class="inv-sub">Inició ${formatDate(start)} · ${rate}%/mes</div>
+      </div>
+      <span style="background:${isOverdue?'rgba(239,68,68,.15)':'rgba(91,141,238,.15)'};color:${isOverdue?'var(--red)':'var(--blu)'};padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">${isOverdue?'EN MORA':'ACTIVO'}</span>
+    </div>
+
+    <div class="inv-grid" style="margin-top:12px">
+      <div class="inv-cell">
+        <div class="inv-cell-lbl">Capital prestado</div>
+        <div class="inv-cell-val">${formatCOP(cap)}</div>
+      </div>
+      <div class="inv-cell earning-live">
+        <div class="inv-cell-lbl"><span class="pulse-dot"></span>Intereses acumulados</div>
+        <div class="inv-cell-val amb" data-loan-live="${loan.id}" data-loan-cap="${cap}" data-loan-rate="${rate}" data-loan-start="${start.toISOString()}">+${formatCOPDecimal(interestAccrued)}</div>
+      </div>
+      <div class="inv-cell">
+        <div class="inv-cell-lbl">Total a pagar hoy</div>
+        <div class="inv-cell-val" data-loan-total="${loan.id}" style="color:var(--neg)">${formatCOP(totalDueNow)}</div>
+      </div>
+      <div class="inv-cell">
+        <div class="inv-cell-lbl">${due?'Vencimiento':'Plazo'}</div>
+        <div class="inv-cell-val" style="color:${isOverdue?'var(--red)':'var(--text)'};font-size:13px">${dueLabel}</div>
       </div>
     </div>
-    <a href="https://wa.me/573194552890?text=Hola,%20quiero%20consultar%20sobre%20préstamos%20en%20Sanse%20Capital"
-       target="_blank"
-       style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:#25D366;border:none;border-radius:12px;color:white;font-size:14px;font-weight:700;text-decoration:none">
-      💬 Consultar por WhatsApp
-    </a>
+
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn btn-sm" style="flex:1;background:linear-gradient(135deg,var(--blu),var(--pur));color:#fff;border:none;padding:11px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer" onclick="openLoanPayModal(${loan.id},${cap},${rate},'${start.toISOString()}','partial')">💸 Abonar</button>
+      <button class="btn btn-sm" style="flex:1;background:linear-gradient(135deg,var(--grn),var(--blu));color:#fff;border:none;padding:11px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer" onclick="openLoanPayModal(${loan.id},${cap},${rate},'${start.toISOString()}','full')">✓ Pagar total</button>
+    </div>
   </div>`;
+}
+
+// Tick de intereses en vivo (cada 10s, igual que LP COP)
+function startLoanInterestAnimation(){
+  if(window._loanInterestInterval)clearInterval(window._loanInterestInterval);
+  const SECONDS_PER_MONTH=30*24*60*60;
+
+  const updateAll=()=>{
+    const elements=document.querySelectorAll('[data-loan-live]');
+    elements.forEach(el=>{
+      const cap=parseFloat(el.dataset.loanCap)||0;
+      const rate=parseFloat(el.dataset.loanRate)||0;
+      const start=new Date(el.dataset.loanStart||'');
+      if(!cap||!rate||isNaN(start.getTime())){
+        if(el.textContent!=='+$0,00')el.textContent='+$0,00';
+        return;
+      }
+      const secondsElapsed=Math.max(0,(new Date()-start)/1000);
+      const interest=cap*(rate/100)*(secondsElapsed/SECONDS_PER_MONTH);
+      const newText='+'+formatCOPDecimal(interest);
+      if(el.textContent!==newText){
+        el.classList.add('cdtc-live-val','tick');
+        el.textContent=newText;
+        setTimeout(()=>el.classList.remove('tick'),800);
+      } else if(!el.classList.contains('cdtc-live-val')){
+        el.classList.add('cdtc-live-val');
+      }
+      // También actualizar total a pagar hoy
+      const loanId=el.getAttribute('data-loan-live');
+      const totalEl=document.querySelector('[data-loan-total="'+loanId+'"]');
+      if(totalEl)totalEl.textContent=formatCOP(cap+interest);
+    });
+  };
+  updateAll();
+  window._loanInterestInterval=setInterval(updateAll,10000);
+}
+
+// Modal de pago/abono
+function openLoanPayModal(loanId,cap,rate,startISO,mode){
+  const start=new Date(startISO);
+  const SECONDS_PER_MONTH=30*24*60*60;
+  const secondsElapsed=Math.max(0,(new Date()-start)/1000);
+  const interestAccrued=cap*(rate/100)*(secondsElapsed/SECONDS_PER_MONTH);
+  const totalDueNow=cap+interestAccrued;
+  const balance=parseFloat(balanceSummary.totalBalance||balanceSummary.availableBalance||0);
+
+  const isFull=mode==='full';
+  const defaultAmount=isFull?Math.round(totalDueNow):Math.round(interestAccrued);
+  const title=isFull?'Pagar préstamo completo':'Abonar al préstamo';
+
+  const modal=document.getElementById('modalGeneric')||document.getElementById('modal');
+  // Si no hay modal genérico, usar prompt
+  const insufficientFunds=balance<defaultAmount;
+
+  const bodyHtml=`
+    <div style="background:var(--bg2,#1a1d2e);border:1px solid var(--bd,rgba(255,255,255,.08));border-radius:12px;padding:20px;max-width:420px;margin:0 auto">
+      <h3 style="font-size:18px;font-weight:700;margin-bottom:14px">${title}</h3>
+      <div style="background:rgba(91,141,238,.06);border:1px solid rgba(91,141,238,.2);border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Capital pendiente:</span><strong>${formatCOP(cap)}</strong></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Intereses acumulados:</span><strong style="color:var(--amb)">+${formatCOPDecimal(interestAccrued)}</strong></div>
+        <div style="display:flex;justify-content:space-between;border-top:1px solid var(--bd,rgba(255,255,255,.08));margin-top:6px;padding-top:6px"><span>Total a pagar hoy:</span><strong style="color:var(--neg)">${formatCOP(totalDueNow)}</strong></div>
+      </div>
+      <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);margin-bottom:6px">Monto a ${isFull?'pagar':'abonar'} (COP)</label>
+      <input id="lp-amount" type="number" min="1000" step="1000" value="${defaultAmount}" ${isFull?'readonly':''} style="width:100%;padding:12px;background:var(--sur,rgba(255,255,255,.04));border:1px solid var(--bd,rgba(255,255,255,.08));border-radius:8px;color:#fff;font-size:16px;font-weight:600">
+      <div style="font-size:11px;color:var(--mut);margin-top:6px">Balance disponible: <strong style="color:${insufficientFunds?'var(--red)':'var(--grn)'}">${formatCOP(balance)}</strong></div>
+      ${insufficientFunds?`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red);padding:10px;border-radius:8px;font-size:12px;margin-top:10px">⚠️ Balance insuficiente para este pago</div>`:''}
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button onclick="closeLoanPayModal()" style="flex:1;background:var(--sur,rgba(255,255,255,.04));border:1px solid var(--bd,rgba(255,255,255,.08));color:var(--text);padding:11px;border-radius:8px;font-weight:600;cursor:pointer">Cancelar</button>
+        <button onclick="submitLoanPay(${loanId})" ${insufficientFunds?'disabled':''} style="flex:2;background:linear-gradient(135deg,var(--grn),var(--blu));color:#fff;border:none;padding:11px;border-radius:8px;font-weight:700;cursor:${insufficientFunds?'not-allowed':'pointer'};opacity:${insufficientFunds?'.5':'1'}">${isFull?'Confirmar pago total':'Confirmar abono'}</button>
+      </div>
+    </div>`;
+
+  // Overlay personalizado (no depende de modal genérico)
+  let overlay=document.getElementById('loanPayOverlay');
+  if(!overlay){
+    overlay=document.createElement('div');
+    overlay.id='loanPayOverlay';
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)';
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML=bodyHtml;
+  overlay.style.display='flex';
+}
+
+function closeLoanPayModal(){
+  const o=document.getElementById('loanPayOverlay');
+  if(o)o.style.display='none';
+}
+
+async function submitLoanPay(loanId){
+  const amt=parseFloat(document.getElementById('lp-amount')?.value||0);
+  if(!amt||amt<1000)return toast('Monto mínimo $1.000','error');
+  try{
+    const r=await apiFetch('/loans/pay',{method:'POST',body:JSON.stringify({loanId,amount:amt})});
+    const d=await(r?r.json().catch(()=>({})):{});
+    if(!r||!r.ok)return toast(d.error||'Error al pagar','error');
+    toast('Pago registrado ✓','success');
+    closeLoanPayModal();
+    // Refrescar datos y vista
+    try{
+      const [balR,loanR]=await Promise.all([apiFetch('/investments/balance-summary'),apiFetch('/loans/my')]);
+      if(balR&&balR.ok){const bd=await balR.json();if(bd)Object.assign(balanceSummary,bd);}
+      if(loanR&&loanR.ok){myLoans=await loanR.json();}
+    }catch(e){}
+    // Re-renderizar la vista de préstamos
+    const c=document.getElementById('dashboard-content');
+    if(c&&typeof renderLoansView==='function')renderLoansView(c);
+  }catch(e){toast('Error de red','error')}
 }
 
 
