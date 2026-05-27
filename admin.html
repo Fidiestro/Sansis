@@ -1059,6 +1059,46 @@ img{max-width:100%;display:block}
 
     <!-- Préstamos -->
     <div class="sub-view hide" data-sub-view="loans">
+      <!-- ★ NUEVO: Stats de la cartera de préstamos -->
+      <div id="loan-stats-card" style="background:var(--bg2,#0f1117);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:600;color:var(--txt-2);margin-bottom:4px">📊 Resumen de la cartera de préstamos</div>
+        <div style="font-size:11px;color:var(--txt-3);margin-bottom:12px">Vista general y ganancias para la empresa</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
+          <div style="background:var(--sur);border:1px solid var(--line);border-radius:8px;padding:10px">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">Activos</div>
+            <div class="mono" style="font-size:16px;font-weight:700;color:#5b8dee" id="ls-active-count">—</div>
+          </div>
+          <div style="background:var(--sur);border:1px solid var(--line);border-radius:8px;padding:10px">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">Capital prestado</div>
+            <div class="mono" style="font-size:16px;font-weight:700;color:#5b8dee" id="ls-active-cap">—</div>
+          </div>
+          <div style="background:var(--sur);border:1px solid var(--line);border-radius:8px;padding:10px">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">Pagados</div>
+            <div class="mono" style="font-size:16px;font-weight:700;color:#10b981" id="ls-paid-count">—</div>
+          </div>
+          <div style="background:var(--sur);border:1px solid var(--line);border-radius:8px;padding:10px">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">En mora</div>
+            <div class="mono" style="font-size:16px;font-weight:700;color:#ef4444" id="ls-overdue-count">—</div>
+          </div>
+          <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:10px">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">💰 Ganado en intereses</div>
+            <div class="mono" style="font-size:16px;font-weight:700;color:#f59e0b" id="ls-total-interest">—</div>
+          </div>
+          <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:10px">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">💰 Intereses este mes</div>
+            <div class="mono" style="font-size:16px;font-weight:700;color:#f59e0b" id="ls-month-interest">—</div>
+          </div>
+          <div style="background:var(--sur);border:1px solid var(--line);border-radius:8px;padding:10px">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">Capital recuperado</div>
+            <div class="mono" style="font-size:16px;font-weight:700;color:#10b981" id="ls-capital-back">—</div>
+          </div>
+          <div style="background:var(--sur);border:1px solid var(--line);border-radius:8px;padding:10px">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">Tasa promedio</div>
+            <div class="mono" style="font-size:16px;font-weight:700;color:var(--txt-1)" id="ls-avg-rate">—</div>
+          </div>
+        </div>
+      </div>
+
       <div class="filters">
         <button class="filter on" onclick="fLoan('all',this)">Todas</button>
         <button class="filter" onclick="fLoan('pending',this)">Pendientes</button>
@@ -1784,6 +1824,7 @@ function openCreateLoanModal(userId, userName){
             <option value="3" selected>3 meses</option>
             <option value="6">6 meses</option>
             <option value="12">12 meses</option>
+            <option value="0">Sin plazo definido</option>
           </select>
         </div>
       </div>
@@ -1815,22 +1856,36 @@ function openCreateLoanModal(userId, userName){
     const upd=()=>{
       const a=parseFloat(document.getElementById('lc-amount')?.value||0);
       const r=parseFloat(document.getElementById('lc-rate')?.value||0);
-      const t=parseInt(document.getElementById('lc-term')?.value||0);
+      const tRaw=document.getElementById('lc-term')?.value;
+      const t=parseInt(tRaw||0);
+      const isIndefinite=(tRaw==='0'||tRaw==='');
       const pv=document.getElementById('lc-preview');
       const pc=document.getElementById('lc-preview-content');
-      if(!a||!r||!t||!pv||!pc){if(pv)pv.style.display='none';return}
+      if(!a||!r||!pv||!pc){if(pv)pv.style.display='none';return}
+      if(!isIndefinite && !t){if(pv)pv.style.display='none';return}
       const interesMes=Math.round(a*(r/100));
-      const interesTotal=interesMes*t;
       pv.style.display='block';
-      pc.innerHTML=`
-        <div style="display:flex;justify-content:space-between"><span>Capital:</span><strong>${F(a)}</strong></div>
-        <div style="display:flex;justify-content:space-between"><span>Interés mensual (${r}%):</span><strong style="color:var(--amb)">${F(interesMes)}</strong></div>
-        <div style="display:flex;justify-content:space-between"><span>Interés total (${t}m):</span><strong style="color:var(--amb)">${F(interesTotal)}</strong></div>
-        <div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:6px;padding-top:6px"><span>Total a pagar:</span><strong style="color:var(--neg)">${F(a+interesTotal)}</strong></div>`;
+      if(isIndefinite){
+        pc.innerHTML=`
+          <div style="display:flex;justify-content:space-between"><span>Capital:</span><strong>${F(a)}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Interés mensual (${r}%):</span><strong style="color:var(--amb)">${F(interesMes)}</strong></div>
+          <div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:6px;padding-top:6px"><span>Plazo:</span><strong style="color:var(--amb)">Sin plazo definido</strong></div>
+          <div style="font-size:11px;color:var(--txt-3);margin-top:4px">El interés se acumula al segundo. El usuario abona cuando pueda.</div>`;
+      }else{
+        const interesTotal=interesMes*t;
+        pc.innerHTML=`
+          <div style="display:flex;justify-content:space-between"><span>Capital:</span><strong>${F(a)}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Interés mensual (${r}%):</span><strong style="color:var(--amb)">${F(interesMes)}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Interés total (${t}m):</span><strong style="color:var(--amb)">${F(interesTotal)}</strong></div>
+          <div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:6px;padding-top:6px"><span>Total a pagar:</span><strong style="color:var(--neg)">${F(a+interesTotal)}</strong></div>`;
+      }
     };
     ['lc-amount','lc-rate','lc-term'].forEach(id=>{
       const el=document.getElementById(id);
-      if(el)el.addEventListener('input',upd);
+      if(el){
+        el.addEventListener('input',upd);
+        el.addEventListener('change',upd);
+      }
     });
     upd();
   },50);
@@ -1839,19 +1894,24 @@ function openCreateLoanModal(userId, userName){
 async function submitCreateLoan(userId){
   const amount=parseFloat(document.getElementById('lc-amount')?.value||0);
   const rate=parseFloat(document.getElementById('lc-rate')?.value||0);
-  const term=parseInt(document.getElementById('lc-term')?.value||0);
+  const tRaw=document.getElementById('lc-term')?.value;
+  const term=parseInt(tRaw||0);
+  const isIndefinite=(tRaw==='0'||tRaw==='');
   const purpose=(document.getElementById('lc-purpose')?.value||'').trim();
   const startDate=(document.getElementById('lc-startdate')?.value||'').trim();
   const notes=(document.getElementById('lc-notes')?.value||'').trim();
 
   if(!amount||amount<100000)return toast('Monto mínimo $100.000','error');
   if(!rate||rate<1||rate>20)return toast('Tasa entre 1% y 20%','error');
-  if(!term||![1,2,3,6,12].includes(term))return toast('Plazo inválido','error');
+  if(!isIndefinite && !term)return toast('Selecciona un plazo','error');
+  if(!isIndefinite && ![1,2,3,6,12].includes(term))return toast('Plazo inválido','error');
 
-  if(!confirm(`Crear préstamo de ${F(amount)} al ${rate}%/mes por ${term} meses?`))return;
+  const plazoMsg=isIndefinite?'SIN plazo definido':`por ${term} meses`;
+  if(!confirm(`Crear préstamo de ${F(amount)} al ${rate}%/mes ${plazoMsg}?`))return;
 
   try{
-    const body={userId, amount, termMonths:term, monthlyRate:rate};
+    // termMonths=0 → el backend lo interpreta como "indefinido"
+    const body={userId, amount, termMonths:isIndefinite?0:term, monthlyRate:rate};
     if(purpose)body.purpose=purpose;
     if(startDate)body.startDate=startDate;
     if(notes)body.notes=notes;
@@ -1864,6 +1924,8 @@ async function submitCreateLoan(userId){
     State.cacheFlags.users=false;
     await loadUsersQuiet();
     if(State._viewingUserId)await viewUser(State._viewingUserId);
+    // Refrescar stats si la pestaña de loans está cargada
+    if(typeof loadLoanStats==='function')loadLoanStats();
   }catch(e){toast('Error de red','error')}
 }
 
@@ -2528,10 +2590,37 @@ async function loadLoans(status){
     State.loans=loans;
     $('#loans-content').innerHTML = loans.length ? renderLoans(loans) : '<div class="empty">Sin préstamos</div>';
   }catch(e){console.error('loadLoans:',e)}
+  // Cargar también las stats de ganancias
+  loadLoanStats();
 }
+
+// ★ NUEVO: cargar y renderizar stats de la cartera de préstamos
+async function loadLoanStats(){
+  try{
+    const r=await apiFetch('/admin/loans/profit-stats');
+    if(!r||!r.ok)return;
+    const s=await r.json();
+
+    const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val};
+
+    set('ls-active-count',  s.activeLoanCount||0);
+    set('ls-active-cap',    F(s.activeLoanCapital||0));
+    set('ls-paid-count',    s.paidLoanCount||0);
+    set('ls-overdue-count', s.overdueLoanCount||0);
+    set('ls-total-interest',F(s.totalInterestEarned||0));
+    set('ls-month-interest',F(s.monthInterest||0));
+    set('ls-capital-back',  F(s.totalCapitalRecovered||0));
+
+    const avg=s.weightedAvgRate||s.avgRate||0;
+    set('ls-avg-rate', (parseFloat(avg)||0).toFixed(2)+'%');
+  }catch(e){console.warn('loadLoanStats:',e)}
+}
+
 function renderLoans(loans){
   return '<div class="list">'+loans.map(l=>{
-    const term=l.term_months||l.duration_months||'—';
+    // ★ Manejo de plazo indefinido (term_months = null)
+    const termRaw=l.term_months!=null?l.term_months:l.duration_months;
+    const termLbl=(termRaw==null||termRaw===0)?'Sin plazo':(termRaw+'m');
     const rate=l.approved_rate||l.monthly_rate||l.rate||'—';
     return `<div class="row">
       <div class="row-top">
@@ -2544,7 +2633,7 @@ function renderLoans(loans){
       <div class="row-meta">
         ${pill(l.status)}
         <span>${rate}%/mes</span>
-        <span>${term}m plazo</span>
+        <span>${termLbl}</span>
         <span>${Dt(l.created_at)}</span>
       </div>
       ${l.status==='pending'?`

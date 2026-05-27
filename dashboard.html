@@ -2396,39 +2396,85 @@ function renderLoansView(c){
 function renderLoanCard(loan){
   const cap=parseFloat(loan.approvedAmount||loan.amount)||0;
   const rate=parseFloat(loan.monthlyRate||loan.approvedRate)||0;
-  const term=loan.term||0;
+  const term=loan.term;                              // null = indefinido
+  const isIndefinite=loan.indefinite||!term||!loan.dueDate;
   const start=new Date(loan.startDate||loan.createdAt||Date.now());
   const due=loan.dueDate?new Date(loan.dueDate):null;
   const isOverdue=loan.status==='overdue';
 
-  // Tiempo transcurrido
+  // ★ REF DATE para el reloj de interés:
+  //   Si ya hubo abonos → usa lastPaymentAt (reloj se reinicia)
+  //   Si no hay abonos → usa start_date
+  // Esto hace que el interés mostrado coincida con lo que el backend cobrará.
+  const refDate=loan.lastPaymentAt?new Date(loan.lastPaymentAt):start;
+
+  // Tiempo transcurrido (siempre desde el inicio del préstamo)
   const now=new Date();
-  const daysElapsed=Math.max(0,Math.floor((now-start)/(1000*60*60*24)));
-  const monthsElapsed=daysElapsed/30;
+  const daysFromStart=Math.max(0,Math.floor((now-start)/(1000*60*60*24)));
 
   // Interés acumulado en vivo: capital × tasa × (segundos / segundos_por_mes)
+  // ★ Se cuenta desde la fecha de corte (último pago o inicio)
   const SECONDS_PER_MONTH=30*24*60*60;
-  const secondsElapsed=Math.max(0,(now-start)/1000);
+  const secondsElapsed=Math.max(0,(now-refDate)/1000);
   const interestAccrued=cap*(rate/100)*(secondsElapsed/SECONDS_PER_MONTH);
 
   // Total a pagar HOY (capital + interés acumulado)
   const totalDueNow=cap+interestAccrued;
 
-  // Días hasta vencimiento
+  // ── Label de vencimiento o tiempo transcurrido ──
   let dueLabel='—';
-  if(due){
+  let dueLbl='Plazo';
+  if(isIndefinite){
+    // Préstamo sin plazo definido → mostrar tiempo transcurrido desde la solicitud
+    dueLbl='Tiempo transcurrido';
+    dueLabel=getLoanTimeElapsed(start);
+  }else if(due){
+    dueLbl='Vencimiento';
     const daysToDue=Math.floor((due-now)/(1000*60*60*24));
     if(daysToDue<0)dueLabel=`Vencido hace ${Math.abs(daysToDue)}d`;
     else if(daysToDue===0)dueLabel='Vence hoy';
     else dueLabel=`Vence en ${daysToDue}d`;
   }
 
+  // Título de la card
+  const termLabel=isIndefinite?'· sin plazo':(term?'· '+term+'m':'');
+
+  // ── Historial de pagos (renderizado inline desde loan.payments si está) ──
+  const payments=Array.isArray(loan.payments)?loan.payments:[];
+  const paymentsInline=payments.length?`
+    <div style="border-top:1px solid var(--bd);padding-top:10px;margin-top:10px">
+      <div style="font-size:10px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Historial de pagos (${payments.length})</div>
+      <div style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto">
+        ${payments.map(p=>{
+          const d=new Date(p.createdAt||p.created_at);
+          const dateLbl=d.toLocaleDateString('es-CO',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+          const interestAmt=p.interestAmount!==undefined?p.interestAmount:p.interest_amount;
+          const capitalAmt=p.capitalAmount!==undefined?p.capitalAmount:p.capital_amount;
+          const remaining=p.remainingCapital!==undefined?p.remainingCapital:p.remaining_capital;
+          const isFinal=p.isFullyPaid||p.is_fully_paid;
+          return `
+            <div style="background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:6px;padding:8px 10px;font-size:11px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+                <span style="color:var(--text);font-weight:600">${dateLbl}</span>
+                <span style="color:var(--neg);font-weight:700;font-family:'Space Mono',monospace">−${formatCOP(p.amount)}</span>
+              </div>
+              <div style="display:flex;gap:10px;color:var(--mut);font-size:10px;flex-wrap:wrap">
+                <span>Interés cobrado: <strong style="color:var(--amb)">${formatCOP(interestAmt)}</strong></span>
+                <span>Capital: <strong style="color:var(--blu)">${formatCOP(capitalAmt)}</strong></span>
+                <span>Saldo: <strong style="color:var(--text)">${formatCOP(remaining)}</strong></span>
+              </div>
+              ${isFinal?`<div style="color:var(--grn);font-size:10px;font-weight:600;margin-top:3px">✓ Pago final — préstamo saldado</div>`:''}
+            </div>`;
+        }).join('')}
+      </div>
+    </div>`:'';
+
   return `
   <div class="inv-card" style="border-color:${isOverdue?'rgba(239,68,68,.35)':'rgba(91,141,238,.2)'}">
     <div class="inv-card-top">
       <div>
-        <div class="inv-name">Préstamo SANSE ${loan.term?'· '+loan.term+'m':''}</div>
-        <div class="inv-sub">Inició ${formatDate(start)} · ${rate}%/mes</div>
+        <div class="inv-name">Préstamo SANSE ${termLabel}</div>
+        <div class="inv-sub">Inició ${formatDate(start)} · ${rate}%/mes${isIndefinite?' · sin plazo':''}</div>
       </div>
       <span style="background:${isOverdue?'rgba(239,68,68,.15)':'rgba(91,141,238,.15)'};color:${isOverdue?'var(--red)':'var(--blu)'};padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">${isOverdue?'EN MORA':'ACTIVO'}</span>
     </div>
@@ -2440,35 +2486,80 @@ function renderLoanCard(loan){
       </div>
       <div class="inv-cell earning-live">
         <div class="inv-cell-lbl"><span class="pulse-dot"></span>Intereses acumulados</div>
-        <div class="inv-cell-val amb" data-loan-live="${loan.id}" data-loan-cap="${cap}" data-loan-rate="${rate}" data-loan-start="${start.toISOString()}">+${formatCOPDecimal(interestAccrued)}</div>
+        <div class="inv-cell-val amb" data-loan-live="${loan.id}" data-loan-cap="${cap}" data-loan-rate="${rate}" data-loan-start="${refDate.toISOString()}">+${formatCOPDecimal(interestAccrued)}</div>
       </div>
       <div class="inv-cell">
         <div class="inv-cell-lbl">Total a pagar hoy</div>
         <div class="inv-cell-val" data-loan-total="${loan.id}" style="color:var(--neg)">${formatCOP(totalDueNow)}</div>
       </div>
       <div class="inv-cell">
-        <div class="inv-cell-lbl">${due?'Vencimiento':'Plazo'}</div>
+        <div class="inv-cell-lbl">${dueLbl}</div>
         <div class="inv-cell-val" style="color:${isOverdue?'var(--red)':'var(--text)'};font-size:13px">${dueLabel}</div>
       </div>
     </div>
 
     <div style="display:flex;gap:8px;margin-top:14px">
-      <button class="btn btn-sm" style="flex:1;background:linear-gradient(135deg,var(--blu),var(--pur));color:#fff;border:none;padding:11px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer" onclick="openLoanPayModal(${loan.id},${cap},${rate},'${start.toISOString()}','partial')">💸 Abonar</button>
-      <button class="btn btn-sm" style="flex:1;background:linear-gradient(135deg,var(--grn),var(--blu));color:#fff;border:none;padding:11px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer" onclick="openLoanPayModal(${loan.id},${cap},${rate},'${start.toISOString()}','full')">✓ Pagar total</button>
+      <button class="btn btn-sm" style="flex:1;background:linear-gradient(135deg,var(--blu),var(--pur));color:#fff;border:none;padding:11px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer" onclick="openLoanPayModal(${loan.id},${cap},${rate},'${refDate.toISOString()}','partial')">💸 Abonar</button>
+      <button class="btn btn-sm" style="flex:1;background:linear-gradient(135deg,var(--grn),var(--blu));color:#fff;border:none;padding:11px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer" onclick="openLoanPayModal(${loan.id},${cap},${rate},'${refDate.toISOString()}','full')">✓ Pagar total</button>
     </div>
 
-    <!-- Historial de pagos (se carga vía loadLoanPayments) -->
-    <div id="loan-payments-${loan.id}" style="margin-top:14px"></div>
+    ${paymentsInline}
+
+    <!-- Container para loadLoanPayments (carga adicional opcional, no rompe nada) -->
+    <div id="loan-payments-${loan.id}" style="margin-top:0"></div>
   </div>`;
 }
 
-// Carga el historial de pagos de un préstamo y lo renderiza dentro de la card
+// Helper: tiempo transcurrido desde una fecha en formato humano
+function getLoanTimeElapsed(fromDate){
+  const ms=new Date()-new Date(fromDate);
+  if(isNaN(ms)||ms<0)return '0d';
+  const days=Math.floor(ms/(1000*60*60*24));
+  if(days<1){
+    const hours=Math.floor(ms/(1000*60*60));
+    const mins=Math.floor((ms%(1000*60*60))/(1000*60));
+    return hours>0?(hours+'h '+mins+'m'):(mins+'m');
+  }
+  if(days<30)return days+(days===1?' día':' días');
+  const months=Math.floor(days/30);
+  const remDays=days%30;
+  if(months<12)return months+(months===1?' mes':' meses')+(remDays>0?' '+remDays+'d':'');
+  const years=Math.floor(months/12);
+  const remMonths=months%12;
+  return years+(years===1?' año':' años')+(remMonths>0?' '+remMonths+'m':'');
+}
+
+// Carga el historial de pagos de un préstamo y lo renderiza dentro de la card.
+// FIX: Ahora usa los datos locales de myLoans.loanRequests[].payments
+//      (vienen del backend en /loans/my), en vez de hacer un fetch extra.
+//      Si por algún motivo no están en cache, intenta el API como fallback.
 async function loadLoanPayments(loanId){
   try{
-    const r=await apiFetch('/loans/'+loanId+'/payments');
-    if(!r||!r.ok)return;
-    const payments=await r.json();
-    const container=document.getElementById('loan-payments-'+loanId);
+    // 1) Buscar en cache local primero (myLoans.loanRequests[*].payments)
+    let payments=null;
+    if(myLoans&&Array.isArray(myLoans.loanRequests)){
+      const loan=myLoans.loanRequests.find(l=>l.id===loanId||String(l.id)===String(loanId));
+      if(loan&&Array.isArray(loan.payments))payments=loan.payments.map(p=>({
+        id:p.id,
+        amount:p.amount,
+        interest_amount:p.interestAmount,
+        capital_amount:p.capitalAmount,
+        remaining_capital:p.remainingCapital,
+        ref_id:p.refId,
+        is_fully_paid:p.isFullyPaid,
+        created_at:p.createdAt
+      }));
+    }
+
+    // 2) Si no hay cache, intentar endpoint (puede no existir; degrada silenciosamente)
+    if(!payments){
+      try{
+        const r=await apiFetch('/loans/'+loanId+'/payments');
+        if(r&&r.ok)payments=await r.json();
+      }catch(e){/* endpoint puede no existir; renderLoanCard ya renderizó inline */}
+    }
+
+    if(!payments)return;
 
     // ★ Si hubo pagos, mover la "fecha de corte" del tick en vivo al último pago.
     // Esto hace que el interés mostrado coincida con lo que el backend cobrará:
@@ -2486,35 +2577,11 @@ async function loadLoanPayments(loanId){
       }
     }
 
-    if(!container)return;
-    if(!payments.length){
-      container.innerHTML=`<div style="font-size:11px;color:var(--mut);text-align:center;padding:8px;border-top:1px solid var(--bd);margin-top:8px">Sin pagos registrados aún</div>`;
-      return;
-    }
-    container.innerHTML=`
-      <div style="border-top:1px solid var(--bd);padding-top:10px;margin-top:6px">
-        <div style="font-size:10px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Historial de pagos (${payments.length})</div>
-        <div style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto">
-          ${payments.map(p=>{
-            const d=new Date(p.created_at);
-            const dateLbl=d.toLocaleDateString('es-CO',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
-            return `
-              <div style="background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:6px;padding:8px 10px;font-size:11px">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
-                  <span style="color:var(--text);font-weight:600">${dateLbl}</span>
-                  <span style="color:var(--neg);font-weight:700;font-family:'Space Mono',monospace">−${formatCOP(p.amount)}</span>
-                </div>
-                <div style="display:flex;gap:10px;color:var(--mut);font-size:10px;flex-wrap:wrap">
-                  <span>Interés: <strong style="color:var(--amb)">${formatCOP(p.interest_amount)}</strong></span>
-                  <span>Capital: <strong style="color:var(--blu)">${formatCOP(p.capital_amount)}</strong></span>
-                  <span>Saldo: <strong style="color:var(--text)">${formatCOP(p.remaining_capital)}</strong></span>
-                </div>
-                ${p.is_fully_paid?`<div style="color:var(--grn);font-size:10px;font-weight:600;margin-top:3px">✓ Pago final — préstamo saldado</div>`:''}
-              </div>`;
-          }).join('')}
-        </div>
-      </div>`;
-  }catch(e){console.error('Error cargando pagos préstamo',loanId,e)}
+    // El render del historial ya lo hace renderLoanCard inline desde loan.payments.
+    // Este container queda como espacio vacío (no se rerendera para evitar duplicado).
+    // Si el endpoint API existiera y devolviera datos diferentes a los locales,
+    // entonces sí se renderizaría aquí. De lo contrario, no hacemos nada.
+  }catch(e){console.error('Error en loadLoanPayments',loanId,e)}
 }
 
 // Tick de intereses en vivo (cada 10s, igual que LP COP)
@@ -2617,7 +2684,19 @@ async function submitLoanPay(loanId){
     const r=await apiFetch('/loans/pay',{method:'POST',body:JSON.stringify({loanId,amount:amt})});
     const d=await(r?r.json().catch(()=>({})):{});
     if(!r||!r.ok)return toast(d.error||'Error al pagar','error');
-    toast(d.message||'Pago registrado ✓','success');
+
+    // ★ NUEVO: Toast detallado con interés cobrado + capital reducido
+    const p=d.payment||{};
+    const interestText=formatCOP(p.interestCovered||0);
+    const capitalText=formatCOP(p.capitalReduced||0);
+    const capitalizedText=(p.interestCapitalized&&p.interestCapitalized>0)
+        ?` · Capitalizado: ${formatCOP(p.interestCapitalized)}`
+        :'';
+    const msg=p.isFullyPaid
+      ? `✅ Préstamo pagado · Interés cobrado: ${interestText}`
+      : `Abono OK · Interés cobrado: ${interestText} · Capital: ${capitalText}${capitalizedText}`;
+    toast(msg,'success');
+
     closeLoanPayModal();
 
     // FIX: Refrescar TODOS los datos del dashboard, no solo los préstamos.
