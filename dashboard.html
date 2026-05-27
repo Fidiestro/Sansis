@@ -2307,7 +2307,7 @@ function renderLoansView(c){
   const allLoans=[...reqs,...legacy];
   const active=allLoans.filter(l=>l.status==='active'||l.status==='overdue');
   const pending=allLoans.filter(l=>l.status==='pending');
-  const historical=allLoans.filter(l=>['paid','rejected'].includes(l.status));
+  const historical=allLoans.filter(l=>['paid','rejected','cancelled'].includes(l.status));
 
   // Si no hay préstamos → mostrar CTA
   if(!allLoans.length){
@@ -2372,17 +2372,23 @@ function renderLoansView(c){
           <div class="positions-title" style="color:var(--mut)">Historial</div>
           <div class="positions-badge">${historical.length}</div>
         </div>
-        ${historical.map(l=>`
+        ${historical.map(l=>{
+          const badge={
+            paid:     {bg:'rgba(16,185,129,.15)', color:'var(--grn)', label:'PAGADO'},
+            rejected: {bg:'rgba(239,68,68,.1)',   color:'var(--red)', label:'RECHAZADO'},
+            cancelled:{bg:'rgba(156,163,175,.12)',color:'#9ca3af',    label:'CANCELADO'}
+          }[l.status]||{bg:'rgba(239,68,68,.1)',color:'var(--red)',label:l.status.toUpperCase()};
+          return `
           <div class="inv-card" style="opacity:.7">
             <div class="inv-card-top">
               <div>
                 <div class="inv-name">${formatCOP(l.approvedAmount||l.amount)}</div>
-                <div class="inv-sub">${l.startDate?formatDate(l.startDate):''} ${l.term?'· '+l.term+'m':''}</div>
+                <div class="inv-sub">${l.startDate?formatDate(l.startDate):''} ${l.term?'· '+l.term+'m':l.term===null?'· sin plazo':''}</div>
               </div>
-              <span style="background:${l.status==='paid'?'rgba(16,185,129,.15)':'rgba(239,68,68,.1)'};color:${l.status==='paid'?'var(--grn)':'var(--red)'};padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">${l.status==='paid'?'PAGADO':'RECHAZADO'}</span>
+              <span style="background:${badge.bg};color:${badge.color};padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">${badge.label}</span>
             </div>
-          </div>
-        `).join('')}
+          </div>`;
+        }).join('')}
       </div>`:''}
     </div>`;
 

@@ -345,6 +345,7 @@ img{max-width:100%;display:block}
 .pill.approved{background:rgba(126,182,255,.08);color:var(--info);border:1px solid rgba(126,182,255,.2)}
 .pill.completed,.pill.active,.pill.paid{background:rgba(126,217,87,.08);color:var(--pos);border:1px solid rgba(126,217,87,.2)}
 .pill.rejected,.pill.blocked,.pill.overdue{background:rgba(255,107,107,.08);color:var(--neg);border:1px solid rgba(255,107,107,.2)}
+.pill.cancelled{background:rgba(156,163,175,.1);color:#9ca3af;border:1px solid rgba(156,163,175,.25)}
 .pill.neutral{background:var(--surface);color:var(--txt-2);border:1px solid var(--line)}
 
 /* ─────────────────────────────────────────
@@ -1104,6 +1105,7 @@ img{max-width:100%;display:block}
         <button class="filter" onclick="fLoan('pending',this)">Pendientes</button>
         <button class="filter" onclick="fLoan('active',this)">Activos</button>
         <button class="filter" onclick="fLoan('paid',this)">Pagados</button>
+        <button class="filter" onclick="fLoan('cancelled',this)">Cancelados</button>
       </div>
       <div id="loans-content"><div class="empty">Cargando…</div></div>
     </div>
@@ -1385,8 +1387,9 @@ function toast(msg,kind){
 // Status pill HTML
 function pill(status){
   if(!status) return '';
-  const cls = ['pending','approved','completed','active','paid','rejected','blocked','overdue'].includes(status)?status:'neutral';
-  return `<span class="pill ${cls}">${status}</span>`;
+  const cls = ['pending','approved','completed','active','paid','rejected','blocked','overdue','cancelled'].includes(status)?status:'neutral';
+  const label = status==='cancelled' ? 'cancelado' : status;
+  return `<span class="pill ${cls}">${label}</span>`;
 }
 
 // Type translation
@@ -2642,6 +2645,12 @@ function renderLoans(loans){
           <button class="btn btn-sm btn-neg" onclick="procLoan(${l.id},'reject')">Rechazar</button>
         </div>
       `:''}
+      ${(l.status==='active'||l.status==='overdue')?`
+        <div class="row-actions">
+          <button class="btn btn-sm" style="background:#10b981;color:#fff;border:none" onclick="procLoan(${l.id},'mark_paid')">✓ Marcar pagado</button>
+          <button class="btn btn-sm btn-neg" onclick="cancelLoan(${l.id},'${(l.ref_id||('LN-'+l.id)).replace(/'/g,'')}',${parseFloat(l.approved_amount||l.amount||0)})">🚫 Cancelar</button>
+        </div>
+      `:''}
     </div>`;
   }).join('')+'</div>';
 }
@@ -2652,13 +2661,41 @@ function fLoan(s, btn){
   loadLoans(s);
 }
 async function procLoan(id, action){
-  if(!confirm('¿'+action+' este préstamo?')) return;
+  // Labels más legibles para el confirm
+  const lbl={approve:'aprobar',reject:'rechazar',mark_paid:'marcar como pagado',mark_overdue:'marcar en mora'}[action]||action;
+  if(!confirm('¿'+lbl+' este préstamo?')) return;
   try{
     const r=await apiFetch('/admin/loans/'+id+'/process',{method:'POST',body:JSON.stringify({action})});
-    if(!r||!r.ok) return toast('Error','error');
-    toast('Listo','ok');
+    const d=await(r?r.json().catch(()=>({})):{});
+    if(!r||!r.ok) return toast(d.error||'Error','error');
+    toast(d.message||'Listo','ok');
     loadLoans('all');
   }catch(e){toast('Error','error')}
+}
+
+// ★ NUEVO: Cancelar préstamo activo (cancelación SUAVE)
+async function cancelLoan(id, refId, capitalPendiente){
+  const msg=`⚠️ Cancelar el préstamo ${refId}?\n\n`+
+            `Capital pendiente: ${F(capitalPendiente)}\n\n`+
+            `• Se marca como "cancelado"\n`+
+            `• El balance del usuario NO se toca (la deuda pendiente queda perdonada)\n`+
+            `• El historial de abonos se conserva\n\n`+
+            `Esta acción es reversible solo por la base de datos.`;
+  if(!confirm(msg)) return;
+
+  // Pedir nota opcional
+  const notes=prompt('Motivo de la cancelación (opcional):','')||'';
+
+  try{
+    const r=await apiFetch('/admin/loans/'+id+'/process',{
+      method:'POST',
+      body:JSON.stringify({action:'cancel',notes:notes.trim()||null})
+    });
+    const d=await(r?r.json().catch(()=>({})):{});
+    if(!r||!r.ok) return toast(d.error||'Error al cancelar','error');
+    toast('Préstamo cancelado ✓','ok');
+    loadLoans('all');
+  }catch(e){toast('Error de red','error')}
 }
 
 // ─── TRANSACTIONS (con filtros + paginación) ───
