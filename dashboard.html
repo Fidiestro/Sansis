@@ -3882,5 +3882,410 @@ async function confirmAddCapital(){
 
 init();
 </script>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     SANSE CAPITAL — Chat de soporte (botón flotante global)
+     ════════════════════════════════════════════════════════════════════ -->
+<style>
+  #sc-fab {
+    position: fixed; right: 18px; bottom: 88px; z-index: 9998;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--grn), var(--blu));
+    color: #fff; border: none; cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.06);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .2s, box-shadow .2s;
+  }
+  #sc-fab:hover { transform: scale(1.08); }
+  #sc-fab svg { width: 24px; height: 24px; }
+  #sc-fab .sc-badge {
+    position: absolute; top: -4px; right: -4px;
+    min-width: 20px; height: 20px; padding: 0 6px;
+    border-radius: 10px; background: var(--red); color: #fff;
+    font-size: 10px; font-weight: 700;
+    display: none; align-items: center; justify-content: center;
+    border: 2px solid var(--bg);
+  }
+  #sc-fab .sc-badge.show { display: flex; }
+
+  #sc-panel {
+    position: fixed; right: 18px; bottom: 154px; z-index: 9999;
+    width: min(380px, calc(100vw - 36px));
+    height: min(560px, calc(100vh - 200px));
+    background: var(--bg2); border: 1px solid var(--bd);
+    border-radius: 18px; overflow: hidden;
+    display: none; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    animation: sc-slide-in .25s ease-out;
+  }
+  #sc-panel.open { display: flex; }
+  @keyframes sc-slide-in {
+    from { opacity: 0; transform: translateY(20px) scale(.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .sc-head {
+    padding: 14px 16px; background: var(--bg);
+    border-bottom: 1px solid var(--bd);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sc-head-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--grn), var(--blu));
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sc-head-info { flex: 1; min-width: 0; }
+  .sc-head-title { font-size: 13px; font-weight: 700; color: var(--text); }
+  .sc-head-sub { font-size: 11px; color: var(--mut); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+  .sc-status-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--grn);
+    box-shadow: 0 0 8px rgba(16,185,129,.6);
+  }
+  .sc-close-btn {
+    background: transparent; border: none; color: var(--mut);
+    cursor: pointer; padding: 6px; border-radius: 6px; font-size: 18px;
+  }
+  .sc-close-btn:hover { background: var(--bg2); color: var(--text); }
+  .sc-messages {
+    flex: 1; overflow-y: auto; padding: 14px; background: var(--bg);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .sc-empty {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: var(--mut); text-align: center; padding: 20px;
+  }
+  .sc-empty-icon { font-size: 36px; margin-bottom: 12px; opacity: .5; }
+  .sc-empty-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .sc-empty-sub { font-size: 12px; line-height: 1.5; }
+  .sc-msg {
+    max-width: 78%; padding: 9px 12px; border-radius: 14px;
+    font-size: 13px; line-height: 1.45;
+    word-wrap: break-word; overflow-wrap: break-word;
+  }
+  .sc-msg-user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, var(--blu), #6366f1);
+    color: #fff; border-bottom-right-radius: 4px;
+  }
+  .sc-msg-admin {
+    align-self: flex-start;
+    background: var(--bg2); border: 1px solid var(--bd);
+    color: var(--text); border-bottom-left-radius: 4px;
+  }
+  .sc-msg-time { font-size: 10px; opacity: .65; margin-top: 4px; }
+  .sc-msg img {
+    max-width: 100%; border-radius: 8px; display: block;
+    margin-top: 4px; cursor: pointer;
+  }
+  .sc-composer { padding: 10px; border-top: 1px solid var(--bd); background: var(--bg2); }
+  .sc-img-preview {
+    display: none; padding: 8px; margin-bottom: 8px;
+    background: var(--bg); border: 1px solid var(--bd); border-radius: 8px;
+    position: relative;
+  }
+  .sc-img-preview.show { display: block; }
+  .sc-img-preview img { max-width: 100%; max-height: 120px; border-radius: 6px; }
+  .sc-img-preview .sc-img-clear {
+    position: absolute; top: 4px; right: 4px;
+    background: rgba(0,0,0,.7); color: #fff; border: none;
+    border-radius: 50%; width: 22px; height: 22px; cursor: pointer;
+    font-size: 12px;
+  }
+  .sc-input-row { display: flex; gap: 6px; align-items: center; }
+  .sc-attach-btn, .sc-send-btn {
+    flex-shrink: 0; width: 36px; height: 36px; border-radius: 10px;
+    border: 1px solid var(--bd); background: var(--bg); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--mut); transition: all .15s;
+  }
+  .sc-attach-btn:hover { color: var(--text); border-color: var(--blu); }
+  .sc-send-btn {
+    background: linear-gradient(135deg, var(--grn), var(--blu));
+    color: #fff; border: none;
+  }
+  .sc-send-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .sc-textarea {
+    flex: 1; resize: none; min-height: 36px; max-height: 100px;
+    padding: 8px 12px; background: var(--bg); border: 1px solid var(--bd);
+    border-radius: 10px; color: var(--text); font-size: 13px;
+    font-family: inherit; outline: none;
+  }
+  .sc-textarea:focus { border-color: var(--blu); }
+  #sc-img-modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,.85);
+    z-index: 10000; display: none; align-items: center; justify-content: center;
+    padding: 20px; cursor: zoom-out;
+  }
+  #sc-img-modal.open { display: flex; }
+  #sc-img-modal img { max-width: 100%; max-height: 100%; border-radius: 8px; }
+  .sc-loading {
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; color: var(--mut); font-size: 12px;
+  }
+  @media (max-height: 500px) {
+    #sc-fab { bottom: 16px; }
+    #sc-panel { bottom: 80px; height: calc(100vh - 100px); }
+  }
+</style>
+
+<button id="sc-fab" onclick="scToggle()" aria-label="Chat de ayuda" title="Chat de ayuda">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+  <span class="sc-badge" id="sc-badge">0</span>
+</button>
+
+<div id="sc-panel" role="dialog" aria-label="Chat de ayuda">
+  <div class="sc-head">
+    <div class="sc-head-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+    </div>
+    <div class="sc-head-info">
+      <div class="sc-head-title">Soporte Sanse Capital</div>
+      <div class="sc-head-sub">
+        <span class="sc-status-dot"></span>
+        <span>Te respondemos en breve</span>
+      </div>
+    </div>
+    <button class="sc-close-btn" onclick="scToggle()" aria-label="Cerrar">✕</button>
+  </div>
+  <div class="sc-messages" id="sc-messages">
+    <div class="sc-loading">Cargando…</div>
+  </div>
+  <div class="sc-composer">
+    <div class="sc-img-preview" id="sc-img-preview">
+      <img id="sc-img-thumb" alt="">
+      <button class="sc-img-clear" onclick="scClearImage()">✕</button>
+    </div>
+    <div class="sc-input-row">
+      <input type="file" id="sc-file" accept="image/*" style="display:none" onchange="scHandleFile(this)">
+      <button class="sc-attach-btn" onclick="document.getElementById('sc-file').click()" title="Adjuntar imagen" aria-label="Adjuntar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+        </svg>
+      </button>
+      <textarea class="sc-textarea" id="sc-input" placeholder="Escribe tu mensaje…" rows="1" oninput="scAutoGrow(this);scUpdateSendBtn()" onkeydown="scKeyDown(event)"></textarea>
+      <button class="sc-send-btn" id="sc-send" onclick="scSend()" disabled aria-label="Enviar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="sc-img-modal" onclick="this.classList.remove('open')">
+  <img id="sc-img-full" alt="">
+</div>
+
+<script>
+var scState = {
+  open: false, chatId: null, lastMessageId: 0,
+  pollingInterval: null, pendingImage: null, unreadCount: 0,
+};
+
+function scToggle() {
+  scState.open = !scState.open;
+  var panel = document.getElementById('sc-panel');
+  panel.classList.toggle('open', scState.open);
+  if (scState.open) scOpen(); else scStopPolling();
+}
+
+async function scOpen() {
+  scState.unreadCount = 0;
+  scUpdateBadge();
+  scState.lastMessageId = 0;
+  await scFetchMessages(true);
+  setTimeout(function() {
+    var i = document.getElementById('sc-input');
+    if (i) i.focus();
+  }, 300);
+  scStartPolling();
+}
+
+function scStartPolling() {
+  scStopPolling();
+  scState.pollingInterval = setInterval(function() { scFetchMessages(false); }, 3000);
+}
+
+function scStopPolling() {
+  if (scState.pollingInterval) { clearInterval(scState.pollingInterval); scState.pollingInterval = null; }
+}
+
+async function scFetchMessages(initial) {
+  try {
+    var res = await apiFetch('/support/chat/messages?since=' + scState.lastMessageId);
+    if (!res || !res.ok) return;
+    var data = await res.json();
+    if (data.chatId) scState.chatId = data.chatId;
+    if (initial) scRenderAll(data.messages || []);
+    else if (data.messages && data.messages.length > 0) scAppendMessages(data.messages);
+    if (data.messages && data.messages.length > 0) {
+      scState.lastMessageId = data.messages[data.messages.length - 1].id;
+    }
+  } catch (e) {}
+}
+
+function scRenderAll(messages) {
+  var c = document.getElementById('sc-messages');
+  if (!c) return;
+  if (messages.length === 0) {
+    c.innerHTML = '<div class="sc-empty">'
+      + '<div class="sc-empty-icon">💬</div>'
+      + '<div class="sc-empty-title">¿En qué te ayudamos?</div>'
+      + '<div class="sc-empty-sub">Cuéntanos tu duda sobre depósitos, retiros o cualquier tema. Te respondemos lo antes posible.</div>'
+      + '</div>';
+    return;
+  }
+  c.innerHTML = '';
+  messages.forEach(function(m) { scAddMessageBubble(m, c); });
+  c.scrollTop = c.scrollHeight;
+}
+
+function scAppendMessages(messages) {
+  var c = document.getElementById('sc-messages');
+  if (!c) return;
+  if (c.querySelector('.sc-empty')) c.innerHTML = '';
+  messages.forEach(function(m) { scAddMessageBubble(m, c); });
+  c.scrollTop = c.scrollHeight;
+  if (!scState.open) {
+    var newAdmin = messages.filter(function(m) { return m.sender === 'admin'; }).length;
+    if (newAdmin > 0) { scState.unreadCount += newAdmin; scUpdateBadge(); }
+  }
+}
+
+function scAddMessageBubble(m, container) {
+  var div = document.createElement('div');
+  div.className = 'sc-msg ' + (m.sender === 'user' ? 'sc-msg-user' : 'sc-msg-admin');
+  var html = '';
+  if (m.text) html += '<div>' + scEscape(m.text) + '</div>';
+  if (m.image_data) {
+    html += '<img src="' + m.image_data + '" alt="adjunto" onclick="scOpenImage(\'' + m.id + '\')" data-img-id="' + m.id + '">';
+  }
+  html += '<div class="sc-msg-time">' + scFormatTime(m.created_at) + '</div>';
+  div.innerHTML = html;
+  container.appendChild(div);
+}
+
+function scOpenImage(msgId) {
+  var img = document.querySelector('[data-img-id="' + msgId + '"]');
+  if (!img) return;
+  var modal = document.getElementById('sc-img-modal');
+  document.getElementById('sc-img-full').src = img.src;
+  modal.classList.add('open');
+}
+
+function scEscape(s) {
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/\n/g, '<br>');
+}
+
+function scFormatTime(iso) {
+  if (!iso) return '';
+  try { return new Date(iso).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }); }
+  catch (e) { return ''; }
+}
+
+function scAutoGrow(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function scKeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); scSend(); }
+}
+
+function scUpdateSendBtn() {
+  var input = document.getElementById('sc-input');
+  var btn = document.getElementById('sc-send');
+  var hasText = input && input.value.trim().length > 0;
+  var hasImage = !!scState.pendingImage;
+  btn.disabled = !(hasText || hasImage);
+}
+
+function scHandleFile(input) {
+  var file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    if (typeof toast === 'function') toast('Imagen máximo 5MB', 'error');
+    input.value = ''; return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    scState.pendingImage = e.target.result;
+    document.getElementById('sc-img-thumb').src = e.target.result;
+    document.getElementById('sc-img-preview').classList.add('show');
+    scUpdateSendBtn();
+  };
+  reader.readAsDataURL(file);
+}
+
+function scClearImage() {
+  scState.pendingImage = null;
+  document.getElementById('sc-file').value = '';
+  document.getElementById('sc-img-preview').classList.remove('show');
+  scUpdateSendBtn();
+}
+
+async function scSend() {
+  var input = document.getElementById('sc-input');
+  var btn = document.getElementById('sc-send');
+  var text = input.value.trim();
+  var image = scState.pendingImage;
+  if (!text && !image) return;
+  btn.disabled = true;
+  var optimistic = {
+    id: 'tmp-' + Date.now(), sender: 'user', text: text,
+    image_data: image, created_at: new Date().toISOString()
+  };
+  var c = document.getElementById('sc-messages');
+  if (c.querySelector('.sc-empty')) c.innerHTML = '';
+  scAddMessageBubble(optimistic, c);
+  c.scrollTop = c.scrollHeight;
+  input.value = '';
+  input.style.height = 'auto';
+  scClearImage();
+  try {
+    var res = await apiFetch('/support/chat/message', {
+      method: 'POST',
+      body: JSON.stringify({ text: text, image: image })
+    });
+    if (!res || !res.ok) { if (typeof toast === 'function') toast('No se pudo enviar el mensaje', 'error'); }
+    else { await scFetchMessages(false); }
+  } catch (e) { if (typeof toast === 'function') toast('Error de conexión', 'error'); }
+  finally { scUpdateSendBtn(); input.focus(); }
+}
+
+function scUpdateBadge() {
+  var b = document.getElementById('sc-badge');
+  if (!b) return;
+  if (scState.unreadCount > 0) {
+    b.textContent = scState.unreadCount > 9 ? '9+' : scState.unreadCount;
+    b.classList.add('show');
+  } else { b.classList.remove('show'); }
+}
+
+setInterval(function() {
+  if (!scState.open && scState.chatId) scFetchMessages(false);
+}, 20000);
+
+(function scInit() {
+  setTimeout(function() {
+    apiFetch('/support/chat').then(function(r) {
+      if (r && r.ok) return r.json();
+      return null;
+    }).then(function(data) {
+      if (data && data.chat) {
+        scState.chatId = data.chat.id;
+        scFetchMessages(false);
+      }
+    }).catch(function() {});
+  }, 1500);
+})();
+</script>
 </body>
 </html>
