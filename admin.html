@@ -3619,5 +3619,234 @@ function sup_relTime(iso){
   }catch(e){ return ''; }
 }
 </script>
+<script>
+(function(){
+  'use strict';
+  function fc(n){ return (typeof F==='function')?F(n):('$'+Math.round(n||0).toLocaleString('es-CO')); }
+  function fd(d){ if(!d) return '—'; try{ return new Date(d).toLocaleDateString('es-CO',{day:'numeric',month:'short',year:'numeric'}); }catch(e){ return '—'; } }
+  function freqLabel(f){ return f==='weekly'?'Semanal':f==='biweekly'?'Quincenal':'Mensual'; }
+
+  // Registrar etiquetas de las transacciones de cadena (si TX_LABEL existe)
+  try{ if(typeof TX_LABEL!=='undefined'){ TX_LABEL.cadena='Cuota cadena'; TX_LABEL.cadena_payout='Cobro cadena'; } }catch(e){}
+
+  // ── 1) Inyectar subtab + sub-view en Financiero ──
+  function inject(){
+    var fin = document.getElementById('view-finance');
+    if(!fin) return;
+    var subtabs = fin.querySelector('.subtabs');
+    if(subtabs && !subtabs.querySelector('[data-sub="cadenas"]')){
+      var b=document.createElement('button');
+      b.className='subtab'; b.setAttribute('data-sub','cadenas');
+      b.setAttribute('onclick',"sub('finance','cadenas')");
+      b.textContent='Cadenas';
+      subtabs.appendChild(b);
+    }
+    var section = fin.querySelector('.section');
+    if(section && !section.querySelector('[data-sub-view="cadenas"]')){
+      var d=document.createElement('div');
+      d.className='sub-view hide'; d.setAttribute('data-sub-view','cadenas');
+      d.id='cad-admin-view';
+      d.innerHTML='<div class="empty">Cargando…</div>';
+      section.appendChild(d);
+    }
+  }
+
+  // ── 2) Enganchar sub() sin romper el existente ──
+  var _origSub = window.sub;
+  window.sub = function(view, s){
+    var r = _origSub ? _origSub.call(this, view, s) : undefined;
+    if(view==='finance' && s==='cadenas') cadAdminLoad();
+    return r;
+  };
+
+  // ── 3) Lista admin ──
+  window.cadAdminLoad = async function(){
+    var c=document.getElementById('cad-admin-view'); if(!c) return;
+    c.innerHTML='<div class="empty">Cargando…</div>';
+    try{
+      var res=await apiFetch('/admin/cadenas');
+      var data=(res&&res.ok)?await res.json():{cadenas:[]};
+      var list=data.cadenas||[];
+      var rows = list.length ? list.map(cadAdminRow).join('') : '<div class="empty">Sin cadenas registradas</div>';
+      c.innerHTML =
+        '<div class="card"><div class="card-h">Cadenas de <em>ahorro</em></div>'
+        + '<div class="card-d">Crea cadenas, inscribe participantes, inicia el ciclo y gestiona pagos.</div>'
+        + '<button class="btn btn-primary btn-block" onclick="cadAdminNew()">+ Nueva cadena</button></div>'
+        + '<div class="list">'+rows+'</div>';
+    }catch(e){
+      console.error('[cadenas admin] load', e);
+      c.innerHTML='<div class="empty">Error cargando cadenas</div>';
+    }
+  };
+
+  function cadAdminRow(x){
+    var pillMap={open:'approved',active:'active',completed:'completed',cancelled:'cancelled'};
+    var pillCls=pillMap[x.status]||'neutral';
+    return ''
+    + '<div class="row row-clickable" onclick="cadAdminDetail('+x.id+')">'
+      + '<div class="row-top"><div>'
+        + '<div class="row-id">CAD-'+x.id+' · '+freqLabel(x.frequency)+'</div>'
+        + '<div class="row-name">'+(x.name||'—')+'</div>'
+      + '</div><div class="row-amount acc">'+fc(x.potValue||0)+'</div></div>'
+      + '<div class="row-meta">'
+        + '<span class="pill '+pillCls+'">'+x.status+'</span>'
+        + '<span>'+(x.participants||0)+' inscritos</span>'
+        + '<span>Cuota '+fc(x.cuota)+'</span>'
+        + '<span>Inicio '+fd(x.startDate)+'</span>'
+        + '<span>Cierre '+fd(x.registrationDeadline)+'</span>'
+      + '</div>'
+    + '</div>';
+  }
+
+  // ── 4) Crear cadena ──
+  window.cadAdminNew = function(){
+    var today=new Date().toISOString().slice(0,10);
+    var html =
+      '<div class="fg"><label>Nombre</label><input id="cadf-name" placeholder="Ej: Cadena Mensual #1"></div>'
+      + '<div class="fg-row"><div class="fg"><label>Cuota (COP)</label><input id="cadf-cuota" type="number" placeholder="100000"></div>'
+      + '<div class="fg"><label>Frecuencia</label><select id="cadf-freq"><option value="monthly">Mensual</option><option value="biweekly">Quincenal</option><option value="weekly">Semanal</option></select></div></div>'
+      + '<div class="fg-row"><div class="fg"><label>Fecha de inicio</label><input id="cadf-start" type="date" value="'+today+'"></div>'
+      + '<div class="fg"><label>Cierre de inscripción</label><input id="cadf-deadline" type="date" value="'+today+'"></div></div>'
+      + '<div class="fg"><label>Cupo máximo (opcional)</label><input id="cadf-max" type="number" placeholder="Sin límite"></div>'
+      + '<div class="fg"><label>Notas (opcional)</label><input id="cadf-notes" placeholder="Descripción interna"></div>'
+      + '<button class="btn btn-primary btn-block" onclick="cadAdminCreate()">Crear cadena</button>';
+    openModal('Nueva <em>cadena</em>', 'Ahorro grupal rotativo', html);
+  };
+
+  window.cadAdminCreate = async function(){
+    var body={
+      name:(document.getElementById('cadf-name').value||'').trim(),
+      cuota:parseFloat(document.getElementById('cadf-cuota').value),
+      frequency:document.getElementById('cadf-freq').value,
+      startDate:document.getElementById('cadf-start').value,
+      registrationDeadline:document.getElementById('cadf-deadline').value,
+      maxParticipants:parseInt(document.getElementById('cadf-max').value)||null,
+      notes:(document.getElementById('cadf-notes').value||'').trim()||null
+    };
+    if(!body.name||!body.cuota||!body.startDate||!body.registrationDeadline) return toast('Completa nombre, cuota y fechas','error');
+    try{
+      var r=await apiFetch('/admin/cadenas',{method:'POST',body:JSON.stringify(body)});
+      var d=r?await r.json().catch(function(){return{};}):{};
+      if(!r||!r.ok) return toast(d.error||'Error al crear','error');
+      toast('Cadena creada','ok');
+      closeModal(); cadAdminLoad();
+    }catch(e){ toast('Error de red','error'); }
+  };
+
+  // ── 5) Detalle / gestión ──
+  window.cadAdminDetail = async function(id){
+    try{
+      var r=await apiFetch('/admin/cadenas/'+id);
+      if(!r||!r.ok) return toast('Error cargando','error');
+      var x=await r.json();
+
+      var paidSet={};
+      (x.payments||[]).forEach(function(p){ paidSet[p.user_id+'-'+p.period_number]=p; });
+      var payoutByPeriod={};
+      (x.payouts||[]).forEach(function(p){ payoutByPeriod[p.period_number]=p; });
+
+      var members=(x.membersDetailed||[]).filter(function(m){return m.status!=='removed'&&m.status!=='left';});
+
+      var membersHtml = members.map(function(m){
+        var turn=m.turn?('#'+m.turn):'—';
+        var payCell='';
+        if(x.status==='active' && m.turn){
+          var paid=paidSet[m.userId+'-'+x.currentPeriod];
+          payCell = paid
+            ? '<span class="pill paid">pagó P'+x.currentPeriod+'</span>'
+            : '<button class="btn btn-sm btn-ghost" onclick="cadAdminMarkPaid('+id+','+m.userId+','+x.currentPeriod+')">Marcar pago P'+x.currentPeriod+'</button>';
+        }
+        var deliverBtn='';
+        if(x.status==='active' && m.turn && x.currentPeriod>=m.turn){
+          var po=payoutByPeriod[m.turn];
+          deliverBtn = (po && (po.status==='claimed'||po.status==='delivered'))
+            ? '<span class="pill completed">'+(po.status==='delivered'?'entregado':'reclamado')+'</span>'
+            : '<button class="btn btn-sm btn-pos" onclick="cadAdminDeliver('+id+','+m.turn+')">Entregar pozo</button>';
+        }
+        return '<div class="row"><div class="row-top"><div>'
+          + '<div class="row-id">Turno '+turn+'</div><div class="row-name">'+(m.name||'—')+'</div>'
+          + '<div class="row-meta" style="margin-top:4px"><span>'+(m.email||'')+'</span></div>'
+          + '</div></div>'
+          + '<div class="row-actions">'+payCell+deliverBtn
+          + '<button class="btn btn-sm btn-neg" onclick="cadAdminRemove('+id+','+m.userId+')">Quitar</button>'
+          + '</div></div>';
+      }).join('');
+
+      var startBtn = x.status==='open'
+        ? '<button class="btn btn-primary btn-block" onclick="cadAdminStart('+id+')" style="margin-bottom:10px">▶ Iniciar cadena (asigna turnos por inscripción)</button>'
+        : '';
+      var cancelBtn = (x.status!=='cancelled'&&x.status!=='completed')
+        ? '<button class="btn btn-neg btn-block" onclick="cadAdminCancel('+id+')">Cancelar cadena</button>'
+        : '';
+
+      var html =
+        '<div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr 1fr 1fr;margin-bottom:14px">'
+        + '<div class="stat"><div class="stat-label">Pozo</div><div class="stat-value acc mono">'+fc(x.potValue)+'</div></div>'
+        + '<div class="stat"><div class="stat-label">Inscritos</div><div class="stat-value mono">'+x.participants+'</div></div>'
+        + '<div class="stat"><div class="stat-label">Período</div><div class="stat-value mono">'+(x.currentPeriod>0?(x.currentPeriod+'/'+x.totalPeriods):'—')+'</div></div>'
+        + '</div>'
+        + '<div class="row-meta" style="margin-bottom:14px"><span>Cuota '+fc(x.cuota)+'</span><span>'+freqLabel(x.frequency)+'</span><span>Inicio '+fd(x.startDate)+'</span><span>Termina '+(x.estimatedEndDate?fd(x.estimatedEndDate):'—')+'</span></div>'
+        + startBtn
+        + '<div style="font-family:var(--f-mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt-3);margin:14px 0 10px">Participantes ('+members.length+')</div>'
+        + '<div class="list">'+(membersHtml||'<div class="empty">Sin participantes</div>')+'</div>'
+        + '<div class="divider"></div>'
+        + cancelBtn;
+
+      openModal((x.name||'Cadena')+' <em>· '+x.status+'</em>', 'CAD-'+x.id, html);
+    }catch(e){ console.error(e); toast('Error','error'); }
+  };
+
+  // ── 6) Acciones admin ──
+  window.cadAdminStart = async function(id){
+    if(!confirm('¿Iniciar la cadena? Se asignan los turnos por orden de inscripción y se cierra el ingreso.')) return;
+    try{
+      var r=await apiFetch('/admin/cadenas/'+id+'/start',{method:'POST',body:JSON.stringify({})});
+      var d=r?await r.json().catch(function(){return{};}):{};
+      if(!r||!r.ok) return toast(d.error||'Error','error');
+      toast(d.message||'Cadena iniciada','ok'); closeModal(); cadAdminLoad();
+    }catch(e){ toast('Error de red','error'); }
+  };
+  window.cadAdminMarkPaid = async function(id,userId,period){
+    if(!confirm('¿Marcar la cuota del período '+period+' como pagada (manual)?')) return;
+    try{
+      var r=await apiFetch('/admin/cadenas/'+id+'/mark-paid',{method:'POST',body:JSON.stringify({userId:userId,periodNumber:period})});
+      var d=r?await r.json().catch(function(){return{};}):{};
+      if(!r||!r.ok) return toast(d.error||'Error','error');
+      toast('Pago marcado','ok'); cadAdminDetail(id);
+    }catch(e){ toast('Error de red','error'); }
+  };
+  window.cadAdminDeliver = async function(id,period){
+    if(!confirm('¿Marcar el pozo del turno '+period+' como entregado? (no toca el balance del usuario)')) return;
+    try{
+      var r=await apiFetch('/admin/cadenas/'+id+'/deliver',{method:'POST',body:JSON.stringify({periodNumber:period})});
+      var d=r?await r.json().catch(function(){return{};}):{};
+      if(!r||!r.ok) return toast(d.error||'Error','error');
+      toast('Pozo entregado','ok'); cadAdminDetail(id);
+    }catch(e){ toast('Error de red','error'); }
+  };
+  window.cadAdminRemove = async function(id,userId){
+    if(!confirm('¿Quitar este participante de la cadena? (cancelación suave, no borra historial)')) return;
+    try{
+      var r=await apiFetch('/admin/cadenas/'+id+'/remove-member',{method:'POST',body:JSON.stringify({userId:userId})});
+      var d=r?await r.json().catch(function(){return{};}):{};
+      if(!r||!r.ok) return toast(d.error||'Error','error');
+      toast('Participante removido','ok'); cadAdminDetail(id);
+    }catch(e){ toast('Error de red','error'); }
+  };
+  window.cadAdminCancel = async function(id){
+    if(!confirm('¿Cancelar esta cadena? Se marca como cancelada (no se borra).')) return;
+    try{
+      var r=await apiFetch('/admin/cadenas/'+id+'/cancel',{method:'POST',body:JSON.stringify({})});
+      var d=r?await r.json().catch(function(){return{};}):{};
+      if(!r||!r.ok) return toast(d.error||'Error','error');
+      toast('Cadena cancelada','ok'); closeModal(); cadAdminLoad();
+    }catch(e){ toast('Error de red','error'); }
+  };
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', inject);
+  else inject();
+})();
+</script>
+<!-- ═══ Módulo Cadenas de Ahorro · inyectado automáticamente ═══ -->
 </body>
 </html>

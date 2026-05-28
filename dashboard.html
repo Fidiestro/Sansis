@@ -4496,5 +4496,230 @@ async function scPrime() {
   }, 1500);
 })();
 </script>
+<script>
+(function(){
+  'use strict';
+
+  // ── 1) Inyectar item "Cadenas" en el sidebar (después de Préstamos) ──
+  function injectNav(){
+    var loansLink = document.querySelector('.nav-item[onclick*="loans"]');
+    var nav = document.querySelector('.sb-nav .sb-section');
+    if(!nav) return;
+    var a = document.createElement('a');
+    a.className = 'nav-item'; a.href = '#'; a.id = 'cad-nav';
+    a.setAttribute('onclick','cadShow(this);return false');
+    a.innerHTML = '<svg class="ni" viewBox="0 0 24 24"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="12" r="3"/><circle cx="12" cy="6" r="3"/><circle cx="12" cy="18" r="3"/></svg> Cadenas';
+    if(loansLink && loansLink.parentNode){
+      loansLink.parentNode.insertBefore(a, loansLink.nextSibling);
+    } else { nav.appendChild(a); }
+  }
+
+  // ── 2) Enganchar el router sin romper el existente ──
+  window._cadActive = false;
+  var _origRender = window.renderCurrentView;
+  window.renderCurrentView = function(){
+    if(window._cadActive){ cadRenderList(); return; }
+    return _origRender ? _origRender.apply(this, arguments) : undefined;
+  };
+  var _origShowView = window.showView;
+  window.showView = function(view, el){
+    window._cadActive = false;
+    return _origShowView ? _origShowView.call(this, view, el) : undefined;
+  };
+
+  window.cadShow = function(el){
+    window._cadActive = true;
+    document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+    if(el) el.classList.add('active');
+    var sb = document.getElementById('sidebar');
+    if(window.innerWidth < 1024 && sb) sb.classList.remove('open');
+    cadRenderList();
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  // ── Helpers ──
+  function fc(n){ return (typeof formatCOP==='function') ? formatCOP(n) : ('$'+Math.round(n||0).toLocaleString('es-CO')); }
+  function fd(d){ if(!d) return '—'; try{ return new Date(d).toLocaleDateString('es-CO',{day:'numeric',month:'short',year:'numeric'}); }catch(e){ return '—'; } }
+  function freqLabel(f){ return f==='weekly'?'Semanal':f==='biweekly'?'Quincenal':'Mensual'; }
+  function statusPill(s){
+    var map={open:['Inscripciones abiertas','var(--grn)','rgba(16,185,129,.1)'],active:['Activa','var(--blu)','rgba(79,142,247,.1)'],completed:['Completada','var(--mut)','var(--sur)'],cancelled:['Cancelada','var(--red)','rgba(239,68,68,.08)']};
+    var m=map[s]||['—','var(--mut)','var(--sur)'];
+    return '<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;background:'+m[2]+';color:'+m[1]+'">'+m[0]+'</span>';
+  }
+
+  // ── 3) Lista de cadenas ──
+  window.cadRenderList = async function(){
+    var c = document.getElementById('dashboard-content');
+    if(!c) return;
+    c.innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando cadenas…</p></div>';
+    try{
+      var elig = {eligible:false, requirement:''};
+      try{ var er = await apiFetch('/cadenas/eligibility'); if(er&&er.ok) elig = await er.json(); }catch(e){}
+      var res = await apiFetch('/cadenas');
+      var data = (res && res.ok) ? await res.json() : {cadenas:[]};
+      var list = data.cadenas || [];
+
+      var eligBanner = elig.eligible
+        ? '<div style="display:flex;align-items:center;gap:8px;padding:12px 14px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;margin-bottom:14px;font-size:12px;color:var(--grn)"><span>✓</span><span>Cumples el requisito para participar en cadenas.</span></div>'
+        : '<div style="padding:14px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:10px;margin-bottom:14px;font-size:12px;color:var(--mut);line-height:1.6"><strong style="color:var(--amb);display:block;margin-bottom:4px">🔒 Aún no puedes inscribirte</strong>'+(elig.requirement||'Necesitas una inversión activa que cumpla el requisito.')+'<br><button onclick="showViewByName(\'investments\')" style="margin-top:10px;padding:9px 16px;background:linear-gradient(135deg,var(--blu),var(--pur));border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Ir a invertir →</button></div>';
+
+      var cards = list.length ? list.map(function(x){ return cadCard(x, elig); }).join('')
+        : '<div class="empty"><span class="empty-icon">🔗</span>No hay cadenas disponibles por ahora.</div>';
+
+      c.innerHTML =
+        '<div class="anim" style="max-width:720px">'
+        + '<div class="invest-hero"><div class="ih-head"><h3 class="ih-title">Cadenas de Ahorro</h3>'
+        + '<p class="ih-sub">Ahorro grupal rotativo · '+list.length+' '+(list.length===1?'cadena':'cadenas')+'</p></div></div>'
+        + '<div style="display:inline-block;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:rgba(245,158,11,.12);color:var(--amb);border:1px solid rgba(245,158,11,.3);padding:3px 9px;border-radius:10px;margin-bottom:14px">Beta · Piloto</div>'
+        + eligBanner
+        + cards
+        + '<div style="font-size:11px;color:var(--mut);line-height:1.7;padding:14px;background:var(--sur);border-radius:10px;margin-top:14px"><strong style="color:var(--text);display:block;margin-bottom:4px">¿Cómo funciona?</strong>Cada período todos aportan la misma cuota y un participante recibe el total acumulado (la cuota × número de inscritos). Cuando más personas se inscriben, mayor es el pozo y más tarda en terminar la cadena.</div>'
+        + '</div>';
+    }catch(e){
+      console.error('[cadenas] list', e);
+      c.innerHTML = '<div class="empty"><span class="empty-icon">⚠️</span>Error cargando las cadenas</div>';
+    }
+  };
+
+  function cadCard(x, elig){
+    var pot = fc(x.potValue||0);
+    var canJoin = x.status==='open' && !x.iAmIn && elig.eligible;
+    var deadlinePassed = new Date() > new Date((x.registrationDeadline||'')+'T23:59:59');
+    var btn='';
+    if(x.iAmIn){
+      btn = '<button class="prod-cta" onclick="event.stopPropagation();cadDetail('+x.id+')">Ver mi cadena →</button>';
+    } else if(x.status==='open' && !deadlinePassed){
+      if(canJoin){
+        btn = '<button class="prod-cta" onclick="event.stopPropagation();cadJoin('+x.id+')">Inscribirme</button>';
+      } else if(!elig.eligible){
+        btn = '<button class="prod-cta" disabled style="opacity:.5;cursor:not-allowed">🔒 Requiere inversión</button>';
+      }
+    } else if(x.status==='open' && deadlinePassed){
+      btn = '<button class="prod-cta" disabled style="opacity:.5;cursor:not-allowed">Inscripción cerrada</button>';
+    }
+    return ''
+    + '<div class="inv-card" style="cursor:'+(x.iAmIn?'pointer':'default')+'" '+(x.iAmIn?'onclick="cadDetail('+x.id+')"':'')+'>'
+      + '<div class="inv-head"><div class="inv-type-wrap">'
+        + '<div class="inv-type">'+(x.name||'Cadena')+' <span class="plazo">— '+freqLabel(x.frequency)+'</span></div>'
+        + '<span class="risk-tag medium">Cuota fija</span>'
+      + '</div>'+statusPill(x.status)+'</div>'
+      + '<div class="inv-body">'
+        + cell('Cuota / período', fc(x.cuota), 'blu')
+        + cell('Pozo aprox', pot, 'amb')
+        + cell('Inscritos', (x.participants||0)+'', '')
+        + cell('Frecuencia', freqLabel(x.frequency), '')
+      + '</div>'
+      + '<div class="inv-body" style="margin-top:10px">'
+        + cell('Inicio', fd(x.startDate), 'grn')
+        + cell('Cierre inscripción', fd(x.registrationDeadline), 'amb')
+        + cell('Termina aprox', x.estimatedEndDate?fd(x.estimatedEndDate):'—', 'pur')
+        + cell('Períodos', (x.totalPeriods||x.participants||0)+'', '')
+      + '</div>'
+      + (x.iAmIn?'<div style="margin-top:10px;font-size:11px;color:var(--grn);font-weight:600">✓ Ya estás inscrito</div>':'')
+      + (btn?'<div style="margin-top:14px">'+btn+'</div>':'')
+    + '</div>';
+  }
+  function cell(lbl, val, cls){
+    return '<div class="inv-cell"><div class="inv-cell-lbl">'+lbl+'</div><div class="inv-cell-val '+(cls||'')+'">'+val+'</div></div>';
+  }
+
+  // ── 4) Detalle de la cadena ──
+  window.cadDetail = async function(id){
+    var c = document.getElementById('dashboard-content');
+    if(!c) return;
+    c.innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando…</p></div>';
+    try{
+      var res = await apiFetch('/cadenas/'+id);
+      var x = (res && res.ok) ? await res.json() : null;
+      if(!x){ c.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span>No se pudo cargar</div>'; return; }
+
+      var membersHtml = (x.members||[]).map(function(m){
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd);font-size:13px">'
+          + '<span style="'+(m.isMe?'color:var(--blu);font-weight:700':'')+'">'+(m.turn?('<span style="font-family:Space Mono,monospace;color:var(--mut);margin-right:8px">#'+m.turn+'</span>'):'')+(m.name||'—')+(m.isMe?' (tú)':'')+'</span>'
+          + (m.turn && x.currentPeriod>0 ? (m.turn<x.currentPeriod?'<span style="font-size:10px;color:var(--grn)">recibió</span>':(m.turn===x.currentPeriod?'<span style="font-size:10px;color:var(--amb)">turno actual</span>':'<span style="font-size:10px;color:var(--mut)">en espera</span>')):'')
+        + '</div>';
+      }).join('');
+
+      var payBtn='';
+      if(x.status==='active' && x.iAmIn){
+        if(x.currentPeriod>0 && !x.paidCurrentPeriod){
+          payBtn = '<button class="prod-cta" style="margin-top:12px" onclick="cadPay('+id+')">💸 Pagar cuota período '+x.currentPeriod+' · '+fc(x.cuota)+'</button>';
+        } else if(x.paidCurrentPeriod){
+          payBtn = '<div style="margin-top:12px;padding:12px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;text-align:center;font-size:12px;color:var(--grn)">✓ Cuota del período '+x.currentPeriod+' pagada</div>';
+        }
+      }
+      var claimBtn = x.canClaim
+        ? '<div style="margin-top:12px;padding:18px;background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(124,92,252,.08));border:1px solid rgba(245,158,11,.35);border-radius:12px"><div style="font-size:10px;font-weight:700;color:var(--amb);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">¡Es tu turno!</div><div style="font-family:Space Mono,monospace;font-size:26px;font-weight:700;color:var(--amb);margin-bottom:10px">'+fc(x.potValue)+'</div><button class="prod-cta" style="background:linear-gradient(135deg,var(--amb),var(--grn))" onclick="cadClaim('+id+')">💰 Reclamar el pozo</button></div>'
+        : '';
+
+      var collected = (x.currentPeriod>0) ? '<div style="font-size:11px;color:var(--mut);margin-top:8px">Recaudado período '+x.currentPeriod+': <strong style="color:var(--text)">'+fc(x.currentCollected||0)+'</strong> ('+(x.currentPaidCount||0)+'/'+x.participants+' pagaron)</div>' : '';
+
+      c.innerHTML =
+        '<div class="anim" style="max-width:680px">'
+        + '<div class="detail-header"><button class="btn-back" onclick="cadShow(document.getElementById(\'cad-nav\'))"><svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Volver</button></div>'
+        + '<div class="detail-hero"><div class="dh-top"><div class="inv-type-wrap"><div class="inv-type">'+(x.name||'Cadena')+'</div><span class="risk-tag medium">'+freqLabel(x.frequency)+'</span></div>'+statusPill(x.status)+'</div>'
+        + '<div class="dh-ttl">Pozo de la cadena</div><div class="dh-cap" style="color:var(--amb)">'+fc(x.potValue)+'</div>'
+        + '<div style="font-size:12px;color:var(--mut);margin-top:6px">'+(x.participants||0)+' inscritos · cuota '+fc(x.cuota)+' por '+freqLabel(x.frequency).toLowerCase()+'</div></div>'
+        + claimBtn
+        + '<div class="detail-metrics" style="margin-top:14px">'
+          + dm('Mi turno', x.myTurn?('#'+x.myTurn):'—', 'pur')
+          + dm('Período actual', x.currentPeriod>0?(x.currentPeriod+'/'+x.totalPeriods):'No iniciado', 'blu')
+          + dm('Inicio', fd(x.startDate), 'grn')
+          + dm('Termina aprox', x.estimatedEndDate?fd(x.estimatedEndDate):'—', 'amb')
+        + '</div>'
+        + payBtn
+        + collected
+        + '<div class="card" style="padding:18px;margin-top:14px"><div style="font-size:13px;font-weight:700;margin-bottom:10px">Participantes y turnos</div>'+(membersHtml||'<div style="color:var(--mut);font-size:12px">Sin participantes</div>')+'</div>'
+        + (x.notes?'<div style="font-size:12px;color:var(--mut);padding:14px;background:var(--sur);border-radius:10px;margin-top:14px">'+x.notes+'</div>':'')
+        + '</div>';
+    }catch(e){
+      console.error('[cadenas] detail', e);
+      c.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span>Error cargando el detalle</div>';
+    }
+  };
+  function dm(lbl,val,cls){ return '<div class="dm-item '+(cls==='grn'?'paid':cls==='amb'?'pend':cls==='blu'?'apy':'time')+'"><div class="dm-lbl">'+lbl+'</div><div class="dm-val '+(cls||'')+'">'+val+'</div></div>'; }
+
+  // ── 5) Acciones ──
+  window.cadJoin = async function(id){
+    if(!confirm('¿Inscribirte en esta cadena? Te comprometes a pagar la cuota cada período.')) return;
+    try{
+      var r = await apiFetch('/cadenas/'+id+'/join',{method:'POST'});
+      var d = r?await r.json().catch(function(){return{};}):{};
+      if(!r||!r.ok){ toast(d.error||'No se pudo inscribir','error'); return; }
+      toast('✅ Te inscribiste en la cadena');
+      cadRenderList();
+    }catch(e){ toast('Error de conexión','error'); }
+  };
+
+  window.cadPay = async function(id){
+    if(!confirm('¿Pagar la cuota de este período? Se descontará de tu balance disponible.')) return;
+    try{
+      var r = await apiFetch('/cadenas/'+id+'/pay',{method:'POST'});
+      var d = r?await r.json().catch(function(){return{};}):{};
+      if(!r||!r.ok){ toast(d.error||'No se pudo pagar','error'); return; }
+      toast('✅ Cuota pagada');
+      if(typeof loadAllData==='function') await loadAllData();
+      cadDetail(id);
+    }catch(e){ toast('Error de conexión','error'); }
+  };
+
+  window.cadClaim = async function(id){
+    if(!confirm('¿Reclamar el pozo de tu turno? Se acreditará a tu balance disponible.')) return;
+    try{
+      var r = await apiFetch('/cadenas/'+id+'/claim',{method:'POST'});
+      var d = r?await r.json().catch(function(){return{};}):{};
+      if(!r||!r.ok){ toast(d.error||'No se pudo reclamar','error'); return; }
+      toast('✅ Pozo reclamado y acreditado');
+      if(typeof loadAllData==='function') await loadAllData();
+      cadDetail(id);
+    }catch(e){ toast('Error de conexión','error'); }
+  };
+
+  // Init: inyectar nav cuando el DOM esté listo
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', injectNav);
+  else injectNav();
+})();
+</script>
+<!-- ═══ Módulo Cadenas de Ahorro · inyectado automáticamente ═══ -->
 </body>
 </html>
