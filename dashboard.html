@@ -4085,6 +4085,8 @@ init();
 var scState = {
   open: false, chatId: null, lastMessageId: 0,
   pollingInterval: null, pendingImage: null, unreadCount: 0,
+  seen: {},        // IDs reales ya pintados (dedup)
+  fetching: false, // guard anti-concurrencia
 };
 
 function scToggle() {
@@ -4116,6 +4118,8 @@ function scStopPolling() {
 }
 
 async function scFetchMessages(initial) {
+  if (!initial && scState.fetching) return;   // guard solo en polls
+  scState.fetching = true;
   try {
     var res = await apiFetch('/support/chat/messages?since=' + scState.lastMessageId);
     if (!res || !res.ok) return;
@@ -4126,12 +4130,13 @@ async function scFetchMessages(initial) {
     if (data.messages && data.messages.length > 0) {
       scState.lastMessageId = data.messages[data.messages.length - 1].id;
     }
-  } catch (e) {}
+  } catch (e) {} finally { scState.fetching = false; }
 }
 
 function scRenderAll(messages) {
   var c = document.getElementById('sc-messages');
   if (!c) return;
+  scState.seen = {};   // reset dedup al re-renderizar todo
   if (messages.length === 0) {
     c.innerHTML = '<div class="sc-empty">'
       + '<div class="sc-empty-icon">💬</div>'
@@ -4149,6 +4154,9 @@ function scAppendMessages(messages) {
   var c = document.getElementById('sc-messages');
   if (!c) return;
   if (c.querySelector('.sc-empty')) c.innerHTML = '';
+  // Quitar burbujas optimistas: ya llega su versión real del servidor
+  var opt = c.querySelectorAll('.sc-msg-optimistic');
+  for (var i = 0; i < opt.length; i++) opt[i].remove();
   messages.forEach(function(m) { scAddMessageBubble(m, c); });
   c.scrollTop = c.scrollHeight;
   if (!scState.open) {
@@ -4158,8 +4166,15 @@ function scAppendMessages(messages) {
 }
 
 function scAddMessageBubble(m, container) {
+  var realId = (m.id != null && String(m.id).indexOf('tmp-') !== 0) ? m.id : null;
+  if (realId != null) {
+    if (scState.seen[realId]) return;   // ya pintado → no duplicar
+    scState.seen[realId] = true;
+  }
   var div = document.createElement('div');
   div.className = 'sc-msg ' + (m.sender === 'user' ? 'sc-msg-user' : 'sc-msg-admin');
+  if (realId != null) div.setAttribute('data-msg-id', realId);
+  else div.className += ' sc-msg-optimistic';
   var html = '';
   if (m.text) html += '<div>' + scEscape(m.text) + '</div>';
   if (m.image_data) {

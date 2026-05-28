@@ -3349,6 +3349,8 @@ var supState = {
   pollInterval: null,
   pendingImage: null,
   badgeInitDone: false,
+  seen: {},        // IDs reales ya pintados (dedup)
+  fetching: false, // guard anti-concurrencia
 };
 
 function sup_filter(f, el){
@@ -3417,6 +3419,8 @@ function sup_stopPolling(){
 
 async function sup_loadMessages(initial){
   if(!supState.selectedId) return;
+  if(!initial && supState.fetching) return;   // guard solo en polls
+  supState.fetching = true;
   try{
     var res = await apiFetch('/admin/support/chats/' + supState.selectedId + '/messages?since=' + supState.lastMessageId);
     if(!res || !res.ok) return;
@@ -3433,12 +3437,13 @@ async function sup_loadMessages(initial){
     if(initial) sup_renderMsgs(msgs);
     else if(msgs.length > 0) sup_appendMsgs(msgs);
     if(msgs.length > 0) supState.lastMessageId = msgs[msgs.length - 1].id;
-  }catch(e){}
+  }catch(e){} finally { supState.fetching = false; }
 }
 
 function sup_renderMsgs(msgs){
   var c = document.getElementById('sup-detail-msgs');
   c.innerHTML = '';
+  supState.seen = {};   // reset dedup al re-renderizar todo
   if(msgs.length === 0){
     c.innerHTML = '<div class="sup-msgs-empty">Sin mensajes aún</div>';
     return;
@@ -3450,14 +3455,24 @@ function sup_renderMsgs(msgs){
 function sup_appendMsgs(msgs){
   var c = document.getElementById('sup-detail-msgs');
   if(c.querySelector('.sup-msgs-empty')) c.innerHTML = '';
+  // Quitar burbujas optimistas: ya llega su versión real del servidor
+  var opt = c.querySelectorAll('.sup-bubble-optimistic');
+  for(var i = 0; i < opt.length; i++) opt[i].remove();
   msgs.forEach(function(m){ sup_addBubble(m, c); });
   c.scrollTop = c.scrollHeight;
 }
 
 function sup_addBubble(m, container){
+  var realId = (m.id != null && String(m.id).indexOf('tmp-') !== 0) ? m.id : null;
+  if(realId != null){
+    if(supState.seen[realId]) return;   // ya pintado → no duplicar
+    supState.seen[realId] = true;
+  }
   var isAdmin = m.sender === 'admin';
   var div = document.createElement('div');
   div.className = 'sup-bubble ' + (isAdmin ? 'sup-bubble-admin' : 'sup-bubble-user');
+  if(realId != null) div.setAttribute('data-msg-id', realId);
+  else div.className += ' sup-bubble-optimistic';
   var html = '';
   if(m.text) html += '<div>' + sup_esc(m.text).replace(/\n/g, '<br>') + '</div>';
   if(m.image_data){
