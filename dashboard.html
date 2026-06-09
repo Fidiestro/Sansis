@@ -1289,27 +1289,45 @@ async function claimInvestmentEarnings(invId,earnings,kind){
   // (la comisión de referido la calcula el backend; aquí mostramos el caso sin referido como min recibido)
   var minNet=earnings-sanseCommission;
 
-  var msg='¿Retirar ganancias de '+label+'?\n\nBruto: '+formatCOP(earnings);
+  var msg='¿Reclamar ganancias de '+label+'?\n\nBruto: '+formatCOP(earnings);
   if(sanseCommission>0)msg+='\nComisión Sanse 20%: -'+formatCOP(sanseCommission);
   msg+='\nRecibirás: '+formatCOP(minNet)+(sanseCommission>0?'':'\n\n(Si tienes referido, se descuenta 5% adicional)');
 
   if(!confirm(msg))return;
 
   try{
-    var res=await apiFetch('/investments/'+invId+'/withdraw-earnings',{method:'POST'});
+    // LP COP: endpoint nuevo de pago mensual. Reclama TODO lo acumulado del usuario.
+    // Pool: endpoint clásico por inversión (con comisión 20%).
+    var res;
+    if(isPool){
+      res=await apiFetch('/investments/'+invId+'/withdraw-earnings',{method:'POST'});
+    }else{
+      res=await apiFetch('/investments/lp/claim',{method:'POST'});
+    }
     if(res&&res.status===404){
       toast('Solicita el retiro por WhatsApp al admin','error');
       setTimeout(function(){window.open('https://wa.me/573194552890?text=Quiero retirar mis ganancias de '+label+' - ID inv: '+invId,'_blank')},500);
       return;
     }
     var d=await res.json();
-    if(!res.ok)return toast(d.error||'Error al retirar','error');
+    if(!res.ok)return toast(d.error||'Error al reclamar','error');
 
-    // El backend devuelve el desglose real (con comisión de referido si aplica)
-    var realGross=d.grossEarnings||earnings;
-    var realSanse=d.sanseCommission||d.commission||0;
-    var realRef=d.referralCommission||0;
-    var realNet=d.netAmount||(realGross-realSanse-realRef);
+    // Normalizar respuesta según el endpoint:
+    //  • Pool (viejo): {grossEarnings, sanseCommission/commission, referralCommission, netAmount}
+    //  • LP COP (/lp/claim): {claimed:{netToUser, referralCommission, ...}}
+    var realGross,realSanse,realRef,realNet;
+    if(isPool){
+      realGross=d.grossEarnings||earnings;
+      realSanse=d.sanseCommission||d.commission||0;
+      realRef=d.referralCommission||0;
+      realNet=d.netAmount||(realGross-realSanse-realRef);
+    }else{
+      var cl=d.claimed||{};
+      realNet=cl.netToUser||0;
+      realRef=cl.referralCommission||0;
+      realSanse=0; // LP COP no tiene comisión Sanse
+      realGross=realNet+realRef;
+    }
 
     // Animación de retiro exitoso
     if(!document.getElementById('wr-anims')){var st=document.createElement('style');st.id='wr-anims';st.textContent='@keyframes wrScale{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}@keyframes wrBounce{0%{transform:scale(0)}50%{transform:scale(1.25)}100%{transform:scale(1)}}@keyframes wrFade{from{opacity:0}to{opacity:1}}';document.head.appendChild(st);}
@@ -1326,7 +1344,7 @@ async function claimInvestmentEarnings(invId,earnings,kind){
     ov.innerHTML='<div style="background:var(--bg2);border:1px solid rgba(16,185,129,.3);border-radius:20px;padding:28px;text-align:center;max-width:380px;width:100%;animation:wrScale .4s ease">'
       +'<div style="font-size:52px;margin-bottom:8px;animation:wrBounce .6s ease">💰</div>'
       +'<div style="font-size:20px;font-weight:700;color:var(--grn);margin-bottom:4px">¡Retiro Exitoso!</div>'
-      +'<div style="font-size:11px;color:var(--mut);margin-bottom:18px">'+label+' #'+invId+'</div>'
+      +'<div style="font-size:11px;color:var(--mut);margin-bottom:18px">'+label+(isPool?' #'+invId:' · rendimientos mensuales')+'</div>'
       +'<div style="font-family:Space Mono,monospace;font-size:30px;font-weight:700;color:var(--text);margin-bottom:4px">+'+formatCOP(realNet)+'</div>'
       +'<div style="font-size:11px;color:var(--mut);margin-bottom:18px">Acreditado a tu balance disponible</div>'
       +'<div style="background:var(--sur);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;margin-bottom:18px;text-align:left">'+breakdownRows+'</div>'
