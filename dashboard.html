@@ -836,6 +836,16 @@ function parseAmount(input){
 }
 function formatDate(d){if(!d)return '—';const dt=new Date(d);if(isNaN(dt.getTime()))return '—';return dt.toLocaleDateString('es-CO',{day:'numeric',month:'short',year:'numeric'})}
 
+// LP COP paga el día 1 de cada mes. Devuelve la fecha del próximo día 1
+// y los días que faltan, para mostrar "Próximo pago" en lugar del contador en vivo.
+function nextPayoutInfo(){
+  const now=new Date();
+  const next=new Date(now.getFullYear(),now.getMonth()+1,1);
+  const msLeft=next-now;
+  const daysLeft=Math.max(0,Math.ceil(msLeft/(1000*60*60*24)));
+  return {date:next,daysLeft:daysLeft,label:next.toLocaleDateString('es-CO',{day:'numeric',month:'short'})};
+}
+
 // ══════════════════ STATE ══════════════════
 let dashboardData=null;
 let balanceSummary={totalBalance:0,totalInvested:0,availableBalance:0,totalEarnings:0,pendingWithdrawals:0};
@@ -1150,10 +1160,6 @@ function renderInvCard(inv){
     }
   }
 
-  // canClaimNow del backend, o si no viene, asumimos que sí (sin cooldown verificable client-side)
-  const canClaimNow=inv.canClaimNow!==undefined?!!inv.canClaimNow:(liveClaimable>=10);
-  const nextClaimAt=inv.nextClaimAt?new Date(inv.nextClaimAt):null;
-
   // "Ganancias retiradas" = neto histórico ya cobrado.
   // Pool: neto = 80% del bruto retirado.
   // CDTC: neto = 100% (sin comisión Sanse), pero descuenta 5% si tenía referido.
@@ -1190,17 +1196,18 @@ function renderInvCard(inv){
     </div>`;
   }
 
-  // CDTC: mostrar contador animado de ganancias acumuladas en tiempo real
-  // (usa data-* para que startEarningsAnimation lo actualice cada segundo)
-  // grossPaid = el "ya reclamado" en BRUTO, calculado por el backend en liveAccrued - liveClaimable.
-  // Lo guardamos como atributo para que la animación local lo descuente del cálculo bruto.
+  // CDTC / LP COP: el rendimiento se paga el día 1 de cada mes (2% mensual).
+  // En lugar del contador en vivo, mostramos el acumulado pendiente (estático)
+  // y la fecha del próximo pago.
   const start=new Date(inv.startDate||inv.start_date||Date.now());
-  const liveAccrued=parseFloat(inv.liveAccrued)||0;
-  const grossAlreadyClaimed=Math.max(0,liveAccrued-liveClaimable);
+  // Acumulado pendiente de reclamo: lo que envía el backend (accrued) o el claimable.
+  const accruedPending=parseFloat(inv.accruedPending)||parseFloat(inv.liveClaimable)||liveClaimable||0;
+  const payout=nextPayoutInfo();
   const cdtcPendingCell=(!isPool&&isActive)
-    ? `<div class="inv-cell earning-live">
-        <div class="inv-cell-lbl"><span class="pulse-dot"></span>Acumulando (2%)</div>
-        <div class="inv-cell-val amb" data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-claimed="${grossAlreadyClaimed}">+${formatCOPDecimal(liveClaimable)}</div>
+    ? `<div class="inv-cell">
+        <div class="inv-cell-lbl">${accruedPending>0?'Acumulado · por reclamar':'Próximo pago'}</div>
+        <div class="inv-cell-val amb">${accruedPending>0?'+'+formatCOP(accruedPending):'1 '+payout.label.split(' ').slice(-1)[0]}</div>
+        <div style="font-size:10px;color:var(--mut);margin-top:3px">Próximo pago: ${payout.label} · en ${payout.daysLeft} día${payout.daysLeft===1?'':'s'}</div>
       </div>`
     : `<div class="inv-cell">
         <div class="inv-cell-lbl">${withdrawable>0?'<span class="pulse-dot"></span>Por retirar':'Sin pendientes'}</div>
@@ -1213,18 +1220,12 @@ function renderInvCard(inv){
     if(isPool&&withdrawable>0){
       // Pool: botón con monto fijo de withdrawable_earnings
       claimButton=`<div style="margin-top:12px"><button class="btn btn-sm" style="width:100%;background:var(--amb);color:white;border:none;padding:10px;border-radius:7px;font-weight:600;font-size:12px;cursor:pointer" onclick="event.stopPropagation();claimInvestmentEarnings(${inv.id},${withdrawable},'pool')">💰 Retirar Ganancias</button></div>`;
-    } else if(!isPool && liveClaimable>=10){
-      // CDTC: botón si hay >= $10 acumulado (umbral bajo para claim flexible)
-      if(canClaimNow){
-        claimButton=`<div style="margin-top:12px"><button class="btn btn-sm" data-cdtc-claim-btn="${inv.id}" style="width:100%;background:linear-gradient(135deg,var(--amb),var(--grn));color:white;border:none;padding:10px;border-radius:7px;font-weight:700;font-size:12px;cursor:pointer" onclick="event.stopPropagation();claimInvestmentEarnings(${inv.id},${liveClaimable},'cdtc')">💰 Reclamar +${formatCOPDecimal(liveClaimable)}</button></div>`;
-      } else if(nextClaimAt){
-        const msToNext=nextClaimAt-new Date();
-        const hLeft=Math.max(0,Math.floor(msToNext/(1000*60*60)));
-        const mLeft=Math.max(0,Math.floor((msToNext%(1000*60*60))/(1000*60)));
-        claimButton=`<div style="margin-top:12px"><button class="btn btn-sm" disabled style="width:100%;background:var(--sur);color:var(--mut);border:1px solid var(--bd);padding:10px;border-radius:7px;font-weight:600;font-size:12px;cursor:not-allowed">⏱️ Próximo claim en ${hLeft}h ${mLeft}m</button></div>`;
-      }
-    } else if(!isPool && liveClaimable>0 && liveClaimable<10){
-      claimButton=`<div style="margin-top:12px"><button class="btn btn-sm" disabled style="width:100%;background:var(--sur);color:var(--mut);border:1px solid var(--bd);padding:10px;border-radius:7px;font-weight:600;font-size:11px;cursor:not-allowed">Mínimo $10 para reclamar</button></div>`;
+    } else if(!isPool && accruedPending>=10){
+      // LP COP: hay rendimiento acumulado (pagado el día 1) listo para reclamar.
+      claimButton=`<div style="margin-top:12px"><button class="btn btn-sm" style="width:100%;background:linear-gradient(135deg,var(--amb),var(--grn));color:white;border:none;padding:10px;border-radius:7px;font-weight:700;font-size:12px;cursor:pointer" onclick="event.stopPropagation();claimInvestmentEarnings(${inv.id},${accruedPending},'cdtc')">💰 Reclamar +${formatCOP(accruedPending)}</button></div>`;
+    } else if(!isPool){
+      // LP COP sin acumulado aún: informar cuándo llega el próximo pago.
+      claimButton=`<div style="margin-top:12px"><button class="btn btn-sm" disabled style="width:100%;background:var(--sur);color:var(--mut);border:1px solid var(--bd);padding:10px;border-radius:7px;font-weight:600;font-size:12px;cursor:default">📅 Próximo pago: ${payout.label} (en ${payout.daysLeft} día${payout.daysLeft===1?'':'s'})</button></div>`;
     }
   }
 
@@ -1252,8 +1253,8 @@ function renderInvCard(inv){
         <div class="inv-cell-val blu">${formatCOP(cap)}</div>
       </div>
       <div class="inv-cell">
-        <div class="inv-cell-lbl">${isPool?'Mi APY mensual':'APY mensual'}</div>
-        <div class="inv-cell-val">${myAPY.toFixed(2)}%</div>
+        <div class="inv-cell-lbl">${isPool?'Mi APY mensual':'Tasa mensual'}</div>
+        <div class="inv-cell-val">${isPool?myAPY.toFixed(2)+'%':'2.00%'}</div>
       </div>
       <div class="inv-cell">
         <div class="inv-cell-lbl">Ganancias retiradas</div>
@@ -1267,73 +1268,12 @@ function renderInvCard(inv){
   </div>`;
 }
 
-// Update pending earnings animation — recalculates every 10 SECONDS
-// con transición CSS suave para no marear con el contador a 1s.
-// CDTC genera 2% mensual fijo, calculado proporcionalmente al segundo.
-//   liveAccrued = capital × 0.02 × (segundos / 2.592.000)   [30 días = 1 mes contable]
-//   claimable   = liveAccrued - lo ya reclamado en bruto (registrado en data-claimed)
-// Mostrar con 2 DECIMALES (centavos visibles). Threshold mínimo claim: $10.
-// También actualiza el monto del botón "Reclamar" si existe.
+// Update pending earnings animation
+// LP COP ahora paga el día 1 de cada mes (no se acumula al segundo).
+// Esta función se conserva como no-op para no romper las llamadas existentes
+// y para limpiar cualquier intervalo de animación previo.
 function startEarningsAnimation(){
-  if(window._earningsInterval)clearInterval(window._earningsInterval);
-
-  const SECONDS_PER_MONTH=30*24*60*60; // 2.592.000
-
-  const updateAll=()=>{
-    const elements=document.querySelectorAll('[data-pending-live]');
-    // DEBUG: log first run to console so the user can verify in F12
-    if(!window._earningsDebugged){
-      window._earningsDebugged=true;
-      console.log('[CDTC Anim] Elementos encontrados:',elements.length);
-      elements.forEach((el,i)=>{
-        console.log(`[CDTC Anim #${i}] id=${el.getAttribute('data-pending-live')} cap=${el.dataset.capital} start=${el.dataset.start} claimed=${el.dataset.claimed}`);
-      });
-    }
-
-    elements.forEach(el=>{
-      const cap=parseFloat(el.dataset.capital)||0;
-      const startStr=el.dataset.start||'';
-      const start=new Date(startStr);
-      const claimed=parseFloat(el.dataset.claimed)||0;
-      const now=new Date();
-
-      // Validación de datos: si la fecha es inválida o el capital es 0, mostrar $0
-      if(!cap || isNaN(start.getTime())){
-        if(el.textContent!=='+$0,00')el.textContent='+$0,00';
-        if(!window._earningsBadData){
-          window._earningsBadData=true;
-          console.warn('[CDTC Anim] DATOS INVÁLIDOS — cap:',cap,'start:',startStr,'isNaN(start):',isNaN(start.getTime()));
-        }
-        return;
-      }
-
-      const seconds=Math.max(0,(now-start)/1000);
-      const gross=cap*0.02*(seconds/SECONDS_PER_MONTH);
-      const live=Math.max(0,gross-claimed);  // sin redondeo, decimales precisos
-      const newText='+'+formatCOPDecimal(live);
-
-      // Solo actualizar si cambió (evita re-pintar innecesario)
-      if(el.textContent!==newText){
-        // Animación visual: flash verde sutil durante 800ms
-        el.classList.add('cdtc-live-val','tick');
-        el.textContent=newText;
-        setTimeout(()=>el.classList.remove('tick'),800);
-      } else if(!el.classList.contains('cdtc-live-val')){
-        el.classList.add('cdtc-live-val');
-      }
-
-      // Sincronizar con el botón de claim (si está activo y no en cooldown)
-      const invId=el.getAttribute('data-pending-live');
-      const btn=document.querySelector('[data-cdtc-claim-btn="'+invId+'"]');
-      if(btn&&!btn.disabled){
-        btn.textContent='💰 Reclamar +'+formatCOPDecimal(live);
-      }
-    });
-  };
-
-  // Primera ejecución inmediata + intervalo cada 10 segundos
-  updateAll();
-  window._earningsInterval=setInterval(updateAll,10000);
+  if(window._earningsInterval){clearInterval(window._earningsInterval);window._earningsInterval=null;}
 }
 
 // ══════════════════ CLAIM EARNINGS (Pool & CDTC) ══════════════════
@@ -3002,14 +2942,14 @@ function openInvestModal(type='cdtc'){
     document.getElementById('btn-invest').style.background='linear-gradient(135deg,var(--amb),var(--pur))';
   } else {
     document.getElementById('inf-producto').textContent='LP COP — Bajo Riesgo';
-    document.getElementById('inf-apy-l').textContent='APY mensual';
-    document.getElementById('inf-apy').textContent='~2.0%';
+    document.getElementById('inf-apy-l').textContent='Tasa mensual';
+    document.getElementById('inf-apy').textContent='2.0%';
     document.getElementById('inf-apy').style.color='var(--blu)';
     document.getElementById('inf-apy').className='v blu';
     document.getElementById('inf-min').textContent='$100,000 COP';
     document.getElementById('invest-amount').min='100000';
     document.getElementById('invest-amount').placeholder='Mín. $100,000';
-    document.getElementById('invest-disc').textContent='El capital quedará bloqueado durante el plazo seleccionado. Los rendimientos son variables y no garantizados.';
+    document.getElementById('invest-disc').textContent='Rendimiento del 2% mensual, pagado el día 1 de cada mes. El capital queda bloqueado durante el plazo seleccionado.';
     document.getElementById('btn-invest').style.background='';
   }
 
@@ -3049,10 +2989,11 @@ function updateInvestPreview(){
       const months=selectedPlan.months;
       const now=new Date();
       const unlock=new Date(now.getFullYear(),now.getMonth()+months,now.getDate());
-      const gain=Math.round(amt*0.02*months);
+      const gainPerMonth=Math.round(amt*0.02);
+      const gain=gainPerMonth*months;
       document.getElementById('pv-cap').textContent=formatCOP(amt);
       document.getElementById('pv-unlock').textContent=formatDate(unlock);
-      document.getElementById('pv-gain').textContent='+'+formatCOP(gain);
+      document.getElementById('pv-gain').innerHTML=`+${formatCOP(gainPerMonth)} / mes<div style="font-size:10px;color:var(--mut);margin-top:3px">Pagado el día 1 · ~${formatCOP(gain)} en ${months} meses</div>`;
     }
     p.style.display='block';
   }else{p.style.display='none'}
@@ -3131,21 +3072,12 @@ async function showInvestmentDetail(id){
     // 1 mes contable = 30 días = 2.592.000 segundos.
     // pendingGross = capital × 2% × (segundos_transcurridos / segundos_de_un_mes)
     const paidEarnings=returns.reduce((s,r)=>s+(parseFloat(r.earned)||0),0);
-    const secondsElapsed=Math.max(0,(now-start)/1000);
-    const SECONDS_PER_MONTH=30*24*60*60; // 2.592.000
-    const pendingGross=cap*0.02*(secondsElapsed/SECONDS_PER_MONTH);
-    const pendingLive=Math.max(0,pendingGross-paidEarnings);  // sin floor, con decimales
+    // LP COP paga el día 1 (2% mensual). Acumulado pendiente = lo que envía el backend.
+    const accruedPending=parseFloat(inv.accruedPending)||parseFloat(inv.liveClaimable)||0;
+    const payout=nextPayoutInfo();
 
     // APY fijo 2% para CDTC. (Pool tiene su propio render.)
     const myAPY=2.0;
-
-    // Datos de claim del backend (si vienen)
-    const canClaimNow=!!inv.canClaimNow;
-    const nextClaimAt=inv.nextClaimAt?new Date(inv.nextClaimAt):null;
-    let claimMsLeft=0;
-    if(nextClaimAt) claimMsLeft=Math.max(0,nextClaimAt-new Date());
-    const claimHoursLeft=Math.floor(claimMsLeft/(1000*60*60));
-    const claimMinsLeft=Math.floor((claimMsLeft%(1000*60*60))/(1000*60));
 
     c.innerHTML=`
     <div class="anim">
@@ -3168,22 +3100,22 @@ async function showInvestmentDetail(id){
         <div class="dh-cap">${formatCOP(cap)}</div>
       </div>
 
-      ${inv.status==='active'&&pendingLive>=10?`
+      ${inv.status==='active'?`
       <div style="margin-bottom:14px;padding:18px;background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(34,197,94,.08));border:1px solid rgba(245,158,11,.35);border-radius:12px;position:relative;overflow:hidden">
         <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--amb),var(--grn))"></div>
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
           <div>
-            <div style="font-size:10px;font-weight:700;color:var(--amb);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Ganancias acumuladas</div>
-            <div style="font-family:'Space Mono',monospace;font-size:28px;font-weight:700;color:var(--amb)" data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-claimed="${paidEarnings}">+${formatCOPDecimal(pendingLive)}</div>
-            <div style="font-size:11px;color:var(--mut);margin-top:4px">Generándose en tiempo real al 2% mensual</div>
+            <div style="font-size:10px;font-weight:700;color:var(--amb);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${accruedPending>0?'Acumulado · pendiente de reclamo':'Próximo pago'}</div>
+            <div style="font-family:'Space Mono',monospace;font-size:28px;font-weight:700;color:var(--amb)">${accruedPending>0?'+'+formatCOP(accruedPending):formatCOP(Math.round(cap*0.02))}</div>
+            <div style="font-size:11px;color:var(--mut);margin-top:4px">📅 Próximo pago el ${payout.label} · en ${payout.daysLeft} día${payout.daysLeft===1?'':'s'} (2% mensual)</div>
           </div>
-          ${canClaimNow?`
-          <button onclick="claimInvestmentEarnings(${inv.id},${pendingLive},'cdtc')" style="padding:14px 24px;background:linear-gradient(135deg,var(--amb),var(--grn));border:none;border-radius:10px;color:white;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap">
+          ${accruedPending>=10?`
+          <button onclick="claimInvestmentEarnings(${inv.id},${accruedPending},'cdtc')" style="padding:14px 24px;background:linear-gradient(135deg,var(--amb),var(--grn));border:none;border-radius:10px;color:white;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap">
             💰 Reclamar Ahora
-          </button>`:nextClaimAt?`
-          <button disabled style="padding:14px 20px;background:var(--sur);border:1px solid var(--bd);border-radius:10px;color:var(--mut);font-weight:600;font-size:12px;cursor:not-allowed;white-space:nowrap">
-            ⏱️ Próximo en ${claimHoursLeft}h ${claimMinsLeft}m
-          </button>`:''}
+          </button>`:`
+          <button disabled style="padding:14px 20px;background:var(--sur);border:1px solid var(--bd);border-radius:10px;color:var(--mut);font-weight:600;font-size:12px;cursor:default;white-space:nowrap">
+            Sin saldo por reclamar
+          </button>`}
         </div>
       </div>`:''}
 
@@ -3193,15 +3125,15 @@ async function showInvestmentDetail(id){
           <div class="dm-val grn">+${formatCOP(paidEarnings)}</div>
           <div class="dm-sub">${returns.length} ${returns.length===1?'claim':'claims'} hecho${returns.length===1?'':'s'}</div>
         </div>
-        <div class="dm-item pend earning-live">
-          <div class="dm-lbl"><span class="pulse-dot"></span>Acumulando</div>
-          <div class="dm-val amb" data-pending-live="${inv.id}" data-capital="${cap}" data-start="${start.toISOString()}" data-claimed="${paidEarnings}">+${formatCOPDecimal(pendingLive)}</div>
-          <div class="dm-sub">2% mensual fijo</div>
+        <div class="dm-item pend">
+          <div class="dm-lbl">Próximo pago</div>
+          <div class="dm-val amb">${payout.label}</div>
+          <div class="dm-sub">en ${payout.daysLeft} día${payout.daysLeft===1?'':'s'}</div>
         </div>
         <div class="dm-item apy">
-          <div class="dm-lbl">APY mensual</div>
+          <div class="dm-lbl">Tasa mensual</div>
           <div class="dm-val blu">${myAPY.toFixed(2)}%</div>
-          <div class="dm-sub">Tasa fija garantizada</div>
+          <div class="dm-sub">Tasa fija</div>
         </div>
         <div class="dm-item time">
           <div class="dm-lbl">Tiempo activo</div>
@@ -4496,230 +4428,5 @@ async function scPrime() {
   }, 1500);
 })();
 </script>
-<script>
-(function(){
-  'use strict';
-
-  // ── 1) Inyectar item "Cadenas" en el sidebar (después de Préstamos) ──
-  function injectNav(){
-    var loansLink = document.querySelector('.nav-item[onclick*="loans"]');
-    var nav = document.querySelector('.sb-nav .sb-section');
-    if(!nav) return;
-    var a = document.createElement('a');
-    a.className = 'nav-item'; a.href = '#'; a.id = 'cad-nav';
-    a.setAttribute('onclick','cadShow(this);return false');
-    a.innerHTML = '<svg class="ni" viewBox="0 0 24 24"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="12" r="3"/><circle cx="12" cy="6" r="3"/><circle cx="12" cy="18" r="3"/></svg> Cadenas';
-    if(loansLink && loansLink.parentNode){
-      loansLink.parentNode.insertBefore(a, loansLink.nextSibling);
-    } else { nav.appendChild(a); }
-  }
-
-  // ── 2) Enganchar el router sin romper el existente ──
-  window._cadActive = false;
-  var _origRender = window.renderCurrentView;
-  window.renderCurrentView = function(){
-    if(window._cadActive){ cadRenderList(); return; }
-    return _origRender ? _origRender.apply(this, arguments) : undefined;
-  };
-  var _origShowView = window.showView;
-  window.showView = function(view, el){
-    window._cadActive = false;
-    return _origShowView ? _origShowView.call(this, view, el) : undefined;
-  };
-
-  window.cadShow = function(el){
-    window._cadActive = true;
-    document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
-    if(el) el.classList.add('active');
-    var sb = document.getElementById('sidebar');
-    if(window.innerWidth < 1024 && sb) sb.classList.remove('open');
-    cadRenderList();
-    window.scrollTo({top:0,behavior:'smooth'});
-  };
-
-  // ── Helpers ──
-  function fc(n){ return (typeof formatCOP==='function') ? formatCOP(n) : ('$'+Math.round(n||0).toLocaleString('es-CO')); }
-  function fd(d){ if(!d) return '—'; try{ return new Date(d).toLocaleDateString('es-CO',{day:'numeric',month:'short',year:'numeric'}); }catch(e){ return '—'; } }
-  function freqLabel(f){ return f==='weekly'?'Semanal':f==='biweekly'?'Quincenal':'Mensual'; }
-  function statusPill(s){
-    var map={open:['Inscripciones abiertas','var(--grn)','rgba(16,185,129,.1)'],active:['Activa','var(--blu)','rgba(79,142,247,.1)'],completed:['Completada','var(--mut)','var(--sur)'],cancelled:['Cancelada','var(--red)','rgba(239,68,68,.08)']};
-    var m=map[s]||['—','var(--mut)','var(--sur)'];
-    return '<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;background:'+m[2]+';color:'+m[1]+'">'+m[0]+'</span>';
-  }
-
-  // ── 3) Lista de cadenas ──
-  window.cadRenderList = async function(){
-    var c = document.getElementById('dashboard-content');
-    if(!c) return;
-    c.innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando cadenas…</p></div>';
-    try{
-      var elig = {eligible:false, requirement:''};
-      try{ var er = await apiFetch('/cadenas/eligibility'); if(er&&er.ok) elig = await er.json(); }catch(e){}
-      var res = await apiFetch('/cadenas');
-      var data = (res && res.ok) ? await res.json() : {cadenas:[]};
-      var list = data.cadenas || [];
-
-      var eligBanner = elig.eligible
-        ? '<div style="display:flex;align-items:center;gap:8px;padding:12px 14px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;margin-bottom:14px;font-size:12px;color:var(--grn)"><span>✓</span><span>Cumples el requisito para participar en cadenas.</span></div>'
-        : '<div style="padding:14px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:10px;margin-bottom:14px;font-size:12px;color:var(--mut);line-height:1.6"><strong style="color:var(--amb);display:block;margin-bottom:4px">🔒 Aún no puedes inscribirte</strong>'+(elig.requirement||'Necesitas una inversión activa que cumpla el requisito.')+'<br><button onclick="showViewByName(\'investments\')" style="margin-top:10px;padding:9px 16px;background:linear-gradient(135deg,var(--blu),var(--pur));border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Ir a invertir →</button></div>';
-
-      var cards = list.length ? list.map(function(x){ return cadCard(x, elig); }).join('')
-        : '<div class="empty"><span class="empty-icon">🔗</span>No hay cadenas disponibles por ahora.</div>';
-
-      c.innerHTML =
-        '<div class="anim" style="max-width:720px">'
-        + '<div class="invest-hero"><div class="ih-head"><h3 class="ih-title">Cadenas de Ahorro</h3>'
-        + '<p class="ih-sub">Ahorro grupal rotativo · '+list.length+' '+(list.length===1?'cadena':'cadenas')+'</p></div></div>'
-        + '<div style="display:inline-block;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:rgba(245,158,11,.12);color:var(--amb);border:1px solid rgba(245,158,11,.3);padding:3px 9px;border-radius:10px;margin-bottom:14px">Beta · Piloto</div>'
-        + eligBanner
-        + cards
-        + '<div style="font-size:11px;color:var(--mut);line-height:1.7;padding:14px;background:var(--sur);border-radius:10px;margin-top:14px"><strong style="color:var(--text);display:block;margin-bottom:4px">¿Cómo funciona?</strong>Cada período todos aportan la misma cuota y un participante recibe el total acumulado (la cuota × número de inscritos). Cuando más personas se inscriben, mayor es el pozo y más tarda en terminar la cadena.</div>'
-        + '</div>';
-    }catch(e){
-      console.error('[cadenas] list', e);
-      c.innerHTML = '<div class="empty"><span class="empty-icon">⚠️</span>Error cargando las cadenas</div>';
-    }
-  };
-
-  function cadCard(x, elig){
-    var pot = fc(x.potValue||0);
-    var canJoin = x.status==='open' && !x.iAmIn && elig.eligible;
-    var deadlinePassed = new Date() > new Date((x.registrationDeadline||'')+'T23:59:59');
-    var btn='';
-    if(x.iAmIn){
-      btn = '<button class="prod-cta" onclick="event.stopPropagation();cadDetail('+x.id+')">Ver mi cadena →</button>';
-    } else if(x.status==='open' && !deadlinePassed){
-      if(canJoin){
-        btn = '<button class="prod-cta" onclick="event.stopPropagation();cadJoin('+x.id+')">Inscribirme</button>';
-      } else if(!elig.eligible){
-        btn = '<button class="prod-cta" disabled style="opacity:.5;cursor:not-allowed">🔒 Requiere inversión</button>';
-      }
-    } else if(x.status==='open' && deadlinePassed){
-      btn = '<button class="prod-cta" disabled style="opacity:.5;cursor:not-allowed">Inscripción cerrada</button>';
-    }
-    return ''
-    + '<div class="inv-card" style="cursor:'+(x.iAmIn?'pointer':'default')+'" '+(x.iAmIn?'onclick="cadDetail('+x.id+')"':'')+'>'
-      + '<div class="inv-head"><div class="inv-type-wrap">'
-        + '<div class="inv-type">'+(x.name||'Cadena')+' <span class="plazo">— '+freqLabel(x.frequency)+'</span></div>'
-        + '<span class="risk-tag medium">Cuota fija</span>'
-      + '</div>'+statusPill(x.status)+'</div>'
-      + '<div class="inv-body">'
-        + cell('Cuota / período', fc(x.cuota), 'blu')
-        + cell('Pozo aprox', pot, 'amb')
-        + cell('Inscritos', (x.participants||0)+'', '')
-        + cell('Frecuencia', freqLabel(x.frequency), '')
-      + '</div>'
-      + '<div class="inv-body" style="margin-top:10px">'
-        + cell('Inicio', fd(x.startDate), 'grn')
-        + cell('Cierre inscripción', fd(x.registrationDeadline), 'amb')
-        + cell('Termina aprox', x.estimatedEndDate?fd(x.estimatedEndDate):'—', 'pur')
-        + cell('Períodos', (x.totalPeriods||x.participants||0)+'', '')
-      + '</div>'
-      + (x.iAmIn?'<div style="margin-top:10px;font-size:11px;color:var(--grn);font-weight:600">✓ Ya estás inscrito</div>':'')
-      + (btn?'<div style="margin-top:14px">'+btn+'</div>':'')
-    + '</div>';
-  }
-  function cell(lbl, val, cls){
-    return '<div class="inv-cell"><div class="inv-cell-lbl">'+lbl+'</div><div class="inv-cell-val '+(cls||'')+'">'+val+'</div></div>';
-  }
-
-  // ── 4) Detalle de la cadena ──
-  window.cadDetail = async function(id){
-    var c = document.getElementById('dashboard-content');
-    if(!c) return;
-    c.innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando…</p></div>';
-    try{
-      var res = await apiFetch('/cadenas/'+id);
-      var x = (res && res.ok) ? await res.json() : null;
-      if(!x){ c.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span>No se pudo cargar</div>'; return; }
-
-      var membersHtml = (x.members||[]).map(function(m){
-        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd);font-size:13px">'
-          + '<span style="'+(m.isMe?'color:var(--blu);font-weight:700':'')+'">'+(m.turn?('<span style="font-family:Space Mono,monospace;color:var(--mut);margin-right:8px">#'+m.turn+'</span>'):'')+(m.name||'—')+(m.isMe?' (tú)':'')+'</span>'
-          + (m.turn && x.currentPeriod>0 ? (m.turn<x.currentPeriod?'<span style="font-size:10px;color:var(--grn)">recibió</span>':(m.turn===x.currentPeriod?'<span style="font-size:10px;color:var(--amb)">turno actual</span>':'<span style="font-size:10px;color:var(--mut)">en espera</span>')):'')
-        + '</div>';
-      }).join('');
-
-      var payBtn='';
-      if(x.status==='active' && x.iAmIn){
-        if(x.currentPeriod>0 && !x.paidCurrentPeriod){
-          payBtn = '<button class="prod-cta" style="margin-top:12px" onclick="cadPay('+id+')">💸 Pagar cuota período '+x.currentPeriod+' · '+fc(x.cuota)+'</button>';
-        } else if(x.paidCurrentPeriod){
-          payBtn = '<div style="margin-top:12px;padding:12px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;text-align:center;font-size:12px;color:var(--grn)">✓ Cuota del período '+x.currentPeriod+' pagada</div>';
-        }
-      }
-      var claimBtn = x.canClaim
-        ? '<div style="margin-top:12px;padding:18px;background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(124,92,252,.08));border:1px solid rgba(245,158,11,.35);border-radius:12px"><div style="font-size:10px;font-weight:700;color:var(--amb);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">¡Es tu turno!</div><div style="font-family:Space Mono,monospace;font-size:26px;font-weight:700;color:var(--amb);margin-bottom:10px">'+fc(x.potValue)+'</div><button class="prod-cta" style="background:linear-gradient(135deg,var(--amb),var(--grn))" onclick="cadClaim('+id+')">💰 Reclamar el pozo</button></div>'
-        : '';
-
-      var collected = (x.currentPeriod>0) ? '<div style="font-size:11px;color:var(--mut);margin-top:8px">Recaudado período '+x.currentPeriod+': <strong style="color:var(--text)">'+fc(x.currentCollected||0)+'</strong> ('+(x.currentPaidCount||0)+'/'+x.participants+' pagaron)</div>' : '';
-
-      c.innerHTML =
-        '<div class="anim" style="max-width:680px">'
-        + '<div class="detail-header"><button class="btn-back" onclick="cadShow(document.getElementById(\'cad-nav\'))"><svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Volver</button></div>'
-        + '<div class="detail-hero"><div class="dh-top"><div class="inv-type-wrap"><div class="inv-type">'+(x.name||'Cadena')+'</div><span class="risk-tag medium">'+freqLabel(x.frequency)+'</span></div>'+statusPill(x.status)+'</div>'
-        + '<div class="dh-ttl">Pozo de la cadena</div><div class="dh-cap" style="color:var(--amb)">'+fc(x.potValue)+'</div>'
-        + '<div style="font-size:12px;color:var(--mut);margin-top:6px">'+(x.participants||0)+' inscritos · cuota '+fc(x.cuota)+' por '+freqLabel(x.frequency).toLowerCase()+'</div></div>'
-        + claimBtn
-        + '<div class="detail-metrics" style="margin-top:14px">'
-          + dm('Mi turno', x.myTurn?('#'+x.myTurn):'—', 'pur')
-          + dm('Período actual', x.currentPeriod>0?(x.currentPeriod+'/'+x.totalPeriods):'No iniciado', 'blu')
-          + dm('Inicio', fd(x.startDate), 'grn')
-          + dm('Termina aprox', x.estimatedEndDate?fd(x.estimatedEndDate):'—', 'amb')
-        + '</div>'
-        + payBtn
-        + collected
-        + '<div class="card" style="padding:18px;margin-top:14px"><div style="font-size:13px;font-weight:700;margin-bottom:10px">Participantes y turnos</div>'+(membersHtml||'<div style="color:var(--mut);font-size:12px">Sin participantes</div>')+'</div>'
-        + (x.notes?'<div style="font-size:12px;color:var(--mut);padding:14px;background:var(--sur);border-radius:10px;margin-top:14px">'+x.notes+'</div>':'')
-        + '</div>';
-    }catch(e){
-      console.error('[cadenas] detail', e);
-      c.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span>Error cargando el detalle</div>';
-    }
-  };
-  function dm(lbl,val,cls){ return '<div class="dm-item '+(cls==='grn'?'paid':cls==='amb'?'pend':cls==='blu'?'apy':'time')+'"><div class="dm-lbl">'+lbl+'</div><div class="dm-val '+(cls||'')+'">'+val+'</div></div>'; }
-
-  // ── 5) Acciones ──
-  window.cadJoin = async function(id){
-    if(!confirm('¿Inscribirte en esta cadena? Te comprometes a pagar la cuota cada período.')) return;
-    try{
-      var r = await apiFetch('/cadenas/'+id+'/join',{method:'POST'});
-      var d = r?await r.json().catch(function(){return{};}):{};
-      if(!r||!r.ok){ toast(d.error||'No se pudo inscribir','error'); return; }
-      toast('✅ Te inscribiste en la cadena');
-      cadRenderList();
-    }catch(e){ toast('Error de conexión','error'); }
-  };
-
-  window.cadPay = async function(id){
-    if(!confirm('¿Pagar la cuota de este período? Se descontará de tu balance disponible.')) return;
-    try{
-      var r = await apiFetch('/cadenas/'+id+'/pay',{method:'POST'});
-      var d = r?await r.json().catch(function(){return{};}):{};
-      if(!r||!r.ok){ toast(d.error||'No se pudo pagar','error'); return; }
-      toast('✅ Cuota pagada');
-      if(typeof loadAllData==='function') await loadAllData();
-      cadDetail(id);
-    }catch(e){ toast('Error de conexión','error'); }
-  };
-
-  window.cadClaim = async function(id){
-    if(!confirm('¿Reclamar el pozo de tu turno? Se acreditará a tu balance disponible.')) return;
-    try{
-      var r = await apiFetch('/cadenas/'+id+'/claim',{method:'POST'});
-      var d = r?await r.json().catch(function(){return{};}):{};
-      if(!r||!r.ok){ toast(d.error||'No se pudo reclamar','error'); return; }
-      toast('✅ Pozo reclamado y acreditado');
-      if(typeof loadAllData==='function') await loadAllData();
-      cadDetail(id);
-    }catch(e){ toast('Error de conexión','error'); }
-  };
-
-  // Init: inyectar nav cuando el DOM esté listo
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', injectNav);
-  else injectNav();
-})();
-</script>
-<!-- ═══ Módulo Cadenas de Ahorro · inyectado automáticamente ═══ -->
 </body>
 </html>
