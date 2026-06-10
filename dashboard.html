@@ -845,7 +845,7 @@ async function loadAllData(){
       apiFetch('/loans/credit-score')
     ]).then(([gsR,loanR,scoreR])=>{
       if(gsR&&gsR.ok)gsR.json().then(d=>{globalStats=d;});
-      if(loanR&&loanR.ok)loanR.json().then(d=>{myLoans=d;});
+      if(loanR&&loanR.ok)loanR.json().then(d=>{myLoans=d;renderDashLoanBanner();});
       if(scoreR&&scoreR.ok)scoreR.json().then(d=>{creditScore=d;});
     }).catch(()=>{});
   }catch(e){console.error('Load error:',e)}
@@ -923,6 +923,8 @@ function renderDashboard(c){
       Retirar
     </button>
   </div>
+
+  <div id="dash-loan-banner"></div>
 
   <div class="stats-grid anim d1">
     <div class="stat-card">
@@ -1049,6 +1051,7 @@ function renderDashboard(c){
   </div>`;
 
   setTimeout(()=>drawPerfChart('1M'),100);
+  renderDashLoanBanner();
 }
 
 function showViewByName(v){
@@ -2157,6 +2160,79 @@ function renderMovementsView(c){
   </div>`;
 }
 
+
+// ══════════════════ BANNER DE PRÉSTAMO EN LA PÁGINA PRINCIPAL ══════════════════
+// Si el usuario tiene préstamos activos o en mora, se muestran resumidos en el
+// dashboard principal con el interés acumulado en vivo (mismo cálculo que renderLoanCard).
+function renderDashLoanBanner(){
+  const el=document.getElementById('dash-loan-banner');
+  if(!el)return;
+  // Normalizar igual que renderLoansView: loan_requests nuevos + legacy
+  const reqs=(myLoans.loanRequests||[]).filter(l=>l.status==='active'||l.status==='overdue');
+  const legacy=(myLoans.legacyLoans||[]).filter(l=>l.status==='active'||l.status==='overdue').map(l=>({
+    id:'leg-'+l.id, amount:l.amount, approvedAmount:l.amount, monthlyRate:l.monthlyRate,
+    startDate:l.startDate, status:l.status, lastPaymentAt:l.lastPaymentAt
+  }));
+  const active=[...reqs,...legacy];
+  if(!active.length){el.innerHTML='';return}
+
+  const SECONDS_PER_MONTH=30*24*60*60;
+  const calc=()=>{
+    let cap=0,interest=0,overdue=false;
+    active.forEach(l=>{
+      const c=parseFloat(l.approvedAmount||l.amount)||0;
+      const r=parseFloat(l.monthlyRate||l.approvedRate)||0;
+      // Mismo refDate que renderLoanCard: último abono reinicia el reloj
+      const ref=l.lastPaymentAt?new Date(l.lastPaymentAt):new Date(l.startDate||l.createdAt||Date.now());
+      const sec=Math.max(0,(Date.now()-ref)/1000);
+      cap+=c;
+      interest+=c*(r/100)*(sec/SECONDS_PER_MONTH);
+      if(l.status==='overdue')overdue=true;
+    });
+    return {cap,interest,total:cap+interest,overdue};
+  };
+  const s=calc();
+
+  el.innerHTML=`
+  <div class="inv-card anim d1" style="margin-bottom:14px;border-color:${s.overdue?'rgba(239,68,68,.45)':'rgba(245,158,11,.3)'}" onclick="showViewByName('loans')">
+    <div class="inv-card-top">
+      <div>
+        <div class="inv-name">🏦 ${s.overdue?'Préstamo en mora':'Préstamo activo'}${active.length>1?` (${active.length})`:''}</div>
+        <div class="inv-sub">Interés corriendo al segundo · toca para ver el detalle</div>
+      </div>
+      <span style="background:${s.overdue?'rgba(239,68,68,.15)':'rgba(245,158,11,.15)'};color:${s.overdue?'var(--red)':'var(--amb)'};padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;white-space:nowrap">${s.overdue?'EN MORA':'ACTIVO'}</span>
+    </div>
+    <div class="inv-grid" style="margin-top:12px">
+      <div>
+        <div class="inv-sub" style="margin:0 0 2px">Capital</div>
+        <div style="font-family:'Space Mono',monospace;font-weight:700;font-size:14px">${formatCOP(s.cap)}</div>
+      </div>
+      <div>
+        <div class="inv-sub" style="margin:0 0 2px">Interés acumulado</div>
+        <div id="dlb-interest" style="font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:var(--amb)">+${formatCOP(s.interest)}</div>
+      </div>
+      <div>
+        <div class="inv-sub" style="margin:0 0 2px">Total a pagar hoy</div>
+        <div id="dlb-total" style="font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:var(--red)">${formatCOP(s.total)}</div>
+      </div>
+      <div style="display:flex;align-items:center">
+        <button class="btn btn-sm" style="width:100%;background:linear-gradient(135deg,var(--blu),var(--pur));color:#fff;border:none;padding:9px;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer" onclick="event.stopPropagation();showViewByName('loans')">💸 Abonar</button>
+      </div>
+    </div>
+  </div>`;
+
+  // Ticker en vivo (cada 10s, igual que la vista de préstamos)
+  if(window._dashLoanInterval){clearInterval(window._dashLoanInterval);window._dashLoanInterval=null;}
+  window._dashLoanInterval=setInterval(()=>{
+    const iEl=document.getElementById('dlb-interest');
+    const tEl=document.getElementById('dlb-total');
+    if(!iEl||!tEl){clearInterval(window._dashLoanInterval);window._dashLoanInterval=null;return}
+    const u=calc();
+    iEl.textContent='+'+formatCOP(u.interest);
+    tEl.textContent=formatCOP(u.total);
+  },10000);
+}
+
 // ══════════════════ RENDER: LOANS ══════════════════
 function renderLoansView(c){
   // Combinar préstamos: nuevos (loan_requests con status='active'|'overdue') + legacy (loans)
@@ -2579,7 +2655,7 @@ async function submitLoanPay(loanId){
       ]);
       if(dashR&&dashR.ok){const dd=await dashR.json();if(dd)dashboardData=dd;}
       if(balR&&balR.ok){const bd=await balR.json();if(bd)balanceSummary=bd;}
-      if(loanR&&loanR.ok){const ld=await loanR.json();if(ld)myLoans=ld;}
+      if(loanR&&loanR.ok){const ld=await loanR.json();if(ld){myLoans=ld;renderDashLoanBanner();}}
       if(invR&&invR.ok){const id=await invR.json();if(Array.isArray(id))myInvestments=id;}
     }catch(e){console.error('Error refrescando datos post-pago:',e)}
 

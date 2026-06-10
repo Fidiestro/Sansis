@@ -1867,6 +1867,7 @@ function renderUsers(){
   // Mobile: list of cards
   let html='<div class="list">'+us.map(u=>{
     const b=isBlocked(u);
+    const wd=u.totalWithdrawn??u.total_withdrawn;
     return `<div class="row row-clickable" onclick="viewUser(${u.id})">
       <div class="row-top">
         <div style="min-width:0;flex:1">
@@ -1874,6 +1875,7 @@ function renderUsers(){
           <div class="row-name">${u.full_name||'—'}</div>
           <div class="row-meta" style="margin-top:4px">
             <span>${u.email||'—'}</span>
+            ${wd!=null?`<span class="warn">Retirado: <strong class="mono">${F(wd)}</strong></span>`:''}
           </div>
         </div>
         <div style="text-align:right">
@@ -1889,7 +1891,7 @@ function renderUsers(){
   }).join('')+'</div>';
 
   // Desktop: table
-  html+='<div class="table-wrap"><table><thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Balance</th><th>Invertido</th><th>Estado</th><th></th></tr></thead><tbody>'+
+  html+='<div class="table-wrap"><table><thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Balance</th><th>Invertido</th><th>Retirado</th><th>Estado</th><th></th></tr></thead><tbody>'+
     us.map(u=>{
       const b=isBlocked(u);
       return `<tr>
@@ -1898,6 +1900,7 @@ function renderUsers(){
         <td class="dim">${u.email||'—'}</td>
         <td class="mono acc">${F(u.balance||0)}</td>
         <td class="mono">${F(u.totalInvested||0)}</td>
+        <td class="mono warn">${(u.totalWithdrawn??u.total_withdrawn)!=null?F(u.totalWithdrawn??u.total_withdrawn):'—'}</td>
         <td>${pill(b?'blocked':'active')}</td>
         <td style="white-space:nowrap">
           <button class="btn btn-sm btn-ghost" onclick="viewUser(${u.id})">Ver</button>
@@ -1942,18 +1945,25 @@ async function viewUser(uid){
     const ti=ai.reduce((s,i)=>s+parseFloat(i.amount||0),0);
     const activeLoans=loans.filter(l=>l.status==='active'||l.status==='overdue');
     const totalLoaned=activeLoans.reduce((s,l)=>s+parseFloat(l.approved_amount||l.amount||0),0);
+    // Total retirado: suma de TODAS las transacciones tipo withdraw del usuario
+    const totalWithdrawn=(d.transactions||[]).filter(t=>t.type==='withdraw')
+      .reduce((s,t)=>s+Math.abs(parseFloat(t.amount||0)),0);
 
     // Guardar uid en State para que delTx() pueda recargar el modal
     State._viewingUserId = uid;
 
-    let html=`<div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr 1fr 1fr;margin-bottom:14px">
+    let html=`<div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr 1fr;margin-bottom:14px">
       <div class="stat"><div class="stat-label">Balance</div><div class="stat-value acc mono">${F(bal)}</div></div>
       <div class="stat"><div class="stat-label">Invertido</div><div class="stat-value pos mono">${F(ti)}</div></div>
       <div class="stat"><div class="stat-label">Préstamos</div><div class="stat-value mono" style="color:${totalLoaned>0?'var(--neg)':'var(--txt-3)'}">${F(totalLoaned)}</div></div>
+      <div class="stat"><div class="stat-label">Total retirado</div><div class="stat-value warn mono">${F(totalWithdrawn)}</div></div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:14px">
       <button class="btn btn-sm btn-primary" style="flex:1;justify-content:center" onclick="openCreateLoanModal(${uid},'${(u.full_name||'').replace(/'/g,'')}')">
         💰 Crear Préstamo
+      </button>
+      <button class="btn btn-sm btn-pos" style="flex:1;justify-content:center" onclick="openCreateInvestmentModal(${uid},'${(u.full_name||'').replace(/'/g,'')}')">
+        📈 Crear Inversión
       </button>
     </div>`;
 
@@ -1961,6 +1971,7 @@ async function viewUser(uid){
       html+=`<div style="font-family:var(--f-mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt-3);margin:18px 0 10px">Inversiones (${invs.length})</div>`;
       html+='<div class="list">'+invs.map(i=>{
         const isP=(i.type||'').toLowerCase().includes('pool');
+        const lbl=isP?'Fondo DGP':'LP COP';
         return `<div class="row">
           <div class="row-top">
             <div>
@@ -1970,6 +1981,9 @@ async function viewUser(uid){
             <div class="row-amount acc">${F(i.amount)}</div>
           </div>
           <div class="row-meta"><span>${pill(i.status)}</span></div>
+          ${i.status==='active'?`<div class="row-actions">
+            <button class="btn btn-sm btn-neg" onclick="revokeInvestment(${i.id},'${lbl}',${parseFloat(i.amount||0)},${parseFloat(i.totalEarned||0)})">🚫 Revocar</button>
+          </div>`:''}
         </div>`;
       }).join('')+'</div>';
     }
@@ -2177,6 +2191,180 @@ async function submitCreateLoan(userId){
     if(State._viewingUserId)await viewUser(State._viewingUserId);
     // Refrescar stats si la pestaña de loans está cargada
     if(typeof loadLoanStats==='function')loadLoanStats();
+  }catch(e){toast('Error de red','error')}
+}
+
+// ─── CREAR INVERSIÓN MANUAL (LP COP / Fondo DGP) DESDE ADMIN ───
+function openCreateInvestmentModal(userId, userName){
+  const body=`
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Usuario</label>
+        <input type="text" value="${userName||('ID '+userId)}" disabled style="width:100%;padding:11px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt-2);font-size:14px">
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Producto *</label>
+        <select id="ci-type" style="width:100%;padding:11px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:14px">
+          <option value="cdtc" selected>Inversión LP COP — 2% mensual fijo</option>
+          <option value="pool">Fondo DGP (Pool) — APY variable</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Monto (COP) *</label>
+          <input id="ci-amount" type="number" min="50000" step="10000" placeholder="500000" style="width:100%;padding:11px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:14px">
+        </div>
+        <div>
+          <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Bloqueo (meses) *</label>
+          <select id="ci-duration" style="width:100%;padding:11px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:14px">
+            <option value="6" selected>6 meses</option>
+            <option value="12">12 meses</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Fecha de inicio (opcional)</label>
+        <input id="ci-startdate" type="date" style="width:100%;padding:11px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:14px">
+        <div style="font-size:11px;color:var(--txt-3);margin-top:4px">Si está vacía, usa hoy. Útil para registrar inversiones que empezaron antes.</div>
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Notas internas</label>
+        <textarea id="ci-notes" rows="2" placeholder="Ej: Inversión registrada manualmente, capital recibido por Nequi" style="width:100%;padding:11px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:14px;resize:vertical;font-family:inherit"></textarea>
+      </div>
+      <div id="ci-preview" style="background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:12px;color:var(--txt-2);display:none">
+        <div style="font-weight:600;color:var(--txt);margin-bottom:6px">Resumen</div>
+        <div id="ci-preview-content"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-sm btn-ghost" style="flex:1" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-sm btn-primary" style="flex:2;justify-content:center" onclick="submitCreateInvestment(${userId})">Crear inversión</button>
+      </div>
+    </div>`;
+  openModal('📈 Crear inversión', userName||'', body);
+  // Live preview + ajuste de bloqueo según producto (DGP siempre 12m)
+  setTimeout(()=>{
+    const upd=()=>{
+      const type=document.getElementById('ci-type')?.value;
+      const a=parseFloat(document.getElementById('ci-amount')?.value||0);
+      const durEl=document.getElementById('ci-duration');
+      const pv=document.getElementById('ci-preview');
+      const pc=document.getElementById('ci-preview-content');
+      const isPool=type==='pool';
+      // DGP: bloqueo fijo de 12 meses
+      if(durEl){
+        if(isPool){durEl.value='12';durEl.disabled=true;}
+        else durEl.disabled=false;
+      }
+      if(!a||!pv||!pc){if(pv)pv.style.display='none';return}
+      pv.style.display='block';
+      const dur=parseInt(durEl?.value||6);
+      if(isPool){
+        const fee=Math.round(a*0.02);
+        pc.innerHTML=`
+          <div style="display:flex;justify-content:space-between"><span>Capital:</span><strong>${F(a)}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Comisión de entrada (2%):</span><strong style="color:var(--warn)">−${F(fee)}</strong></div>
+          <div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:6px;padding-top:6px"><span>Capital neto invertido:</span><strong style="color:var(--acc)">${F(a-fee)}</strong></div>
+          <div style="font-size:11px;color:var(--txt-3);margin-top:4px">APY variable según rendimientos del pool. Bloqueo 12 meses. Comisión 20% al retirar ganancias. Si el endpoint del backend no aplica la comisión de entrada, se invertirá el monto completo.</div>`;
+      }else{
+        const monthly=Math.round(a*0.02);
+        pc.innerHTML=`
+          <div style="display:flex;justify-content:space-between"><span>Capital:</span><strong>${F(a)}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Rendimiento mensual (2% fijo):</span><strong style="color:var(--pos)">+${F(monthly)}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>En ${dur} meses:</span><strong style="color:var(--pos)">+${F(monthly*dur)}</strong></div>
+          <div style="font-size:11px;color:var(--txt-3);margin-top:4px">Tasa fija 2% mensual calculada en tiempo real. El usuario reclama 1 vez cada 24h.</div>`;
+      }
+    };
+    ['ci-type','ci-amount','ci-duration'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){el.addEventListener('input',upd);el.addEventListener('change',upd);}
+    });
+    upd();
+  },50);
+}
+
+async function submitCreateInvestment(userId){
+  const type=document.getElementById('ci-type')?.value;
+  const amount=parseFloat(document.getElementById('ci-amount')?.value||0);
+  const duration=parseInt(document.getElementById('ci-duration')?.value||6);
+  const startDate=(document.getElementById('ci-startdate')?.value||'').trim();
+  const notes=(document.getElementById('ci-notes')?.value||'').trim();
+
+  if(!['cdtc','pool'].includes(type))return toast('Selecciona el producto','error');
+  if(!amount||amount<50000)return toast('Monto mínimo $50.000','error');
+  if(![6,12].includes(duration))return toast('Bloqueo inválido','error');
+
+  const label=type==='pool'?'Fondo DGP':'LP COP';
+  if(!confirm(`Crear inversión ${label} de ${F(amount)} (bloqueo ${duration}m)?`))return;
+
+  try{
+    const body={userId, type, amount, durationMonths:duration};
+    if(startDate)body.startDate=startDate;
+    if(notes)body.notes=notes;
+    const r=await apiFetch('/admin/investments/create',{method:'POST',body:JSON.stringify(body)});
+    const d=await(r?r.json().catch(()=>({})):{});
+    if(!r)return toast('Error de conexión','error');
+    if(r.status===404)return toast('Falta el endpoint /admin/investments/create en el backend','error');
+    if(!r.ok)return toast(d.error||'Error al crear','error');
+    toast(`Inversión ${label} creada ✓`,'ok');
+    closeModal();
+    // Refrescar todo lo afectado
+    State.cacheFlags.users=false;
+    State.cacheFlags.invs=false;
+    State.cacheFlags.pool=false;
+    State.cacheFlags.rets=false;
+    await loadUsersQuiet();
+    if(State._viewingUserId)await viewUser(State._viewingUserId);
+    loadStats();
+  }catch(e){toast('Error de red','error')}
+}
+
+// ─── REVOCAR INVERSIÓN ACTIVA ───
+// Cancelación SUAVE: marca la inversión como 'cancelled' y (según lo que elijas)
+// devuelve el capital al balance del usuario. El backend decide ambas cosas.
+async function revokeInvestment(id, label, capital, earned){
+  const devolver=confirm(
+    `🚫 Revocar inversión ${label} #${id}\n\n`+
+    `Capital: ${F(capital)}\n`+
+    `Ganado hasta hoy: ${F(earned)}\n\n`+
+    `¿Devolver el CAPITAL al balance del usuario?\n\n`+
+    `• Aceptar → se revoca Y se devuelve ${F(capital)} al balance\n`+
+    `• Cancelar → te pregunto si quieres revocar SIN devolver`
+  );
+  if(!devolver){
+    const sinDevolver=confirm(
+      `¿Revocar la inversión SIN devolver el capital?\n\n`+
+      `El usuario pierde acceso a la inversión y el capital NO vuelve a su balance.\n`+
+      `(Si tampoco quieres esto, cancela y no pasa nada)`
+    );
+    if(!sinDevolver) return;
+  }
+  const notes=prompt('Motivo de la revocación (opcional):','')||'';
+  try{
+    const r=await apiFetch('/admin/investments/'+id+'/revoke',{
+      method:'POST',
+      body:JSON.stringify({refundCapital:devolver, notes:notes.trim()||null})
+    });
+    const d=await(r?r.json().catch(()=>({})):{});
+    if(!r)return toast('Error de conexión','error');
+    if(r.status===404)return toast('Falta el endpoint /admin/investments/:id/revoke en el backend','error');
+    if(!r.ok)return toast(d.error||'Error al revocar','error');
+    toast(`Inversión revocada${devolver?' · capital devuelto':''} ✓`,'ok');
+    // Refrescar todo lo afectado
+    State.cacheFlags.users=false;
+    State.cacheFlags.invs=false;
+    State.cacheFlags.pool=false;
+    State.cacheFlags.rets=false;
+    if(State._viewingUserId && $('#modal-ov').classList.contains('open')){
+      await viewUser(State._viewingUserId);
+    }
+    if(State.currentNav==='finance'){
+      const s=State.currentSub.finance;
+      if(s==='invs')loadInvestments();
+      if(s==='pool')loadPool();
+      if(s==='rets')loadReturns();
+    }
+    loadUsersQuiet();
+    loadStats();
   }catch(e){toast('Error de red','error')}
 }
 
@@ -2415,6 +2603,9 @@ function renderInvList(invs){
         <span>Vence ${D(i.lockEndDate||i.lock_end_date||i.endDate||i.end_date)}</span>
       </div>
       <div class="row-meta"><span class="pos">Ganado: ${F(i.totalEarned||0)}</span></div>
+      ${i.status==='active'?`<div class="row-actions">
+        <button class="btn btn-sm btn-neg" onclick="revokeInvestment(${i.id},'LP COP',${parseFloat(i.amount||0)},${parseFloat(i.totalEarned||0)})">🚫 Revocar</button>
+      </div>`:''}
     </div>`).join('')+'</div>';
 }
 
@@ -2492,6 +2683,9 @@ async function loadPool(){
             <span class="${hasMonthlyReward?'acc':'dim'}">Este mes: <strong class="mono">${F(earnedThisMonth)}</strong></span>
             <span class="warn">Sin reclamar: <strong class="mono">${F(pending)}</strong></span>
           </div>
+          ${i.status==='active'?`<div class="row-actions">
+            <button class="btn btn-sm btn-neg" onclick="revokeInvestment(${i.id},'Fondo DGP',${parseFloat(i.amount||0)},${parseFloat(i.totalEarned||0)})">🚫 Revocar</button>
+          </div>`:''}
         </div>`;
       }).join('')+'</div>' : '<div class="empty">Sin inversiones en pool</div>';
     }
