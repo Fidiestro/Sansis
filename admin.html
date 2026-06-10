@@ -158,7 +158,7 @@ img{max-width:100%;display:block}
 }
 .search-item:last-child{border-bottom:none}
 .search-item-main{min-width:0;flex:1}
-.search-item-name{font-size:14px;font-weight:500;truncate}
+.search-item-name{font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .search-item-meta{font-size:11px;color:var(--txt-3);margin-top:2px;font-family:var(--f-mono)}
 
 /* ─────────────────────────────────────────
@@ -955,8 +955,6 @@ img{max-width:100%;display:block}
 }
 .sup-send-btn:disabled{opacity:.3;cursor:not-allowed}
 
-.hide{display:none !important}
-
 </style>
 </head>
 <body>
@@ -1240,23 +1238,23 @@ img{max-width:100%;display:block}
     <!-- Préstamos -->
     <div class="sub-view hide" data-sub-view="loans">
       <!-- ★ NUEVO: Stats de la cartera de préstamos -->
-      <div id="loan-stats-card" style="background:var(--bg2,#0f1117);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px">
+      <div id="loan-stats-card" style="background:var(--bg-1);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px">
         <div style="font-size:12px;font-weight:600;color:var(--txt-2);margin-bottom:4px">📊 Resumen de la cartera de préstamos</div>
         <div style="font-size:11px;color:var(--txt-3);margin-bottom:12px">Vista general y ganancias para la empresa</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
-          <div style="background:var(--sur);border:1px solid var(--line);border-radius:8px;padding:10px">
+          <div style="background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">Activos</div>
             <div class="mono" style="font-size:16px;font-weight:700;color:#5b8dee" id="ls-active-count">—</div>
           </div>
-          <div style="background:var(--sur);border:1px solid var(--line);border-radius:8px;padding:10px">
+          <div style="background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">Capital prestado</div>
             <div class="mono" style="font-size:16px;font-weight:700;color:#5b8dee" id="ls-active-cap">—</div>
           </div>
-          <div style="background:var(--sur);border:1px solid var(--line);border-radius:8px;padding:10px">
+          <div style="background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">Pagados</div>
             <div class="mono" style="font-size:16px;font-weight:700;color:#10b981" id="ls-paid-count">—</div>
           </div>
-          <div style="background:var(--sur);border:1px solid var(--line);border-radius:8px;padding:10px">
+          <div style="background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">En mora</div>
             <div class="mono" style="font-size:16px;font-weight:700;color:#ef4444" id="ls-overdue-count">—</div>
           </div>
@@ -1268,13 +1266,13 @@ img{max-width:100%;display:block}
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">💰 Intereses este mes</div>
             <div class="mono" style="font-size:16px;font-weight:700;color:#f59e0b" id="ls-month-interest">—</div>
           </div>
-          <div style="background:var(--sur);border:1px solid var(--line);border-radius:8px;padding:10px">
+          <div style="background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">Capital recuperado</div>
             <div class="mono" style="font-size:16px;font-weight:700;color:#10b981" id="ls-capital-back">—</div>
           </div>
-          <div style="background:var(--sur);border:1px solid var(--line);border-radius:8px;padding:10px">
+          <div style="background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">Tasa promedio</div>
-            <div class="mono" style="font-size:16px;font-weight:700;color:var(--txt-1)" id="ls-avg-rate">—</div>
+            <div class="mono" style="font-size:16px;font-weight:700;color:var(--txt)" id="ls-avg-rate">—</div>
           </div>
         </div>
       </div>
@@ -1283,6 +1281,7 @@ img{max-width:100%;display:block}
         <button class="filter on" onclick="fLoan('all',this)">Todas</button>
         <button class="filter" onclick="fLoan('pending',this)">Pendientes</button>
         <button class="filter" onclick="fLoan('active',this)">Activos</button>
+        <button class="filter" onclick="fLoan('overdue',this)">En mora</button>
         <button class="filter" onclick="fLoan('paid',this)">Pagados</button>
         <button class="filter" onclick="fLoan('cancelled',this)">Cancelados</button>
       </div>
@@ -1442,7 +1441,7 @@ img{max-width:100%;display:block}
             <div id="sup-detail-name" class="sup-detail-name"></div>
             <div id="sup-detail-meta" class="sup-detail-meta"></div>
           </div>
-          <button class="btn btn-ghost btn-small" onclick="sup_closeChat()">Cerrar chat</button>
+          <button class="btn btn-ghost btn-sm" onclick="sup_closeChat()">Cerrar chat</button>
         </div>
 
         <div id="sup-detail-msgs" class="sup-msgs">
@@ -1836,7 +1835,7 @@ function updateBadges(){
   $('#dn-pending-dot').classList.toggle('hide', pend===0);
 
   // Sub-badges
-  const setBdg=(id, n, neg)=>{
+  const setBdg=(id, n)=>{
     const el=$('#'+id);
     if(!el) return;
     if(n>0){el.textContent=n;el.classList.remove('hide')}
@@ -1953,7 +1952,7 @@ async function viewUser(uid){
       <div class="stat"><div class="stat-label">Préstamos</div><div class="stat-value mono" style="color:${totalLoaned>0?'var(--neg)':'var(--txt-3)'}">${F(totalLoaned)}</div></div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:14px">
-      <button class="btn btn-sm" style="flex:1;background:linear-gradient(135deg,#5b8dee,#8b6cf6);color:#fff;border:none;padding:10px;border-radius:8px;font-weight:600;cursor:pointer" onclick="openCreateLoanModal(${uid},'${(u.full_name||'').replace(/'/g,'')}')">
+      <button class="btn btn-sm btn-primary" style="flex:1;justify-content:center" onclick="openCreateLoanModal(${uid},'${(u.full_name||'').replace(/'/g,'')}')">
         💰 Crear Préstamo
       </button>
     </div>`;
@@ -2055,22 +2054,22 @@ function openCreateLoanModal(userId, userName){
     <div style="display:flex;flex-direction:column;gap:14px">
       <div>
         <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Usuario</label>
-        <input type="text" value="${userName||('ID '+userId)}" disabled style="width:100%;padding:11px;background:var(--sur);border:1px solid var(--line);border-radius:8px;color:var(--txt-2);font-size:14px">
+        <input type="text" value="${userName||('ID '+userId)}" disabled style="width:100%;padding:11px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt-2);font-size:14px">
       </div>
       <div>
         <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Monto del préstamo (COP) *</label>
-        <input id="lc-amount" type="number" min="100000" step="10000" placeholder="500000" style="width:100%;padding:11px;background:var(--sur);border:1px solid var(--line);border-radius:8px;color:var(--txt-1);font-size:14px">
+        <input id="lc-amount" type="number" min="100000" step="10000" placeholder="500000" style="width:100%;padding:11px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:14px">
         <div style="font-size:11px;color:var(--txt-3);margin-top:4px">Mínimo $100.000 COP</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div>
           <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Tasa mensual (%) *</label>
-          <input id="lc-rate" type="number" min="1" max="20" step="0.1" placeholder="5" value="5" style="width:100%;padding:11px;background:var(--sur);border:1px solid var(--line);border-radius:8px;color:var(--txt-1);font-size:14px">
+          <input id="lc-rate" type="number" min="1" max="20" step="0.1" placeholder="5" value="5" style="width:100%;padding:11px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:14px">
           <div style="font-size:11px;color:var(--txt-3);margin-top:4px">1% a 20% mensual</div>
         </div>
         <div>
           <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Plazo (meses) *</label>
-          <select id="lc-term" style="width:100%;padding:11px;background:var(--sur);border:1px solid var(--line);border-radius:8px;color:var(--txt-1);font-size:14px">
+          <select id="lc-term" style="width:100%;padding:11px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:14px">
             <option value="1">1 mes</option>
             <option value="2">2 meses</option>
             <option value="3" selected>3 meses</option>
@@ -2082,24 +2081,24 @@ function openCreateLoanModal(userId, userName){
       </div>
       <div>
         <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Propósito</label>
-        <input id="lc-purpose" type="text" placeholder="Capital de trabajo, gastos, etc." style="width:100%;padding:11px;background:var(--sur);border:1px solid var(--line);border-radius:8px;color:var(--txt-1);font-size:14px">
+        <input id="lc-purpose" type="text" placeholder="Capital de trabajo, gastos, etc." style="width:100%;padding:11px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:14px">
       </div>
       <div>
         <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Fecha de inicio (opcional)</label>
-        <input id="lc-startdate" type="date" style="width:100%;padding:11px;background:var(--sur);border:1px solid var(--line);border-radius:8px;color:var(--txt-1);font-size:14px">
+        <input id="lc-startdate" type="date" style="width:100%;padding:11px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:14px">
         <div style="font-size:11px;color:var(--txt-3);margin-top:4px">Si está vacío, usa hoy</div>
       </div>
       <div>
         <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Notas internas</label>
-        <textarea id="lc-notes" rows="2" placeholder="Observaciones del admin" style="width:100%;padding:11px;background:var(--sur);border:1px solid var(--line);border-radius:8px;color:var(--txt-1);font-size:14px;resize:vertical;font-family:inherit"></textarea>
+        <textarea id="lc-notes" rows="2" placeholder="Observaciones del admin" style="width:100%;padding:11px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:14px;resize:vertical;font-family:inherit"></textarea>
       </div>
-      <div id="lc-preview" style="background:var(--sur);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:12px;color:var(--txt-2);display:none">
-        <div style="font-weight:600;color:var(--txt-1);margin-bottom:6px">Resumen</div>
+      <div id="lc-preview" style="background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:12px;color:var(--txt-2);display:none">
+        <div style="font-weight:600;color:var(--txt);margin-bottom:6px">Resumen</div>
         <div id="lc-preview-content"></div>
       </div>
       <div style="display:flex;gap:8px;margin-top:4px">
         <button class="btn btn-sm btn-ghost" style="flex:1" onclick="closeModal()">Cancelar</button>
-        <button class="btn btn-sm" style="flex:2;background:linear-gradient(135deg,#5b8dee,#8b6cf6);color:#fff;border:none;font-weight:600" onclick="submitCreateLoan(${userId})">Crear préstamo</button>
+        <button class="btn btn-sm btn-primary" style="flex:2;justify-content:center" onclick="submitCreateLoan(${userId})">Crear préstamo</button>
       </div>
     </div>`;
   openModal('💰 Crear préstamo', userName||'', body);
@@ -2120,15 +2119,15 @@ function openCreateLoanModal(userId, userName){
       if(isIndefinite){
         pc.innerHTML=`
           <div style="display:flex;justify-content:space-between"><span>Capital:</span><strong>${F(a)}</strong></div>
-          <div style="display:flex;justify-content:space-between"><span>Interés mensual (${r}%):</span><strong style="color:var(--amb)">${F(interesMes)}</strong></div>
-          <div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:6px;padding-top:6px"><span>Plazo:</span><strong style="color:var(--amb)">Sin plazo definido</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Interés mensual (${r}%):</span><strong style="color:var(--warn)">${F(interesMes)}</strong></div>
+          <div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:6px;padding-top:6px"><span>Plazo:</span><strong style="color:var(--warn)">Sin plazo definido</strong></div>
           <div style="font-size:11px;color:var(--txt-3);margin-top:4px">El interés se acumula al segundo. El usuario abona cuando pueda.</div>`;
       }else{
         const interesTotal=interesMes*t;
         pc.innerHTML=`
           <div style="display:flex;justify-content:space-between"><span>Capital:</span><strong>${F(a)}</strong></div>
-          <div style="display:flex;justify-content:space-between"><span>Interés mensual (${r}%):</span><strong style="color:var(--amb)">${F(interesMes)}</strong></div>
-          <div style="display:flex;justify-content:space-between"><span>Interés total (${t}m):</span><strong style="color:var(--amb)">${F(interesTotal)}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Interés mensual (${r}%):</span><strong style="color:var(--warn)">${F(interesMes)}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Interés total (${t}m):</span><strong style="color:var(--warn)">${F(interesTotal)}</strong></div>
           <div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:6px;padding-top:6px"><span>Total a pagar:</span><strong style="color:var(--neg)">${F(a+interesTotal)}</strong></div>`;
       }
     };
@@ -2543,7 +2542,7 @@ async function savePoolConfig(){
       distribution:parseFloat($('#pool-distribution').value)||50,
       minAmount:parseFloat($('#pool-min').value)||50000
     })});
-    if(!r||!r.ok){const d=await r.json().catch(()=>({}));return toast(d.error||'Error','error')}
+    if(!r||!r.ok){const d=await(r?r.json().catch(()=>({})):{});return toast(d.error||'Error','error')}
     toast('Configuración guardada','ok');
     State.cacheFlags.pool=false;
     loadPool();
@@ -2611,7 +2610,8 @@ async function registerReturn(){
   btn.disabled=true; btn.textContent='Registrando…';
   try{
     const r=await apiFetch('/admin/investments/'+State.selectedInv.id+'/return',{method:'POST',body:JSON.stringify({rate,periodMonth:month,notes:notes||undefined})});
-    const d=await r.json();
+    if(!r)return toast('Error de conexión','error');
+    const d=await r.json().catch(()=>({}));
     if(!r.ok) return toast(d.error||'Error','error');
     toast('Rendimiento registrado','ok');
     $('#ret-form-card').classList.add('hide');
@@ -2784,7 +2784,13 @@ async function executeBulkReward(){
       method: 'POST',
       body: JSON.stringify({ rate, periodMonth: month, notes: notes || undefined }),
     });
-    const d = await r.json();
+    if (!r) {
+      toast('Error de conexión', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Aplicar a todos los pools';
+      return;
+    }
+    const d = await r.json().catch(() => ({}));
     if (!r.ok) {
       toast(d.error || 'Error al aplicar recompensa', 'error');
       btn.disabled = false;
@@ -3075,7 +3081,7 @@ async function createTx(){
       description: desc||undefined,
       date: date ? new Date(date).toISOString() : undefined
     })});
-    if(!r||!r.ok){const d=await r.json().catch(()=>({}));return toast(d.error||'Error','error')}
+    if(!r||!r.ok){const d=await(r?r.json().catch(()=>({})):{});return toast(d.error||'Error','error')}
     toast('Transacción creada','ok');
     $('#tx-amount').value=''; $('#tx-desc').value='';
     State.cacheFlags.txs=false;
@@ -3327,6 +3333,8 @@ async function refreshCurrentView(){
     State.cacheFlags.users=false; await loadUsers();
   }else if(v==='tx'){
     State.cacheFlags.txs=false; await fetchTxPage();
+  }else if(v==='support'){
+    await sup_load(); sup_refreshBadge();
   }
   toast('Actualizado','ok');
 }
@@ -3503,7 +3511,7 @@ function sup_handleFile(input){
   var file = input.files[0];
   if(!file) return;
   if(file.size > 5 * 1024 * 1024){
-    toast('Imagen máximo 5MB', 'err'); input.value = ''; return;
+    toast('Imagen máximo 5MB', 'error'); input.value = ''; return;
   }
   var reader = new FileReader();
   reader.onload = function(e){
@@ -3546,9 +3554,9 @@ async function sup_send(){
       method: 'POST',
       body: JSON.stringify({ text: text, image: image })
     });
-    if(!res || !res.ok){ toast('Error al enviar', 'err'); }
+    if(!res || !res.ok){ toast('Error al enviar', 'error'); }
     else{ await sup_loadMessages(false); sup_load(); }
-  }catch(e){ toast('Error de conexión', 'err'); }
+  }catch(e){ toast('Error de conexión', 'error'); }
   finally{ sup_updateSendBtn(); input.focus(); }
 }
 

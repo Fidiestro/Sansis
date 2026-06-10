@@ -119,6 +119,11 @@
   /* ──────── INVESTMENTS LIST ──────── */
   .inv-card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:10px;transition:all .15s;cursor:pointer}
   .inv-card:hover{border-color:var(--bdh);transform:translateY(-1px)}
+  .inv-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .inv-name{font-size:14px;font-weight:700}
+  .inv-sub{font-size:11px;color:var(--mut);margin-top:2px}
+  .inv-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(min-width:640px){.inv-grid{grid-template-columns:repeat(4,1fr)}}
   .inv-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap}
   .inv-type-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .inv-type{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
@@ -190,17 +195,7 @@
   .tl-rate{font-family:'Space Mono',monospace;font-size:12px;color:var(--blu);font-weight:600}
   .tl-amt{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--grn)}
 
-  /* ──────── PRODUCT CTA ──────── */
-  .product-card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:18px;position:relative;overflow:hidden}
-  .product-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blu),var(--pur))}
-  .prod-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-  .prod-icon{width:36px;height:36px;border-radius:10px;background:var(--blud);border:1px solid rgba(79,142,247,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .prod-icon svg{width:18px;height:18px;stroke:var(--blu);fill:none;stroke-width:2}
-  .prod-ttl{font-size:15px;font-weight:700}
-  .prod-sub{font-size:12px;color:var(--mut);margin-top:1px}
-  .prod-rates{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-  .rate-chip{padding:5px 12px;background:var(--sur);border:1px solid var(--bd);border-radius:14px;font-size:11px;color:var(--mut)}
-  .rate-chip strong{color:var(--text);font-family:'Space Mono',monospace}
+  /* ──────── PRODUCT CTA (botón) ──────── */
   .prod-cta{width:100%;padding:13px;background:linear-gradient(135deg,var(--blu),var(--pur));border:none;border-radius:8px;color:white;font-size:13px;font-weight:600;transition:opacity .15s}
   .prod-cta:hover{opacity:.9}
   .prod-cta:disabled{opacity:.5;cursor:not-allowed;background:var(--sur);color:var(--mut)}
@@ -222,14 +217,6 @@
   .b-inv{background:rgba(124,92,252,.1);color:var(--pur)}
   .amt-pos{color:var(--grn);font-family:'Space Mono',monospace;font-weight:600}
   .amt-neg{color:var(--red);font-family:'Space Mono',monospace;font-weight:600}
-
-  /* ──────── CHART ──────── */
-  .chart-card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:16px}
-  .chart-head{margin-bottom:14px}
-  .chart-ttl{font-size:13px;font-weight:600}
-  .chart-sub{font-size:11px;color:var(--mut);margin-top:2px}
-  .chart-wrap{height:160px;position:relative}
-  .chart-svg{width:100%;height:100%;display:block}
 
   /* ──────── MODAL ──────── */
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:200;display:none;align-items:flex-end;justify-content:center;padding:0}
@@ -285,23 +272,6 @@
   .risk-tag.medium{background:rgba(245,158,11,.1);color:var(--amb);border-color:rgba(245,158,11,.25)}
   .risk-tag.medium::before{background:var(--amb)}
 
-  .pool-card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:18px;position:relative;overflow:hidden}
-  .pool-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--amb),var(--pur))}
-  .pool-apy-big{font-family:'Space Mono',monospace;font-size:32px;font-weight:700;color:var(--amb);line-height:1;letter-spacing:-.5px;margin:6px 0 4px}
-  .pool-apy-sub{font-size:11px;color:var(--mut);margin-bottom:14px}
-
-  /* allocation ring */
-  .alloc-block{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:18px;margin-bottom:14px}
-  .alloc-ttl{font-size:13px;font-weight:700;margin-bottom:14px}
-  .alloc-rows{display:flex;flex-direction:column;gap:12px}
-  .alloc-row{}
-  .alloc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px}
-  .alloc-name{display:flex;align-items:center;gap:6px;color:var(--text);font-weight:500}
-  .alloc-name .dot-sm{width:8px;height:8px;border-radius:50%}
-  .alloc-val{font-family:'Space Mono',monospace;color:var(--text);font-weight:600}
-  .alloc-pct{font-size:11px;color:var(--mut);margin-left:6px}
-  .alloc-bar{height:6px;background:var(--sur);border-radius:3px;overflow:hidden}
-  .alloc-bar-fill{height:100%;border-radius:3px;transition:width .8s ease}
   .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--mut);gap:14px}
   .spinner{width:32px;height:32px;border:3px solid var(--bd);border-top-color:var(--blu);border-radius:50%;animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
@@ -320,9 +290,6 @@
   .d1{animation-delay:.05s}
   .d2{animation-delay:.1s}
   .d3{animation-delay:.15s}
-
-  /* ──────── GRID LAYOUT (desktop) ──────── */
-  .grid-2{display:grid;grid-template-columns:1fr;gap:14px}
 
   /* ──────── TABLET (>=640px) ──────── */
   @media(min-width:640px){
@@ -345,7 +312,6 @@
     .content{padding:24px;max-width:1200px;margin:0 auto}
     .balance-card{padding:28px}
     .bc-amount{font-size:44px}
-    .grid-2{grid-template-columns:2fr 1fr}
     .modal-overlay{align-items:center;padding:20px}
     .modal{border-radius:16px;max-width:520px}
   }
@@ -355,46 +321,6 @@
   ::-webkit-scrollbar-track{background:var(--bg)}
   ::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
   ::-webkit-scrollbar-thumb:hover{background:var(--bdh)}
-
-  /* ──── SIMULATOR ──── */
-  .sim-card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden}
-  .sim-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--grn),var(--tea))}
-  .sim-result{background:var(--sur);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-top:14px;display:none}
-  .sim-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bd);font-size:13px}
-  .sim-row:last-child{border-bottom:none;padding-top:10px;margin-top:4px}
-  .sim-row .l{color:var(--mut)}
-  .sim-row .v{font-family:'Space Mono',monospace;font-weight:700}
-  .sim-row.total .v{color:var(--grn);font-size:16px}
-  .sim-bar{height:8px;background:var(--sur);border-radius:4px;overflow:hidden;margin:12px 0}
-  .sim-bar-fill{height:100%;background:linear-gradient(90deg,var(--grn),var(--tea));border-radius:4px;transition:width .8s ease}
-
-  /* ──── RISK METER ──── */
-  .risk-meter{display:flex;gap:3px;margin:10px 0}
-  .risk-dot{flex:1;height:6px;border-radius:3px;background:var(--sur)}
-  .risk-dot.on-low{background:var(--grn)}
-  .risk-dot.on-med{background:var(--amb)}
-  .risk-dot.on-high{background:var(--red)}
-
-  /* ──── NOTIFICATION BANNER ──── */
-  .notif-banner{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;margin-bottom:10px;font-size:12px;line-height:1.5;border:1px solid}
-  .notif-banner.info{background:var(--blud);border-color:rgba(79,142,247,.25);color:var(--blu)}
-  .notif-banner.warn{background:var(--ambd);border-color:rgba(245,158,11,.25);color:var(--amb)}
-  .notif-banner.success{background:var(--grnd);border-color:rgba(16,185,129,.25);color:var(--grn)}
-
-  /* ──── MARKET PULSE ──── */
-  .pulse-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bd);font-size:12px}
-  .pulse-row:last-child{border-bottom:none}
-  .pulse-name{font-weight:600;display:flex;align-items:center;gap:6px}
-  .pulse-change.pos{color:var(--grn);font-family:'Space Mono',monospace;font-size:11px;font-weight:700}
-  .pulse-change.neg{color:var(--red);font-family:'Space Mono',monospace;font-size:11px;font-weight:700}
-
-  /* ──── PAYMENT METHODS in Profile ──── */
-  .pm-item{display:flex;align-items:center;gap:10px;padding:12px;background:var(--sur);border:1px solid var(--bd);border-radius:8px;margin-bottom:8px}
-  .pm-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-  .pm-info{flex:1;min-width:0}
-  .pm-label{font-size:13px;font-weight:600}
-  .pm-detail{font-size:11px;color:var(--mut)}
-  .pm-default{font-size:9px;background:var(--grnd);color:var(--grn);padding:2px 7px;border-radius:10px;font-weight:700;border:1px solid rgba(16,185,129,.2)}
 
   /* ═══════════ INVEST CTA — sin inversiones ═══════════ */
   .invest-cta{position:relative;overflow:hidden;background:var(--bg2);border:1px solid var(--bd);border-radius:18px;padding:28px 22px;margin-bottom:14px;cursor:pointer;transition:transform .2s ease,border-color .2s ease}
@@ -1123,7 +1049,6 @@ function renderDashboard(c){
   </div>`;
 
   setTimeout(()=>drawPerfChart('1M'),100);
-  startEarningsAnimation();
 }
 
 function showViewByName(v){
@@ -1133,7 +1058,7 @@ function showViewByName(v){
 
 function renderInvCard(inv){
   const isPending=inv.status==='pending_deposit';
-  const isPool=inv.type==='pool'||String(inv.type||'').includes('pool');
+  const isPool=String(inv.type||'').toLowerCase().includes('pool');
   const isActive=inv.status==='active';
 
   const cap=parseFloat(inv.amount)||0;
@@ -1268,14 +1193,6 @@ function renderInvCard(inv){
   </div>`;
 }
 
-// Update pending earnings animation
-// LP COP ahora paga el día 1 de cada mes (no se acumula al segundo).
-// Esta función se conserva como no-op para no romper las llamadas existentes
-// y para limpiar cualquier intervalo de animación previo.
-function startEarningsAnimation(){
-  if(window._earningsInterval){clearInterval(window._earningsInterval);window._earningsInterval=null;}
-}
-
 // ══════════════════ CLAIM EARNINGS (Pool & CDTC) ══════════════════
 // Reemplaza la antigua withdrawPoolEarnings con una versión genérica.
 // Pool: descuenta 20% Sanse + 5% referido (si aplica).
@@ -1367,15 +1284,6 @@ async function withdrawPoolEarnings(invId,earnings){
 // ══════════════════ CLAIM CDTC (tiempo real, 2% mensual fijo) ══════════════════
 // Llama al endpoint /claim-cdtc que calcula en el backend lo acumulado
 // y descuenta 5% al referido si aplica. Máximo 1 claim cada 24h.
-// Alias retro-compat: cualquier código que llame claimCdtcEarnings termina en la función genérica.
-// El monto exacto lo calcula el backend; aquí pasamos 0 como placeholder solo para el confirm dialog.
-async function claimCdtcEarnings(invId){
-  // Buscar el liveClaimable del investment para mostrarlo en el confirm
-  var inv=(myInvestments||[]).find(function(i){return String(i.id)===String(invId)});
-  var earnings=inv?(parseFloat(inv.liveClaimable)||0):0;
-  return claimInvestmentEarnings(invId,earnings,'cdtc');
-}
-
 // ══════════════════ CONFIRM INVESTMENT DEPOSIT ══════════════════
 // Cliente confirma manualmente que ya depositó. Cambia status de
 // pending_deposit → active y arranca el rendimiento.
@@ -1716,9 +1624,6 @@ function attachPerfChartInteraction(data,w,h,pad,xScale,yScale){
   newSvg.addEventListener('touchend',onLeave);
 }
 
-// Alias retro-compatible (por si algún código llama drawChart)
-function drawChart(){drawPerfChart(window._perfRange||'1M');}
-
 // ══════════════════ RENDER: INVESTMENTS (Aave/DeFi style) ══════════════════
 function renderInvestmentsView(c){
   const active=myInvestments.filter(i=>['active','pending_deposit'].includes(i.status));
@@ -1797,7 +1702,7 @@ function renderInvestmentsView(c){
           transform="rotate(-90 ${cx} ${cy})"/>`:''}
         <!-- center text -->
         <text x="${cx}" y="${cy-2}" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="9" font-family="Space Mono" letter-spacing="1" font-weight="600">CAPITAL</text>
-        <text x="${cx}" y="${cy+16}" text-anchor="middle" fill="#fff" font-size="14" font-weight="700" font-family="Space Mono">${formatCOP(totalInvested).replace('$','$')}</text>
+        <text x="${cx}" y="${cy+16}" text-anchor="middle" fill="#fff" font-size="14" font-weight="700" font-family="Space Mono">${formatCOP(totalInvested)}</text>
       </svg>`;
   }
 
@@ -1972,7 +1877,6 @@ function renderInvestmentsView(c){
       ${done.map(inv=>renderInvCard(inv)).join('')}
     </div>`:''}
   </div>`;
-  startEarningsAnimation();
 }
 
 // Calcula APY del pool basado en rendimientos históricos pagados
@@ -2420,7 +2324,7 @@ function renderLoanCard(loan){
             <div style="background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:6px;padding:8px 10px;font-size:11px">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
                 <span style="color:var(--text);font-weight:600">${dateLbl}</span>
-                <span style="color:var(--neg);font-weight:700;font-family:'Space Mono',monospace">−${formatCOP(p.amount)}</span>
+                <span style="color:var(--red);font-weight:700;font-family:'Space Mono',monospace">−${formatCOP(p.amount)}</span>
               </div>
               <div style="display:flex;gap:10px;color:var(--mut);font-size:10px;flex-wrap:wrap">
                 <span>Interés cobrado: <strong style="color:var(--amb)">${formatCOP(interestAmt)}</strong></span>
@@ -2454,7 +2358,7 @@ function renderLoanCard(loan){
       </div>
       <div class="inv-cell">
         <div class="inv-cell-lbl">Total a pagar hoy</div>
-        <div class="inv-cell-val" data-loan-total="${loan.id}" style="color:var(--neg)">${formatCOP(totalDueNow)}</div>
+        <div class="inv-cell-val" data-loan-total="${loan.id}" style="color:var(--red)">${formatCOP(totalDueNow)}</div>
       </div>
       <div class="inv-cell">
         <div class="inv-cell-lbl">${dueLbl}</div>
@@ -2608,7 +2512,7 @@ function openLoanPayModal(loanId,cap,rate,startISO,mode){
       <div style="background:rgba(91,141,238,.06);border:1px solid rgba(91,141,238,.2);border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px">
         <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Capital pendiente:</span><strong>${formatCOP(cap)}</strong></div>
         <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Intereses acumulados:</span><strong style="color:var(--amb)">+${formatCOPDecimal(interestAccrued)}</strong></div>
-        <div style="display:flex;justify-content:space-between;border-top:1px solid var(--bd,rgba(255,255,255,.08));margin-top:6px;padding-top:6px"><span>Total a pagar hoy:</span><strong style="color:var(--neg)">${formatCOP(totalDueNow)}</strong></div>
+        <div style="display:flex;justify-content:space-between;border-top:1px solid var(--bd,rgba(255,255,255,.08));margin-top:6px;padding-top:6px"><span>Total a pagar hoy:</span><strong style="color:var(--red)">${formatCOP(totalDueNow)}</strong></div>
       </div>
       <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);margin-bottom:6px">Monto a ${isFull?'pagar':'abonar'} (COP)</label>
       <input id="lp-amount" type="number" min="1000" step="1000" value="${defaultAmount}" ${isFull?'readonly':''} style="width:100%;padding:12px;background:var(--sur,rgba(255,255,255,.04));border:1px solid var(--bd,rgba(255,255,255,.08));border-radius:8px;color:#fff;font-size:16px;font-weight:600">
@@ -2949,7 +2853,6 @@ function openInvestModal(type='cdtc'){
     document.getElementById('inf-producto').textContent='Fondo DGP — Riesgo Medio';
     document.getElementById('inf-apy-l').textContent='APY anual';
     document.getElementById('inf-apy').textContent='~'+apy.annual.toFixed(1)+'%';
-    document.getElementById('inf-apy').style.color='var(--amb)';
     document.getElementById('inf-apy').className='v';
     document.getElementById('inf-apy').style.color='var(--amb)';
     document.getElementById('inf-min').textContent='$50,000 COP';
@@ -3189,8 +3092,6 @@ async function showInvestmentDetail(id){
         🔒 El capital se desbloquea el <strong style="color:var(--text)">${formatDate(lockEnd)}</strong>
       </div>`}
     </div>`;
-
-    startEarningsAnimation();
   }catch(e){
     console.error(e);
     c.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span>Error cargando el detalle</div>';
@@ -3229,11 +3130,15 @@ function renderPoolDetail(c, inv, returns, transactions){
   const poolNote=inv.notes||'';
   // Parsear asignaciones desde el campo notes si contiene JSON de estrategia
   let poolAllocation=null;
-  // 1. Intentar desde localStorage (guardado por admin)
-  try{
-    const saved=localStorage.getItem('sanse_pool_strategies');
-    if(saved)poolAllocation=JSON.parse(saved);
-  }catch(_){}
+  // 1. Fuente real: backend (poolStats.strategies, tabla de la migración 002)
+  if(poolStats&&Array.isArray(poolStats.strategies)&&poolStats.strategies.length)poolAllocation=poolStats.strategies;
+  // 2. Fallback: localStorage (solo funciona si admin y cliente comparten navegador)
+  if(!poolAllocation){
+    try{
+      const saved=localStorage.getItem('sanse_pool_strategies_v2')||localStorage.getItem('sanse_pool_strategies');
+      if(saved)poolAllocation=JSON.parse(saved);
+    }catch(_){}
+  }
   // 2. Fallback: desde notas de inversión
   if(!poolAllocation){
     try{
@@ -3432,61 +3337,6 @@ function calculateMyAvgAPY(invId=null){
   
   if(rates.length===0) return 2.0;
   return rates.reduce((a,b)=>a+b,0)/rates.length;
-}
-
-// ══════════════════ HISTORIAL DE DEPÓSITOS ══════════════════
-async function loadDepositHistory(){
-  const container=document.getElementById('dep-history-list');
-  if(!container)return;
-  try{
-    const res=await apiFetch('/deposits/my');
-    if(!res||!res.ok){
-      container.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:13px">No se pudo cargar el historial</div>';
-      return;
-    }
-    const deposits=await res.json();
-    if(!deposits.length){
-      container.innerHTML='<div style="text-align:center;color:var(--mut);padding:30px;font-size:13px"><span style="font-size:24px;display:block;margin-bottom:8px;opacity:.4">📋</span>No tienes depósitos registrados aún</div>';
-      return;
-    }
-    const statusLabel={pending:'Pendiente',approved:'Aprobado',rejected:'Rechazado'};
-    const statusColor={pending:'var(--amb)',approved:'var(--grn)',rejected:'var(--red)'};
-    container.innerHTML=`<div class="table-card"><div class="table-wrap"><table>
-      <thead><tr><th>Ref</th><th>Monto</th><th>Estado</th><th>Nota</th><th>Fecha</th></tr></thead>
-      <tbody>${deposits.map(d=>`<tr>
-        <td class="mono" style="font-size:11px;color:var(--mut)">${d.ref_id||d.id}</td>
-        <td class="mono" style="color:var(--grn);font-weight:600">${formatCOP(d.amount)}</td>
-        <td><span style="font-size:11px;font-weight:700;color:${statusColor[d.status]||'var(--mut)'}">${statusLabel[d.status]||d.status}</span></td>
-        <td style="font-size:12px;color:var(--mut)">${d.note||'—'}</td>
-        <td style="font-size:11px;color:var(--mut)">${formatDate(d.created_at)}</td>
-      </tr>`).join('')}</tbody>
-    </table></div></div>`;
-  }catch(e){
-    container.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:13px">Error cargando historial</div>';
-  }
-}
-
-// ══════════════════ HISTORIAL DE DEPÓSITOS (continuación) ══════════════════
-async function loadDepositHistory_unused(){
-  const container=null;
-  try{
-    const res=await apiFetch('/deposits/my');
-    if(!res||!res.ok){return}
-    const deposits=await res.json();
-    if(!deposits.length){container.innerHTML='<div style="text-align:center;color:var(--mut);padding:30px;font-size:13px"><span style="font-size:24px;display:block;margin-bottom:8px;opacity:.4">📋</span>No tienes depósitos registrados aún</div>';return}
-    const statusColor={pending:'var(--amb)',approved:'var(--grn)',rejected:'var(--red)'};
-    const statusLabel={pending:'Pendiente',approved:'Aprobado',rejected:'Rechazado'};
-    container.innerHTML='<div class="table-card"><div class="table-wrap"><table><thead><tr><th>Ref</th><th>Monto</th><th>Estado</th><th>Nota</th><th>Fecha</th></tr></thead><tbody>'+
-      deposits.map(d=>'<tr>'+
-        '<td class="mono" style="font-size:11px;color:var(--mut)">'+(d.ref_id||d.id)+'</td>'+
-        '<td class="mono" style="color:var(--grn);font-weight:600">'+formatCOP(d.amount)+'</td>'+
-        '<td><span style="font-size:11px;font-weight:700;color:'+(statusColor[d.status]||'var(--mut)')+'">'+
-          (statusLabel[d.status]||d.status)+'</span></td>'+
-        '<td style="font-size:12px;color:var(--mut)">'+(d.note||'—')+'</td>'+
-        '<td style="font-size:11px;color:var(--mut)">'+formatDate(d.created_at)+'</td>'+
-      '</tr>').join('')+
-    '</tbody></table></div></div>';
-  }catch(e){container.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:13px">Error cargando historial</div>'}
 }
 
 // ══════════════════ INIT ══════════════════
