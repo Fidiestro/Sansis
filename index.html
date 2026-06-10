@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0d18">
   <title>Sanse Capital — Gestión de Inversiones en Criptoactivos</title>
   <meta name="description" content="Sanse Capital SAS — Sociedad de gestión de inversiones privadas con rendimientos históricos verificables y gestión transparente en blockchain. Bogotá, Colombia.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -335,7 +336,7 @@
     }
 
     /* ── Live ticker (Hero right) ── */
-    .hero-right { position: relative; display: none; }
+    .hero-right { position: relative; display: block; }
     .protocol-card {
       background: var(--bg-2);
       border: 1px solid var(--border);
@@ -927,12 +928,88 @@
       line-height: 1.65; margin-top: var(--s-3);
     }
 
+    /* ═══════════════════════ 3D LAYER ═══════════════════════ */
+    /* Canvas con red de nodos 3D en el hero */
+    #hero3d {
+      position: absolute; inset: 0; z-index: 0;
+      width: 100%; height: 100%;
+      opacity: 0.9;
+      touch-action: pan-y; /* no bloquear scroll vertical en móvil */
+    }
+    #inicio { perspective: 1200px; }
+
+    /* Profundidad flotante de la tarjeta de protocolo */
+    @keyframes float3d {
+      0%, 100% { transform: rotateY(-7deg) rotateX(3deg) translateY(0); }
+      50%      { transform: rotateY(-7deg) rotateX(3deg) translateY(-10px); }
+    }
+    .hero-right { perspective: 1100px; }
+    .protocol-card {
+      position: relative;
+      transform-style: preserve-3d;
+      animation: float3d 7s ease-in-out infinite;
+      box-shadow:
+        0 24px 60px rgba(0,0,0,0.45),
+        0 8px 20px rgba(91,158,255,0.10),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+      will-change: transform;
+    }
+
+    /* Tilt 3D interactivo (se aplica por JS en desktop) */
+    .tilt {
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .tilt > * { transform: translateZ(0); }
+    .tilt.tilting { transition: border-color 0.25s ease, box-shadow 0.25s ease; }
+    .tilt::after {
+      /* brillo especular que sigue al cursor */
+      content: ''; position: absolute; inset: 0;
+      border-radius: inherit; pointer-events: none;
+      background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(91,158,255,0.10), transparent 60%);
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+    .tilt:hover::after { opacity: 1; }
+
+    .pasos-grid, .servicios-grid, .wallet-cards { perspective: 1400px; }
+    .paso-card, .serv-card, .wcard { position: relative; }
+
+    /* Profundidad extra en hover (suma al tilt) */
+    .paso-card:hover, .serv-card:hover {
+      box-shadow:
+        0 24px 50px rgba(0,0,0,0.45),
+        0 6px 16px rgba(91,158,255,0.12);
+    }
+
+    /* Iconos elevados sobre el plano de la card */
+    .serv-icon-wrap, .paso-icon { transform: translateZ(34px); }
+    .serv-rates, .hero-stat-val { transform: translateZ(18px); }
+
     /* ═══════════════════════ ANIMATIONS ═══════════════════════ */
     .fade-in {
       opacity: 0; transform: translateY(28px);
       transition: opacity 0.7s ease, transform 0.7s ease;
     }
     .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* Entrada 3D al hacer scroll (cards) */
+    .rise-3d {
+      opacity: 0;
+      transform: perspective(1000px) rotateX(10deg) translateY(36px);
+      transition: opacity 0.65s ease, transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .rise-3d.visible {
+      opacity: 1;
+      transform: perspective(1000px) rotateX(0deg) translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .protocol-card { animation: none; transform: none; }
+      .tilt, .rise-3d, .fade-in { transition: none !important; transform: none !important; opacity: 1 !important; }
+      #hero3d { display: none; }
+      html { scroll-behavior: auto; }
+    }
 
     /* ═══════════════════════ RESPONSIVE ═══════════════════════ */
     /* ── Tablet ── */
@@ -968,6 +1045,21 @@
       .hero-stats { grid-template-columns: 1fr 1fr; }
       .hero-stat-val { font-size: 20px; }
       .team-tags { gap: 6px; }
+
+      /* Targets táctiles ≥44px y safe-areas (iPhone notch) */
+      nav { padding-left: max(var(--s-5), env(safe-area-inset-left)); padding-right: max(var(--s-5), env(safe-area-inset-right)); }
+      .nav-hamburger { padding: 12px; margin-right: -8px; }
+      .nav-mobile a { padding: var(--s-5) 0; }
+      .btn-hero-primary, .btn-hero-ghost { padding: 15px 26px; min-height: 48px; width: 100%; justify-content: center; }
+      .hero-btns { flex-direction: column; }
+      .faq-q { padding: var(--s-5) 0; min-height: 52px; }
+      .chain-tab { padding: 10px 18px; min-height: 40px; }
+      footer { padding-bottom: max(var(--s-10), env(safe-area-inset-bottom)); }
+
+      /* Hero más compacto y con la tarjeta visible también en móvil */
+      #inicio { padding-top: 84px; }
+      .hero-right { display: block; perspective: 900px; }
+      .protocol-card { animation-duration: 9s; }
     }
   </style>
 </head>
@@ -1015,6 +1107,7 @@
 <section id="inicio">
   <div class="hero-bg"></div>
   <div class="hero-grid"></div>
+  <canvas id="hero3d" aria-hidden="true"></canvas>
   <div class="hero-inner">
     <div class="hero-left">
       <div class="hero-badge"><div class="hero-badge-dot"></div>Sanse Capital SAS · Bogotá, Colombia</div>
@@ -1168,31 +1261,31 @@
           <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </div>
         <h3>Crea tu cuenta</h3>
-        <p>Regístrate en nuestra plataforma con tus datos personales. Nuestro equipo revisará y aprobará tu solicitud. Recibirás un código de referido personal para invitar a otros.</p>
+        <p>Regístrate con un link de invitación de otro participante o directamente desde nuestra página principal. Nuestro equipo revisará y aprobará tu solicitud, y recibirás tu propio código de referido.</p>
       </div>
       <div class="paso-card">
         <div class="paso-num">02</div>
         <div class="paso-icon">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         </div>
-        <h3>Firma el contrato de mandato</h3>
-        <p>Se formaliza un contrato de mandato civil entre Sanse Capital SAS y el participante, especificando términos de gestión, riesgos, condiciones de retiro y obligaciones de ambas partes.</p>
+        <h3>Deposita tus pesos</h3>
+        <p>Desde tu dashboard sigue las instrucciones para depositar en COP (Bre-B o transferencia bancaria). Un administrador verifica tu depósito y el saldo se refleja en tu cuenta.</p>
       </div>
       <div class="paso-card">
         <div class="paso-num">03</div>
         <div class="paso-icon">
-          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         </div>
-        <h3>Deposita tu capital</h3>
-        <p>Transfiere tu capital a través de los métodos habilitados (Bre-B, transferencia bancaria). Tu depósito se refleja en tu dashboard personal en tiempo real.</p>
+        <h3>Elige tu opción de inversión</h3>
+        <p>Selecciona el producto que mejor se adapte a tu nivel de riesgo y horizonte de inversión: desde el LP COP, más conservador, hasta el Fondo DGP, con mayor exposición y potencial de rendimiento.</p>
       </div>
       <div class="paso-card">
         <div class="paso-num">04</div>
         <div class="paso-icon">
-          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
         </div>
-        <h3>Gestión activa y rendimientos</h3>
-        <p>Tu capital se gestiona activamente en mercados de criptoactivos. Puedes ver el estado de tus inversiones y rendimientos desde tu panel personal. Retiros al cierre de cada mes.</p>
+        <h3>Retira tus rendimientos</h3>
+        <p>Retira tus rendimientos mensualmente o reinviértelos para aprovechar el interés compuesto, y observa cómo tu capital se valoriza mes a mes desde tu panel personal.</p>
       </div>
     </div>
   </div>
@@ -1211,15 +1304,15 @@
           <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
         </div>
         <h3>Inversión en LP COP</h3>
-        <p>Simula un depósito a término con rendimientos basados en el desempeño del fondo. Capital sujeto a permanencia mínima con rendimientos históricos competitivos.</p>
+        <p>Simula un depósito a término en pesos. El rendimiento se genera por los intereses de los préstamos otorgados a participantes del fondo, lo que lo hace nuestra opción más estable. Capital sujeto a permanencia mínima.</p>
         <div class="serv-rates">
           <div class="rate-chip">
             <span class="rate-val">13.5%</span>
-            <span class="rate-lbl">Anual base</span>
+            <span class="rate-lbl">Anual mínima</span>
           </div>
           <div class="rate-chip">
-            <span class="rate-val">42%</span>
-            <span class="rate-lbl">Mejor año</span>
+            <span class="rate-val">24%</span>
+            <span class="rate-lbl">Anual máxima</span>
           </div>
         </div>
         <p class="rate-note">* Rendimientos históricos, no garantizados. Capital sujeto a riesgo.</p>
@@ -1230,7 +1323,7 @@
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/><path d="M8 12a4 4 0 0 1 8 0"/></svg>
         </div>
         <h3>Fondo DGP</h3>
-        <p>Fondo gestionado activamente con exposición a estrategias DeFi y Pools de liquidez. Mayor rentabilidad histórica con perfil de riesgo superior al LP COP. Pensado para participantes con horizonte de inversión más amplio.</p>
+        <p>Fondo gestionado activamente que invierte en Bitcoin y otros activos digitales para buscar un mayor rendimiento. Perfil de riesgo superior al LP COP, pensado para participantes con un horizonte de inversión más amplio.</p>
         <div class="serv-rates">
           <div class="rate-chip">
             <span class="rate-val">20%</span>
@@ -1261,26 +1354,6 @@
           </div>
         </div>
         <p class="rate-note">Tasas mensuales. Sujeto a aprobación.</p>
-      </div>
-
-      <div class="serv-card">
-        <span class="beta-badge">Beta · Piloto</span>
-        <div class="serv-icon-wrap">
-          <svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="12" r="3"/><circle cx="12" cy="6" r="3"/><circle cx="12" cy="18" r="3"/><line x1="8.5" y1="10.5" x2="10" y2="8"/><line x1="14" y1="8" x2="15.5" y2="10.5"/><line x1="15.5" y1="13.5" x2="14" y2="16"/><line x1="10" y1="16" x2="8.5" y2="13.5"/></svg>
-        </div>
-        <h3>Cadenas de Ahorro</h3>
-        <p>Sistema de ahorro grupal tradicional. Un grupo de participantes aporta una cuota mensual fija, y cada mes uno de ellos recibe el monto total acumulado. Disciplina, transparencia y administración respaldada por Sanse Capital.</p>
-        <div class="serv-rates">
-          <div class="rate-chip">
-            <span class="rate-val">Mensual</span>
-            <span class="rate-lbl">Cuota fija</span>
-          </div>
-          <div class="rate-chip">
-            <span class="rate-val">100%</span>
-            <span class="rate-lbl">Trazable y administrado</span>
-          </div>
-        </div>
-        <p class="rate-note">Producto en fase piloto. Cupos limitados según número de participantes por cadena.</p>
       </div>
 
       <div class="serv-card coming-soon">
@@ -1446,11 +1519,176 @@
     document.getElementById('navMobile').classList.toggle('open');
   }
 
-  // ─── SCROLL FADE ───
+  // ─── SCROLL FADE + 3D RISE ───
   const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
   }, { threshold: 0.1 });
   document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+
+  // Entrada 3D escalonada para cards
+  const cards3d = document.querySelectorAll('.paso-card, .serv-card, .wcard');
+  const obs3d = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const i = [...e.target.parentElement.children].indexOf(e.target);
+        e.target.style.transitionDelay = (i * 70) + 'ms';
+        e.target.classList.add('visible');
+        obs3d.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  cards3d.forEach(el => { el.classList.add('rise-3d'); obs3d.observe(el); });
+
+  // ─── TILT 3D (solo dispositivos con cursor) ───
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && !reducedMotion) {
+    document.querySelectorAll('.paso-card, .serv-card, .wcard, .protocol-card').forEach(card => {
+      card.classList.add('tilt');
+      let raf = null;
+      card.addEventListener('pointermove', e => {
+        const r = card.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width;
+        const py = (e.clientY - r.top) / r.height;
+        card.style.setProperty('--mx', (px * 100) + '%');
+        card.style.setProperty('--my', (py * 100) + '%');
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+          raf = null;
+          const rx = (0.5 - py) * 8;   // rotateX
+          const ry = (px - 0.5) * 10;  // rotateY
+          card.classList.add('tilting');
+          if (card.classList.contains('protocol-card')) card.style.animation = 'none';
+          card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-4px)`;
+        });
+      });
+      card.addEventListener('pointerleave', () => {
+        card.classList.remove('tilting');
+        card.style.transform = '';
+        if (card.classList.contains('protocol-card')) card.style.animation = '';
+      });
+    });
+  }
+
+  // ─── RED DE NODOS 3D (canvas, sin librerías) ───
+  (function() {
+    const canvas = document.getElementById('hero3d');
+    if (!canvas || reducedMotion) return;
+    const ctx = canvas.getContext('2d');
+    const isMobile = window.matchMedia('(max-width: 639px)').matches;
+    const DPR = Math.min(window.devicePixelRatio || 1, 2);
+    const N = isMobile ? 46 : 90;          // menos nodos en móvil
+    const LINK_DIST = isMobile ? 150 : 190; // distancia de conexión (px proyectados)
+    const FOV = 520;
+    let W = 0, H = 0, CX = 0, CY = 0;
+    let nodes = [];
+    let angleY = 0, angleX = 0.25;
+    let targetRX = 0, targetRY = 0;
+    let running = true, visible = true;
+
+    function resize() {
+      const r = canvas.parentElement.getBoundingClientRect();
+      W = r.width; H = r.height;
+      canvas.width = W * DPR; canvas.height = H * DPR;
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      CX = W / 2; CY = H / 2;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Nodos distribuidos en una esfera (espiral de Fibonacci) + jitter
+    const R = isMobile ? 200 : 290;
+    for (let i = 0; i < N; i++) {
+      const t = i / (N - 1);
+      const inc = Math.acos(1 - 2 * t);
+      const az = Math.PI * (1 + Math.sqrt(5)) * i;
+      const jitter = 0.75 + Math.random() * 0.5;
+      nodes.push({
+        x: R * jitter * Math.sin(inc) * Math.cos(az),
+        y: R * jitter * Math.sin(inc) * Math.sin(az),
+        z: R * jitter * Math.cos(inc),
+        pulse: Math.random() * Math.PI * 2,
+      });
+    }
+
+    // Interacción: cursor en desktop, giroscopio sutil vía touch-drag NO (no bloquear scroll)
+    window.addEventListener('pointermove', e => {
+      if (!window.matchMedia('(hover: hover)').matches) return;
+      targetRY = ((e.clientX / window.innerWidth) - 0.5) * 0.6;
+      targetRX = ((e.clientY / window.innerHeight) - 0.5) * 0.4 + 0.25;
+    }, { passive: true });
+
+    // Pausar cuando el hero no está visible o la pestaña está oculta
+    new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(canvas);
+    document.addEventListener('visibilitychange', () => { running = !document.hidden; });
+
+    function project(n, sy, cy2, sx, cx2) {
+      // rotación Y, luego X
+      let x = n.x * cy2 - n.z * sy;
+      let z = n.x * sy + n.z * cy2;
+      let y = n.y * cx2 - z * sx;
+      z = n.y * sx + z * cx2;
+      const s = FOV / (FOV + z + 60);
+      return { sx: CX + x * s * 0.92, sy: CY + y * s * 0.92, s, z };
+    }
+
+    let last = 0;
+    function frame(ts) {
+      requestAnimationFrame(frame);
+      if (!running || !visible) return;
+      if (ts - last < 1000 / 45) return; // cap ~45fps (suficiente, ahorra batería)
+      const dt = Math.min(ts - last, 50);
+      last = ts;
+
+      angleY += 0.00012 * dt;
+      angleX += (targetRX - angleX) * 0.04;
+      const ry = angleY + targetRY;
+      const sy = Math.sin(ry), cy2 = Math.cos(ry);
+      const sx = Math.sin(angleX), cx2 = Math.cos(angleX);
+
+      ctx.clearRect(0, 0, W, H);
+      const pts = nodes.map(n => project(n, sy, cy2, sx, cx2));
+
+      // Conexiones
+      ctx.lineWidth = 1;
+      for (let i = 0; i < pts.length; i++) {
+        for (let j = i + 1; j < pts.length; j++) {
+          const dx = pts[i].sx - pts[j].sx, dyy = pts[i].sy - pts[j].sy;
+          const d2 = dx * dx + dyy * dyy;
+          if (d2 < LINK_DIST * LINK_DIST) {
+            const a = (1 - Math.sqrt(d2) / LINK_DIST) * 0.34 * Math.min(pts[i].s, pts[j].s);
+            ctx.strokeStyle = `rgba(91,158,255,${a.toFixed(3)})`;
+            ctx.beginPath();
+            ctx.moveTo(pts[i].sx, pts[i].sy);
+            ctx.lineTo(pts[j].sx, pts[j].sy);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Nodos con pulso
+      for (let i = 0; i < pts.length; i++) {
+        const p = pts[i];
+        const n = nodes[i];
+        n.pulse += 0.0012 * dt;
+        const pulse = 0.7 + 0.3 * Math.sin(n.pulse);
+        const rNode = (1.1 + p.s * 1.7) * pulse;
+        const depth = Math.max(0, Math.min(1, (p.s - 0.55) * 2));
+        ctx.beginPath();
+        ctx.arc(p.sx, p.sy, rNode, 0, Math.PI * 2);
+        ctx.fillStyle = depth > 0.65
+          ? `rgba(139,111,252,${(0.5 + depth * 0.4).toFixed(2)})`
+          : `rgba(91,158,255,${(0.3 + depth * 0.5).toFixed(2)})`;
+        ctx.fill();
+        if (depth > 0.8) {
+          ctx.beginPath();
+          ctx.arc(p.sx, p.sy, rNode * 2.6, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(91,158,255,0.06)';
+          ctx.fill();
+        }
+      }
+    }
+    requestAnimationFrame(frame);
+  })();
 
   // ─── FAQ ───
   function toggleFaq(btn) {
@@ -1474,17 +1712,17 @@
   calcular();
 
   // ─── BLOCKCHAIN ASSETS ───
-  const WALLET = '0xYourWalletAddress';
+  const WALLET = '0x25E6997CD1037E03662996E63875C99704f8F38D';
   let TRM_LIVE = 4100;
   let allAssets = [];
 
   const CHAINS = [
-    { id:'arbitrum', name:'Arbitrum', color:'#28a0f0', rpc:'https://arb1.arbitrum.io/rpc', chainId:42161 },
-    { id:'eth',      name:'Ethereum', color:'#627eea', rpc:'https://cloudflare-eth.com',   chainId:1     },
-    { id:'bsc',      name:'BSC',      color:'#f3ba2f', rpc:'https://bsc-dataseed.binance.org', chainId:56 },
-    { id:'polygon',  name:'Polygon',  color:'#8247e5', rpc:'https://polygon-rpc.com',      chainId:137   },
-    { id:'optimism', name:'Optimism', color:'#ff0420', rpc:'https://mainnet.optimism.io',  chainId:10    },
-    { id:'base',     name:'Base',     color:'#0052ff', rpc:'https://mainnet.base.org',     chainId:8453  },
+    { id:'arbitrum', name:'Arbitrum', color:'#28a0f0', rpc:'https://arbitrum-one-rpc.publicnode.com', chainId:42161 },
+    { id:'eth',      name:'Ethereum', color:'#627eea', rpc:'https://ethereum-rpc.publicnode.com',     chainId:1     },
+    { id:'bsc',      name:'BSC',      color:'#f3ba2f', rpc:'https://bsc-rpc.publicnode.com',          chainId:56    },
+    { id:'polygon',  name:'Polygon',  color:'#8247e5', rpc:'https://polygon-bor-rpc.publicnode.com',  chainId:137   },
+    { id:'optimism', name:'Optimism', color:'#ff0420', rpc:'https://optimism-rpc.publicnode.com',     chainId:10    },
+    { id:'base',     name:'Base',     color:'#0052ff', rpc:'https://base-rpc.publicnode.com',         chainId:8453  },
   ];
 
   const KNOWN_TOKENS = {
@@ -1494,6 +1732,13 @@
       { symbol:'WBTC', name:'Wrapped Bitcoin',addr:'0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f', dec:8  },
       { symbol:'WETH', name:'Wrapped Ether',  addr:'0x82af49447d8a07e3bd95bd0d56f35241523fbab1', dec:18 },
       { symbol:'ARB',  name:'Arbitrum',       addr:'0x912ce59144191c1204e64559fe8253a0e49e6548', dec:18 },
+      // ── Posiciones en Aave v3 (aTokens, 1:1 con el subyacente) ──
+      { symbol:'WETH', name:'WETH en Aave v3', addr:'0xe50fa9b3c56ffb159cb0fca61f5c9d750e8128c8', dec:18, protocol:'Aave' },
+      { symbol:'WBTC', name:'WBTC en Aave v3', addr:'0x078f358208685046a11c85e8ad32895ded33a249', dec:8,  protocol:'Aave' },
+      { symbol:'USDC', name:'USDC en Aave v3', addr:'0x724dc807b04555b71ed48a6896b6f41593b8c637', dec:6,  protocol:'Aave' },
+      { symbol:'USDT', name:'USDT en Aave v3', addr:'0x6ab707aca953edaefbc4fd23ba73294241490620', dec:6,  protocol:'Aave' },
+      { symbol:'ARB',  name:'ARB en Aave v3',  addr:'0x6533afac2e7bccb20dca161449a13a32d391fb00', dec:18, protocol:'Aave' },
+      { symbol:'DAI',  name:'DAI en Aave v3',  addr:'0x82e64f49ed5ec1bc6e43dad4fc8af9bb3a2312ee', dec:18, protocol:'Aave' },
     ],
     eth:      [
       { symbol:'USDC', name:'USD Coin',  addr:'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', dec:6 },
@@ -1528,7 +1773,7 @@
       const d = await r.json();
       if (d?.rates?.COP) TRM_LIVE = d.rates.COP;
     } catch(e) {}
-    document.getElementById('trmVal').textContent = 'TRM $' + Math.round(TRM_LIVE).toLocaleString('es-CO');
+    document.getElementById('trmVal').textContent = '$' + Math.round(TRM_LIVE).toLocaleString('es-CO');
   }
 
   function getPrice(sym) {
@@ -1540,16 +1785,23 @@
   function fmtUSD(n) { return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
   function fmtCOP(n) { return '$' + Math.round(n).toLocaleString('es-CO'); }
 
+  async function rpcCall(rpc, method, params) {
+    const r = await fetch(rpc, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({jsonrpc:'2.0', id:1, method, params})
+    });
+    return (await r.json()).result;
+  }
+
   async function fetchChainAssets(chain) {
     const results = [];
+    const padded = WALLET.toLowerCase().replace('0x','').padStart(64,'0');
+
+    // 1) Balance nativo
     try {
-      const r = await fetch(chain.rpc, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_getBalance',params:[WALLET,'latest']})
-      });
-      const d = await r.json();
-      if (d.result) {
-        const amount = parseInt(d.result,16)/1e18;
+      const res = await rpcCall(chain.rpc, 'eth_getBalance', [WALLET, 'latest']);
+      if (res) {
+        const amount = parseInt(res,16)/1e18;
         const nativeSym = chain.id==='bsc'?'BNB':chain.id==='polygon'?'MATIC':'ETH';
         const price = getPrice(nativeSym);
         if (amount*price > 0.01 || amount > 0.0001) {
@@ -1557,6 +1809,21 @@
         }
       }
     } catch(e) {}
+
+    // 2) ERC-20 y posiciones Aave (balanceOf = 0x70a08231)
+    const tokens = KNOWN_TOKENS[chain.id] || [];
+    const calls = tokens.map(async t => {
+      try {
+        const res = await rpcCall(chain.rpc, 'eth_call', [{to:t.addr, data:'0x70a08231'+padded}, 'latest']);
+        if (!res || res === '0x') return;
+        const amount = parseInt(res,16)/Math.pow(10,t.dec);
+        if (!amount || amount < 1e-9) return;
+        const price = getPrice(t.symbol);
+        if (amount*price < 0.01) return;
+        results.push({symbol:t.symbol, name:t.name, chain:chain.id, amount, price, valueUSD:amount*price, protocol:t.protocol||null});
+      } catch(e) {}
+    });
+    await Promise.all(calls);
     return results;
   }
 
@@ -1612,14 +1879,14 @@
       const valCOP = t.valueUSD * TRM_LIVE;
       return `<tr>
         <td><div class="tk-cell">
-          <div class="tk-icon">${t.symbol.slice(0,3)}</div>
+          <div class="tk-icon"${t.protocol?' style="background:rgba(176,87,255,0.12);color:#b057ff;border-color:rgba(176,87,255,0.25)"':''}>${t.symbol.slice(0,3)}</div>
           <div><div class="tk-sym">${t.symbol}</div><div class="tk-name">${t.name}</div></div>
         </div></td>
         <td class="mono">${fmt(t.amount)}</td>
         <td class="mono">${fmtUSD(t.price||0)}</td>
         <td class="mono" style="color:var(--blue)">${fmtUSD(t.valueUSD)}</td>
         <td class="mono">${fmtCOP(valCOP)}</td>
-        <td><span class="chain-pill"><span class="chain-dot" style="background:${chain.color}"></span>${chain.name}</span></td>
+        <td><span class="chain-pill"><span class="chain-dot" style="background:${chain.color}"></span>${chain.name}${t.protocol?' · '+t.protocol:''}</span></td>
       </tr>`;
     }).join('');
   }
