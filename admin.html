@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#1d5fd6">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -19,35 +19,35 @@
 ═══════════════════════════════════════════════════════════════ */
 
 :root{
-  /* Surfaces */
-  --bg:#0a0a0a;
-  --bg-1:#111111;
-  --bg-2:#161616;
-  --bg-3:#1c1c1c;
-  --surface:rgba(255,255,255,.02);
-  --surface-h:rgba(255,255,255,.04);
+  /* Surfaces — light corporate fintech */
+  --bg:#eef2f7;
+  --bg-1:#ffffff;
+  --bg-2:#ffffff;
+  --bg-3:#f4f7fb;
+  --surface:rgba(13,42,92,.025);
+  --surface-h:rgba(13,42,92,.05);
 
   /* Borders */
-  --line:rgba(255,255,255,.08);
-  --line-2:rgba(255,255,255,.14);
-  --line-3:rgba(255,255,255,.22);
+  --line:rgba(13,42,92,.10);
+  --line-2:rgba(13,42,92,.16);
+  --line-3:rgba(13,42,92,.26);
 
-  /* Text */
-  --txt:#f0f0ee;
-  --txt-2:#8a8a87;
-  --txt-3:#5a5a57;
-  --txt-4:#3a3a37;
+  /* Text — deep navy ink on light */
+  --txt:#0f2647;
+  --txt-2:#516079;
+  --txt-3:#8a97ab;
+  --txt-4:#b6c0d0;
 
-  /* Single accent: terminal phosphor green */
-  --acc:#a3ff12;
-  --acc-dim:rgba(163,255,18,.12);
-  --acc-soft:rgba(163,255,18,.06);
+  /* Single accent: corporate fintech blue */
+  --acc:#1d5fd6;
+  --acc-dim:rgba(29,95,214,.12);
+  --acc-soft:rgba(29,95,214,.06);
 
-  /* Semantic (muted) */
-  --pos:#7ed957;
-  --neg:#ff6b6b;
-  --warn:#ffb84d;
-  --info:#7eb6ff;
+  /* Semantic */
+  --pos:#16a34a;
+  --neg:#dc2626;
+  --warn:#d97706;
+  --info:#2563eb;
 
   /* Layout */
   --safe-bottom:env(safe-area-inset-bottom,0px);
@@ -88,7 +88,7 @@ img{max-width:100%;display:block}
 .top{
   position:sticky;top:0;z-index:80;
   padding-top:var(--safe-top);
-  background:rgba(10,10,10,.92);
+  background:rgba(255,255,255,.85);
   backdrop-filter:blur(20px) saturate(1.2);
   -webkit-backdrop-filter:blur(20px) saturate(1.2);
   border-bottom:1px solid var(--line);
@@ -99,8 +99,8 @@ img{max-width:100%;display:block}
 }
 .brand{display:flex;align-items:center;gap:10px}
 .brand-mark{
-  width:30px;height:30px;
-  background:var(--acc);color:#000;
+  width:30px;height:30px;border-radius:8px;
+  background:var(--acc);color:#fff;
   display:grid;place-items:center;
   font-family:var(--f-mono);font-size:14px;font-weight:700;
   letter-spacing:-.5px;
@@ -130,7 +130,7 @@ img{max-width:100%;display:block}
 ───────────────────────────────────────── */
 .search-ov{
   position:fixed;inset:0;z-index:200;
-  background:rgba(10,10,10,.96);
+  background:rgba(255,255,255,.92);
   backdrop-filter:blur(16px);
   display:none;flex-direction:column;
   padding-top:var(--safe-top);
@@ -246,7 +246,7 @@ img{max-width:100%;display:block}
 .subtab:hover:not(.active){color:var(--txt-2)}
 .subtab-badge{
   display:inline-block;margin-left:6px;
-  background:var(--acc);color:#000;
+  background:var(--acc);color:#fff;
   font-family:var(--f-mono);font-size:9px;font-weight:700;
   padding:1px 5px;border-radius:8px;
   vertical-align:1px;min-width:16px;text-align:center;
@@ -273,7 +273,7 @@ img{max-width:100%;display:block}
   flex-shrink:0;
 }
 .filter:hover{border-color:var(--line-2)}
-.filter.on{background:var(--txt);color:#000;border-color:var(--txt)}
+.filter.on{background:var(--txt);color:#fff;border-color:var(--txt)}
 
 /* ─────────────────────────────────────────
    LIST (cards on mobile)
@@ -341,18 +341,18 @@ img{max-width:100%;display:block}
   content:'';width:5px;height:5px;border-radius:50%;
   background:currentColor;
 }
-.pill.pending{background:rgba(255,184,77,.08);color:var(--warn);border:1px solid rgba(255,184,77,.2)}
-.pill.approved{background:rgba(126,182,255,.08);color:var(--info);border:1px solid rgba(126,182,255,.2)}
-.pill.completed,.pill.active,.pill.paid{background:rgba(126,217,87,.08);color:var(--pos);border:1px solid rgba(126,217,87,.2)}
-.pill.rejected,.pill.blocked,.pill.overdue{background:rgba(255,107,107,.08);color:var(--neg);border:1px solid rgba(255,107,107,.2)}
-.pill.cancelled,.pill.inactive{background:rgba(156,163,175,.1);color:#9ca3af;border:1px solid rgba(156,163,175,.25)}
+.pill.pending{background:rgba(217,119,6,.10);color:var(--warn);border:1px solid rgba(217,119,6,.22)}
+.pill.approved{background:rgba(37,99,235,.10);color:var(--info);border:1px solid rgba(37,99,235,.22)}
+.pill.completed,.pill.active,.pill.paid{background:rgba(22,163,74,.10);color:var(--pos);border:1px solid rgba(22,163,74,.22)}
+.pill.rejected,.pill.blocked,.pill.overdue{background:rgba(220,38,38,.10);color:var(--neg);border:1px solid rgba(220,38,38,.22)}
+.pill.cancelled,.pill.inactive{background:rgba(138,151,171,.12);color:var(--txt-3);border:1px solid rgba(138,151,171,.28)}
 .pill.neutral{background:var(--surface);color:var(--txt-2);border:1px solid var(--line)}
 
 /* ─────────────────────────────────────────
    BUTTONS
 ───────────────────────────────────────── */
 .btn{
-  padding:10px 16px;
+  padding:10px 16px;border-radius:10px;
   font-family:var(--f-mono);font-size:11px;font-weight:500;
   letter-spacing:1.2px;text-transform:uppercase;
   border:1px solid var(--line-2);
@@ -368,14 +368,14 @@ img{max-width:100%;display:block}
 .btn-sm{padding:6px 10px;font-size:10px;min-height:30px}
 .btn-block{width:100%;justify-content:center}
 
-.btn-primary{background:var(--acc);color:#000;border-color:var(--acc)}
-.btn-primary:hover:not(:disabled){background:#b8ff35;border-color:#b8ff35}
+.btn-primary{background:var(--acc);color:#fff;border-color:var(--acc)}
+.btn-primary:hover:not(:disabled){background:#1a52ba;border-color:#1a52ba}
 
-.btn-pos{background:rgba(126,217,87,.08);color:var(--pos);border-color:rgba(126,217,87,.25)}
-.btn-pos:hover:not(:disabled){background:rgba(126,217,87,.14)}
+.btn-pos{background:rgba(22,163,74,.10);color:var(--pos);border-color:rgba(22,163,74,.28)}
+.btn-pos:hover:not(:disabled){background:rgba(22,163,74,.18)}
 
-.btn-neg{background:rgba(255,107,107,.06);color:var(--neg);border-color:rgba(255,107,107,.2)}
-.btn-neg:hover:not(:disabled){background:rgba(255,107,107,.12)}
+.btn-neg{background:rgba(220,38,38,.08);color:var(--neg);border-color:rgba(220,38,38,.22)}
+.btn-neg:hover:not(:disabled){background:rgba(220,38,38,.16)}
 
 .btn-ghost{background:transparent;border-color:var(--line)}
 
@@ -385,6 +385,8 @@ img{max-width:100%;display:block}
 .card{
   background:var(--bg-1);
   border:1px solid var(--line);
+  border-radius:14px;
+  box-shadow:0 1px 2px rgba(15,38,71,.04),0 8px 24px rgba(15,38,71,.05);
   padding:18px;margin-bottom:14px;
 }
 .card-h{
@@ -418,7 +420,7 @@ img{max-width:100%;display:block}
   color:var(--txt);font-size:14px;
   font-family:var(--f-mono);letter-spacing:-.3px;
   outline:none;transition:border-color .12s;
-  border-radius:0;
+  border-radius:10px;
   -webkit-appearance:none;appearance:none;
 }
 .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--acc)}
@@ -470,13 +472,13 @@ img{max-width:100%;display:block}
 ───────────────────────────────────────── */
 .bnav{
   position:fixed;left:0;right:0;bottom:0;z-index:90;
-  background:rgba(10,10,10,.98);
+  background:rgba(255,255,255,.97);
   backdrop-filter:blur(20px);
   -webkit-backdrop-filter:blur(20px);
   border-top:1px solid var(--line-2);
   padding-bottom:var(--safe-bottom);
   display:grid;grid-template-columns:repeat(5,1fr);
-  box-shadow:0 -4px 20px rgba(0,0,0,.4);
+  box-shadow:0 -4px 24px rgba(15,38,71,.10);
 }
 .bn{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -509,7 +511,7 @@ img{max-width:100%;display:block}
 ───────────────────────────────────────── */
 .modal-ov{
   position:fixed;inset:0;z-index:300;
-  background:rgba(0,0,0,.75);
+  background:rgba(15,38,71,.45);
   backdrop-filter:blur(8px);
   -webkit-backdrop-filter:blur(8px);
   display:none;align-items:flex-end;justify-content:center;
@@ -522,7 +524,8 @@ img{max-width:100%;display:block}
   width:100%;max-width:500px;
   background:var(--bg-1);
   border-top:1px solid var(--line-2);
-  border-radius:0;
+  border-radius:18px 18px 0 0;
+  box-shadow:0 -8px 40px rgba(15,38,71,.18);
   max-height:92vh;
   display:flex;flex-direction:column;
   animation:slideUp .25s cubic-bezier(.2,.8,.3,1);
@@ -558,7 +561,7 @@ img{max-width:100%;display:block}
 
 @media(min-width:720px){
   .modal-ov{align-items:center}
-  .modal{border-radius:0;border:1px solid var(--line-2);max-height:85vh}
+  .modal{border-radius:18px;border:1px solid var(--line-2);max-height:85vh}
   .modal-handle{display:none}
 }
 
@@ -569,6 +572,7 @@ img{max-width:100%;display:block}
   position:fixed;bottom:calc(80px + var(--safe-bottom));
   left:50%;transform:translateX(-50%) translateY(20px);
   background:var(--bg-2);border:1px solid var(--line-2);
+  border-radius:12px;box-shadow:0 12px 32px rgba(15,38,71,.16);
   color:var(--txt);padding:12px 18px;
   font-family:var(--f-mono);font-size:12px;font-weight:500;
   letter-spacing:.3px;
@@ -577,8 +581,8 @@ img{max-width:100%;display:block}
   pointer-events:none;max-width:90%;
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.err{border-color:rgba(255,107,107,.4);color:var(--neg)}
-.toast.ok{border-color:rgba(163,255,18,.4);color:var(--acc)}
+.toast.err{border-color:rgba(220,38,38,.4);color:var(--neg)}
+.toast.ok{border-color:rgba(29,95,214,.4);color:var(--acc)}
 
 /* ─────────────────────────────────────────
    PULL TO REFRESH
@@ -840,7 +844,7 @@ img{max-width:100%;display:block}
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 .sup-item-unread{
-  background:var(--neg);color:#000;
+  background:var(--neg);color:#fff;
   border-radius:2px;padding:1px 6px;
   font-size:10px;font-weight:700;font-family:var(--f-mono);
 }
@@ -897,7 +901,7 @@ img{max-width:100%;display:block}
 }
 .sup-bubble-admin{
   align-self:flex-end;
-  background:var(--acc);color:#000;
+  background:var(--acc);color:#fff;
   font-weight:500;
 }
 .sup-bubble img{
@@ -909,7 +913,7 @@ img{max-width:100%;display:block}
   font-size:10px;opacity:.6;margin-top:4px;
   font-family:var(--f-mono);
 }
-.sup-bubble-admin .sup-bubble-time{color:#000}
+.sup-bubble-admin .sup-bubble-time{color:#fff}
 
 .sup-composer{
   padding:10px;border-top:1px solid var(--line);
@@ -948,7 +952,7 @@ img{max-width:100%;display:block}
 .sup-textarea:focus{border-color:var(--acc)}
 .sup-send-btn{
   flex-shrink:0;width:38px;height:38px;
-  background:var(--acc);color:#000;
+  background:var(--acc);color:#fff;
   border:none;border-radius:2px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   transition:opacity .15s;
@@ -1112,8 +1116,8 @@ img{max-width:100%;display:block}
   </div>
   <div class="subtabs">
     <button class="subtab active" data-sub="invs" onclick="sub('finance','invs')">Inversiones</button>
-    <button class="subtab" data-sub="pool" onclick="sub('finance','pool')">Pool</button>
-    <button class="subtab" data-sub="rets" onclick="sub('finance','rets')">Rendimientos</button>
+    <button class="subtab" data-sub="pool" onclick="sub('finance','pool')">Fondo DGP</button>
+    <button class="subtab" data-sub="rets" onclick="sub('finance','rets')">Rendimientos DGP</button>
     <button class="subtab" data-sub="loans" onclick="sub('finance','loans')">Préstamos</button>
   </div>
 
@@ -1131,7 +1135,7 @@ img{max-width:100%;display:block}
     <!-- Pool -->
     <div class="sub-view hide" data-sub-view="pool">
       <div class="card">
-        <div class="card-h">Configuración del <em>Pool</em></div>
+        <div class="card-h">Configuración del <em>Fondo DGP</em></div>
         <div class="card-d">Estos valores son visibles para todos los usuarios en su dashboard.</div>
         <div class="fg-row-3">
           <div class="fg"><label>APY Mensual (%)</label><input id="pool-apy-monthly" type="number" step="0.01" placeholder="2.0" oninput="updatePoolAnnual()"></div>
@@ -1146,18 +1150,18 @@ img{max-width:100%;display:block}
       </div>
 
       <div class="card">
-        <div class="card-h">Estado del <em>Pool</em></div>
+        <div class="card-h">Estado del <em>Fondo DGP</em></div>
         <div id="pool-stats"><div class="empty">Cargando…</div></div>
       </div>
 
       <div class="card">
-        <div class="card-h">Inversiones en el <em>pool</em></div>
+        <div class="card-h">Inversiones en el <em>Fondo DGP</em></div>
         <div id="pool-invs"><div class="empty">Cargando…</div></div>
       </div>
 
       <div class="card">
         <div class="card-h">Comisiones <em>20%</em></div>
-        <div class="card-d">Registro contable de retiros de ganancias del pool.</div>
+        <div class="card-d">Registro contable de retiros de ganancias del Fondo DGP.</div>
         <div class="stats" style="grid-template-columns:1fr 1fr 1fr;border:1px solid var(--line);margin-bottom:14px">
           <div class="stat"><div class="stat-label">Bruto</div><div class="stat-value pos mono" id="pwk-gross">—</div></div>
           <div class="stat"><div class="stat-label">Comisión</div><div class="stat-value warn mono" id="pwk-commission">—</div></div>
@@ -1194,13 +1198,13 @@ img{max-width:100%;display:block}
     <!-- Rendimientos -->
     <div class="sub-view hide" data-sub-view="rets">
       <div class="info-box">
-        <strong>LP COP ya no se registra manualmente.</strong> Tasa fija 2% mensual sobre el capital, calculada en tiempo real. El cliente reclama 1 vez cada 24h. Aquí solo verás inversiones <strong>Pool</strong>.
+        <strong>Registro manual de rendimientos.</strong> Tanto el <strong>LP COP</strong> como el <strong>Fondo DGP</strong> (riesgo medio) se registran a mano con la tasa que tú definas. El monto se acumula como "Por retirar" y el cliente lo reclama desde su dashboard. La recompensa masiva de abajo aplica solo a los Fondos DGP.
       </div>
 
       <!-- ═══ RECOMPENSA MASIVA (BULK) ═══ -->
       <div class="card" style="border-color:var(--acc-dim)">
-        <div class="card-h">⚡ Recompensa <em>masiva</em> Pool</div>
-        <div class="card-d">Aplica una tasa a <strong>TODOS los pools activos</strong> de una sola vez. No tienes que ir uno por uno.</div>
+        <div class="card-h">⚡ Recompensa <em>masiva</em> Fondo DGP</div>
+        <div class="card-d">Aplica una tasa a <strong>TODOS los Fondos DGP activos</strong> de una sola vez. No tienes que ir uno por uno.</div>
 
         <div class="fg-row">
           <div class="fg"><label>Tasa (%)</label><input id="bulk-rate" type="number" step="0.01" min="0" max="100" placeholder="20" oninput="updateBulkPreview()"></div>
@@ -1218,7 +1222,7 @@ img{max-width:100%;display:block}
       <!-- ═══ RENDIMIENTO INDIVIDUAL ═══ -->
       <div class="card">
         <div class="card-h">Rendimiento <em>individual</em></div>
-        <div class="card-d">Selecciona una inversión Pool específica para registrarle un rendimiento manualmente.</div>
+        <div class="card-d">Selecciona una inversión (LP COP o Fondo DGP) para registrarle un rendimiento manualmente.</div>
         <div id="ret-list"><div class="empty">Cargando…</div></div>
       </div>
 
@@ -2874,7 +2878,7 @@ async function loadPool(){
         return `<div class="row">
           <div class="row-top">
             <div>
-              <div class="row-id">POOL · ID ${i.id} ${hasMonthlyReward?`<span class="tag" style="background:var(--acc-soft);color:var(--acc);border-color:var(--acc-dim);margin-left:6px">${currentMonth}</span>`:''}</div>
+              <div class="row-id">FONDO DGP · ID ${i.id} ${hasMonthlyReward?`<span class="tag" style="background:var(--acc-soft);color:var(--acc);border-color:var(--acc-dim);margin-left:6px">${currentMonth}</span>`:''}</div>
               <div class="row-name">${i.userName||i.user_name||'—'}</div>
             </div>
             <div class="row-amount acc">${F(i.amount)}</div>
@@ -2957,12 +2961,14 @@ async function loadReturns(){
     const r=await apiFetch('/admin/investments/active');
     if(!r||!r.ok) return;
     let invs=await r.json();
-    invs=invs.filter(i=>(i.type||'').toLowerCase().includes('pool'));
+    // Ahora se listan AMBOS productos: LP COP y Fondo DGP
+    invs=invs.filter(i=>i.status==='active');
+    const lbl=i=>(i.type||'').toLowerCase().includes('pool')?'FONDO DGP':'LP COP';
     $('#ret-list').innerHTML = invs.length ? '<div class="list">'+invs.map(i=>`
       <div class="row">
         <div class="row-top">
           <div>
-            <div class="row-id">POOL · ID ${i.id}</div>
+            <div class="row-id">${lbl(i)} · ID ${i.id}</div>
             <div class="row-name">${i.userName||i.user_name||'—'}</div>
           </div>
           <div class="row-amount acc">${F(i.amount)}</div>
@@ -2975,7 +2981,7 @@ async function loadReturns(){
         <div class="row-actions">
           <button class="btn btn-sm btn-primary" onclick="selInv(${i.id})">Registrar rendimiento</button>
         </div>
-      </div>`).join('')+'</div>' : '<div class="empty">Sin inversiones Pool activas</div>';
+      </div>`).join('')+'</div>' : '<div class="empty">Sin inversiones activas</div>';
   }catch(e){console.error('loadReturns:',e)}
 }
 async function selInv(id){
@@ -2984,9 +2990,9 @@ async function selInv(id){
     const invs=await r.json();
     const inv=invs.find(i=>String(i.id)===String(id));
     if(!inv) return toast('Inversión no encontrada','error');
-    if(!(inv.type||'').toLowerCase().includes('pool')) return toast('Solo Pool','error');
+    const isPool=(inv.type||'').toLowerCase().includes('pool');
     State.selectedInv=inv;
-    $('#rf-label').textContent='Pool · '+(inv.userName||inv.user_name||'—')+' · '+F(inv.amount);
+    $('#rf-label').textContent=(isPool?'Fondo DGP':'LP COP')+' · '+(inv.userName||inv.user_name||'—')+' · '+F(inv.amount);
     $('#ret-form-card').classList.remove('hide');
     $('#ret-form-card').scrollIntoView({behavior:'smooth',block:'center'});
   }catch(e){toast('Error','error')}
@@ -3106,8 +3112,8 @@ async function fetchBulkPreview(){
       prev.innerHTML = `
         <strong style="color:var(--warn)">⚠️ Sin pools elegibles</strong><br>
         ${d.skippedCount > 0
-          ? `<span class="dim">Los ${d.skippedCount} pools activos ya tienen rendimiento registrado para <strong>${d.periodMonth || month || 'ese período'}</strong>.</span>`
-          : `<span class="dim">No hay inversiones Pool con status='active'.</span>`}
+          ? `<span class="dim">Los ${d.skippedCount} Fondos DGP activos ya tienen rendimiento registrado para <strong>${d.periodMonth || month || 'ese período'}</strong>.</span>`
+          : `<span class="dim">No hay Fondos DGP con status='active'.</span>`}
       `;
       btn.disabled = true;
       btn.textContent = 'Sin pools elegibles';
