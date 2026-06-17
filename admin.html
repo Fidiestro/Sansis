@@ -2233,7 +2233,7 @@ async function viewUser(uid){
       html+='<div class="list">'+loans.map(l=>{
         const amt = parseFloat(l.approved_amount||l.amount||0);
         const accrued = parseFloat(l.accruedInterest||0);
-        const months = l.monthsElapsed!==undefined ? l.monthsElapsed : null;
+        const days = l.daysElapsed!==undefined ? l.daysElapsed : null;
         return `<div class="row">
           <div class="row-top">
             <div>
@@ -2247,7 +2247,10 @@ async function viewUser(uid){
             <span>${l.start_date?D(l.start_date):'—'}</span>
             ${l.due_date?`<span>Vence: ${D(l.due_date)}</span>`:''}
           </div>
-          ${(l.status==='active'||l.status==='overdue')?`<div class="row-note" style="color:var(--neg)">Intereses acumulados: <strong>${F(accrued)}</strong>${months!==null?` · ${months} mes${months===1?'':'es'} transcurrido${months===1?'':'s'}`:''}</div>`:''}
+          ${(l.status==='active'||l.status==='overdue')?`<div class="row-note" style="color:var(--neg)">Intereses acumulados: <strong>${F(accrued)}</strong>${days!==null?` · ${days} día${days===1?'':'s'} transcurrido${days===1?'':'s'}`:''}</div>
+          <div class="row-actions">
+            <button class="btn btn-sm btn-pos" onclick="openLoanPayment(${l.id},'${(l.ref_id||'LOAN-'+l.id).replace(/'/g,'')}',${amt},${parseFloat(l.monthly_rate||l.approved_rate||0)},${accrued})">💵 Registrar abono</button>
+          </div>`:''}
         </div>`;
       }).join('')+'</div>';
     }
@@ -2499,6 +2502,87 @@ async function submitCreateLoan(userId){
     // Refrescar stats si la pestaña de loans está cargada
     if(typeof loadLoanStats==='function')loadLoanStats();
   }catch(e){toast('Error de red','error')}
+}
+
+// ─── ABONO EXTERNO A PRÉSTAMO (admin) ───
+function openLoanPayment(loanId, refId, capital, rate, accrued){
+  State._loanPay = { loanId, refId, capital:parseFloat(capital)||0, rate:parseFloat(rate)||0, accrued:parseFloat(accrued)||0 };
+  const body=`
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="info-box" style="border-left-color:var(--warn)">
+        Registra un <strong>abono externo</strong> (el cliente pagó por fuera: efectivo, transferencia, etc.).
+        <strong>No</strong> se descuenta de su balance en la plataforma.
+      </div>
+      <div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr 1fr;margin:0">
+        <div class="stat"><div class="stat-label">Capital pendiente</div><div class="stat-value mono" style="color:var(--neg)">${F(capital)}</div></div>
+        <div class="stat"><div class="stat-label">Interés acumulado</div><div class="stat-value mono warn">${F(accrued)}</div></div>
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Monto del abono (COP)</label>
+        <input id="lp-amount" type="number" min="1000" step="1000" placeholder="Ej: 50000" oninput="updateLoanPayPreview()" style="width:100%;padding:11px;background:var(--bg);border:1px solid var(--line-2);border-radius:10px;color:var(--txt);font-size:14px">
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Nota (opcional)</label>
+        <input id="lp-notes" placeholder="Ej: pago en efectivo en oficina" style="width:100%;padding:11px;background:var(--bg);border:1px solid var(--line-2);border-radius:10px;color:var(--txt);font-size:14px">
+      </div>
+      <div id="lp-preview" class="info-box hide"></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-sm btn-ghost" style="flex:1" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-sm btn-pos" style="flex:2;justify-content:center" id="lp-btn" onclick="submitLoanPayment()">Registrar abono</button>
+      </div>
+    </div>`;
+  openModal('💵 Abono a <em>préstamo</em>', refId, body);
+}
+
+function updateLoanPayPreview(){
+  const lp=State._loanPay; if(!lp) return;
+  const amount=parseFloat($('#lp-amount').value)||0;
+  const prev=$('#lp-preview');
+  if(amount<1000){ prev.classList.add('hide'); return; }
+  // Misma lógica del backend: interés primero, resto a capital; si no alcanza, capitaliza
+  let interestCovered, capitalReduced, newPending, capitalized=0;
+  if(amount>=lp.accrued){
+    interestCovered=lp.accrued;
+    capitalReduced=Math.max(0,amount-interestCovered);
+    newPending=Math.max(0,lp.capital-capitalReduced);
+  }else{
+    interestCovered=amount;
+    capitalized=lp.accrued-amount;
+    capitalReduced=0;
+    newPending=lp.capital+capitalized;
+  }
+  const fullyPaid=newPending<=0;
+  prev.classList.remove('hide');
+  prev.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;font-size:12px">
+      <div><span class="dim">A intereses</span><br><strong class="warn mono">${F(interestCovered)}</strong></div>
+      <div><span class="dim">A capital</span><br><strong class="pos mono">${F(capitalReduced)}</strong></div>
+      <div><span class="dim">Capital pendiente tras abono</span><br><strong class="mono" style="color:var(--neg)">${F(newPending)}</strong></div>
+      ${capitalized>0?`<div><span class="dim">Interés capitalizado</span><br><strong class="neg mono">+${F(capitalized)}</strong></div>`:''}
+    </div>
+    ${fullyPaid?'<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)"><strong class="pos">✓ Este abono salda el préstamo completo</strong></div>':''}`;
+}
+
+async function submitLoanPayment(){
+  const lp=State._loanPay; if(!lp) return toast('Sin préstamo','error');
+  const amount=parseFloat($('#lp-amount').value)||0;
+  if(amount<1000) return toast('Monto mínimo $1.000','error');
+  const notes=($('#lp-notes').value||'').trim();
+  const btn=$('#lp-btn');
+  btn.disabled=true; btn.textContent='Registrando…';
+  try{
+    const r=await apiFetch('/admin/loans/'+lp.loanId+'/payment',{method:'POST',body:JSON.stringify({amount, notes:notes||undefined})});
+    const d=await(r?r.json().catch(()=>({})):{});
+    if(!r||!r.ok){ toast(d.error||'Error al registrar','error'); btn.disabled=false; btn.textContent='Registrar abono'; return; }
+    toast(d.message||'Abono registrado ✓','ok');
+    closeModal();
+    State._loanPay=null;
+    State.cacheFlags.users=false;
+    await loadUsersQuiet();
+    if(State._viewingUserId) await viewUser(State._viewingUserId);
+    if(State.currentNav==='finance' && State.currentSub.finance==='loans'){ State.cacheFlags.loans=false; loadLoans('all'); }
+    loadStats();
+  }catch(e){ toast('Error de red','error'); btn.disabled=false; btn.textContent='Registrar abono'; }
 }
 
 // ─── CREAR INVERSIÓN MANUAL (LP COP / Fondo DGP) DESDE ADMIN ───
