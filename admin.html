@@ -345,7 +345,7 @@ img{max-width:100%;display:block}
 .pill.approved{background:rgba(126,182,255,.08);color:var(--info);border:1px solid rgba(126,182,255,.2)}
 .pill.completed,.pill.active,.pill.paid{background:rgba(126,217,87,.08);color:var(--pos);border:1px solid rgba(126,217,87,.2)}
 .pill.rejected,.pill.blocked,.pill.overdue{background:rgba(255,107,107,.08);color:var(--neg);border:1px solid rgba(255,107,107,.2)}
-.pill.cancelled{background:rgba(156,163,175,.1);color:#9ca3af;border:1px solid rgba(156,163,175,.25)}
+.pill.cancelled,.pill.inactive{background:rgba(156,163,175,.1);color:#9ca3af;border:1px solid rgba(156,163,175,.25)}
 .pill.neutral{background:var(--surface);color:var(--txt-2);border:1px solid var(--line)}
 
 /* ─────────────────────────────────────────
@@ -1298,6 +1298,7 @@ img{max-width:100%;display:block}
     <div class="page-meta"><span id="users-count">—</span> cuentas registradas en el sistema.</div>
   </div>
   <div class="section">
+    <div id="users-summary"></div>
     <div id="users-content"><div class="empty">Cargando…</div></div>
   </div>
 </div>
@@ -1634,8 +1635,9 @@ function toast(msg,kind){
 // Status pill HTML
 function pill(status){
   if(!status) return '';
-  const cls = ['pending','approved','completed','active','paid','rejected','blocked','overdue','cancelled'].includes(status)?status:'neutral';
-  const label = status==='cancelled' ? 'cancelado' : status;
+  const cls = ['pending','approved','completed','active','inactive','paid','rejected','blocked','overdue','cancelled'].includes(status)?status:'neutral';
+  const labels = {cancelled:'cancelado', active:'Activo', inactive:'Inactivo', blocked:'Bloqueado'};
+  const label = labels[status] || status;
   return `<span class="pill ${cls}">${label}</span>`;
 }
 
@@ -1698,7 +1700,10 @@ function loadView(view){
     if(sb==='rets' && !State.cacheFlags.rets) loadReturns();
     if(sb==='loans' && !State.cacheFlags.loans) loadLoans('all');
   }
-  if(view==='users' && !State.cacheFlags.users) loadUsers();
+  if(view==='users'){
+    if(!State.cacheFlags.users) loadUsers();
+    else loadGlobalSummary();
+  }
   if(view==='tx' && !State.cacheFlags.txs) loadTransactions();
   if(view==='support') sup_load();
 }
@@ -1851,6 +1856,7 @@ async function loadUsers(){
   await loadUsersQuiet();
   State.cacheFlags.users=true;
   renderUsers();
+  loadGlobalSummary();
 }
 async function loadUsersQuiet(){
   try{
@@ -1861,13 +1867,52 @@ async function loadUsersQuiet(){
     $('#users-count').textContent=State.users.length;
   }catch(e){State.users=[];console.error('loadUsers:',e)}
 }
+
+// ─── RESUMEN GLOBAL (tipo caja, como tu hoja) ───
+async function loadGlobalSummary(){
+  const box=$('#users-summary');
+  if(!box) return;
+  try{
+    const r=await apiFetch('/admin/global-summary');
+    if(!r||!r.ok) return;
+    const s=await r.json();
+    const cell=(label,val,color)=>`
+      <div class="stat">
+        <div class="stat-label">${label}</div>
+        <div class="stat-value mono" style="color:${color||'var(--txt)'}">${F(val)}</div>
+      </div>`;
+    box.innerHTML=`
+      <div style="font-family:var(--f-mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt-3);margin:0 0 10px">Resumen global · Caja</div>
+      <div class="stats" style="border:1px solid var(--line);grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:8px">
+        ${cell('Total Ahorros / Depósitos', s.totalAhorros, 'var(--pos)')}
+        ${cell('Total Préstamos', s.totalPrestamos, 'var(--neg)')}
+        ${cell('Total Intereses Cobrados', s.totalIntereses, 'var(--acc)')}
+        ${cell('Total Ganancias Pagadas', s.totalGanancias, 'var(--pos)')}
+        ${cell('Total Retiros', s.totalRetiros, 'var(--warn)')}
+        ${cell('Dinero fondo recolectado', s.dineroFondo, 'var(--acc)')}
+      </div>
+      <div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr;margin-bottom:18px;background:var(--surface)">
+        <div class="stat" style="display:flex;align-items:center;justify-content:space-between">
+          <div class="stat-label" style="font-size:12px;font-weight:700;color:var(--txt)">BALANCE EN CAJA</div>
+          <div class="stat-value mono" style="font-size:20px;font-weight:800;color:var(--acc)">${F(s.balanceCaja)}</div>
+        </div>
+      </div>`;
+  }catch(e){console.error('loadGlobalSummary:',e)}
+}
+
 function renderUsers(){
   const us=State.users;
   if(!us.length){$('#users-content').innerHTML='<div class="empty">Sin usuarios</div>';return}
+  const estadoOf=u=>{
+    if(isBlocked(u)) return 'blocked';
+    return u.estado || ((parseFloat(u.prestamos||0)>0||parseFloat(u.balance||0)>0)?'active':'inactive');
+  };
+  const dash=v=>{const n=parseFloat(v||0);return n>0?F(n):'—';};
+
   // Mobile: list of cards
   let html='<div class="list">'+us.map(u=>{
     const b=isBlocked(u);
-    const wd=u.totalWithdrawn??u.total_withdrawn;
+    const est=estadoOf(u);
     return `<div class="row row-clickable" onclick="viewUser(${u.id})">
       <div class="row-top">
         <div style="min-width:0;flex:1">
@@ -1875,35 +1920,47 @@ function renderUsers(){
           <div class="row-name">${u.full_name||'—'}</div>
           <div class="row-meta" style="margin-top:4px">
             <span>${u.email||'—'}</span>
-            ${wd!=null?`<span class="warn">Retirado: <strong class="mono">${F(wd)}</strong></span>`:''}
+            <span>${pill(est)}</span>
+          </div>
+          <div class="row-meta" style="margin-top:4px;flex-wrap:wrap;gap:8px">
+            <span>Ahorros: <strong class="mono pos">${dash(u.ahorros)}</strong></span>
+            <span>Préstamos: <strong class="mono" style="color:${parseFloat(u.prestamos||0)>0?'var(--neg)':'var(--txt-3)'}">${dash(u.prestamos)}</strong></span>
+            <span>Ganancias: <strong class="mono pos">${dash(u.ganancias)}</strong></span>
+            <span>Intereses: <strong class="mono acc">${dash(u.intereses)}</strong></span>
           </div>
         </div>
         <div style="text-align:right">
           <div class="row-amount acc">${F(u.balance||0)}</div>
-          <div style="margin-top:6px">${pill(b?'blocked':'active')}</div>
         </div>
       </div>
       <div class="row-actions" onclick="event.stopPropagation()">
-        <button class="btn btn-sm btn-ghost" onclick="viewUser(${u.id})">Ver detalle</button>
+        <button class="btn btn-sm btn-ghost" onclick="viewUser(${u.id})">Ver detalle →</button>
         <button class="btn btn-sm ${b?'btn-pos':'btn-neg'}" onclick="toggleBlock(${u.id},${b})">${b?'Desbloquear':'Bloquear'}</button>
       </div>
     </div>`;
   }).join('')+'</div>';
 
-  // Desktop: table
-  html+='<div class="table-wrap"><table><thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Balance</th><th>Invertido</th><th>Retirado</th><th>Estado</th><th></th></tr></thead><tbody>'+
+  // Desktop: table — columnas estilo hoja de cálculo
+  html+='<div class="table-wrap"><table><thead><tr>'+
+    '<th>Cliente</th><th>Estado</th><th>Correo</th><th>ID</th><th>Balance</th>'+
+    '<th>Préstamos</th><th>Ahorros</th><th>Ganancias</th><th>Intereses</th><th></th>'+
+    '</tr></thead><tbody>'+
     us.map(u=>{
       const b=isBlocked(u);
-      return `<tr>
-        <td class="mono dim">${u.id}</td>
+      const est=estadoOf(u);
+      const negBal=parseFloat(u.balance||0)<0;
+      return `<tr class="row-clickable" onclick="viewUser(${u.id})">
         <td>${u.full_name||'—'}</td>
+        <td onclick="event.stopPropagation()">${pill(est)}</td>
         <td class="dim">${u.email||'—'}</td>
-        <td class="mono acc">${F(u.balance||0)}</td>
-        <td class="mono">${F(u.totalInvested||0)}</td>
-        <td class="mono warn">${(u.totalWithdrawn??u.total_withdrawn)!=null?F(u.totalWithdrawn??u.total_withdrawn):'—'}</td>
-        <td>${pill(b?'blocked':'active')}</td>
-        <td style="white-space:nowrap">
-          <button class="btn btn-sm btn-ghost" onclick="viewUser(${u.id})">Ver</button>
+        <td class="mono dim">${u.document_number||u.id}</td>
+        <td class="mono ${negBal?'neg':'acc'}">${F(u.balance||0)}</td>
+        <td class="mono" style="color:${parseFloat(u.prestamos||0)>0?'var(--neg)':'var(--txt-3)'}">${dash(u.prestamos)}</td>
+        <td class="mono pos">${dash(u.ahorros)}</td>
+        <td class="mono pos">${dash(u.ganancias)}</td>
+        <td class="mono acc">${dash(u.intereses)}</td>
+        <td style="white-space:nowrap" onclick="event.stopPropagation()">
+          <button class="btn btn-sm btn-ghost" onclick="viewUser(${u.id})">Ver Detalle →</button>
           <button class="btn btn-sm ${b?'btn-pos':'btn-neg'}" onclick="toggleBlock(${u.id},${b})">${b?'Desbloquear':'Bloquear'}</button>
         </td>
       </tr>`;
