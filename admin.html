@@ -19,34 +19,34 @@
 ═══════════════════════════════════════════════════════════════ */
 
 :root{
-  /* Surfaces — light corporate fintech */
-  --bg:#eef2f7;
+  /* Surfaces — light corporate fintech, con profundidad (menos blanco puro) */
+  --bg:#dde5ef;
   --bg-1:#ffffff;
-  --bg-2:#ffffff;
-  --bg-3:#f4f7fb;
-  --surface:rgba(13,42,92,.025);
-  --surface-h:rgba(13,42,92,.05);
+  --bg-2:#f3f7fc;
+  --bg-3:#e7eef7;
+  --surface:rgba(13,42,92,.04);
+  --surface-h:rgba(13,42,92,.07);
 
   /* Borders */
-  --line:rgba(13,42,92,.10);
-  --line-2:rgba(13,42,92,.16);
-  --line-3:rgba(13,42,92,.26);
+  --line:rgba(13,42,92,.13);
+  --line-2:rgba(13,42,92,.20);
+  --line-3:rgba(13,42,92,.30);
 
   /* Text — deep navy ink on light */
   --txt:#0f2647;
-  --txt-2:#516079;
-  --txt-3:#8a97ab;
-  --txt-4:#b6c0d0;
+  --txt-2:#46566f;
+  --txt-3:#7a89a0;
+  --txt-4:#a8b3c4;
 
   /* Single accent: corporate fintech blue */
   --acc:#1d5fd6;
-  --acc-dim:rgba(29,95,214,.12);
-  --acc-soft:rgba(29,95,214,.06);
+  --acc-dim:rgba(29,95,214,.16);
+  --acc-soft:rgba(29,95,214,.09);
 
   /* Semantic */
-  --pos:#16a34a;
+  --pos:#15803d;
   --neg:#dc2626;
-  --warn:#d97706;
+  --warn:#c2740a;
   --info:#2563eb;
 
   /* Layout */
@@ -88,7 +88,7 @@ img{max-width:100%;display:block}
 .top{
   position:sticky;top:0;z-index:80;
   padding-top:var(--safe-top);
-  background:rgba(255,255,255,.85);
+  background:rgba(243,247,252,.9);
   backdrop-filter:blur(20px) saturate(1.2);
   -webkit-backdrop-filter:blur(20px) saturate(1.2);
   border-bottom:1px solid var(--line);
@@ -130,7 +130,7 @@ img{max-width:100%;display:block}
 ───────────────────────────────────────── */
 .search-ov{
   position:fixed;inset:0;z-index:200;
-  background:rgba(255,255,255,.92);
+  background:rgba(243,247,252,.95);
   backdrop-filter:blur(16px);
   display:none;flex-direction:column;
   padding-top:var(--safe-top);
@@ -1115,20 +1115,50 @@ img{max-width:100%;display:block}
     <div class="page-meta">Inversiones, pool, rendimientos y préstamos.</div>
   </div>
   <div class="subtabs">
-    <button class="subtab active" data-sub="invs" onclick="sub('finance','invs')">Inversiones</button>
+    <button class="subtab active" data-sub="invs" onclick="sub('finance','invs')">LP COP</button>
     <button class="subtab" data-sub="pool" onclick="sub('finance','pool')">Fondo DGP</button>
-    <button class="subtab" data-sub="rets" onclick="sub('finance','rets')">Rendimientos DGP</button>
     <button class="subtab" data-sub="loans" onclick="sub('finance','loans')">Préstamos</button>
   </div>
 
   <div class="section">
-    <!-- Inversiones (LP COP) -->
+    <!-- LP COP -->
     <div class="sub-view active" data-sub-view="invs">
       <div id="invs-stats"></div>
       <div class="card">
         <div class="card-h">LP COP · Inversiones <em>activas</em></div>
         <div class="card-d">Todas las inversiones tipo LP COP actualmente activas.</div>
         <div id="invs-list"><div class="empty">Cargando…</div></div>
+      </div>
+
+      <!-- ═══ RECOMPENSA MASIVA LP COP ═══ -->
+      <div class="card" style="border-color:var(--acc-dim)">
+        <div class="card-h">⚡ Rendimiento <em>masivo</em> LP COP</div>
+        <div class="card-d">Aplica una tasa a <strong>TODAS las inversiones LP COP activas</strong> de una sola vez. Se acumula como "Por retirar" y el cliente lo reclama (descuento 5% referido al claim).</div>
+        <div class="fg-row">
+          <div class="fg"><label>Tasa (%)</label><input id="lpbulk-rate" type="number" step="0.01" min="0" max="100" placeholder="2.0" oninput="updateLpBulkPreview()"></div>
+          <div class="fg"><label>Mes del período</label><input id="lpbulk-month" type="month" onchange="updateLpBulkPreview()"></div>
+        </div>
+        <div class="fg"><label>Notas (opcional)</label><input id="lpbulk-notes" placeholder="Ej: Rendimiento mayo 2026"></div>
+        <div id="lpbulk-preview" class="info-box hide" style="border-left-color:var(--acc)"></div>
+        <button class="btn btn-primary btn-block" id="lpbulk-btn" onclick="confirmLpBulkReward()" disabled>Aplicar a todas las LP COP</button>
+      </div>
+
+      <!-- ═══ RENDIMIENTO INDIVIDUAL LP COP ═══ -->
+      <div class="card">
+        <div class="card-h">Rendimiento <em>individual</em> LP COP</div>
+        <div class="card-d">Selecciona una inversión LP COP para registrarle un rendimiento manualmente.</div>
+        <div id="lpret-list"><div class="empty">Cargando…</div></div>
+      </div>
+      <div class="card hide" id="lpret-form-card">
+        <div class="card-h">Rendimiento para</div>
+        <div class="card-d mono acc" id="lprf-label">—</div>
+        <div class="fg-row">
+          <div class="fg"><label>Tasa (%)</label><input id="lprf-rate" type="number" step="0.01" min="0" max="100" placeholder="2.0" oninput="updateLpRetPrev()"></div>
+          <div class="fg"><label>Mes del período</label><input id="lprf-month" type="month"></div>
+        </div>
+        <div class="fg"><label>Notas (opcional)</label><input id="lprf-notes" placeholder="Ej: Rendimiento febrero 2026"></div>
+        <div id="lprf-preview" class="info-box hide"></div>
+        <button class="btn btn-primary btn-block" id="lprf-btn" onclick="registerReturn()">Registrar rendimiento</button>
       </div>
     </div>
 
@@ -1193,39 +1223,26 @@ img{max-width:100%;display:block}
           <button class="btn btn-primary" onclick="saveStrats()" id="btn-save-strats" style="flex:1">Guardar</button>
         </div>
       </div>
-    </div>
 
-    <!-- Rendimientos -->
-    <div class="sub-view hide" data-sub-view="rets">
-      <div class="info-box">
-        <strong>Registro manual de rendimientos.</strong> Tanto el <strong>LP COP</strong> como el <strong>Fondo DGP</strong> (riesgo medio) se registran a mano con la tasa que tú definas. El monto se acumula como "Por retirar" y el cliente lo reclama desde su dashboard. La recompensa masiva de abajo aplica solo a los Fondos DGP.
-      </div>
-
-      <!-- ═══ RECOMPENSA MASIVA (BULK) ═══ -->
+      <!-- ═══ RECOMPENSA MASIVA FONDO DGP ═══ -->
       <div class="card" style="border-color:var(--acc-dim)">
-        <div class="card-h">⚡ Recompensa <em>masiva</em> Fondo DGP</div>
-        <div class="card-d">Aplica una tasa a <strong>TODOS los Fondos DGP activos</strong> de una sola vez. No tienes que ir uno por uno.</div>
-
+        <div class="card-h">⚡ Rendimiento <em>masivo</em> Fondo DGP</div>
+        <div class="card-d">Aplica una tasa a <strong>TODOS los Fondos DGP activos</strong> de una sola vez. Se acumula como "Por retirar" (descuento 20% comisión al claim).</div>
         <div class="fg-row">
           <div class="fg"><label>Tasa (%)</label><input id="bulk-rate" type="number" step="0.01" min="0" max="100" placeholder="20" oninput="updateBulkPreview()"></div>
           <div class="fg"><label>Mes del período</label><input id="bulk-month" type="month" onchange="updateBulkPreview()"></div>
         </div>
         <div class="fg"><label>Notas (opcional)</label><input id="bulk-notes" placeholder="Ej: Recompensa mayo 2026"></div>
-
         <div id="bulk-preview" class="info-box hide" style="border-left-color:var(--acc)"></div>
-
-        <button class="btn btn-primary btn-block" id="bulk-btn" onclick="confirmBulkReward()" disabled>
-          Aplicar a todos los pools
-        </button>
+        <button class="btn btn-primary btn-block" id="bulk-btn" onclick="confirmBulkReward()" disabled>Aplicar a todos los DGP</button>
       </div>
 
-      <!-- ═══ RENDIMIENTO INDIVIDUAL ═══ -->
+      <!-- ═══ RENDIMIENTO INDIVIDUAL FONDO DGP ═══ -->
       <div class="card">
-        <div class="card-h">Rendimiento <em>individual</em></div>
-        <div class="card-d">Selecciona una inversión (LP COP o Fondo DGP) para registrarle un rendimiento manualmente.</div>
+        <div class="card-h">Rendimiento <em>individual</em> Fondo DGP</div>
+        <div class="card-d">Selecciona un Fondo DGP para registrarle un rendimiento manualmente.</div>
         <div id="ret-list"><div class="empty">Cargando…</div></div>
       </div>
-
       <div class="card hide" id="ret-form-card">
         <div class="card-h">Rendimiento para</div>
         <div class="card-d mono acc" id="rf-label">—</div>
@@ -1678,9 +1695,8 @@ function sub(view,sub){
     if(sub==='regs' && !State.cacheFlags.regs) loadRegistrations('all');
   }
   if(view==='finance'){
-    if(sub==='invs' && !State.cacheFlags.invs) loadInvestments();
-    if(sub==='pool' && !State.cacheFlags.pool) loadPool();
-    if(sub==='rets' && !State.cacheFlags.rets) loadReturns();
+    if(sub==='invs' && !State.cacheFlags.invs){ loadInvestments(); loadReturnsLP(); }
+    if(sub==='pool' && !State.cacheFlags.pool){ loadPool(); loadReturns(); }
     if(sub==='loans' && !State.cacheFlags.loans) loadLoans('all');
   }
   if(view==='tx'){
@@ -1699,9 +1715,8 @@ function loadView(view){
   }
   if(view==='finance'){
     const sb=State.currentSub.finance;
-    if(sb==='invs' && !State.cacheFlags.invs) loadInvestments();
-    if(sb==='pool' && !State.cacheFlags.pool) loadPool();
-    if(sb==='rets' && !State.cacheFlags.rets) loadReturns();
+    if(sb==='invs' && !State.cacheFlags.invs){ loadInvestments(); loadReturnsLP(); }
+    if(sb==='pool' && !State.cacheFlags.pool){ loadPool(); loadReturns(); }
     if(sb==='loans' && !State.cacheFlags.loans) loadLoans('all');
   }
   if(view==='users'){
@@ -1987,6 +2002,59 @@ async function toggleBlock(id, blocked){
   }catch(e){toast('Error','error')}
 }
 
+// ─── EDITAR REFERIDO ───
+async function openEditReferido(uid, currentRef){
+  // Asegurar lista de usuarios cargada para el selector
+  if(!State.users || !State.users.length){ await loadUsersQuiet(); }
+  const opts = (State.users||[])
+    .filter(x=>String(x.id)!==String(uid))
+    .map(x=>`<option value="${x.id}" ${String(x.id)===String(currentRef)?'selected':''}>${x.full_name} (ID ${x.id})</option>`)
+    .join('');
+  const body=`
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-3);margin-bottom:6px">Referido por</label>
+        <select id="er-ref" style="width:100%;padding:11px;background:var(--bg);border:1px solid var(--line-2);border-radius:10px;color:var(--txt);font-size:14px">
+          <option value="none" ${!currentRef||currentRef==='null'?'selected':''}>— Sin referido —</option>
+          ${opts}
+        </select>
+        <div style="font-size:11px;color:var(--txt-3);margin-top:6px">El nuevo referidor debe ser un usuario existente. No puede ser el mismo usuario.</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-sm btn-ghost" style="flex:1" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-sm btn-primary" style="flex:2;justify-content:center" onclick="submitEditReferido(${uid})">Guardar referido</button>
+      </div>
+    </div>`;
+  openModal('✏️ Editar <em>referido</em>', 'ID '+uid, body);
+}
+
+async function submitEditReferido(uid){
+  const u=(State.users||[]).find(x=>String(x.id)===String(uid));
+  if(!u){ await loadUsersQuiet(); }
+  const usr=(State.users||[]).find(x=>String(x.id)===String(uid));
+  if(!usr) return toast('Usuario no encontrado','error');
+  const ref=$('#er-ref').value;
+  try{
+    const r=await apiFetch('/admin/users/'+uid+'/edit',{method:'POST',body:JSON.stringify({
+      fullName: usr.full_name,
+      email: usr.email,
+      phone: usr.phone||undefined,
+      documentNumber: usr.document_number||undefined,
+      role: usr.role||'client',
+      status: usr.status||(isBlocked(usr)?'blocked':'active'),
+      referredBy: ref==='none'?'none':ref
+    })});
+    if(!r||!r.ok){
+      const d=await(r?r.json().catch(()=>({})):{});
+      return toast(d.error||'Error al guardar','error');
+    }
+    toast('Referido actualizado','ok');
+    State.cacheFlags.users=false;
+    await loadUsersQuiet();
+    if(State._viewingUserId) await viewUser(State._viewingUserId);
+  }catch(e){toast('Error','error')}
+}
+
 async function viewUser(uid){
   try{
     const r=await apiFetch('/admin/users/'+uid+'/details');
@@ -2035,7 +2103,36 @@ async function viewUser(uid){
         <div style="font-size:10px;color:var(--txt-3)">${formula||''}</div>
       </div>`;
 
+    // Nombre del referidor (si hay) buscándolo en State.users
+    let refName='—';
+    if(u.referred_by){
+      const rf=(State.users||[]).find(x=>String(x.id)===String(u.referred_by));
+      refName=rf?`${rf.full_name} (ID ${u.referred_by})`:`ID ${u.referred_by}`;
+    }
+    const pr=(label,val)=>`
+      <div style="display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-bottom:1px solid var(--line)">
+        <span style="font-size:12px;color:var(--txt-3)">${label}</span>
+        <span class="mono" style="font-size:12px;text-align:right;word-break:break-all">${val||'—'}</span>
+      </div>`;
+
     let html=`
+    <!-- INFORMACIÓN PERSONAL -->
+    <div style="font-family:var(--f-mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt-3);margin:4px 0 10px">Información personal</div>
+    <div style="border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px">
+      ${pr('Email', u.email)}
+      ${pr('Teléfono', u.phone)}
+      ${pr('Cédula', u.document_number)}
+      ${pr('Fecha de registro', u.created_at?D(u.created_at):'—')}
+      ${pr('Código de referido', u.referral_code)}
+      <div style="display:flex;justify-content:space-between;gap:10px;padding:8px 10px;align-items:center">
+        <span style="font-size:12px;color:var(--txt-3)">Referido por</span>
+        <span style="display:flex;align-items:center;gap:8px">
+          <span class="mono" style="font-size:12px;text-align:right">${refName}</span>
+          <button class="btn btn-sm btn-ghost" onclick="openEditReferido(${uid},'${(u.referred_by||'').toString().replace(/'/g,'')}')">✏️</button>
+        </span>
+      </div>
+    </div>
+
     <!-- INFORMACIÓN DEL CLIENTE -->
     <div style="font-family:var(--f-mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt-3);margin:4px 0 10px">Información del cliente</div>
     <div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr 1fr;margin-bottom:14px">
@@ -2569,9 +2666,8 @@ async function revokeInvestment(id, label, capital, earned){
     }
     if(State.currentNav==='finance'){
       const s=State.currentSub.finance;
-      if(s==='invs')loadInvestments();
-      if(s==='pool')loadPool();
-      if(s==='rets')loadReturns();
+      if(s==='invs'){ loadInvestments(); loadReturnsLP(); }
+      if(s==='pool'){ loadPool(); loadReturns(); }
     }
     loadUsersQuiet();
     loadStats();
@@ -2954,21 +3050,19 @@ async function savePoolConfig(){
   finally{btn.disabled=false; btn.textContent='Guardar configuración'}
 }
 
-// ─── RETURNS ───
+// ─── RETURNS DGP ───
 async function loadReturns(){
   State.cacheFlags.rets=true;
   try{
     const r=await apiFetch('/admin/investments/active');
     if(!r||!r.ok) return;
     let invs=await r.json();
-    // Ahora se listan AMBOS productos: LP COP y Fondo DGP
-    invs=invs.filter(i=>i.status==='active');
-    const lbl=i=>(i.type||'').toLowerCase().includes('pool')?'FONDO DGP':'LP COP';
+    invs=invs.filter(i=>i.status==='active' && (i.type||'').toLowerCase().includes('pool'));
     $('#ret-list').innerHTML = invs.length ? '<div class="list">'+invs.map(i=>`
       <div class="row">
         <div class="row-top">
           <div>
-            <div class="row-id">${lbl(i)} · ID ${i.id}</div>
+            <div class="row-id">FONDO DGP · ID ${i.id}</div>
             <div class="row-name">${i.userName||i.user_name||'—'}</div>
           </div>
           <div class="row-amount acc">${F(i.amount)}</div>
@@ -2979,12 +3073,39 @@ async function loadReturns(){
           <span class="pos">+${F(i.totalEarned||0)}</span>
         </div>
         <div class="row-actions">
-          <button class="btn btn-sm btn-primary" onclick="selInv(${i.id})">Registrar rendimiento</button>
+          <button class="btn btn-sm btn-primary" onclick="selInv(${i.id},'pool')">Registrar rendimiento</button>
         </div>
-      </div>`).join('')+'</div>' : '<div class="empty">Sin inversiones activas</div>';
+      </div>`).join('')+'</div>' : '<div class="empty">Sin Fondos DGP activos</div>';
   }catch(e){console.error('loadReturns:',e)}
 }
-async function selInv(id){
+// ─── RETURNS LP COP ───
+async function loadReturnsLP(){
+  try{
+    const r=await apiFetch('/admin/investments/active');
+    if(!r||!r.ok) return;
+    let invs=await r.json();
+    invs=invs.filter(i=>i.status==='active' && !(i.type||'').toLowerCase().includes('pool'));
+    $('#lpret-list').innerHTML = invs.length ? '<div class="list">'+invs.map(i=>`
+      <div class="row">
+        <div class="row-top">
+          <div>
+            <div class="row-id">LP COP · ID ${i.id}</div>
+            <div class="row-name">${i.userName||i.user_name||'—'}</div>
+          </div>
+          <div class="row-amount acc">${F(i.amount)}</div>
+        </div>
+        <div class="row-meta">
+          ${pill(i.status)}
+          <span>${D(i.startDate||i.start_date)}</span>
+          <span class="pos">+${F(i.totalEarned||0)}</span>
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-sm btn-primary" onclick="selInv(${i.id},'lp')">Registrar rendimiento</button>
+        </div>
+      </div>`).join('')+'</div>' : '<div class="empty">Sin inversiones LP COP activas</div>';
+  }catch(e){console.error('loadReturnsLP:',e)}
+}
+async function selInv(id, kind){
   try{
     const r=await apiFetch('/admin/investments/active');
     const invs=await r.json();
@@ -2992,9 +3113,16 @@ async function selInv(id){
     if(!inv) return toast('Inversión no encontrada','error');
     const isPool=(inv.type||'').toLowerCase().includes('pool');
     State.selectedInv=inv;
-    $('#rf-label').textContent=(isPool?'Fondo DGP':'LP COP')+' · '+(inv.userName||inv.user_name||'—')+' · '+F(inv.amount);
-    $('#ret-form-card').classList.remove('hide');
-    $('#ret-form-card').scrollIntoView({behavior:'smooth',block:'center'});
+    State.selectedInvKind=isPool?'pool':'lp';
+    if(isPool){
+      $('#rf-label').textContent='Fondo DGP · '+(inv.userName||inv.user_name||'—')+' · '+F(inv.amount);
+      $('#ret-form-card').classList.remove('hide');
+      $('#ret-form-card').scrollIntoView({behavior:'smooth',block:'center'});
+    }else{
+      $('#lprf-label').textContent='LP COP · '+(inv.userName||inv.user_name||'—')+' · '+F(inv.amount);
+      $('#lpret-form-card').classList.remove('hide');
+      $('#lpret-form-card').scrollIntoView({behavior:'smooth',block:'center'});
+    }
   }catch(e){toast('Error','error')}
 }
 function updateRetPrev(){
@@ -3005,14 +3133,29 @@ function updateRetPrev(){
   $('#rf-preview').classList.remove('hide');
   $('#rf-preview').innerHTML=`Capital <strong class="acc mono">${F(cap)}</strong> × ${rate}% = <strong class="pos mono">+${F(earned)}</strong>`;
 }
+function updateLpRetPrev(){
+  const rate=parseFloat($('#lprf-rate').value)||0;
+  if(!State.selectedInv||!rate) return;
+  const cap=parseFloat(State.selectedInv.amount)||0;
+  const earned=Math.round(cap*(rate/100));
+  $('#lprf-preview').classList.remove('hide');
+  $('#lprf-preview').innerHTML=`Capital <strong class="acc mono">${F(cap)}</strong> × ${rate}% = <strong class="pos mono">+${F(earned)}</strong>`;
+}
 async function registerReturn(){
   if(!State.selectedInv) return toast('Selecciona inversión','error');
-  const rate=parseFloat($('#rf-rate').value);
+  const isPool=State.selectedInvKind==='pool';
+  const rateEl=isPool?'#rf-rate':'#lprf-rate';
+  const monthEl=isPool?'#rf-month':'#lprf-month';
+  const notesEl=isPool?'#rf-notes':'#lprf-notes';
+  const btnEl=isPool?'#rf-btn':'#lprf-btn';
+  const formCard=isPool?'#ret-form-card':'#lpret-form-card';
+  const prevEl=isPool?'#rf-preview':'#lprf-preview';
+  const rate=parseFloat($(rateEl).value);
   if(!rate) return toast('Ingresa la tasa','error');
-  const month=$('#rf-month').value;
+  const month=$(monthEl).value;
   if(!month) return toast('Selecciona el mes','error');
-  const notes=$('#rf-notes').value;
-  const btn=$('#rf-btn');
+  const notes=$(notesEl).value;
+  const btn=$(btnEl);
   btn.disabled=true; btn.textContent='Registrando…';
   try{
     const r=await apiFetch('/admin/investments/'+State.selectedInv.id+'/return',{method:'POST',body:JSON.stringify({rate,periodMonth:month,notes:notes||undefined})});
@@ -3020,11 +3163,12 @@ async function registerReturn(){
     const d=await r.json().catch(()=>({}));
     if(!r.ok) return toast(d.error||'Error','error');
     toast('Rendimiento registrado','ok');
-    $('#ret-form-card').classList.add('hide');
-    State.selectedInv=null;
-    $('#rf-rate').value=''; $('#rf-notes').value='';
-    $('#rf-preview').classList.add('hide');
-    loadReturns(); loadStats();
+    $(formCard).classList.add('hide');
+    State.selectedInv=null; State.selectedInvKind=null;
+    $(rateEl).value=''; $(notesEl).value='';
+    $(prevEl).classList.add('hide');
+    if(isPool){ State.cacheFlags.pool=false; loadReturns(); } else { State.cacheFlags.invs=false; loadReturnsLP(); }
+    loadStats();
   }catch(e){toast('Error','error')}
   finally{btn.disabled=false; btn.textContent='Registrar rendimiento'}
 }
@@ -3240,6 +3384,114 @@ async function executeBulkReward(){
     btn.disabled = false;
     btn.textContent = 'Aplicar a todos los pools';
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// BULK REWARD — Recompensa masiva LP COP
+// ═══════════════════════════════════════════════════════════════════════
+const LpBulkReward = { preview:null, _debounce:null };
+
+function updateLpBulkPreview(){
+  clearTimeout(LpBulkReward._debounce);
+  LpBulkReward._debounce = setTimeout(fetchLpBulkPreview, 350);
+}
+
+async function fetchLpBulkPreview(){
+  const rate=parseFloat($('#lpbulk-rate').value);
+  const month=$('#lpbulk-month').value;
+  const btn=$('#lpbulk-btn');
+  const prev=$('#lpbulk-preview');
+  if(!rate||rate<=0||rate>100){ prev.classList.add('hide'); btn.disabled=true; btn.textContent='Aplicar a todas las LP COP'; return; }
+  prev.innerHTML='<div class="dim">Consultando preview...</div>';
+  prev.classList.remove('hide');
+  try{
+    const params=new URLSearchParams({rate:String(rate)});
+    if(month) params.set('periodMonth',month);
+    params.set('_t',Date.now());
+    const r=await apiFetch('/admin/lp/reward-preview?'+params.toString());
+    if(!r){ prev.innerHTML='<div style="color:var(--neg)">⚠️ Sin respuesta del servidor</div>'; btn.disabled=true; return; }
+    if(r.status===404){ prev.innerHTML='<div style="color:var(--warn)">⚠️ Endpoint no encontrado (404). Sube el backend actualizado.</div>'; btn.disabled=true; btn.textContent='Backend no listo'; return; }
+    if(!r.ok){ let m='Error '+r.status; try{const e=await r.json(); if(e.error)m=e.error;}catch(_){} prev.innerHTML=`<div style="color:var(--neg)">⚠️ ${m}</div>`; btn.disabled=true; return; }
+    const d=await r.json();
+    LpBulkReward.preview=d;
+    if(typeof d.eligibleCount!=='number'){ prev.innerHTML='<div style="color:var(--warn)">⚠️ Respuesta inválida del backend.</div>'; btn.disabled=true; return; }
+    if(d.eligibleCount===0){
+      prev.innerHTML=`<strong style="color:var(--warn)">⚠️ Sin LP COP elegibles</strong><br>${d.skippedCount>0?`<span class="dim">Las ${d.skippedCount} LP COP activas ya tienen rendimiento para <strong>${d.periodMonth||month||'ese período'}</strong>.</span>`:`<span class="dim">No hay LP COP con status='active'.</span>`}`;
+      btn.disabled=true; btn.textContent='Sin LP COP elegibles'; return;
+    }
+    prev.innerHTML=`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;font-size:12px">
+        <div><span class="dim">LP COP elegibles</span><br><strong class="acc mono" style="font-size:18px">${d.eligibleCount}</strong></div>
+        <div><span class="dim">Ya pagados (skip)</span><br><strong class="dim mono" style="font-size:18px">${d.skippedCount||0}</strong></div>
+        <div><span class="dim">Capital base total</span><br><strong class="mono">${F(d.totalCapital)}</strong></div>
+        <div><span class="dim">Bruto a registrar</span><br><strong class="pos mono">+${F(d.totalGross)}</strong></div>
+      </div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)">
+        <span class="dim" style="font-size:11px">Cuando los usuarios reclamen:</span><br>
+        <span class="warn mono">Comisión referido 5%: ${F(d.referenceCommission)}</span> · 
+        <span class="pos mono">Neto a usuarios: ${F(d.referenceNet)}</span>
+      </div>`;
+    btn.disabled=!month;
+    btn.textContent=month?`Aplicar ${rate}% a ${d.eligibleCount} LP COP`:'Selecciona el mes del período';
+  }catch(e){ prev.innerHTML=`<div style="color:var(--neg)">⚠️ Error de conexión</div>`; btn.disabled=true; }
+}
+
+function confirmLpBulkReward(){
+  const rate=parseFloat($('#lpbulk-rate').value);
+  const month=$('#lpbulk-month').value;
+  const d=LpBulkReward.preview;
+  if(!rate||!month||!d||!d.eligibleCount) return toast('Datos incompletos','error');
+  const html=`
+    <div style="font-size:14px;line-height:1.6;margin-bottom:14px">
+      Vas a aplicar <strong class="acc">${rate}%</strong> de rendimiento LP COP al período <strong class="acc mono">${month}</strong>.
+    </div>
+    <div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr 1fr;margin-bottom:14px">
+      <div class="stat"><div class="stat-label">LP COP afectadas</div><div class="stat-value acc mono">${d.eligibleCount}</div></div>
+      <div class="stat"><div class="stat-label">Bruto total</div><div class="stat-value pos mono">+${F(d.totalGross)}</div></div>
+    </div>
+    <div style="padding:12px;background:var(--acc-soft);border-left:2px solid var(--warn);font-size:12px;color:var(--txt-2);line-height:1.5;margin-bottom:14px">
+      <strong style="color:var(--warn)">⚠️ Esta acción NO se puede deshacer.</strong><br>
+      Se acumula como "Por retirar". El cliente reclama desde su dashboard (descuento 5% referido al claim).
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" onclick="closeModal()" style="flex:1">Cancelar</button>
+      <button class="btn btn-primary" onclick="executeLpBulkReward()" style="flex:1">Confirmar y aplicar</button>
+    </div>`;
+  openModal('Confirmar <em>rendimiento masivo LP COP</em>', `${rate}% · ${month} · ${d.eligibleCount} LP COP`, html);
+}
+
+async function executeLpBulkReward(){
+  const rate=parseFloat($('#lpbulk-rate').value);
+  const month=$('#lpbulk-month').value;
+  const notes=$('#lpbulk-notes').value.trim();
+  closeModal();
+  const btn=$('#lpbulk-btn');
+  btn.disabled=true; btn.textContent='Procesando…';
+  try{
+    const r=await apiFetch('/admin/lp/pay-returns-bulk',{method:'POST',body:JSON.stringify({rate,periodMonth:month,notes:notes||undefined})});
+    if(!r){ toast('Error de conexión','error'); btn.disabled=false; btn.textContent='Aplicar a todas las LP COP'; return; }
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){ toast(d.error||'Error al aplicar','error'); btn.disabled=false; btn.textContent='Aplicar a todas las LP COP'; return; }
+    const summary=`
+      <div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr 1fr;margin-bottom:14px">
+        <div class="stat"><div class="stat-label">Aplicados</div><div class="stat-value acc mono">${d.applied}</div></div>
+        <div class="stat"><div class="stat-label">Saltados</div><div class="stat-value mono">${d.skipped}</div></div>
+        <div class="stat"><div class="stat-label">Bruto registrado</div><div class="stat-value pos mono">+${F(d.totalGross)}</div></div>
+        <div class="stat"><div class="stat-label">Tasa</div><div class="stat-value mono">${d.rate}%</div></div>
+      </div>
+      <div style="padding:12px;background:var(--acc-soft);border-left:2px solid var(--acc);font-size:12px;line-height:1.5;margin-bottom:14px">
+        <strong class="acc">✓ Rendimiento aplicado</strong><br>
+        Los usuarios pueden reclamar desde su dashboard.
+      </div>
+      <button class="btn btn-block btn-primary" onclick="closeModal()">Listo</button>`;
+    openModal('✓ <em>Aplicado</em>', `${d.applied} LP COP · ${d.periodMonth}`, summary);
+    $('#lpbulk-rate').value=''; $('#lpbulk-notes').value='';
+    $('#lpbulk-preview').classList.add('hide');
+    btn.disabled=true; btn.textContent='Aplicar a todas las LP COP';
+    LpBulkReward.preview=null;
+    State.cacheFlags.invs=false;
+    loadInvestments(); loadReturnsLP(); loadStats();
+  }catch(e){ toast('Error de conexión','error'); btn.disabled=false; btn.textContent='Aplicar a todas las LP COP'; }
 }
 
 // ─── LOANS ───
@@ -3731,9 +3983,8 @@ async function refreshCurrentView(){
     loadStats();
   }else if(v==='finance'){
     const s=State.currentSub.finance;
-    if(s==='invs'){State.cacheFlags.invs=false; await loadInvestments()}
-    if(s==='pool'){State.cacheFlags.pool=false; await loadPool(); loadStrats()}
-    if(s==='rets'){State.cacheFlags.rets=false; await loadReturns()}
+    if(s==='invs'){State.cacheFlags.invs=false; await loadInvestments(); loadReturnsLP()}
+    if(s==='pool'){State.cacheFlags.pool=false; await loadPool(); loadStrats(); loadReturns()}
     if(s==='loans'){State.cacheFlags.loans=false; await loadLoans('all')}
   }else if(v==='users'){
     State.cacheFlags.users=false; await loadUsers();
