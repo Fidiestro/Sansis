@@ -2026,6 +2026,7 @@ async function viewUser(uid){
       html+='<div class="list">'+invs.map(i=>{
         const isP=(i.type||'').toLowerCase().includes('pool');
         const lbl=isP?'Fondo DGP':'LP COP';
+        const accrued=parseFloat(i.accruedPending||0);
         return `<div class="row">
           <div class="row-top">
             <div>
@@ -2035,6 +2036,7 @@ async function viewUser(uid){
             <div class="row-amount acc">${F(i.amount)}</div>
           </div>
           <div class="row-meta"><span>${pill(i.status)}</span></div>
+          ${(!isP&&i.status==='active')?`<div class="row-note" style="color:var(--pos)">Acumulado sin reclamar: <strong>${F(accrued)}</strong></div>`:''}
           ${i.status==='active'?`<div class="row-actions">
             <button class="btn btn-sm btn-neg" onclick="revokeInvestment(${i.id},'${lbl}',${parseFloat(i.amount||0)},${parseFloat(i.totalEarned||0)})">🚫 Revocar</button>
           </div>`:''}
