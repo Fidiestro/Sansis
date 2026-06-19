@@ -3041,14 +3041,25 @@ async function loadPool(){
     </div>`;
 
     // Inversiones del pool
-    const ir=await apiFetch('/admin/investments/active?type=pool');
+    const ir=await apiFetch('/admin/investments/active');
     if(ir&&ir.ok){
-      const invs=await ir.json();
+      const allInvs=await ir.json();
+      // ★ Filtrar SOLO Fondo DGP (Pool) en frontend — el backend real no respeta ?type=
+      // (separación LP COP vs DGP inviolable)
+      const invs=allInvs.filter(i => (i.type||'').toLowerCase().includes('pool'));
+      // ★ Total de capital en el Fondo DGP (suma de amounts de las inversiones activas)
+      const dgpCapital=invs.reduce((sum,i)=>sum+parseFloat(i.amount||0),0);
       // Mes actual en formato YYYY-MM (para columna "Ganado este mes")
       const now=new Date();
       const currentMonth=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 
-      $('#pool-invs').innerHTML = invs.length ? '<div class="list">'+invs.map(i=>{
+      // ★ Cuadrito de total de capital del fondo (estilo LP COP)
+      const dgpTotalCard=`<div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr 1fr;margin-bottom:14px">
+        <div class="stat"><div class="stat-label">Capital Fondo DGP</div><div class="stat-value acc mono">${F(dgpCapital)}</div></div>
+        <div class="stat"><div class="stat-label">Inv. activas</div><div class="stat-value mono">${invs.length}</div></div>
+      </div>`;
+
+      $('#pool-invs').innerHTML = dgpTotalCard + (invs.length ? '<div class="list">'+invs.map(i=>{
         const s=new Date(i.startDate||i.start_date);
         const days=Math.floor((Date.now()-s)/(864e5));
 
@@ -3088,7 +3099,7 @@ async function loadPool(){
             <button class="btn btn-sm btn-neg" onclick="revokeInvestment(${i.id},'Fondo DGP',${parseFloat(i.amount||0)},${parseFloat(i.totalEarned||0)})">🚫 Revocar</button>
           </div>`:''}
         </div>`;
-      }).join('')+'</div>' : '<div class="empty">Sin inversiones en pool</div>';
+      }).join('')+'</div>' : '<div class="empty">Sin inversiones en el Fondo DGP</div>');
     }
 
     // Comisiones
@@ -3683,6 +3694,7 @@ function renderLoans(loans){
         <div class="row-actions">
           <button class="btn btn-sm" style="background:#10b981;color:#fff;border:none" onclick="procLoan(${l.id},'mark_paid')">✓ Marcar pagado</button>
           <button class="btn btn-sm" style="background:#5b8dee;color:#fff;border:none" onclick="editLoanTerm(${l.id},'${(l.ref_id||('LN-'+l.id)).replace(/'/g,'')}',${termRaw==null?'null':termRaw})">📅 Editar plazo</button>
+          <button class="btn btn-sm" style="background:#8b5cf6;color:#fff;border:none" onclick="editLoanStart(${l.id},'${(l.ref_id||('LN-'+l.id)).replace(/'/g,'')}','${(l.start_date||'').toString().slice(0,10)}')">📆 Editar inicio</button>
           <button class="btn btn-sm btn-neg" onclick="cancelLoan(${l.id},'${(l.ref_id||('LN-'+l.id)).replace(/'/g,'')}',${parseFloat(l.approved_amount||l.amount||0)})">🚫 Cancelar</button>
         </div>
       `:''}
@@ -3759,6 +3771,37 @@ async function editLoanTerm(id, refId, currentTerm){
     const d=await(r?r.json().catch(()=>({})):{});
     if(!r||!r.ok) return toast(d.error||'Error al editar plazo','error');
     toast('Plazo actualizado ✓','ok');
+    State.cacheFlags.loans=false;
+    loadLoans('all');
+  }catch(e){toast('Error de red','error')}
+}
+
+// ★ NUEVO: Editar fecha de inicio de un préstamo activo / en mora
+async function editLoanStart(id, refId, currentStart){
+  const cur = (currentStart||'').slice(0,10);
+  const input = prompt(
+    `📆 Editar fecha de inicio del préstamo ${refId}\n\n`+
+    `Inicio actual: ${cur||'sin fecha'}\n\n`+
+    `Ingresa la nueva fecha de inicio (formato YYYY-MM-DD, ej: 2026-03-15).\n`+
+    `Se recalcula el vencimiento según el plazo. Capital, abonos y status no se tocan.`,
+    cur || new Date().toISOString().slice(0,10)
+  );
+  if(input===null) return; // canceló
+  const v = input.trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(v)) return toast('Fecha inválida (usa YYYY-MM-DD)','error');
+  const test = new Date(v+'T00:00:00');
+  if(isNaN(test.getTime())) return toast('Fecha inválida','error');
+
+  if(!confirm(`¿Cambiar la fecha de inicio a "${v}"?\n\nSe recalcula el vencimiento. El capital, abonos y status no se tocan.`)) return;
+
+  try{
+    const r=await apiFetch('/admin/loans/'+id+'/process',{
+      method:'POST',
+      body:JSON.stringify({action:'edit_start', newStartDate:v})
+    });
+    const d=await(r?r.json().catch(()=>({})):{});
+    if(!r||!r.ok) return toast(d.error||'Error al editar fecha de inicio','error');
+    toast('Fecha de inicio actualizada ✓','ok');
     State.cacheFlags.loans=false;
     loadLoans('all');
   }catch(e){toast('Error de red','error')}
