@@ -1295,6 +1295,17 @@ img{max-width:100%;display:block}
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">Tasa promedio</div>
             <div class="mono" style="font-size:16px;font-weight:700;color:var(--txt)" id="ls-avg-rate">—</div>
           </div>
+          <!-- ★ NUEVO: Capital LP COP total (lo que tienes invertido) -->
+          <div style="background:rgba(163,255,18,.06);border:1px solid rgba(163,255,18,.25);border-radius:8px;padding:10px">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">Capital LP COP</div>
+            <div class="mono" style="font-size:16px;font-weight:700;color:var(--acc)" id="ls-lpcop-total">—</div>
+          </div>
+          <!-- ★ NUEVO: LP COP − Préstamos activos (lo que queda libre) -->
+          <div style="background:rgba(163,255,18,.06);border:1px solid rgba(163,255,18,.25);border-radius:8px;padding:10px">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">LP COP − Préstamos</div>
+            <div class="mono" style="font-size:16px;font-weight:700;color:var(--acc)" id="ls-lpcop-net">—</div>
+            <div style="font-size:9px;color:var(--txt-3);margin-top:2px" id="ls-lpcop-net-hint">Libre para prestar</div>
+          </div>
         </div>
       </div>
 
@@ -3597,14 +3608,24 @@ async function loadLoans(status){
 // ★ NUEVO: cargar y renderizar stats de la cartera de préstamos
 async function loadLoanStats(){
   try{
-    const r=await apiFetch('/admin/loans/profit-stats');
-    if(!r||!r.ok)return;
-    const s=await r.json();
+    // Trae stats de préstamos + capital LP COP en paralelo (más rápido)
+    const [pr, ir] = await Promise.all([
+      apiFetch('/admin/loans/profit-stats'),
+      apiFetch('/admin/investments/active'),
+    ]);
+    if(!pr||!pr.ok)return;
+    const s = await pr.json();
+    const allInv = (ir&&ir.ok) ? await ir.json() : [];
+    // LP COP = todas las inversiones activas que NO son Pool
+    const lpcopInvs = allInv.filter(i => !(i.type||'').toLowerCase().includes('pool'));
+    const lpcopCapital = lpcopInvs.reduce((sum, i) => sum + parseFloat(i.amount||0), 0);
+    const activeLoanCap = parseFloat(s.activeLoanCapital||0);
+    const netoLpcop = lpcopCapital - activeLoanCap;
 
     const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val};
 
     set('ls-active-count',  s.activeLoanCount||0);
-    set('ls-active-cap',    F(s.activeLoanCapital||0));
+    set('ls-active-cap',    F(activeLoanCap));
     set('ls-paid-count',    s.paidLoanCount||0);
     set('ls-overdue-count', s.overdueLoanCount||0);
     set('ls-total-interest',F(s.totalInterestEarned||0));
@@ -3613,6 +3634,22 @@ async function loadLoanStats(){
 
     const avg=s.weightedAvgRate||s.avgRate||0;
     set('ls-avg-rate', (parseFloat(avg)||0).toFixed(2)+'%');
+
+    // ★ NUEVO: cuadritos LP COP
+    set('ls-lpcop-total', F(lpcopCapital));
+    const netoEl = document.getElementById('ls-lpcop-net');
+    const hintEl = document.getElementById('ls-lpcop-net-hint');
+    if(netoEl){
+      netoEl.textContent = F(netoLpcop);
+      // Si el neto es negativo → estás prestando más de lo que tienes en LP COP
+      if(netoLpcop < 0){
+        netoEl.style.color = 'var(--neg)';
+        if(hintEl){ hintEl.textContent = '⚠️ Sobre-expuesto'; hintEl.style.color = 'var(--neg)'; }
+      }else{
+        netoEl.style.color = 'var(--acc)';
+        if(hintEl){ hintEl.textContent = 'Libre para prestar'; hintEl.style.color = 'var(--txt-3)'; }
+      }
+    }
   }catch(e){console.warn('loadLoanStats:',e)}
 }
 
@@ -3645,6 +3682,7 @@ function renderLoans(loans){
       ${(l.status==='active'||l.status==='overdue')?`
         <div class="row-actions">
           <button class="btn btn-sm" style="background:#10b981;color:#fff;border:none" onclick="procLoan(${l.id},'mark_paid')">✓ Marcar pagado</button>
+          <button class="btn btn-sm" style="background:#5b8dee;color:#fff;border:none" onclick="editLoanTerm(${l.id},'${(l.ref_id||('LN-'+l.id)).replace(/'/g,'')}',${termRaw==null?'null':termRaw})">📅 Editar plazo</button>
           <button class="btn btn-sm btn-neg" onclick="cancelLoan(${l.id},'${(l.ref_id||('LN-'+l.id)).replace(/'/g,'')}',${parseFloat(l.approved_amount||l.amount||0)})">🚫 Cancelar</button>
         </div>
       `:''}
@@ -3691,6 +3729,37 @@ async function cancelLoan(id, refId, capitalPendiente){
     const d=await(r?r.json().catch(()=>({})):{});
     if(!r||!r.ok) return toast(d.error||'Error al cancelar','error');
     toast('Préstamo cancelado ✓','ok');
+    loadLoans('all');
+  }catch(e){toast('Error de red','error')}
+}
+
+// ★ NUEVO: Editar plazo de un préstamo activo / en mora
+async function editLoanTerm(id, refId, currentTerm){
+  const curLbl = (currentTerm==null || currentTerm===0) ? 'Sin plazo definido' : (currentTerm+' meses');
+  const input = prompt(
+    `📅 Editar plazo del préstamo ${refId}\n\n`+
+    `Plazo actual: ${curLbl}\n\n`+
+    `Ingresa el nuevo plazo en meses (1, 2, 3, 6, 12…) o 0 para "sin plazo definido":`,
+    currentTerm==null?'0':String(currentTerm)
+  );
+  if(input===null) return; // canceló
+  const trimmed = input.trim();
+  if(trimmed==='') return toast('Plazo vacío','error');
+  const n = parseInt(trimmed);
+  if(isNaN(n)||n<0||n>120) return toast('Plazo inválido (0–120 meses)','error');
+
+  const newLbl = n===0 ? 'sin plazo definido' : `${n} meses`;
+  if(!confirm(`¿Cambiar el plazo a "${newLbl}"?\n\nSe recalcula la fecha de vencimiento. El capital, abonos y status no se tocan.`)) return;
+
+  try{
+    const r=await apiFetch('/admin/loans/'+id+'/process',{
+      method:'POST',
+      body:JSON.stringify({action:'edit_term', newTermMonths:n})
+    });
+    const d=await(r?r.json().catch(()=>({})):{});
+    if(!r||!r.ok) return toast(d.error||'Error al editar plazo','error');
+    toast('Plazo actualizado ✓','ok');
+    State.cacheFlags.loans=false;
     loadLoans('all');
   }catch(e){toast('Error de red','error')}
 }
