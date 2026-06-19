@@ -1751,6 +1751,49 @@ function closeModal(){
   document.body.style.overflow='';
 }
 
+// ─── WHATSAPP: enviar mensaje manual ───
+// Normaliza un número colombiano a formato internacional para wa.me
+function waNormalizePhone(phone){
+  if(!phone) return '';
+  let p=String(phone).replace(/[^\d]/g,''); // solo dígitos
+  if(!p) return '';
+  // Si ya viene con 57 al inicio y largo >=12, se deja
+  if(p.startsWith('57') && p.length>=12) return p;
+  // Celular colombiano de 10 dígitos → anteponer 57
+  if(p.length===10) return '57'+p;
+  // Cualquier otro caso: si no empieza por 57 y es corto, anteponer 57
+  if(!p.startsWith('57')) return '57'+p;
+  return p;
+}
+// Abre un modal con el mensaje editable + botón para mandarlo por WhatsApp
+function waShowMessage(phone, message, titulo){
+  const norm=waNormalizePhone(phone);
+  const hasPhone=!!norm;
+  const msgId='wa-msg-'+Date.now();
+  const html=`
+    <div style="font-size:12px;color:var(--txt-3);margin-bottom:8px">
+      ${hasPhone?`Teléfono: <strong class="mono">+${norm}</strong>`:'<span style="color:var(--neg)">⚠️ Este usuario no tiene teléfono registrado. Copia el mensaje y envíalo manualmente.</span>'}
+    </div>
+    <textarea id="${msgId}" style="width:100%;min-height:160px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:10px;font-size:13px;font-family:inherit;resize:vertical">${message}</textarea>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button class="btn btn-sm" style="background:#25D366;color:#fff;border:none;flex:1;min-width:140px" onclick="waSend('${norm}','${msgId}')">📲 Enviar por WhatsApp</button>
+      <button class="btn btn-sm btn-ghost" style="flex:1;min-width:120px" onclick="waCopy('${msgId}')">📋 Copiar mensaje</button>
+    </div>`;
+  openModal(titulo||'📲 <em>Mensaje para el cliente</em>', 'Revisa el texto y envíalo por WhatsApp', html);
+}
+function waSend(norm, msgId){
+  const el=document.getElementById(msgId);
+  const text=el?el.value:'';
+  const encoded=encodeURIComponent(text);
+  const url=norm ? `https://wa.me/${norm}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+  window.open(url,'_blank');
+}
+function waCopy(msgId){
+  const el=document.getElementById(msgId);
+  if(!el) return;
+  navigator.clipboard.writeText(el.value).then(()=>toast('Mensaje copiado ✓','ok')).catch(()=>toast('No se pudo copiar','error'));
+}
+
 // ─── SEARCH ───
 function openSearch(){
   $('#search-ov').classList.add('open');
@@ -2814,12 +2857,23 @@ function fDep(s, btn){
 }
 async function procDep(id, action){
   if(!confirm('¿'+action+' este depósito?')) return;
+  // Datos del depósito para el mensaje de WhatsApp
+  const dep=(State.deposits||[]).find(d=>String(d.id)===String(id));
   try{
     const r=await apiFetch('/admin/deposits/'+id+'/process',{method:'POST',body:JSON.stringify({action})});
     if(!r||!r.ok) return toast('Error','error');
     toast('Listo','ok');
     State.cacheFlags.deps=false;
     loadDeposits('all'); loadStats();
+    // Notificación manual al cliente vía WhatsApp (solo al aprobar)
+    if(action==='approve' && dep){
+      const nombre=(dep.user_name||'').split(' ')[0]||'';
+      const msg=`Hola ${nombre} 👋\n\n`+
+        `✅ Tu depósito de $${F(dep.amount).replace('$','')} COP fue confirmado y ya está reflejado en tu saldo de Sanse Capital.\n\n`+
+        `Ref: ${dep.ref_id||('DEP-'+dep.id)}\n\n`+
+        `Gracias por confiar en nosotros.`;
+      waShowMessage(dep.user_phone, msg, '📲 <em>Depósito confirmado</em>');
+    }
   }catch(e){toast('Error','error')}
 }
 async function rejectDep(id){
@@ -2891,11 +2945,30 @@ function fWr(s, btn){
 }
 async function procWr(id, action){
   if(!confirm('¿'+action+' este retiro?')) return;
+  const wr=(State.withdrawals||[]).find(w=>String(w.id)===String(id));
   try{
     const r=await apiFetch('/admin/withdrawals/'+id+'/process',{method:'POST',body:JSON.stringify({action})});
     if(!r||!r.ok) return toast('Error','error');
     toast('Listo','ok');
     loadWithdrawals('all'); loadStats();
+    // Notificación manual al cliente vía WhatsApp
+    if(wr && (action==='approve' || action==='complete')){
+      const nombre=(wr.user_name||'').split(' ')[0]||'';
+      const monto=F(wr.amount).replace('$','');
+      let msg;
+      if(action==='approve'){
+        msg=`Hola ${nombre} 👋\n\n`+
+          `✅ Tu solicitud de retiro de $${monto} COP fue aprobada y está en proceso de pago.\n\n`+
+          `Ref: ${wr.ref_id||('WR-'+wr.id)}\n\n`+
+          `Te avisaremos cuando el pago esté completado.`;
+      }else{
+        msg=`Hola ${nombre} 👋\n\n`+
+          `💸 Tu retiro de $${monto} COP fue completado y enviado a tu cuenta registrada.\n\n`+
+          `Ref: ${wr.ref_id||('WR-'+wr.id)}\n\n`+
+          `Gracias por confiar en Sanse Capital.`;
+      }
+      waShowMessage(wr.user_phone, msg, '📲 <em>Retiro '+(action==='approve'?'aprobado':'completado')+'</em>');
+    }
   }catch(e){toast('Error','error')}
 }
 
@@ -3603,6 +3676,7 @@ async function executeLpBulkReward(){
 // ─── LOANS ───
 async function loadLoans(status){
   State.cacheFlags.loans=true;
+  State.loanPayments=null; // invalidar cache de abonos para reflejar nuevos
   try{
     const q=status==='all'?'':'?status='+status;
     const r=await apiFetch('/admin/loans'+q);
@@ -3698,8 +3772,64 @@ function renderLoans(loans){
           <button class="btn btn-sm btn-neg" onclick="cancelLoan(${l.id},'${(l.ref_id||('LN-'+l.id)).replace(/'/g,'')}',${parseFloat(l.approved_amount||l.amount||0)})">🚫 Cancelar</button>
         </div>
       `:''}
+      ${l.status!=='pending'?`
+        <div class="row-actions">
+          <button class="btn btn-sm btn-ghost" id="abonos-btn-${l.id}" onclick="toggleAbonos(${l.id})">💳 Ver abonos</button>
+        </div>
+        <div id="abonos-box-${l.id}" style="display:none;margin-top:10px;border-top:1px solid var(--line);padding-top:10px"></div>
+      `:''}
     </div>`;
   }).join('')+'</div>';
+}
+// ★ NUEVO: desplegable de abonos por préstamo
+async function toggleAbonos(loanId){
+  const box=document.getElementById('abonos-box-'+loanId);
+  const btn=document.getElementById('abonos-btn-'+loanId);
+  if(!box) return;
+  // Si ya está abierto, lo cerramos
+  if(box.style.display!=='none'){
+    box.style.display='none';
+    if(btn) btn.textContent='💳 Ver abonos';
+    return;
+  }
+  box.style.display='block';
+  if(btn) btn.textContent='▲ Ocultar abonos';
+  box.innerHTML='<div class="empty" style="padding:8px">Cargando abonos…</div>';
+  try{
+    // Cache de todos los pagos para no pedirlos repetido
+    if(!State.loanPayments){
+      const r=await apiFetch('/admin/loans/payments');
+      State.loanPayments = (r&&r.ok) ? await r.json() : [];
+    }
+    const pagos=(State.loanPayments||[]).filter(p=>String(p.loan_id)===String(loanId));
+    if(!pagos.length){
+      box.innerHTML='<div class="empty" style="padding:8px">Sin abonos registrados</div>';
+      return;
+    }
+    // Orden cronológico (más reciente primero ya viene del backend)
+    box.innerHTML='<div style="display:flex;flex-direction:column;gap:8px">'+pagos.map(p=>{
+      const fecha=Dt(p.created_at);
+      const total=F(p.amount);
+      const interes=F(p.interest_amount||0);
+      const capital=F(p.capital_amount||0);
+      const pend=F(p.remaining_capital||0);
+      const fullyPaid=Number(p.is_fully_paid)===1;
+      return `<div style="background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span class="mono" style="font-size:11px;color:var(--txt-3)">${p.ref_id||'—'} · ${fecha}</span>
+          <span class="mono acc" style="font-weight:700">${total}</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:11px">
+          <span class="pos">Interés: <strong class="mono">${interes}</strong></span>
+          <span>Capital: <strong class="mono">${capital}</strong></span>
+          <span class="warn">Pendiente: <strong class="mono">${pend}</strong></span>
+          ${fullyPaid?'<span class="pos" style="font-weight:700">✅ Pagado completo</span>':''}
+        </div>
+      </div>`;
+    }).join('')+'</div>';
+  }catch(e){
+    box.innerHTML='<div class="empty" style="padding:8px">Error cargando abonos</div>';
+  }
 }
 function fLoan(s, btn){
   btn.parentElement.querySelectorAll('.filter').forEach(b=>b.classList.remove('on'));
