@@ -1118,6 +1118,7 @@ img{max-width:100%;display:block}
     <button class="subtab active" data-sub="invs" onclick="sub('finance','invs')">LP COP</button>
     <button class="subtab" data-sub="pool" onclick="sub('finance','pool')">Fondo DGP</button>
     <button class="subtab" data-sub="loans" onclick="sub('finance','loans')">Préstamos</button>
+    <button class="subtab" data-sub="company" onclick="sub('finance','company')">Inv. Empresa</button>
   </div>
 
   <div class="section">
@@ -1318,6 +1319,28 @@ img{max-width:100%;display:block}
         <button class="filter" onclick="fLoan('cancelled',this)">Cancelados</button>
       </div>
       <div id="loans-content"><div class="empty">Cargando…</div></div>
+    </div>
+
+    <!-- INVERSIONES DE EMPRESA (tesorería interna) -->
+    <div class="sub-view hide" data-sub-view="company">
+      <div class="card" style="background:rgba(91,141,238,.05);border-color:rgba(91,141,238,.25);margin-bottom:14px">
+        <div style="font-size:12px;font-weight:600;color:var(--txt-2);margin-bottom:4px">🏦 Inversiones de la empresa</div>
+        <div style="font-size:11px;color:var(--txt-3);margin-bottom:12px">Registro interno de tesorería. Capital tomado de LP COP para invertir por fuera (dólares, Retroensambles, etc.) y sus rendimientos. <strong>No afecta el balance de ningún cliente.</strong></div>
+        <div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr 1fr 1fr;margin:0">
+          <div class="stat"><div class="stat-label">Capital desplegado</div><div class="stat-value mono" id="cinv-capital">—</div></div>
+          <div class="stat"><div class="stat-label">Ganancias registradas</div><div class="stat-value pos mono" id="cinv-returns">—</div></div>
+          <div class="stat"><div class="stat-label">Inv. activas</div><div class="stat-value mono" id="cinv-active">—</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">Inversiones <em>de empresa</em></div>
+        <div class="card-d">Listado de inversiones internas. Toca una para ver/registrar rendimientos.</div>
+        <div style="margin:10px 0">
+          <button class="btn btn-primary btn-sm" onclick="openCreateCompanyInv()">+ Nueva inversión de empresa</button>
+        </div>
+        <div id="cinv-list"><div class="empty">Cargando…</div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1594,6 +1617,7 @@ const State = {
   transactions: [],
   poolConfig: {},
   poolWithdrawals: [],
+  companyInvestments: [],
   cacheFlags: {}, // controla si una sección ya cargó
   currentNav: 'home',
   currentSub: { pending:'deps', finance:'invs', tx:'hist' },
@@ -1709,6 +1733,7 @@ function sub(view,sub){
     if(sub==='invs' && !State.cacheFlags.invs){ loadInvestments(); loadReturnsLP(); }
     if(sub==='pool' && !State.cacheFlags.pool){ loadPool(); loadReturns(); }
     if(sub==='loans' && !State.cacheFlags.loans) loadLoans('all');
+    if(sub==='company' && !State.cacheFlags.company) loadCompanyInvestments();
   }
   if(view==='tx'){
     if(sub==='hist' && !State.cacheFlags.txs) loadTransactions();
@@ -1729,6 +1754,7 @@ function loadView(view){
     if(sb==='invs' && !State.cacheFlags.invs){ loadInvestments(); loadReturnsLP(); }
     if(sb==='pool' && !State.cacheFlags.pool){ loadPool(); loadReturns(); }
     if(sb==='loans' && !State.cacheFlags.loans) loadLoans('all');
+    if(sb==='company' && !State.cacheFlags.company) loadCompanyInvestments();
   }
   if(view==='users'){
     if(!State.cacheFlags.users) loadUsers();
@@ -3671,6 +3697,230 @@ async function executeLpBulkReward(){
     State.cacheFlags.invs=false;
     loadInvestments(); loadReturnsLP(); loadStats();
   }catch(e){ toast('Error de conexión','error'); btn.disabled=false; btn.textContent='Aplicar a todas las LP COP'; }
+}
+
+// ─── INVERSIONES DE EMPRESA (tesorería interna) ───
+async function loadCompanyInvestments(){
+  State.cacheFlags.company=true;
+  const list=document.getElementById('cinv-list');
+  try{
+    const r=await apiFetch('/admin/company-investments');
+    if(!r||!r.ok){
+      const d=await(r?r.json().catch(()=>({})):{});
+      if(list) list.innerHTML='<div class="empty">'+(d.error||'Error al cargar')+'</div>';
+      return;
+    }
+    const data=await r.json();
+    State.companyInvestments=data.investments||[];
+    // Stats
+    const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
+    set('cinv-capital', F(data.stats?.totalCapitalDeployed||0));
+    set('cinv-returns', F(data.stats?.totalReturns||0));
+    set('cinv-active',  data.stats?.activeCount||0);
+    // Lista
+    if(!data.investments||!data.investments.length){
+      if(list) list.innerHTML='<div class="empty">Sin inversiones de empresa. Crea la primera.</div>';
+      return;
+    }
+    if(list) list.innerHTML='<div class="list">'+data.investments.map(ci=>{
+      const neto=ci.totalReturns;
+      const netoColor=neto>=0?'pos':'neg';
+      return `<div class="row">
+        <div class="row-top">
+          <div>
+            <div class="row-id">${ci.accountLabel}</div>
+            <div class="row-name">${ci.name}</div>
+          </div>
+          <div class="row-amount acc">${F(ci.capitalDeployed)}</div>
+        </div>
+        <div class="row-meta">
+          ${pill(ci.status==='active'?'active':'completed')}
+          <span class="${netoColor}">Ganancia: ${F(ci.totalReturns)}</span>
+          <span>${ci.returnsCount} mov.</span>
+          ${ci.startDate?'<span>'+Dt(ci.startDate)+'</span>':''}
+        </div>
+        ${ci.sourceNote?`<div class="row-note">${ci.sourceNote}</div>`:''}
+        <div class="row-actions">
+          <button class="btn btn-sm btn-primary" onclick="openCompanyReturns(${ci.id})">📊 Ver / registrar rendimientos</button>
+          ${ci.status==='active'
+            ? `<button class="btn btn-sm btn-ghost" onclick="closeCompanyInv(${ci.id})">Cerrar</button>`
+            : `<button class="btn btn-sm btn-ghost" onclick="reopenCompanyInv(${ci.id})">Reabrir</button>`}
+        </div>
+      </div>`;
+    }).join('')+'</div>';
+  }catch(e){
+    console.error('loadCompanyInvestments:',e);
+    if(list) list.innerHTML='<div class="empty">Error de conexión</div>';
+  }
+}
+
+// Modal: crear inversión de empresa
+function openCreateCompanyInv(){
+  const html=`
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3)">Cuenta interna *</label>
+        <input id="cci-account" list="cci-accounts" placeholder="Ej: Sanse Capital" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:10px;font-size:14px;margin-top:4px">
+        <datalist id="cci-accounts">
+          <option value="Sanse Capital"></option>
+          <option value="Inversion Activos"></option>
+          <option value="Retroensambles Fusa"></option>
+        </datalist>
+      </div>
+      <div>
+        <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3)">Nombre de la inversión *</label>
+        <input id="cci-name" placeholder="Ej: Compra dólares marzo" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:10px;font-size:14px;margin-top:4px">
+      </div>
+      <div>
+        <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3)">Capital tomado (COP) *</label>
+        <input id="cci-capital" type="number" placeholder="5000000" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:10px;font-size:14px;margin-top:4px">
+      </div>
+      <div>
+        <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3)">Fecha de inicio (opcional)</label>
+        <input id="cci-start" type="date" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:10px;font-size:14px;margin-top:4px">
+      </div>
+      <div>
+        <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3)">Nota / origen del capital (opcional)</label>
+        <textarea id="cci-note" placeholder="Ej: Capital tomado de varias LP COP para compra de dólares" style="width:100%;min-height:70px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:10px;font-size:13px;margin-top:4px;resize:vertical"></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="submitCreateCompanyInv()">Registrar inversión</button>
+    </div>`;
+  openModal('🏦 <em>Nueva inversión de empresa</em>','Registro interno de tesorería',html);
+}
+async function submitCreateCompanyInv(){
+  const accountLabel=(document.getElementById('cci-account')?.value||'').trim();
+  const name=(document.getElementById('cci-name')?.value||'').trim();
+  const capitalDeployed=parseFloat(document.getElementById('cci-capital')?.value||0);
+  const startDate=(document.getElementById('cci-start')?.value||'').trim();
+  const sourceNote=(document.getElementById('cci-note')?.value||'').trim();
+  if(!accountLabel) return toast('Indica la cuenta interna','error');
+  if(!name) return toast('Indica el nombre','error');
+  if(!capitalDeployed||capitalDeployed<=0) return toast('Capital inválido','error');
+  try{
+    const body={accountLabel,name,capitalDeployed};
+    if(startDate)body.startDate=startDate;
+    if(sourceNote)body.sourceNote=sourceNote;
+    const r=await apiFetch('/admin/company-investments',{method:'POST',body:JSON.stringify(body)});
+    const d=await(r?r.json().catch(()=>({})):{});
+    if(!r||!r.ok) return toast(d.error||'Error al registrar','error');
+    toast('Inversión de empresa registrada ✓','ok');
+    closeModal();
+    State.cacheFlags.company=false;
+    loadCompanyInvestments();
+  }catch(e){toast('Error de red','error')}
+}
+
+// Modal: ver/registrar rendimientos de una inversión de empresa
+async function openCompanyReturns(id){
+  openModal('📊 <em>Rendimientos</em>','Cargando…','<div class="empty">Cargando…</div>');
+  try{
+    const r=await apiFetch('/admin/company-investments/'+id+'/returns');
+    const d=await(r?r.json().catch(()=>({})):{});
+    if(!r||!r.ok){ $('#modal-body').innerHTML='<div class="empty">'+(d.error||'Error')+'</div>'; return; }
+    const inv=d.investment;
+    const neto=d.netResult||0;
+    const movsHtml=(d.returns&&d.returns.length)
+      ? d.returns.map(m=>{
+          const kindLbl=m.kind==='sale'?'Venta':m.kind==='loss'?'Pérdida':'Rendimiento';
+          const amtColor=m.amount>=0?'pos':'neg';
+          return `<div style="background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+            <div style="min-width:0">
+              <div style="font-size:12px"><strong>${kindLbl}</strong> ${m.eventDate?'· '+Dt(m.eventDate):'· '+Dt(m.createdAt)}</div>
+              ${m.note?`<div style="font-size:11px;color:var(--txt-3);margin-top:2px">${m.note}</div>`:''}
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+              <span class="mono ${amtColor}" style="font-weight:700">${F(m.amount)}</span>
+              <button class="btn btn-sm btn-ghost" style="padding:2px 8px" onclick="deleteCompanyReturn(${inv.id},${m.id})">✕</button>
+            </div>
+          </div>`;
+        }).join('')
+      : '<div class="empty" style="padding:8px">Sin rendimientos registrados</div>';
+
+    const html=`
+      <div style="background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:14px">
+        <div style="font-size:11px;color:var(--txt-3)">${inv.accountLabel}</div>
+        <div style="font-size:15px;font-weight:700;margin:2px 0">${inv.name}</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:12px">
+          <span>Capital: <strong class="mono acc">${F(inv.capitalDeployed)}</strong></span>
+          <span>Ganancia acum.: <strong class="mono ${neto>=0?'pos':'neg'}">${F(neto)}</strong></span>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:600;margin-bottom:8px">+ Registrar rendimiento / venta</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px">
+            <select id="cret-kind" style="background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:8px;font-size:13px">
+              <option value="return">Rendimiento</option>
+              <option value="sale">Venta / cierre</option>
+              <option value="loss">Pérdida</option>
+            </select>
+            <input id="cret-amount" type="number" placeholder="Monto" style="flex:1;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:8px;font-size:13px">
+          </div>
+          <input id="cret-date" type="date" style="background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:8px;font-size:13px">
+          <input id="cret-note" placeholder="Nota (opcional)" style="background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:8px;font-size:13px">
+          <button class="btn btn-sm btn-primary" onclick="submitCompanyReturn(${inv.id})">Registrar</button>
+        </div>
+      </div>
+
+      <div style="font-size:12px;font-weight:600;margin-bottom:8px">Historial de movimientos</div>
+      <div style="display:flex;flex-direction:column;gap:8px">${movsHtml}</div>`;
+    $('#modal-title').innerHTML='📊 <em>'+inv.name+'</em>';
+    $('#modal-sub').textContent=inv.accountLabel;
+    $('#modal-body').innerHTML=html;
+  }catch(e){ $('#modal-body').innerHTML='<div class="empty">Error de conexión</div>'; }
+}
+async function submitCompanyReturn(id){
+  const kind=document.getElementById('cret-kind')?.value||'return';
+  const amount=parseFloat(document.getElementById('cret-amount')?.value||0);
+  const eventDate=(document.getElementById('cret-date')?.value||'').trim();
+  const note=(document.getElementById('cret-note')?.value||'').trim();
+  if(!amount||amount===0) return toast('Indica el monto','error');
+  try{
+    const body={amount,kind};
+    if(eventDate)body.eventDate=eventDate;
+    if(note)body.note=note;
+    const r=await apiFetch('/admin/company-investments/'+id+'/returns',{method:'POST',body:JSON.stringify(body)});
+    const d=await(r?r.json().catch(()=>({})):{});
+    if(!r||!r.ok) return toast(d.error||'Error','error');
+    toast('Movimiento registrado ✓','ok');
+    State.cacheFlags.company=false;
+    openCompanyReturns(id); // refrescar modal
+    loadCompanyInvestments(); // refrescar lista de fondo
+  }catch(e){toast('Error de red','error')}
+}
+async function deleteCompanyReturn(invId, returnId){
+  if(!confirm('¿Eliminar este movimiento?')) return;
+  try{
+    const r=await apiFetch('/admin/company-investments/'+invId+'/returns/'+returnId,{method:'DELETE'});
+    const d=await(r?r.json().catch(()=>({})):{});
+    if(!r||!r.ok) return toast(d.error||'Error','error');
+    toast('Movimiento eliminado ✓','ok');
+    State.cacheFlags.company=false;
+    openCompanyReturns(invId);
+    loadCompanyInvestments();
+  }catch(e){toast('Error de red','error')}
+}
+async function closeCompanyInv(id){
+  if(!confirm('¿Cerrar esta inversión de empresa?')) return;
+  try{
+    const r=await apiFetch('/admin/company-investments/'+id+'/close',{method:'POST'});
+    const d=await(r?r.json().catch(()=>({})):{});
+    if(!r||!r.ok) return toast(d.error||'Error','error');
+    toast('Inversión cerrada ✓','ok');
+    State.cacheFlags.company=false;
+    loadCompanyInvestments();
+  }catch(e){toast('Error de red','error')}
+}
+async function reopenCompanyInv(id){
+  try{
+    const r=await apiFetch('/admin/company-investments/'+id+'/reopen',{method:'POST'});
+    const d=await(r?r.json().catch(()=>({})):{});
+    if(!r||!r.ok) return toast(d.error||'Error','error');
+    toast('Inversión reabierta ✓','ok');
+    State.cacheFlags.company=false;
+    loadCompanyInvestments();
+  }catch(e){toast('Error de red','error')}
 }
 
 // ─── LOANS ───
