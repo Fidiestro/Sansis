@@ -1365,6 +1365,9 @@ img{max-width:100%;display:block}
     <div class="page-meta"><span id="users-count">—</span> cuentas registradas en el sistema.</div>
   </div>
   <div class="section">
+    <div style="margin-bottom:14px">
+      <button class="btn btn-primary btn-sm" onclick="openPrecreateUser()">+ Pre-crear cliente (del Excel)</button>
+    </div>
     <div id="users-summary"></div>
     <div id="users-content"><div class="empty">Cargando…</div></div>
   </div>
@@ -1963,6 +1966,81 @@ function updateBadges(){
 }
 
 // ─── USERS ───
+// ─── PRE-CREAR CLIENTE (del Excel) ───
+function openPrecreateUser(){
+  const html=`
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:11px;color:var(--txt-3);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px">
+        Crea la cuenta del cliente con sus datos del Excel. Queda <strong>activa</strong> de una. El saldo lo asignas manual después con transacciones. El cliente entra con la clave temporal y se le pedirá cambiarla en el primer ingreso.
+      </div>
+      <div>
+        <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3)">Nombre completo *</label>
+        <input id="pcu-name" placeholder="Ej: María Pérez" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:10px;font-size:14px;margin-top:4px">
+      </div>
+      <div>
+        <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3)">Correo *</label>
+        <input id="pcu-email" type="email" placeholder="correo@ejemplo.com" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:10px;font-size:14px;margin-top:4px">
+      </div>
+      <div style="display:flex;gap:8px">
+        <div style="flex:1">
+          <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3)">Cédula</label>
+          <input id="pcu-doc" placeholder="1001061017" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:10px;font-size:14px;margin-top:4px">
+        </div>
+        <div style="flex:1">
+          <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3)">Teléfono</label>
+          <input id="pcu-phone" placeholder="3001234567" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:10px;font-size:14px;margin-top:4px">
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3)">Clave temporal</label>
+        <input id="pcu-pass" value="Sanse2026" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:10px;font-size:14px;margin-top:4px;font-family:var(--f-mono)">
+        <div style="font-size:9px;color:var(--txt-3);margin-top:2px">Mín. 8 caracteres, 1 mayúscula, 1 minúscula, 1 número.</div>
+      </div>
+      <button class="btn btn-primary" onclick="submitPrecreateUser()">Crear cuenta</button>
+    </div>`;
+  openModal('👤 <em>Pre-crear cliente</em>','Cuenta activa con clave temporal',html);
+}
+async function submitPrecreateUser(){
+  const fullName=(document.getElementById('pcu-name')?.value||'').trim();
+  const email=(document.getElementById('pcu-email')?.value||'').trim();
+  const documentNumber=(document.getElementById('pcu-doc')?.value||'').trim();
+  const phone=(document.getElementById('pcu-phone')?.value||'').trim();
+  const password=(document.getElementById('pcu-pass')?.value||'').trim();
+  if(!fullName) return toast('Indica el nombre','error');
+  if(!email) return toast('Indica el correo','error');
+  try{
+    const body={fullName,email,password};
+    if(documentNumber)body.documentNumber=documentNumber;
+    if(phone)body.phone=phone;
+    const r=await apiFetch('/admin/users/precreate',{method:'POST',body:JSON.stringify(body)});
+    const d=await(r?r.json().catch(()=>({})):{});
+    if(!r||!r.ok) return toast(d.error||'Error al crear','error');
+    // Mostrar resumen con los datos de acceso para copiar
+    const resumen=`
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="background:rgba(163,255,18,.08);border:1px solid rgba(163,255,18,.3);border-radius:8px;padding:12px">
+          <div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:8px">✅ Cuenta creada</div>
+          <div style="font-size:13px;line-height:1.7">
+            <div><strong>Nombre:</strong> ${fullName}</div>
+            <div><strong>Correo:</strong> <span class="mono">${d.email}</span></div>
+            <div><strong>Clave temporal:</strong> <span class="mono">${d.tempPassword}</span></div>
+            <div><strong>Código referido:</strong> <span class="mono">${d.referralCode||'—'}</span></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--txt-3)">Pásale estos datos al cliente. Se le pedirá cambiar la clave al entrar. El saldo lo asignas con el botón de transacciones.</div>
+        <button class="btn btn-primary btn-sm" onclick="copyAccessData('${fullName.replace(/'/g,'')}','${d.email}','${d.tempPassword}')">📋 Copiar datos de acceso</button>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal();openPrecreateUser()">+ Crear otro</button>
+      </div>`;
+    openModal('👤 <em>Cliente creado</em>','Datos de acceso',resumen);
+    State.cacheFlags.users=false;
+    loadUsersQuiet();
+  }catch(e){toast('Error de red','error')}
+}
+function copyAccessData(name,email,pass){
+  const text=`Hola ${name}, ya tienes tu cuenta en Sanse Capital 👋\n\nIngresa en: sansecapital.com\nCorreo: ${email}\nClave temporal: ${pass}\n\nAl entrar te pediremos cambiar la clave.`;
+  navigator.clipboard.writeText(text).then(()=>toast('Datos copiados ✓','ok')).catch(()=>toast('No se pudo copiar','error'));
+}
+
 async function loadUsers(){
   await loadUsersQuiet();
   State.cacheFlags.users=true;
