@@ -1281,12 +1281,24 @@ img{max-width:100%;display:block}
             <div class="mono" style="font-size:16px;font-weight:700;color:#ef4444" id="ls-overdue-count">—</div>
           </div>
           <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:10px">
-            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">💰 Ganado en intereses</div>
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">💰 Intereses reclamados</div>
             <div class="mono" style="font-size:16px;font-weight:700;color:#f59e0b" id="ls-total-interest">—</div>
           </div>
           <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:10px">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">💰 Intereses este mes</div>
             <div class="mono" style="font-size:16px;font-weight:700;color:#f59e0b" id="ls-month-interest">—</div>
+          </div>
+          <!-- ★ NUEVO: Intereses NO reclamados (acumulados sin cobrar) -->
+          <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:10px">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">⏳ Intereses no reclamados</div>
+            <div class="mono" style="font-size:16px;font-weight:700;color:#f59e0b" id="ls-interest-unclaimed">—</div>
+            <div style="font-size:9px;color:var(--txt-3);margin-top:2px">Acumulado en activos sin cobrar</div>
+          </div>
+          <!-- ★ NUEVO: Total intereses (reclamados + no reclamados) -->
+          <div style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.4);border-radius:8px;padding:10px">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">Σ Total intereses</div>
+            <div class="mono" style="font-size:16px;font-weight:700;color:#f59e0b" id="ls-interest-all">—</div>
+            <div style="font-size:9px;color:var(--txt-3);margin-top:2px">Reclamados + no reclamados</div>
           </div>
           <div style="background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-3);margin-bottom:4px">Capital recuperado</div>
@@ -1989,6 +2001,7 @@ async function loadGlobalSummary(){
         ${cell('Total Ganancias Pagadas', s.totalGanancias, 'var(--pos)')}
         ${cell('Total Retiros', s.totalRetiros, 'var(--warn)')}
         ${cell('Dinero fondo recolectado', s.dineroFondo, 'var(--acc)')}
+        ${cell('💵 Disponible usuarios (sin invertir)', s.totalDisponibleUsuarios, 'var(--pos)')}
       </div>
       <div class="stats" style="border:1px solid var(--line);grid-template-columns:1fr;margin-bottom:18px;background:var(--surface)">
         <div class="stat" style="display:flex;align-items:center;justify-content:space-between">
@@ -3943,10 +3956,11 @@ async function loadLoans(status){
 // ★ NUEVO: cargar y renderizar stats de la cartera de préstamos
 async function loadLoanStats(){
   try{
-    // Trae stats de préstamos + capital LP COP en paralelo (más rápido)
-    const [pr, ir] = await Promise.all([
+    // Trae stats de préstamos + capital LP COP + inversiones de empresa en paralelo
+    const [pr, ir, cir] = await Promise.all([
       apiFetch('/admin/loans/profit-stats'),
       apiFetch('/admin/investments/active'),
+      apiFetch('/admin/company-investments?status=active'),
     ]);
     if(!pr||!pr.ok)return;
     const s = await pr.json();
@@ -3955,7 +3969,14 @@ async function loadLoanStats(){
     const lpcopInvs = allInv.filter(i => !(i.type||'').toLowerCase().includes('pool'));
     const lpcopCapital = lpcopInvs.reduce((sum, i) => sum + parseFloat(i.amount||0), 0);
     const activeLoanCap = parseFloat(s.activeLoanCapital||0);
-    const netoLpcop = lpcopCapital - activeLoanCap;
+    // ★ Capital comprometido en inversiones de empresa (tesorería interna)
+    let companyCapital = 0;
+    if(cir&&cir.ok){
+      const cd = await cir.json();
+      companyCapital = parseFloat(cd.stats?.totalCapitalDeployed||0);
+    }
+    // Capital libre = LP COP − préstamos activos − inversiones de empresa
+    const netoLpcop = lpcopCapital - activeLoanCap - companyCapital;
 
     const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val};
 
@@ -3966,6 +3987,9 @@ async function loadLoanStats(){
     set('ls-total-interest',F(s.totalInterestEarned||0));
     set('ls-month-interest',F(s.monthInterest||0));
     set('ls-capital-back',  F(s.totalCapitalRecovered||0));
+    // ★ NUEVO: intereses no reclamados y total
+    set('ls-interest-unclaimed', F(s.totalInterestUnclaimed||0));
+    set('ls-interest-all',       F(s.totalInterestAll != null ? s.totalInterestAll : (parseFloat(s.totalInterestEarned||0)+parseFloat(s.totalInterestUnclaimed||0))));
 
     const avg=s.weightedAvgRate||s.avgRate||0;
     set('ls-avg-rate', (parseFloat(avg)||0).toFixed(2)+'%');
@@ -3976,13 +4000,17 @@ async function loadLoanStats(){
     const hintEl = document.getElementById('ls-lpcop-net-hint');
     if(netoEl){
       netoEl.textContent = F(netoLpcop);
-      // Si el neto es negativo → estás prestando más de lo que tienes en LP COP
+      // Hint dinámico que muestra qué se está restando
+      const desc = companyCapital>0
+        ? `Libre (− ${F(activeLoanCap)} préstamos − ${F(companyCapital)} inv. empresa)`
+        : 'Libre para prestar';
+      // Si el neto es negativo → estás comprometiendo más de lo que tienes en LP COP
       if(netoLpcop < 0){
         netoEl.style.color = 'var(--neg)';
         if(hintEl){ hintEl.textContent = '⚠️ Sobre-expuesto'; hintEl.style.color = 'var(--neg)'; }
       }else{
         netoEl.style.color = 'var(--acc)';
-        if(hintEl){ hintEl.textContent = 'Libre para prestar'; hintEl.style.color = 'var(--txt-3)'; }
+        if(hintEl){ hintEl.textContent = desc; hintEl.style.color = 'var(--txt-3)'; }
       }
     }
   }catch(e){console.warn('loadLoanStats:',e)}
