@@ -3,762 +3,1716 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#070b14">
-  <title>Sanse Capital — Ahorro e inversión en pesos, ahora en WhatsApp</title>
-  <meta name="description" content="Sanse Capital SAS — Fondo privado de ahorro e inversión en pesos colombianos. Consulta tu saldo LP COP, Fondo DGP y préstamos desde WhatsApp. Activos verificables en blockchain. Bogotá, Colombia.">
-  <meta property="og:title" content="Sanse Capital — Tu saldo, ahora en WhatsApp">
-  <meta property="og:description" content="Consulta tu LP COP, Fondo DGP y préstamos escribiéndole a nuestro bot de WhatsApp. Activos verificables en blockchain.">
-  <meta property="og:image" content="https://sansecapital.com/favicon-256.png">
-  <meta property="og:url" content="https://sansecapital.com/">
+  <meta name="theme-color" content="#0a0d18">
+  <title>Sanse Capital — Gestión de Inversiones en Criptoactivos</title>
+  <meta name="description" content="Sanse Capital SAS — Sociedad de gestión de inversiones privadas con rendimientos históricos verificables y gestión transparente en blockchain. Bogotá, Colombia.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Favicons -->
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
   <style>
     :root {
-      --bg: #070b14;
-      --bg-2: #0c1220;
-      --bg-3: #111a2d;
-      --surface: rgba(255,255,255,0.04);
-      --surface-2: rgba(255,255,255,0.07);
-      --line: rgba(255,255,255,0.08);
-      --line-2: rgba(255,255,255,0.16);
-      --text: #eef1f7;
-      --text-2: #b9c0d0;
-      --muted: #7d869b;
-      --blue: #5b9eff;
-      --teal: #2dd4bf;
-      --violet: #8b6ffc;
-      --wa: #25d366;
-      --wa-deep: #0b3d2a;
-      --amber: #f5b544;
-      --red: #ef5b5b;
-      --r: 18px;
-      --r-sm: 12px;
-      --display: 'Bricolage Grotesque', system-ui, sans-serif;
-      --body: 'Inter', system-ui, sans-serif;
-      --mono: 'JetBrains Mono', ui-monospace, monospace;
-      --max: 1180px;
+      /* ── Color tokens ── */
+      --bg:        #0a0d18;
+      --bg-2:      #0f1322;
+      --bg-3:      #141930;
+      --surface:   rgba(255,255,255,0.035);
+      --surface-h: rgba(255,255,255,0.06);
+      --border:    rgba(255,255,255,0.07);
+      --border-b:  rgba(255,255,255,0.14);
+      --text:      #eaecf2;
+      --text-dim:  #b4b8c5;
+      --muted:     #7a8194;
+      --dim:       #3a4252;
+      --blue:      #5b9eff;
+      --blue-g:    rgba(91,158,255,0.16);
+      --blue-d:    rgba(91,158,255,0.07);
+      --purple:    #8b6ffc;
+      --teal:      #2dd4bf;
+      --green:     #10b981;
+      --amber:     #f59e0b;
+      --red:       #ef4444;
+
+      /* ── Radii ── */
+      --r:    14px;
+      --r-sm: 10px;
+      --r-xs: 6px;
+
+      /* ── Type scale ── */
+      --fs-xs:  11px;
+      --fs-sm:  12px;
+      --fs-md:  14px;
+      --fs-lg:  16px;
+      --fs-xl:  18px;
+
+      /* ── Spacing scale (8pt grid) ── */
+      --s-1:  4px;
+      --s-2:  8px;
+      --s-3:  12px;
+      --s-4:  16px;
+      --s-5:  20px;
+      --s-6:  24px;
+      --s-8:  32px;
+      --s-10: 40px;
+      --s-12: 48px;
+      --s-16: 64px;
+      --s-20: 80px;
+      --s-24: 96px;
+
+      /* ── Shadows ── */
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+      --shadow:    0 4px 16px rgba(0,0,0,0.25);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,0.35);
+      --shadow-blue: 0 8px 24px rgba(91,158,255,0.15);
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; overflow-x: hidden; }
-    body { font-family: var(--body); background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
-    a { color: inherit; }
-    img { max-width: 100%; display: block; }
-    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
-    .grad { background: linear-gradient(100deg, var(--blue), var(--teal)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .grad-wa { background: linear-gradient(100deg, #6ef0a0, var(--wa)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .mono { font-family: var(--mono); }
 
-    /* ── Buttons ── */
-    .btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; border-radius: 999px; font-weight: 600; font-size: 15px; text-decoration: none; border: 1px solid transparent; cursor: pointer; transition: transform .15s, background .2s, border-color .2s; font-family: var(--body); }
-    .btn:hover { transform: translateY(-1px); }
-    .btn-wa { background: var(--wa); color: #04170d; }
-    .btn-wa:hover { background: #3be07a; }
-    .btn-primary { background: var(--text); color: var(--bg); }
-    .btn-ghost { border-color: var(--line-2); color: var(--text); background: transparent; }
-    .btn-ghost:hover { border-color: var(--text-2); }
-    .btn svg { width: 18px; height: 18px; flex: none; }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: var(--fs-md);
+      font-weight: 400;
+      line-height: 1.6;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; }
+    ::selection { background: var(--blue-g); color: var(--text); }
 
-    /* ── Nav ── */
-    nav { position: fixed; inset: 0 0 auto 0; z-index: 50; background: rgba(7,11,20,.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
-    .nav-in { display: flex; align-items: center; justify-content: space-between; height: 68px; gap: 20px; }
-    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--display); font-weight: 800; letter-spacing: .04em; font-size: 17px; }
-    .logo img { width: 30px; height: 30px; object-fit: contain; }
-    .logo span { color: var(--muted); font-weight: 500; }
-    .nav-links { display: flex; gap: 4px; list-style: none; }
-    .nav-links a { white-space: nowrap; text-decoration: none; font-size: 14px; color: var(--text-2); padding: 8px 12px; border-radius: 999px; transition: background .2s, color .2s; display: inline-flex; align-items: center; gap: 6px; }
-    .nav-links a:hover { color: var(--text); background: var(--surface); }
-    .pill-new { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; background: var(--wa); color: #04170d; padding: 2px 7px; border-radius: 999px; }
-    .nav-right { display: flex; gap: 8px; }
-    .nav-right .btn { padding: 9px 16px; font-size: 14px; white-space: nowrap; }
-    .burger { display: none; background: none; border: 1px solid var(--line-2); border-radius: 10px; width: 42px; height: 42px; color: var(--text); cursor: pointer; }
-    .burger svg { width: 20px; height: 20px; }
-    .mob { display: none; position: fixed; top: 68px; inset-inline: 0; z-index: 49; background: var(--bg-2); border-bottom: 1px solid var(--line); padding: 12px 24px 24px; }
-    .mob.open { display: block; }
-    .mob a { display: block; padding: 13px 0; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--text-2); }
-    .mob .mob-btns { display: flex; gap: 10px; margin-top: 18px; }
-    .mob .mob-btns .btn { flex: 1; justify-content: center; border-bottom: none; }
+    /* ═══════════════════════ NAV ═══════════════════════ */
+    nav {
+      position: fixed; top:0; left:0; right:0; z-index:100;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 var(--s-5);
+      background: rgba(10,13,24,0.78);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: var(--s-3);
+      font-family: 'Space Mono', monospace;
+      font-size: var(--fs-sm); font-weight: 700;
+      letter-spacing: 2.4px; text-transform: uppercase;
+      color: var(--text);
+    }
+    .nav-logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-blue);
+      padding: 6px;
+      overflow: hidden;
+    }
+    .nav-logo-icon img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    .nav-logo span { color: var(--blue); }
 
-    /* ── Hero ── */
-    .hero { position: relative; padding: 140px 0 90px; overflow: hidden; }
-    .hero::before { content: ''; position: absolute; width: 900px; height: 900px; right: -300px; top: -260px; background: radial-gradient(circle, rgba(37,211,102,.16), transparent 60%); pointer-events: none; }
-    .hero::after { content: ''; position: absolute; width: 800px; height: 800px; left: -360px; bottom: -420px; background: radial-gradient(circle, rgba(91,158,255,.14), transparent 60%); pointer-events: none; }
-    .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.1fr .9fr; gap: 60px; align-items: center; }
-    .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-2); border: 1px solid var(--line-2); padding: 6px 14px 6px 6px; border-radius: 999px; background: var(--surface); text-decoration: none; }
-    .eyebrow b { background: var(--wa); color: #04170d; font-size: 11px; letter-spacing: .05em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }
-    h1 { font-family: var(--display); font-weight: 800; font-size: clamp(42px, 6vw, 76px); line-height: 1.02; letter-spacing: -.025em; margin: 22px 0 22px; }
-    .lead { font-size: clamp(17px, 1.6vw, 19px); color: var(--text-2); max-width: 540px; }
-    .hero-btns { display: flex; flex-wrap: wrap; gap: 12px; margin: 32px 0 40px; }
-    .hero-facts { display: grid; grid-template-columns: repeat(3, auto); gap: 28px; justify-content: start; }
-    .fact b { display: block; font-family: var(--display); font-size: 26px; font-weight: 700; }
-    .fact span { font-size: 13px; color: var(--muted); }
+    .nav-links {
+      display: none; align-items: center; gap: var(--s-8);
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 13px; color: var(--muted);
+      transition: color 0.18s ease;
+      font-weight: 500;
+      letter-spacing: 0.1px;
+    }
+    .nav-links a:hover { color: var(--text); }
 
-    /* ── Phone mock ── */
-    .phone-wrap { display: flex; justify-content: center; }
-    .phone { width: 340px; max-width: 100%; border-radius: 42px; padding: 10px; background: linear-gradient(160deg, #2a3242, #12161f); box-shadow: 0 40px 100px -20px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.08) inset; transform: rotate(2deg); }
-    .screen { border-radius: 34px; overflow: hidden; background: #0b141a; height: 600px; display: flex; flex-direction: column; }
-    .wa-head { display: flex; align-items: center; gap: 10px; padding: 34px 14px 12px; background: #1f2c34; }
-    .wa-av { width: 38px; height: 38px; border-radius: 50%; background: var(--bg-3); display: grid; place-items: center; overflow: hidden; border: 1px solid rgba(255,255,255,.1); }
-    .wa-av img { width: 26px; height: 26px; }
-    .wa-name { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
-    .wa-name svg { width: 14px; height: 14px; color: var(--wa); }
-    .wa-status { font-size: 12px; color: #8696a0; }
-    .chat { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; overflow: hidden; background-color: #0b141a; background-image: radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px); background-size: 16px 16px; }
-    .msg { flex: none; max-width: 82%; padding: 7px 10px 6px; border-radius: 10px; font-size: 13.5px; line-height: 1.42; opacity: 0; transform: translateY(8px); transition: opacity .35s, transform .35s; white-space: pre-line; }
-    .msg.show { opacity: 1; transform: none; }
-    .msg.in { background: #1f2c34; align-self: flex-start; border-top-left-radius: 2px; }
-    .msg.out { background: #005c4b; align-self: flex-end; border-top-right-radius: 2px; }
-    .msg .t { display: block; text-align: right; font-size: 10.5px; color: rgba(255,255,255,.5); margin-top: 2px; }
-    .msg .row { display: flex; justify-content: space-between; gap: 16px; font-family: var(--mono); font-size: 12.5px; }
-    .msg .row span:first-child { color: #aebac1; font-family: var(--body); }
-    .typing { align-self: flex-start; background: #1f2c34; padding: 10px 14px; border-radius: 10px; display: none; gap: 4px; }
-    .typing.show { display: flex; }
-    .typing i { width: 6px; height: 6px; border-radius: 50%; background: #8696a0; animation: blink 1s infinite; }
-    .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
-    @keyframes blink { 0%,100% { opacity: .3 } 50% { opacity: 1 } }
-    .wa-input { display: flex; align-items: center; gap: 8px; padding: 10px; background: #0b141a; }
-    .wa-input div { flex: 1; background: #1f2c34; border-radius: 999px; padding: 10px 14px; font-size: 13px; color: #8696a0; }
-    .wa-input span { width: 40px; height: 40px; border-radius: 50%; background: var(--wa); display: grid; place-items: center; color: #04170d; }
-    .wa-input svg { width: 18px; height: 18px; }
-    .demo-note { text-align: center; font-size: 12px; color: var(--muted); margin-top: 16px; }
+    .nav-right { display: none; align-items: center; gap: var(--s-3); }
+    .nav-btn {
+      font-size: 13px; font-weight: 600;
+      padding: 9px 20px; border-radius: var(--r-sm);
+      transition: all 0.18s ease; cursor: pointer;
+      letter-spacing: 0.1px;
+      border: none;
+    }
+    .nav-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+    .nav-ghost:hover {
+      border-color: var(--border-b);
+      color: var(--text);
+      background: var(--surface);
+    }
+    .nav-primary {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white;
+      box-shadow: var(--shadow-blue);
+    }
+    .nav-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 28px rgba(91,158,255,0.25);
+    }
 
-    /* ── News strip ── */
-    .news { border-block: 1px solid var(--line); background: var(--bg-2); }
-    .news-in { display: grid; grid-template-columns: repeat(4, 1fr); }
-    .news-item { padding: 26px 24px; border-left: 1px solid var(--line); display: flex; gap: 14px; align-items: flex-start; }
-    .news-item:first-child { border-left: none; }
-    .ni-ico { width: 38px; height: 38px; flex: none; border-radius: 10px; display: grid; place-items: center; background: var(--surface-2); }
-    .ni-ico svg { width: 19px; height: 19px; }
-    .news-item h3 { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
-    .news-item p { font-size: 13px; color: var(--muted); line-height: 1.45; }
+    .nav-hamburger {
+      display: flex; flex-direction: column; gap: 5px;
+      cursor: pointer; padding: 8px; background: none; border: none;
+    }
+    .nav-hamburger span {
+      display: block; width: 22px; height: 2px;
+      background: var(--text); transition: all 0.3s;
+      border-radius: 2px;
+    }
+    .nav-mobile {
+      display: none; position: fixed;
+      top: 60px; left:0; right:0; z-index:99;
+      background: rgba(10,13,24,0.96);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: var(--s-6) var(--s-5);
+      flex-direction: column; gap: 0;
+    }
+    .nav-mobile.open { display: flex; }
+    .nav-mobile a {
+      font-size: var(--fs-md); color: var(--text-dim);
+      padding: var(--s-4) 0; border-bottom: 1px solid var(--border);
+      transition: color 0.18s ease;
+      font-weight: 500;
+    }
+    .nav-mobile a:hover { color: var(--text); }
+    .nav-mobile .mob-primary {
+      margin-top: var(--s-4);
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white; text-align: center;
+      padding: var(--s-4); border-radius: var(--r-sm);
+      font-weight: 600; border: none;
+    }
 
-    /* ── Sections ── */
-    section { padding: 110px 0; }
-    .kicker { font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--teal); margin-bottom: 14px; }
-    .kicker.wa { color: var(--wa); }
-    h2 { font-family: var(--display); font-weight: 800; font-size: clamp(32px, 4.2vw, 52px); line-height: 1.05; letter-spacing: -.02em; margin-bottom: 18px; }
-    .sub { color: var(--text-2); font-size: 17px; max-width: 620px; }
-    .head { margin-bottom: 56px; }
-    .head.center { text-align: center; } .head.center .sub { margin-inline: auto; }
+    /* ═══════════════════════ HERO ═══════════════════════ */
+    #inicio {
+      min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 96px var(--s-5) var(--s-16);
+      position: relative; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 900px 700px at -5% 50%, rgba(91,158,255,0.10) 0%, transparent 60%),
+        radial-gradient(ellipse 600px 600px at 105% 20%, rgba(139,111,252,0.09) 0%, transparent 60%),
+        radial-gradient(ellipse 400px 400px at 60% 80%, rgba(45,212,191,0.05) 0%, transparent 60%);
+    }
+    .hero-grid {
+      position: absolute; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(91,158,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(91,158,255,0.035) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 25%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 25%, transparent 100%);
+    }
+    .hero-inner {
+      position: relative; z-index: 1;
+      max-width: 1180px; margin: 0 auto; width: 100%;
+      display: grid; grid-template-columns: 1fr; gap: var(--s-10); align-items: center;
+    }
 
-    /* ── Bot section ── */
-    #bot { background: linear-gradient(180deg, var(--bg) 0%, #08160f 50%, var(--bg) 100%); }
-    .bot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-    .bcard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 26px; transition: border-color .2s, transform .2s; }
-    .bcard:hover { border-color: rgba(37,211,102,.35); transform: translateY(-2px); }
-    .bcard .cmd { display: inline-block; font-family: var(--mono); font-size: 12px; color: var(--wa); background: rgba(37,211,102,.1); border: 1px solid rgba(37,211,102,.2); padding: 3px 9px; border-radius: 6px; margin-bottom: 18px; }
-    .bcard h3 { font-family: var(--display); font-size: 21px; font-weight: 700; margin-bottom: 8px; }
-    .bcard p { font-size: 14.5px; color: var(--text-2); }
-    .bot-steps { margin-top: 56px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 0; align-items: stretch; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg-2); overflow: hidden; }
-    .bstep { padding: 28px; border-right: 1px solid var(--line); }
-    .bstep .n { font-family: var(--mono); font-size: 13px; color: var(--muted); }
-    .bstep h4 { font-size: 17px; margin: 8px 0 4px; }
-    .bstep p { font-size: 14px; color: var(--muted); }
-    .bstep-cta { padding: 28px; display: flex; align-items: center; justify-content: center; background: rgba(37,211,102,.06); }
-    .secure { margin-top: 18px; display: flex; gap: 12px; align-items: flex-start; font-size: 14px; color: var(--text-2); background: var(--surface); border: 1px dashed var(--line-2); border-radius: var(--r-sm); padding: 16px 18px; }
-    .secure svg { width: 20px; height: 20px; color: var(--amber); flex: none; margin-top: 2px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: var(--s-2);
+      background: var(--blue-d);
+      border: 1px solid rgba(91,158,255,0.22);
+      border-radius: 24px; padding: 7px 16px;
+      font-size: var(--fs-xs); font-family: 'Space Mono', monospace;
+      color: var(--blue); margin-bottom: var(--s-6);
+      text-transform: uppercase; letter-spacing: 1.2px;
+      font-weight: 700;
+    }
+    .hero-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--blue); animation: blink 2s ease-in-out infinite;
+      box-shadow: 0 0 8px var(--blue);
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-    /* ── Products ── */
-    .prod-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
-    .prod { grid-column: span 2; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 30px; display: flex; flex-direction: column; position: relative; }
-    .prod.big { grid-column: span 3; }
-    .prod .tag { align-self: flex-start; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); color: var(--text-2); margin-bottom: 18px; }
-    .prod .tag.new { background: rgba(37,211,102,.14); color: var(--wa); }
-    .prod .tag.soon { background: rgba(245,181,68,.14); color: var(--amber); }
-    .prod h3 { font-family: var(--display); font-size: 26px; font-weight: 700; margin-bottom: 10px; letter-spacing: -.01em; }
-    .prod p { font-size: 15px; color: var(--text-2); }
-    .prod ul { list-style: none; margin-top: 16px; display: grid; gap: 8px; }
-    .prod li { font-size: 14px; color: var(--text-2); padding-left: 22px; position: relative; }
-    .prod li::before { content: ''; position: absolute; left: 4px; top: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
-    .rates { display: flex; gap: 10px; margin-top: auto; padding-top: 24px; flex-wrap: wrap; }
-    .rate { flex: 1; min-width: 110px; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 12px 14px; }
-    .rate b { display: block; font-family: var(--mono); font-size: 22px; font-weight: 500; }
-    .rate span { font-size: 12px; color: var(--muted); }
-    .prod .note { font-size: 12px; color: var(--muted); margin-top: 14px; }
+    .hero-title {
+      font-size: clamp(38px, 6.2vw, 68px);
+      font-weight: 700; line-height: 1.04;
+      letter-spacing: -1.2px;
+      margin-bottom: var(--s-5);
+    }
+    .hero-title .grad {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 50%, var(--teal) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: var(--fs-lg);
+      color: var(--text-dim);
+      line-height: 1.65;
+      max-width: 480px;
+      margin-bottom: var(--s-8);
+      font-weight: 400;
+    }
+    /* ── Estilos preservados por si reactivamos disclaimers (no usados actualmente) ──
+    .hero-disclaimer {
+      background: rgba(245,158,11,0.05);
+      border: 1px solid rgba(245,158,11,0.16);
+      border-radius: var(--r-sm);
+      padding: var(--s-3) var(--s-4);
+      font-size: var(--fs-sm);
+      color: var(--text-dim);
+      line-height: 1.6;
+      margin-bottom: var(--s-8);
+    }
+    .hero-disclaimer strong { color: var(--amber); font-weight: 700; }
+    */
 
-    /* ── Transparency ── */
-    #transparencia { background: var(--bg-2); border-block: 1px solid var(--line); }
-    .ticker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
-    .tk { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .tk-l { font-size: 13px; color: var(--muted); }
-    .tk-l b { color: var(--text); font-size: 15px; display: block; }
-    .tk-r { text-align: right; font-family: var(--mono); font-size: 14px; }
-    .chg { font-size: 12px; } .chg.up { color: var(--wa); } .chg.down { color: var(--red); }
-    .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
-    .kpi { background: var(--bg); border: 1px solid var(--line); border-radius: var(--r); padding: 24px; }
-    .kpi-l { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
-    .kpi-v { font-family: var(--mono); font-size: 30px; font-weight: 500; }
-    .kpi-s { font-size: 13px; color: var(--muted); margin-top: 4px; }
-    .chain-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-    .chain-tab { background: var(--surface); border: 1px solid var(--line); color: var(--text-2); padding: 7px 14px; border-radius: 999px; font-size: 13px; cursor: pointer; font-family: var(--body); }
-    .chain-tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
-    .assets-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); }
-    .assets-table { width: 100%; border-collapse: collapse; min-width: 720px; }
-    .assets-table th { text-align: left; font-size: 12px; font-weight: 500; color: var(--muted); padding: 14px 18px; border-bottom: 1px solid var(--line); text-transform: uppercase; letter-spacing: .06em; }
-    .assets-table td { padding: 14px 18px; border-bottom: 1px solid var(--line); font-size: 14px; }
+    .hero-btns {
+      display: flex; gap: var(--s-3); flex-wrap: wrap;
+      margin-bottom: var(--s-12);
+    }
+    .btn-hero-primary {
+      display: inline-flex; align-items: center; gap: var(--s-2);
+      padding: 14px 28px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border: none; border-radius: var(--r-sm);
+      color: white; font-size: var(--fs-md); font-weight: 600;
+      cursor: pointer; transition: all 0.2s ease;
+      box-shadow: var(--shadow-blue);
+      letter-spacing: 0.1px;
+    }
+    .btn-hero-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 32px rgba(91,158,255,0.28);
+    }
+    .btn-hero-ghost {
+      display: inline-flex; align-items: center; gap: var(--s-2);
+      padding: 14px 24px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-sm); color: var(--text-dim);
+      font-size: var(--fs-md); font-weight: 500; cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-hero-ghost:hover {
+      border-color: var(--border-b);
+      color: var(--text);
+      background: var(--surface-h);
+      transform: translateY(-1px);
+    }
+
+    .hero-stats {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border); border-radius: var(--r);
+      overflow: hidden;
+    }
+    .hero-stat {
+      background: var(--bg-2);
+      padding: var(--s-5) var(--s-6);
+      transition: background 0.2s ease;
+    }
+    .hero-stat:hover { background: var(--bg-3); }
+    .hero-stat-val {
+      font-family: 'Space Mono', monospace;
+      font-size: 24px; font-weight: 700; color: var(--text);
+      margin-bottom: var(--s-1);
+      letter-spacing: -0.4px;
+    }
+    .hero-stat-val.blue { color: var(--blue); }
+    .hero-stat-val.green { color: var(--green); }
+    .hero-stat-val.teal { color: var(--teal); }
+    .hero-stat-lbl {
+      font-size: var(--fs-xs); color: var(--muted);
+      text-transform: uppercase; letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    /* ── Live ticker (Hero right) ── */
+    .hero-right { position: relative; display: block; }
+    .protocol-card {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .protocol-card-header {
+      padding: var(--s-4) var(--s-5);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .protocol-card-title {
+      font-size: var(--fs-xs); font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 1.4px;
+    }
+    .live-badge {
+      display: flex; align-items: center; gap: var(--s-2);
+      font-size: 10px; font-family: 'Space Mono', monospace;
+      color: var(--green); font-weight: 700; letter-spacing: 0.5px;
+    }
+    .live-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--green); animation: blink 1.5s ease-in-out infinite;
+      box-shadow: 0 0 6px var(--green);
+    }
+    .protocol-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--border);
+      transition: background 0.15s ease;
+    }
+    .protocol-row:last-child { border-bottom: none; }
+    .protocol-row:hover { background: var(--surface); }
+    .pr-left { display: flex; align-items: center; gap: var(--s-3); }
+    .pr-icon {
+      width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700;
+      font-family: 'Space Mono', monospace;
+    }
+    .pr-icon.btc  { background: rgba(247,147,26,0.15); color: #f7931a; }
+    .pr-icon.eth  { background: rgba(98,126,234,0.15); color: #627eea; }
+    .pr-icon.usdc { background: rgba(39,117,202,0.15); color: #2775ca; }
+    .pr-icon.arb  { background: rgba(40,160,240,0.15); color: #28a0f0; }
+    .pr-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .pr-chain { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; letter-spacing: 0.5px; margin-top: 2px; }
+    .pr-right { text-align: right; }
+    .pr-val { font-size: 13px; font-family: 'Space Mono', monospace; font-weight: 700; color: var(--text); }
+    .pr-change { font-size: 10px; margin-top: 2px; font-family: 'Space Mono', monospace; }
+    .pr-change.up { color: var(--green); }
+    .pr-change.down { color: var(--red); }
+
+    /* ═══════════════════════ SECTIONS BASE ═══════════════════════ */
+    section { padding: var(--s-20) var(--s-5); }
+    .section-inner { max-width: 1180px; margin: 0 auto; }
+    .section-eyebrow {
+      display: inline-flex; align-items: center; gap: var(--s-2);
+      font-size: var(--fs-xs); font-family: 'Space Mono', monospace;
+      color: var(--blue); text-transform: uppercase; letter-spacing: 1.4px;
+      margin-bottom: var(--s-4);
+      font-weight: 700;
+    }
+    .section-eyebrow::before {
+      content: ''; width: 24px; height: 1px; background: var(--blue);
+    }
+    .section-title {
+      font-size: clamp(28px, 4.2vw, 44px);
+      font-weight: 700; line-height: 1.12;
+      letter-spacing: -0.8px;
+      margin-bottom: var(--s-4);
+    }
+    .section-title .grad {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .section-sub {
+      font-size: var(--fs-lg);
+      color: var(--text-dim);
+      line-height: 1.65;
+      max-width: 580px;
+      margin-bottom: var(--s-12);
+    }
+
+    /* ── Legal banner: preservado por si reactivamos disclaimer entre hero y wallet (no usado actualmente) ──
+    .legal-strip {
+      background: rgba(245,158,11,0.04);
+      border-top: 1px solid rgba(245,158,11,0.1);
+      border-bottom: 1px solid rgba(245,158,11,0.1);
+      padding: var(--s-4) var(--s-5);
+      display: flex; gap: var(--s-4); align-items: flex-start;
+    }
+    .legal-strip-icon { font-size: 16px; flex-shrink: 0; margin-top: 2px; }
+    .legal-strip-text { font-size: var(--fs-sm); color: var(--text-dim); line-height: 1.65; }
+    .legal-strip-text strong { color: var(--amber); font-weight: 700; }
+    .legal-strip-text a { color: var(--blue); border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+    .legal-strip-text a:hover { border-bottom-color: var(--blue); }
+    */
+
+    /* ═══════════════════════ ACTIVOS / WALLET ═══════════════════════ */
+    #wallet { background: var(--bg-2); }
+    .wallet-cards {
+      display: grid; grid-template-columns: 1fr; gap: var(--s-3);
+      margin-bottom: var(--s-8);
+    }
+    .wcard {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--r); padding: var(--s-6);
+      position: relative; overflow: hidden;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+    .wcard:hover { border-color: var(--border-b); transform: translateY(-2px); }
+    .wcard::before {
+      content: ''; position: absolute;
+      top:0; left:0; right:0; height: 2px;
+      background: linear-gradient(90deg, var(--blue), var(--purple));
+      opacity: 0.7;
+    }
+    .wcard-label {
+      font-size: var(--fs-xs); text-transform: uppercase;
+      letter-spacing: 1.2px; color: var(--muted);
+      margin-bottom: var(--s-3); font-weight: 600;
+    }
+    .wcard-val {
+      font-family: 'Space Mono', monospace;
+      font-size: 26px; font-weight: 700;
+      margin-bottom: var(--s-1);
+      letter-spacing: -0.5px;
+    }
+    .wcard-val.blue { color: var(--blue); }
+    .wcard-val.green { color: var(--green); }
+    .wcard-sub { font-size: var(--fs-sm); color: var(--muted); line-height: 1.55; }
+
+    .chain-tabs {
+      display: flex; gap: var(--s-2); flex-wrap: wrap;
+      margin-bottom: var(--s-4);
+    }
+    .chain-tab {
+      padding: 7px 16px; font-size: var(--fs-sm);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; color: var(--muted);
+      cursor: pointer; transition: all 0.18s ease;
+      font-weight: 500;
+    }
+    .chain-tab:hover, .chain-tab.active {
+      border-color: rgba(91,158,255,0.4); color: var(--blue);
+      background: var(--blue-d);
+    }
+    .assets-wrap {
+      overflow-x: auto;
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .assets-table {
+      width: 100%; border-collapse: collapse; min-width: 680px;
+    }
+    .assets-table th {
+      text-align: left; font-size: 10px;
+      text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted);
+      padding: var(--s-4); border-bottom: 1px solid var(--border);
+      background: var(--bg-2); font-weight: 700;
+    }
+    .assets-table td {
+      padding: var(--s-4); font-size: 13px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
     .assets-table tr:last-child td { border-bottom: none; }
-    .tk-cell { display: flex; align-items: center; gap: 10px; }
-    .tk-icon { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 700; background: rgba(91,158,255,.12); color: var(--blue); border: 1px solid rgba(91,158,255,.25); }
-    .tk-sym { font-weight: 600; } .tk-name { font-size: 12px; color: var(--muted); }
-    .chain-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; background: var(--surface); padding: 4px 10px; border-radius: 999px; }
-    .chain-dot { width: 7px; height: 7px; border-radius: 50%; }
-    .wallet-link { margin-top: 14px; font-size: 13px; color: var(--muted); }
-    .wallet-link a { display: inline-block; word-break: break-all; font-family: var(--mono); font-size: 12px; }
-    .wallet-link a { color: var(--blue); }
-
-    /* ── Simulator ── */
-    .sim { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
-    .sim-l { padding: 36px; display: grid; gap: 22px; background: var(--surface); }
-    .sim-r { padding: 36px; background: linear-gradient(150deg, rgba(91,158,255,.14), rgba(45,212,191,.08)); display: flex; flex-direction: column; justify-content: center; }
-    .field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
-    .field input, .field select { width: 100%; background: var(--bg); border: 1px solid var(--line-2); color: var(--text); border-radius: var(--r-sm); padding: 13px 14px; font-size: 16px; font-family: var(--body); }
-    .field input:focus, .field select:focus { outline: 2px solid var(--blue); outline-offset: 1px; }
-    .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-    .seg button { background: var(--bg); border: 1px solid var(--line-2); color: var(--text-2); padding: 11px 6px; border-radius: var(--r-sm); font-family: var(--body); font-size: 14px; cursor: pointer; }
-    .seg button.on { background: var(--text); color: var(--bg); border-color: var(--text); }
-    .sim-r .l { font-size: 14px; color: var(--text-2); }
-    .sim-r .v { font-family: var(--mono); font-size: clamp(36px, 4.6vw, 54px); font-weight: 500; margin: 6px 0; }
-    .sim-r .tot { font-size: 16px; color: var(--text-2); }
-    .sim-r .disc { font-size: 12px; color: var(--muted); margin-top: 22px; }
-
-    /* ── Steps ── */
-    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; counter-reset: s; }
-    .step { border-top: 2px solid var(--line-2); padding-top: 22px; }
-    .step .n { font-family: var(--mono); color: var(--teal); font-size: 14px; }
-    .step h3 { font-family: var(--display); font-size: 21px; margin: 8px 0; }
-    .step p { color: var(--text-2); font-size: 15px; }
-
-    /* ── About ── */
-    .about { display: grid; grid-template-columns: .9fr 1.1fr; gap: 60px; align-items: start; }
-    .about p { color: var(--text-2); font-size: 16.5px; margin-bottom: 16px; }
-    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-    .tags span { font-size: 13px; border: 1px solid var(--line-2); padding: 6px 13px; border-radius: 999px; color: var(--text-2); }
-
-    /* ── FAQ ── */
-    .faq { max-width: 820px; margin: 0 auto; }
-    .faq details { border-bottom: 1px solid var(--line); }
-    .faq summary { list-style: none; cursor: pointer; padding: 22px 40px 22px 0; font-size: 17px; font-weight: 500; position: relative; }
-    .faq summary::-webkit-details-marker { display: none; }
-    .faq summary::after { content: '+'; position: absolute; right: 4px; top: 18px; font-size: 24px; color: var(--muted); transition: transform .2s; }
-    .faq details[open] summary::after { transform: rotate(45deg); }
-    .faq details p { color: var(--text-2); padding: 0 0 22px; font-size: 15.5px; }
-
-    /* ── CTA ── */
-    .cta { border-radius: 28px; padding: 64px 40px; text-align: center; background: radial-gradient(ellipse at top, rgba(37,211,102,.22), transparent 60%), var(--bg-2); border: 1px solid var(--line); }
-    .cta h2 { margin-bottom: 14px; }
-    .cta .sub { margin: 0 auto 30px; }
-    .cta .hero-btns { justify-content: center; margin: 0; }
-
-    /* ── Footer ── */
-    footer { padding: 56px 0 100px; border-top: 1px solid var(--line); margin-top: 110px; }
-    .foot { display: flex; justify-content: space-between; gap: 30px; flex-wrap: wrap; margin-bottom: 26px; }
-    .foot-links { display: flex; flex-wrap: wrap; gap: 6px 22px; }
-    .foot-links a { text-decoration: none; color: var(--text-2); font-size: 14px; }
-    .legal { font-size: 12.5px; color: var(--muted); max-width: 900px; }
-
-    /* ── Floating WA ── */
-    .wa-float { position: fixed; right: 20px; bottom: 20px; z-index: 60; display: inline-flex; align-items: center; gap: 10px; background: var(--wa); color: #04170d; text-decoration: none; font-weight: 600; font-size: 14px; padding: 13px 18px 13px 14px; border-radius: 999px; box-shadow: 0 12px 30px -8px rgba(37,211,102,.55); }
-    .wa-float svg { width: 22px; height: 22px; }
-
-    .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s, transform .6s; }
-    .reveal.in { opacity: 1; transform: none; }
-    @media (prefers-reduced-motion: reduce) { .reveal, .msg { opacity: 1; transform: none; transition: none; } .phone { transform: none; } }
-
-    /* ── Responsive ── */
-    @media (max-width: 1240px) { .nav-links { display: none; } .burger { display: grid; place-items: center; } }
-    @media (max-width: 1060px) {
-      .bot-grid { grid-template-columns: repeat(2, 1fr); }
-      .news-in { grid-template-columns: repeat(2, 1fr); }
-      .news-item:nth-child(3) { border-left: none; }
-      .news-item:nth-child(n+3) { border-top: 1px solid var(--line); }
-      .prod, .prod.big { grid-column: span 3; }
-      .steps { grid-template-columns: repeat(2, 1fr); row-gap: 36px; }
+    .assets-table tr:hover td { background: var(--surface); }
+    .tk-cell { display: flex; align-items: center; gap: var(--s-3); }
+    .tk-icon {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--blue-d); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--fs-xs); font-weight: 700; color: var(--blue);
+      font-family: 'Space Mono', monospace; flex-shrink: 0;
     }
-    @media (max-width: 860px) {
-      .nav-right { display: none; }
-      .burger { display: grid; place-items: center; }
-      .hero { padding: 116px 0 70px; }
-      .hero-grid { grid-template-columns: 1fr; gap: 50px; }
-      .phone { transform: none; }
-      .bot-steps { grid-template-columns: 1fr; }
-      .bstep { border-right: none; border-bottom: 1px solid var(--line); }
-      .ticker { grid-template-columns: repeat(2, 1fr); }
-      .kpis { grid-template-columns: 1fr; }
-      .sim { grid-template-columns: 1fr; }
-      .about { grid-template-columns: 1fr; gap: 20px; }
-      section { padding: 80px 0; }
+    .tk-sym { font-weight: 600; font-size: 13px; color: var(--text); }
+    .tk-name { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .chain-pill {
+      display: inline-flex; align-items: center; gap: var(--s-2);
+      font-size: 10px; font-family: 'Space Mono', monospace;
+      padding: 5px 11px; border-radius: 12px;
+      background: var(--surface); border: 1px solid var(--border); color: var(--text-dim);
+      font-weight: 600; letter-spacing: 0.3px;
     }
-    @media (max-width: 600px) {
-      .wrap { padding: 0 16px; }
-      .hero-facts { grid-template-columns: repeat(3, 1fr); gap: 14px; }
-      .fact b { font-size: 21px; }
-      .bot-grid, .news-in { grid-template-columns: 1fr; }
-      .news-item { border-left: none !important; border-top: 1px solid var(--line); padding: 20px 16px; }
-      .news-item:first-child { border-top: none; }
-      .prod, .prod.big { grid-column: span 6; padding: 24px; }
-      .steps { grid-template-columns: 1fr; }
-      .sim-l, .sim-r { padding: 24px; }
-      .cta { padding: 44px 20px; }
-      .hero-btns .btn { flex: 1 1 100%; justify-content: center; }
-      .wa-float span { display: none; }
-      .wa-float { padding: 14px; }
-      .screen { height: 560px; }
+    .chain-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .mono { font-family: 'Space Mono', monospace; font-size: 12px; }
+
+    /* ═══════════════════════ MODELO / PASOS ═══════════════════════ */
+    #modelo { background: var(--bg); }
+    .pasos-grid {
+      display: grid; grid-template-columns: 1fr; gap: var(--s-3);
+    }
+    .paso-card {
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: var(--s-8);
+      transition: all 0.25s ease;
+      position: relative; overflow: hidden;
+    }
+    .paso-card:hover {
+      border-color: rgba(91,158,255,0.28);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+    .paso-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 48px; font-weight: 700;
+      color: rgba(91,158,255,0.14); line-height: 1;
+      margin-bottom: var(--s-5);
+      letter-spacing: -1px;
+    }
+    .paso-card h3 {
+      font-size: var(--fs-xl);
+      font-weight: 700;
+      margin-bottom: var(--s-3);
+      letter-spacing: -0.2px;
+    }
+    .paso-card p {
+      font-size: var(--fs-md);
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+    .paso-icon {
+      position: absolute; top: var(--s-6); right: var(--s-6);
+      width: 40px; height: 40px; border-radius: 11px;
+      background: var(--blue-d); border: 1px solid rgba(91,158,255,0.22);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .paso-icon svg { width: 18px; height: 18px; stroke: var(--blue); fill: none; stroke-width: 2; }
+
+    /* ═══════════════════════ SERVICIOS ═══════════════════════ */
+    #servicios { background: var(--bg-2); }
+    .servicios-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--s-3);
+    }
+    /* En desktop: 3 columnas. Si hay 5 cards, las últimas 2 se centran. */
+    @media (min-width: 900px) {
+      .servicios-grid {
+        grid-template-columns: repeat(6, 1fr);
+        gap: var(--s-4);
+      }
+      .servicios-grid > .serv-card {
+        grid-column: span 2;
+      }
+      /* 4ª y 5ª card centradas: cada una ocupa 2 cols, empezando en col 2 y 4 */
+      .servicios-grid > .serv-card:nth-child(4) {
+        grid-column: 2 / span 2;
+      }
+      .servicios-grid > .serv-card:nth-child(5) {
+        grid-column: 4 / span 2;
+      }
+    }
+    /* Tablet: 2 columnas */
+    @media (min-width: 640px) and (max-width: 899px) {
+      .servicios-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .serv-card {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--r); padding: var(--s-8);
+      transition: all 0.25s ease;
+      display: flex; flex-direction: column;
+    }
+    .serv-card:hover {
+      border-color: rgba(91,158,255,0.28);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+    .serv-icon-wrap {
+      width: 48px; height: 48px; border-radius: 13px;
+      background: var(--blue-d); border: 1px solid rgba(91,158,255,0.22);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: var(--s-5);
+    }
+    .serv-icon-wrap svg { width: 22px; height: 22px; stroke: var(--blue); fill: none; stroke-width: 2; }
+    .serv-card h3 {
+      font-size: var(--fs-xl);
+      font-weight: 700;
+      margin-bottom: var(--s-3);
+      letter-spacing: -0.2px;
+    }
+    .serv-card p {
+      font-size: var(--fs-md);
+      color: var(--text-dim);
+      line-height: 1.7;
+      flex: 1;
+      margin-bottom: var(--s-5);
+    }
+    .serv-rates {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-2);
+      margin-top: auto;
+    }
+    .rate-chip {
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: var(--r-sm); padding: var(--s-3);
+      text-align: center;
+    }
+    .rate-val {
+      font-family: 'Space Mono', monospace;
+      font-size: 20px; font-weight: 700; color: var(--blue);
+      display: block; margin-bottom: var(--s-1);
+      letter-spacing: -0.4px;
+    }
+    .rate-lbl {
+      font-size: 10px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      font-weight: 600;
+    }
+    .rate-note {
+      font-size: var(--fs-xs);
+      color: var(--muted);
+      margin-top: var(--s-3);
+      opacity: 0.85;
+      line-height: 1.5;
+    }
+    /* ── Badge "Próximamente" para servicios futuros ── */
+    .serv-card.coming-soon {
+      position: relative;
+    }
+    .serv-card.coming-soon::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(91,158,255,0.025), rgba(139,111,252,0.02));
+      border-radius: var(--r);
+      pointer-events: none;
+    }
+    .soon-badge {
+      display: inline-flex; align-items: center; gap: var(--s-2);
+      background: linear-gradient(135deg, rgba(45,212,191,0.12), rgba(91,158,255,0.12));
+      border: 1px solid rgba(45,212,191,0.3);
+      color: var(--teal);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 5px 11px;
+      border-radius: 20px;
+      margin-bottom: var(--s-4);
+      align-self: flex-start;
+    }
+    .soon-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 8px var(--teal);
+      animation: blink 2s ease-in-out infinite;
+    }
+    /* ── Badge BETA (variante ámbar para productos activos en piloto) ── */
+    .beta-badge {
+      display: inline-flex; align-items: center; gap: var(--s-2);
+      background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(239,68,68,0.06));
+      border: 1px solid rgba(245,158,11,0.3);
+      color: var(--amber);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 5px 11px;
+      border-radius: 20px;
+      margin-bottom: var(--s-4);
+      align-self: flex-start;
+    }
+    .beta-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--amber);
+      box-shadow: 0 0 8px var(--amber);
+      animation: blink 2s ease-in-out infinite;
+    }
+    .soon-feature {
+      display: flex; align-items: center; gap: var(--s-3);
+      padding: var(--s-3) 0;
+      border-top: 1px solid var(--border);
+      font-size: var(--fs-sm);
+      color: var(--text-dim);
+    }
+    .soon-feature:first-of-type { border-top: none; padding-top: var(--s-1); }
+    .soon-feature-icon {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--teal);
+    }
+    .soon-feature-text strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ═══════════════════════ CALCULADORA ═══════════════════════ */
+    #calc { background: var(--bg); }
+    .calc-wrap {
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: var(--r); overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .calc-body { display: grid; grid-template-columns: 1fr; }
+    .calc-left {
+      padding: var(--s-6);
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .calc-right {
+      padding: var(--s-6); display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: var(--bg);
+      text-align: center;
+    }
+    .form-field { margin-bottom: var(--s-5); }
+    .form-field:last-child { margin-bottom: 0; }
+    .form-label {
+      display: block; font-size: var(--fs-xs); font-weight: 700;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: var(--s-2);
+    }
+    .form-input {
+      width: 100%; padding: 13px 15px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--r-sm); color: var(--text);
+      font-size: var(--fs-md); font-family: 'Space Grotesk', sans-serif;
+      outline: none; transition: border-color 0.2s ease;
+    }
+    .form-input:focus {
+      border-color: rgba(91,158,255,0.5);
+      box-shadow: 0 0 0 3px rgba(91,158,255,0.1);
+    }
+    .calc-result-label {
+      font-size: var(--fs-sm); color: var(--muted);
+      text-transform: uppercase; letter-spacing: 1.2px;
+      margin-bottom: var(--s-3);
+      font-weight: 600;
+    }
+    .calc-result-val {
+      font-family: 'Space Mono', monospace;
+      font-size: clamp(36px, 5vw, 48px);
+      font-weight: 700; color: var(--green);
+      margin-bottom: var(--s-2);
+      letter-spacing: -1px;
+    }
+    .calc-result-total {
+      font-size: var(--fs-md); color: var(--text-dim);
+      font-family: 'Space Mono', monospace;
+      margin-bottom: var(--s-6);
+    }
+    .calc-disclaimer {
+      font-size: var(--fs-xs); color: var(--muted);
+      text-align: center; line-height: 1.65; opacity: 0.85;
+    }
+
+    /* ═══════════════════════ EQUIPO ═══════════════════════ */
+    #quienes { background: var(--bg-2); }
+    .team-story {
+      font-size: var(--fs-lg); color: var(--text-dim); line-height: 1.75;
+      max-width: 760px; margin-bottom: var(--s-5);
+    }
+    .team-story + .team-story { margin-top: var(--s-4); }
+    .team-tags {
+      display: flex; gap: var(--s-2); flex-wrap: wrap;
+      margin-top: var(--s-8);
+    }
+    .team-tag {
+      display: flex; align-items: center; gap: var(--s-2);
+      padding: 9px 18px; border-radius: 22px;
+      background: var(--surface); border: 1px solid var(--border);
+      font-size: var(--fs-sm); color: var(--text-dim);
+      font-weight: 500;
+      transition: all 0.18s ease;
+    }
+    .team-tag:hover {
+      border-color: var(--border-b);
+      color: var(--text);
+      background: var(--surface-h);
+    }
+    .team-tag::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--blue);
+    }
+
+    /* ═══════════════════════ FAQ ═══════════════════════ */
+    #faq { background: var(--bg); }
+    .faq-list { max-width: 760px; }
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-q {
+      width: 100%; background: none; border: none;
+      color: var(--text); font-size: var(--fs-lg); font-weight: 500;
+      font-family: inherit;
+      text-align: left; padding: var(--s-5) 0;
+      cursor: pointer; display: flex; justify-content: space-between;
+      align-items: center; gap: var(--s-4);
+      transition: color 0.18s ease;
+      letter-spacing: -0.1px;
+    }
+    .faq-q:hover { color: var(--blue); }
+    .faq-icon {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.3s ease;
+      color: var(--blue);
+      font-size: 16px; line-height: 1;
+    }
+    .faq-item.open .faq-icon {
+      transform: rotate(45deg);
+      border-color: var(--blue);
+      background: var(--blue-d);
+    }
+    .faq-a {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.3s ease;
+    }
+    .faq-item.open .faq-a {
+      max-height: 320px;
+      padding-bottom: var(--s-5);
+    }
+    .faq-a p {
+      font-size: var(--fs-md);
+      color: var(--text-dim);
+      line-height: 1.75;
+    }
+
+    /* ═══════════════════════ CTA ═══════════════════════ */
+    #cta { background: var(--bg-2); }
+    .cta-wrap {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--r); padding: var(--s-12) var(--s-6);
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .cta-wrap::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 700px 450px at 50% 0%, rgba(91,158,255,0.08) 0%, transparent 70%);
+    }
+    .cta-wrap > * { position: relative; z-index: 1; }
+    .cta-title {
+      font-size: clamp(28px, 3.8vw, 40px);
+      font-weight: 700;
+      margin-bottom: var(--s-4);
+      letter-spacing: -0.6px;
+    }
+    .cta-sub {
+      font-size: var(--fs-lg); color: var(--text-dim);
+      margin-bottom: var(--s-8);
+      max-width: 500px;
+      margin-left: auto; margin-right: auto;
+      line-height: 1.65;
+    }
+    .cta-btns {
+      display: flex; gap: var(--s-3);
+      justify-content: center; flex-wrap: wrap;
+    }
+
+    /* ═══════════════════════ FOOTER ═══════════════════════ */
+    footer {
+      padding: var(--s-10) var(--s-5);
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: var(--s-4);
+      background: var(--bg);
+    }
+    .footer-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: var(--fs-sm); font-weight: 700;
+      letter-spacing: 2.4px; color: var(--text-dim);
+    }
+    .footer-logo span { color: var(--blue); }
+    .footer-links { display: flex; gap: var(--s-6); flex-wrap: wrap; }
+    .footer-links a {
+      font-size: var(--fs-sm); color: var(--muted);
+      transition: color 0.18s ease;
+      font-weight: 500;
+    }
+    .footer-links a:hover { color: var(--text); }
+    .footer-legal {
+      font-size: var(--fs-xs); color: var(--dim);
+      text-align: center; width: 100%;
+      line-height: 1.65; margin-top: var(--s-3);
+    }
+
+    /* ═══════════════════════ 3D LAYER ═══════════════════════ */
+    /* Canvas con red de nodos 3D en el hero */
+    #hero3d {
+      position: absolute; inset: 0; z-index: 0;
+      width: 100%; height: 100%;
+      opacity: 0.9;
+      touch-action: pan-y; /* no bloquear scroll vertical en móvil */
+    }
+    #inicio { perspective: 1200px; }
+
+    /* Profundidad flotante de la tarjeta de protocolo */
+    @keyframes float3d {
+      0%, 100% { transform: rotateY(-7deg) rotateX(3deg) translateY(0); }
+      50%      { transform: rotateY(-7deg) rotateX(3deg) translateY(-10px); }
+    }
+    .hero-right { perspective: 1100px; }
+    .protocol-card {
+      position: relative;
+      transform-style: preserve-3d;
+      animation: float3d 7s ease-in-out infinite;
+      box-shadow:
+        0 24px 60px rgba(0,0,0,0.45),
+        0 8px 20px rgba(91,158,255,0.10),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+      will-change: transform;
+    }
+
+    /* Tilt 3D interactivo (se aplica por JS en desktop) */
+    .tilt {
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .tilt > * { transform: translateZ(0); }
+    .tilt.tilting { transition: border-color 0.25s ease, box-shadow 0.25s ease; }
+    .tilt::after {
+      /* brillo especular que sigue al cursor */
+      content: ''; position: absolute; inset: 0;
+      border-radius: inherit; pointer-events: none;
+      background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(91,158,255,0.10), transparent 60%);
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+    .tilt:hover::after { opacity: 1; }
+
+    .pasos-grid, .servicios-grid, .wallet-cards { perspective: 1400px; }
+    .paso-card, .serv-card, .wcard { position: relative; }
+
+    /* Profundidad extra en hover (suma al tilt) */
+    .paso-card:hover, .serv-card:hover {
+      box-shadow:
+        0 24px 50px rgba(0,0,0,0.45),
+        0 6px 16px rgba(91,158,255,0.12);
+    }
+
+    /* Iconos elevados sobre el plano de la card */
+    .serv-icon-wrap, .paso-icon { transform: translateZ(34px); }
+    .serv-rates, .hero-stat-val { transform: translateZ(18px); }
+
+    /* ═══════════════════════ ANIMATIONS ═══════════════════════ */
+    .fade-in {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* Entrada 3D al hacer scroll (cards) */
+    .rise-3d {
+      opacity: 0;
+      transform: perspective(1000px) rotateX(10deg) translateY(36px);
+      transition: opacity 0.65s ease, transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .rise-3d.visible {
+      opacity: 1;
+      transform: perspective(1000px) rotateX(0deg) translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .protocol-card { animation: none; transform: none; }
+      .tilt, .rise-3d, .fade-in { transition: none !important; transform: none !important; opacity: 1 !important; }
+      #hero3d { display: none; }
+      html { scroll-behavior: auto; }
+    }
+
+    /* ═══════════════════════ RESPONSIVE ═══════════════════════ */
+    /* ── Tablet ── */
+    @media (min-width: 640px) {
+      .wallet-cards    { grid-template-columns: 1fr 1fr; }
+      .pasos-grid      { grid-template-columns: 1fr 1fr; }
+      .hero-stats      { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    /* ── Desktop ── */
+    @media (min-width: 900px) {
+      nav { padding: 0 var(--s-12); height: 64px; }
+      section { padding: var(--s-24) var(--s-12); }
+      #inicio { padding: 120px var(--s-12) var(--s-20); }
+      .legal-strip { padding: var(--s-4) var(--s-12); }
+      .hero-inner { grid-template-columns: 1.05fr 1fr; gap: var(--s-16); }
+      .hero-right { display: block; }
+      .wallet-cards { grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
+      .pasos-grid { grid-template-columns: repeat(2, 1fr); gap: var(--s-4); }
+      .calc-body { grid-template-columns: 1fr 1fr; }
+      .calc-left { padding: var(--s-10); border-right: 1px solid var(--border); border-bottom: none; }
+      .calc-right { padding: var(--s-10); }
+      .cta-wrap { padding: var(--s-16); }
+      footer { padding: var(--s-10) var(--s-12); flex-direction: row; align-items: center; }
+      .nav-links, .nav-right { display: flex; }
+      .nav-hamburger { display: none; }
+      .footer-legal { margin-top: 0; width: 100%; }
+    }
+
+    /* ── Mobile-only fixes ── */
+    @media (max-width: 639px) {
+      section { padding: var(--s-12) var(--s-5); }
+      .hero-stats { grid-template-columns: 1fr 1fr; }
+      .hero-stat-val { font-size: 20px; }
+      .team-tags { gap: 6px; }
+
+      /* Targets táctiles ≥44px y safe-areas (iPhone notch) */
+      nav { padding-left: max(var(--s-5), env(safe-area-inset-left)); padding-right: max(var(--s-5), env(safe-area-inset-right)); }
+      .nav-hamburger { padding: 12px; margin-right: -8px; }
+      .nav-mobile a { padding: var(--s-5) 0; }
+      .btn-hero-primary, .btn-hero-ghost { padding: 15px 26px; min-height: 48px; width: 100%; justify-content: center; }
+      .hero-btns { flex-direction: column; }
+      .faq-q { padding: var(--s-5) 0; min-height: 52px; }
+      .chain-tab { padding: 10px 18px; min-height: 40px; }
+      footer { padding-bottom: max(var(--s-10), env(safe-area-inset-bottom)); }
+
+      /* Hero más compacto y con la tarjeta visible también en móvil */
+      #inicio { padding-top: 84px; }
+      .hero-right { display: block; perspective: 900px; }
+      .protocol-card { animation-duration: 9s; }
     }
   </style>
 </head>
 <body>
 
-<!-- Ícono de WhatsApp reutilizable -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="i-wa" viewBox="0 0 24 24"><path fill="currentColor" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35zM12.05 21.8h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.9-9.88 2.64 0 5.12 1.03 6.99 2.9a9.82 9.82 0 0 1 2.89 6.99c0 5.45-4.44 9.88-9.89 9.88zm8.41-18.3A11.81 11.81 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.89 0-3.18-1.24-6.16-3.48-8.41z"/></symbol>
-</svg>
-
-<!-- ═════════ NAV ═════════ -->
-<nav>
-  <div class="wrap nav-in">
-    <a class="logo" href="#inicio"><img src="assets/logo-icon-nav.png" alt="">SANSE <span>CAPITAL</span></a>
-    <ul class="nav-links">
-      <li><a href="#bot">Bot WhatsApp <span class="pill-new">Nuevo</span></a></li>
-      <li><a href="#productos">Productos</a></li>
-      <li><a href="#transparencia">Transparencia</a></li>
-      <li><a href="#simulador">Simulador</a></li>
-      <li><a href="#como">Cómo funciona</a></li>
-      <li><a href="#faq">FAQ</a></li>
-    </ul>
-    <div class="nav-right">
-      <a href="login.html" class="btn btn-ghost">Iniciar sesión</a>
-      <a href="register.html" class="btn btn-primary">Crear cuenta</a>
+<!-- ═══════════════════════ NAV ═══════════════════════ -->
+<nav role="navigation">
+  <a class="nav-logo" href="#inicio">
+    <div class="nav-logo-icon">
+      <img src="assets/logo-icon-nav.png" alt="Sanse Capital">
     </div>
-    <button class="burger" onclick="toggleMenu()" aria-label="Abrir menú" aria-expanded="false" id="burger">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-    </button>
+    SANSE <span>CAPITAL</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#inicio">Inicio</a></li>
+    <li><a href="#wallet">Activos</a></li>
+    <li><a href="#modelo">Modelo</a></li>
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#quienes">Equipo</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="terminos.html">Términos</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="login.html" class="nav-btn nav-ghost">Iniciar Sesión</a>
+    <a href="register.html" class="nav-btn nav-primary">Crear Cuenta</a>
   </div>
+  <button class="nav-hamburger" onclick="toggleMenu()" aria-label="Menú">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
-<div class="mob" id="mob">
-  <a href="#bot" onclick="toggleMenu()">Bot de WhatsApp <span class="pill-new">Nuevo</span></a>
-  <a href="#productos" onclick="toggleMenu()">Productos</a>
-  <a href="#transparencia" onclick="toggleMenu()">Transparencia</a>
-  <a href="#simulador" onclick="toggleMenu()">Simulador</a>
-  <a href="#como" onclick="toggleMenu()">Cómo funciona</a>
-  <a href="#faq" onclick="toggleMenu()">Preguntas frecuentes</a>
-  <a href="terminos.html">Términos y condiciones</a>
-  <div class="mob-btns">
-    <a href="login.html" class="btn btn-ghost">Iniciar sesión</a>
-    <a href="register.html" class="btn btn-primary">Crear cuenta</a>
-  </div>
+
+<div class="nav-mobile" id="navMobile">
+  <a href="#inicio" onclick="toggleMenu()">Inicio</a>
+  <a href="#wallet" onclick="toggleMenu()">Activos del Fondo</a>
+  <a href="#modelo" onclick="toggleMenu()">Nuestro Modelo</a>
+  <a href="#servicios" onclick="toggleMenu()">Servicios</a>
+  <a href="#quienes" onclick="toggleMenu()">Equipo</a>
+  <a href="#faq" onclick="toggleMenu()">FAQ</a>
+  <a href="terminos.html">Términos y Condiciones</a>
+  <a href="login.html">Iniciar Sesión</a>
+  <a href="register.html" class="mob-primary">Crear Cuenta →</a>
 </div>
 
-<!-- ═════════ HERO ═════════ -->
-<header class="hero" id="inicio">
-  <div class="wrap hero-grid">
-    <div>
-      <a class="eyebrow" href="#bot"><b>Nuevo</b> Bot de socios en WhatsApp ya disponible →</a>
-      <h1>Tu ahorro en pesos, ahora <span class="grad-wa">en WhatsApp.</span></h1>
-      <p class="lead">Consulta tu saldo de LP COP, Fondo DGP y tus préstamos en segundos, escribiéndonos por WhatsApp. Sin apps nuevas, sin esperar a fin de mes.</p>
+<!-- ═══════════════════════ HERO ═══════════════════════ -->
+<section id="inicio">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <canvas id="hero3d" aria-hidden="true"></canvas>
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-badge"><div class="hero-badge-dot"></div>Sanse Capital SAS · Bogotá, Colombia</div>
+      <h1 class="hero-title">
+        Gestión<br>
+        <span class="grad">Inteligente</span><br>
+        de Inversiones
+      </h1>
+      <p class="hero-sub">
+        Sociedad de gestión de inversiones privadas con rendimientos históricos verificables y trazabilidad completa en blockchain.
+      </p>
       <div class="hero-btns">
-        <a href="#" class="btn btn-wa" data-wa="Hola, quiero consultar mi saldo">
-          <svg><use href="#i-wa"/></svg> Hablar con el bot
+        <a href="register.html" class="btn-hero-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Comenzar ahora
         </a>
-        <a href="register.html" class="btn btn-ghost">Quiero ser socio</a>
+        <a href="#modelo" class="btn-hero-ghost">
+          Cómo funciona →
+        </a>
       </div>
-      <div class="hero-facts">
-        <div class="fact"><b>2023</b><span>Operando desde</span></div>
-        <div class="fact"><b>20+</b><span>Socios activos</span></div>
-        <div class="fact"><b>100%</b><span>Activos on-chain</span></div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-val blue">20+</div>
+          <div class="hero-stat-lbl">Participantes activos</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val green">13.5–42%</div>
+          <div class="hero-stat-lbl">Rentabilidad anual histórica*</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val teal">100%</div>
+          <div class="hero-stat-lbl">Trazabilidad on-chain</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val" style="color:var(--text-dim)">2023</div>
+          <div class="hero-stat-lbl">Año de inicio</div>
+        </div>
       </div>
     </div>
-
-    <div>
-      <div class="phone-wrap">
-        <div class="phone" aria-label="Ejemplo de conversación con el bot de Sanse Capital en WhatsApp">
-          <div class="screen">
-            <div class="wa-head">
-              <div class="wa-av"><img src="assets/logo-icon-nav.png" alt=""></div>
-              <div>
-                <div class="wa-name">Sanse Capital <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1l2.6 2.2 3.4-.4.9 3.3 3 1.7-1.3 3.2 1.3 3.2-3 1.7-.9 3.3-3.4-.4L12 23l-2.6-2.2-3.4.4-.9-3.3-3-1.7L3.4 13 2.1 9.8l3-1.7.9-3.3 3.4.4z"/><path d="M10.5 15.5l-3-3 1.4-1.4 1.6 1.6 4.6-4.6 1.4 1.4z" fill="#0b141a"/></svg></div>
-                <div class="wa-status">bot de socios · en línea</div>
-              </div>
-            </div>
-            <div class="chat" id="chat">
-              <div class="msg out">Hola 👋 quiero ver mi saldo<span class="t">9:41</span></div>
-              <div class="msg in">¡Hola! Soy el asistente de Sanse Capital. Para proteger tu cuenta, escribe tu número de cédula.<span class="t">9:41</span></div>
-              <div class="msg out">10•••••482<span class="t">9:41</span></div>
-              <div class="msg in">Gracias. Ahora tu PIN de 4 dígitos 🔒<span class="t">9:41</span></div>
-              <div class="msg out">••••<span class="t">9:42</span></div>
-              <div class="msg in"><b>Tu resumen, Laura</b>
-<span class="row"><span>LP COP</span><span>$8.420.000</span></span><span class="row"><span>Fondo DGP</span><span>$3.150.000</span></span><span class="row"><span>Préstamo activo</span><span>$1.200.000</span></span>
-Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<span class="t">9:42</span></div>
-              <div class="typing" id="typing"><i></i><i></i><i></i></div>
-            </div>
-            <div class="wa-input"><div>Escribe un mensaje</div><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></span></div>
+    <div class="hero-right">
+      <div class="protocol-card">
+        <div class="protocol-card-header">
+          <span class="protocol-card-title">Activos del Protocolo</span>
+          <span class="live-badge"><div class="live-dot"></div> En vivo</span>
+        </div>
+        <div class="protocol-row">
+          <div class="pr-left">
+            <div class="pr-icon btc">₿</div>
+            <div><div class="pr-name">Bitcoin</div><div class="pr-chain">BTC · ARBITRUM</div></div>
+          </div>
+          <div class="pr-right">
+            <div class="pr-val" id="hero-btc-val">—</div>
+            <div class="pr-change up" id="hero-btc-chg">cargando...</div>
+          </div>
+        </div>
+        <div class="protocol-row">
+          <div class="pr-left">
+            <div class="pr-icon eth">Ξ</div>
+            <div><div class="pr-name">Ethereum</div><div class="pr-chain">ETH · MAINNET</div></div>
+          </div>
+          <div class="pr-right">
+            <div class="pr-val" id="hero-eth-val">—</div>
+            <div class="pr-change up" id="hero-eth-chg">cargando...</div>
+          </div>
+        </div>
+        <div class="protocol-row">
+          <div class="pr-left">
+            <div class="pr-icon usdc">$</div>
+            <div><div class="pr-name">USD Coin</div><div class="pr-chain">USDC · ARBITRUM</div></div>
+          </div>
+          <div class="pr-right">
+            <div class="pr-val" id="hero-usdc-val">—</div>
+            <div class="pr-change" id="hero-usdc-chg">stablecoin</div>
+          </div>
+        </div>
+        <div class="protocol-row">
+          <div class="pr-left">
+            <div class="pr-icon arb">A</div>
+            <div><div class="pr-name">Arbitrum</div><div class="pr-chain">ARB · L2</div></div>
+          </div>
+          <div class="pr-right">
+            <div class="pr-val" id="hero-arb-val">—</div>
+            <div class="pr-change up" id="hero-arb-chg">cargando...</div>
           </div>
         </div>
       </div>
-      <p class="demo-note">Conversación de ejemplo · datos ficticios</p>
-    </div>
-  </div>
-</header>
-
-<!-- ═════════ NOVEDADES ═════════ -->
-<div class="news">
-  <div class="wrap news-in">
-    <div class="news-item">
-      <div class="ni-ico" style="color:var(--wa)"><svg><use href="#i-wa"/></svg></div>
-      <div><h3>Bot de socios</h3><p>Saldos y préstamos por WhatsApp, 24/7.</p></div>
-    </div>
-    <div class="news-item">
-      <div class="ni-ico" style="color:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></div>
-      <div><h3>Reporte mensual</h3><p>Cada mes recibes tu informe directo en WhatsApp.</p></div>
-    </div>
-    <div class="news-item">
-      <div class="ni-ico" style="color:var(--teal)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="12" r="5"/><circle cx="16" cy="12" r="5"/></svg></div>
-      <div><h3>Cadenas de ahorro</h3><p>Ahorro semanal en grupo, con orden y registro.</p></div>
-    </div>
-    <div class="news-item">
-      <div class="ni-ico" style="color:var(--amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg></div>
-      <div><h3>Préstamo rápido</h3><p>Crédito ágil respaldado por tu propio ahorro.</p></div>
-    </div>
-  </div>
-</div>
-
-<!-- ═════════ BOT ═════════ -->
-<section id="bot">
-  <div class="wrap">
-    <div class="head reveal">
-      <div class="kicker wa">Bot de socios · WhatsApp</div>
-      <h2>Todo tu fondo,<br>en un chat.</h2>
-      <p class="sub">Ya no necesitas abrir el dashboard ni escribirle a un asesor para saber cómo va tu plata. El bot te responde al instante con la misma información de tu cuenta.</p>
-    </div>
-
-    <div class="bot-grid">
-      <div class="bcard reveal">
-        <span class="cmd">saldo</span>
-        <h3>Saldo LP COP</h3>
-        <p>Tu capital y rendimientos acumulados en el producto de renta en pesos.</p>
-      </div>
-      <div class="bcard reveal">
-        <span class="cmd">dgp</span>
-        <h3>Fondo DGP</h3>
-        <p>El valor actual de tu participación en el fondo de mayor exposición.</p>
-      </div>
-      <div class="bcard reveal">
-        <span class="cmd">préstamos</span>
-        <h3>Tus préstamos</h3>
-        <p>Saldo pendiente, próxima cuota y estado de tus créditos activos.</p>
-      </div>
-      <div class="bcard reveal">
-        <span class="cmd">reporte</span>
-        <h3>Reporte mensual</h3>
-        <p>Recibe el informe del mes con el desempeño de tus productos.</p>
-      </div>
-    </div>
-
-    <div class="bot-steps reveal">
-      <div class="bstep"><span class="n">01</span><h4>Escríbenos</h4><p>Guarda el número de Sanse Capital y envía un “Hola”.</p></div>
-      <div class="bstep"><span class="n">02</span><h4>Verifica tu identidad</h4><p>Ingresa tu cédula y tu PIN personal de socio.</p></div>
-      <div class="bstep"><span class="n">03</span><h4>Consulta</h4><p>Elige del menú qué quieres ver. Respuesta inmediata.</p></div>
-      <div class="bstep-cta">
-        <a href="#" class="btn btn-wa" data-wa="Hola, quiero consultar mi saldo"><svg><use href="#i-wa"/></svg> Abrir WhatsApp</a>
-      </div>
-    </div>
-
-    <div class="secure reveal">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      <div><b>Tu seguridad primero.</b> El bot solo muestra información después de verificar cédula y PIN. Sanse Capital nunca te pedirá contraseñas bancarias, códigos de verificación ni transferencias a cuentas diferentes a las oficiales por este chat. ¿Aún no tienes PIN? Pídelo a tu asesor o desde tu dashboard.</div>
     </div>
   </div>
 </section>
 
-<!-- ═════════ PRODUCTOS ═════════ -->
-<section id="productos">
-  <div class="wrap">
-    <div class="head reveal">
-      <div class="kicker">Productos</div>
-      <h2>Elige cómo hacer<br>crecer tus <span class="grad">pesos</span>.</h2>
-      <p class="sub">Desde la opción más estable hasta la de mayor potencial, más herramientas de ahorro y crédito para socios.</p>
-    </div>
+<!-- ═══════════════════════ ACTIVOS DEL FONDO ═══════════════════════ -->
+<section id="wallet">
+  <div class="section-inner fade-in">
+    <div class="section-eyebrow">Transparencia en Vivo</div>
+    <h2 class="section-title">Activos del <span class="grad">Fondo</span></h2>
+    <p class="section-sub">Balance multi-chain en tiempo real. Cualquier persona puede verificar los activos del fondo directamente en blockchain.</p>
 
-    <div class="prod-grid">
-      <article class="prod big reveal">
-        <span class="tag">Renta en pesos</span>
-        <h3>LP COP</h3>
-        <p>Funciona como un depósito a término en pesos. El rendimiento proviene de los intereses de los préstamos otorgados a socios del fondo, por eso es nuestra opción más estable.</p>
-        <div class="rates">
-          <div class="rate"><b>13.5%</b><span>Anual mínima histórica</span></div>
-          <div class="rate"><b>24%</b><span>Anual máxima histórica</span></div>
-        </div>
-        <p class="note">* Rendimientos históricos, no garantizados. Capital sujeto a permanencia mínima y a riesgo.</p>
-      </article>
-
-      <article class="prod big reveal">
-        <span class="tag">Mayor potencial</span>
-        <h3>Fondo DGP</h3>
-        <p>Fondo gestionado activamente con exposición a Bitcoin y otros activos digitales, con estrategias en Arbitrum y Aave v3. Rendimiento variable, pensado para horizontes más largos.</p>
-        <div class="rates">
-          <div class="rate"><b>20%</b><span>Anual base histórica</span></div>
-          <div class="rate"><b>60%</b><span>Mejor año</span></div>
-        </div>
-        <p class="note">* Rendimientos históricos, no garantizados. Mayor exposición a la volatilidad del mercado cripto.</p>
-      </article>
-
-      <article class="prod reveal">
-        <span class="tag new">Nuevo</span>
-        <h3>Cadenas de ahorro</h3>
-        <p>Ahorra cada semana junto a otros socios. Cada participante aporta y recibe su turno, con el registro y el respaldo de Sanse Capital.</p>
-        <ul><li>Aportes semanales</li><li>Turnos y pagos registrados</li><li>Avisos por WhatsApp</li></ul>
-      </article>
-
-      <article class="prod reveal">
-        <span class="tag">Crédito para socios</span>
-        <h3>Préstamos</h3>
-        <p>Préstamos rápidos sobre el valor de tu ahorro y, para socios antiguos, crédito de libre inversión según estudio de perfil e historial.</p>
-        <div class="rates">
-          <div class="rate"><b>4%</b><span>Mensual con inversión activa</span></div>
-          <div class="rate"><b>6%</b><span>Mensual sin inversión previa</span></div>
-        </div>
-        <p class="note">Sujeto a aprobación. Libre inversión hasta $4.000.000 o más según estudio.</p>
-      </article>
-
-      <article class="prod reveal">
-        <span class="tag soon">Próximamente</span>
-        <h3>Swap USDT/COP</h3>
-        <p>Convierte entre tu saldo en pesos y USDT desde tu dashboard, mantén saldos paralelos y retira USDT a tu wallet externa en red TRON.</p>
-        <ul><li>Mesa interna de compra y venta</li><li>Retiros USDT (TRON)</li></ul>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- ═════════ TRANSPARENCIA ═════════ -->
-<section id="transparencia">
-  <div class="wrap">
-    <div class="head reveal">
-      <div class="kicker">Transparencia en vivo</div>
-      <h2>Verifica los activos<br>del fondo tú mismo.</h2>
-      <p class="sub">El balance multi-cadena se lee directamente de la blockchain cada vez que abres esta página. Cualquier persona puede comprobarlo.</p>
-    </div>
-
-    <div class="ticker">
-      <div class="tk"><div class="tk-l"><b>Bitcoin</b>BTC</div><div class="tk-r"><div id="hero-btc-val">—</div><div class="chg" id="hero-btc-chg">…</div></div></div>
-      <div class="tk"><div class="tk-l"><b>Ethereum</b>ETH</div><div class="tk-r"><div id="hero-eth-val">—</div><div class="chg" id="hero-eth-chg">…</div></div></div>
-      <div class="tk"><div class="tk-l"><b>USD Coin</b>USDC</div><div class="tk-r"><div id="hero-usdc-val">—</div><div class="chg" id="hero-usdc-chg">stablecoin</div></div></div>
-      <div class="tk"><div class="tk-l"><b>Arbitrum</b>ARB</div><div class="tk-r"><div id="hero-arb-val">—</div><div class="chg" id="hero-arb-chg">…</div></div></div>
-    </div>
-
-    <div class="kpis">
-      <div class="kpi"><div class="kpi-l">Activos cripto (USD)</div><div class="kpi-v" id="totalBalance">Cargando…</div><div class="kpi-s" id="totalBalanceCOP">—</div></div>
-      <div class="kpi"><div class="kpi-l">Capital en préstamos (COP)</div><div class="kpi-v">$30M+</div><div class="kpi-s">Préstamos activos a socios</div></div>
-      <div class="kpi"><div class="kpi-l">Capital total gestionado (COP)</div><div class="kpi-v" id="totalCapital">Calculando…</div><div class="kpi-s">TRM <span id="trmVal">—</span> · <span id="totalTokens">—</span> tokens · <span id="totalChains">—</span> cadenas</div></div>
+    <div class="wallet-cards">
+      <div class="wcard">
+        <div class="wcard-label">Activos Cripto (USD)</div>
+        <div class="wcard-val blue" id="totalBalance">Cargando...</div>
+        <div class="wcard-sub" id="totalBalanceCOP">—</div>
+      </div>
+      <div class="wcard">
+        <div class="wcard-label">Capital en Préstamos (COP)</div>
+        <div class="wcard-val green">$30M+</div>
+        <div class="wcard-sub">Capital en préstamos activos</div>
+      </div>
+      <div class="wcard">
+        <div class="wcard-label">Capital Total Gestionado (COP)</div>
+        <div class="wcard-val blue" id="totalCapital">Calculando...</div>
+        <div class="wcard-sub">TRM: <span id="trmVal">$3.766</span> · <span id="totalTokens">—</span> tokens · <span id="totalChains">—</span> cadenas</div>
+      </div>
     </div>
 
     <div class="chain-tabs" id="chainTabs">
       <button class="chain-tab active" onclick="filterChain('all', event)">Todas las cadenas</button>
     </div>
+
     <div class="assets-wrap">
       <table class="assets-table">
-        <thead><tr><th>Token</th><th>Cantidad</th><th>Precio</th><th>Valor USD</th><th>Valor COP</th><th>Cadena</th></tr></thead>
-        <tbody id="assetsBody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">Cargando activos…</td></tr></tbody>
+        <thead>
+          <tr>
+            <th>Token</th>
+            <th>Cantidad</th>
+            <th>Precio</th>
+            <th>Valor USD</th>
+            <th>Valor COP</th>
+            <th>Cadena</th>
+          </tr>
+        </thead>
+        <tbody id="assetsBody">
+          <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">Cargando activos...</td></tr>
+        </tbody>
       </table>
     </div>
-    <div class="wallet-link">Wallet del fondo: <a id="walletLink" href="#" target="_blank" rel="noopener"></a></div>
   </div>
 </section>
 
-<!-- ═════════ SIMULADOR ═════════ -->
-<section id="simulador">
-  <div class="wrap">
-    <div class="head reveal">
-      <div class="kicker">Simulador</div>
-      <h2>¿Cuánto podría<br>rendir tu dinero?</h2>
-      <p class="sub">Proyección basada en rendimientos históricos. No es una promesa de rentabilidad.</p>
-    </div>
-    <div class="sim reveal">
-      <div class="sim-l">
-        <div class="field">
-          <label for="calcMonto">Monto a invertir (COP)</label>
-          <input type="text" inputmode="numeric" id="calcMonto" value="5.000.000" oninput="onMonto(this)">
+<!-- ═══════════════════════ MODELO ═══════════════════════ -->
+<section id="modelo">
+  <div class="section-inner fade-in">
+    <div class="section-eyebrow">Nuestro Modelo</div>
+    <h2 class="section-title">Cómo <span class="grad">Funciona</span></h2>
+    <p class="section-sub">Proceso simple y transparente para participar en el fondo.</p>
+
+    <div class="pasos-grid">
+      <div class="paso-card">
+        <div class="paso-num">01</div>
+        <div class="paso-icon">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </div>
-        <div class="field">
-          <label>Permanencia</label>
-          <div class="seg" id="segMeses">
-            <button type="button" data-v="3">3 meses</button>
-            <button type="button" data-v="6" class="on">6 meses</button>
-            <button type="button" data-v="12">12 meses</button>
+        <h3>Crea tu cuenta</h3>
+        <p>Regístrate con un link de invitación de otro participante o directamente desde nuestra página principal. Nuestro equipo revisará y aprobará tu solicitud, y recibirás tu propio código de referido.</p>
+      </div>
+      <div class="paso-card">
+        <div class="paso-num">02</div>
+        <div class="paso-icon">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h3>Deposita tus pesos</h3>
+        <p>Desde tu dashboard sigue las instrucciones para depositar en COP (Bre-B o transferencia bancaria). Un administrador verifica tu depósito y el saldo se refleja en tu cuenta.</p>
+      </div>
+      <div class="paso-card">
+        <div class="paso-num">03</div>
+        <div class="paso-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        <h3>Elige tu opción de inversión</h3>
+        <p>Selecciona el producto que mejor se adapte a tu nivel de riesgo y horizonte de inversión: desde el LP COP, más conservador, hasta el Fondo DGP, con mayor exposición y potencial de rendimiento.</p>
+      </div>
+      <div class="paso-card">
+        <div class="paso-num">04</div>
+        <div class="paso-icon">
+          <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        </div>
+        <h3>Retira tus rendimientos</h3>
+        <p>Retira tus rendimientos mensualmente o reinviértelos para aprovechar el interés compuesto, y observa cómo tu capital se valoriza mes a mes desde tu panel personal.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ SERVICIOS ═══════════════════════ -->
+<section id="servicios">
+  <div class="section-inner fade-in">
+    <div class="section-eyebrow">Nuestros Servicios</div>
+    <h2 class="section-title">Productos <span class="grad">Disponibles</span></h2>
+    <p class="section-sub">Opciones de inversión y financiación adaptadas a cada participante.</p>
+
+    <div class="servicios-grid">
+      <div class="serv-card">
+        <div class="serv-icon-wrap">
+          <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        </div>
+        <h3>Inversión en LP COP</h3>
+        <p>Simula un depósito a término en pesos. El rendimiento se genera por los intereses de los préstamos otorgados a participantes del fondo, lo que lo hace nuestra opción más estable. Capital sujeto a permanencia mínima.</p>
+        <div class="serv-rates">
+          <div class="rate-chip">
+            <span class="rate-val">13.5%</span>
+            <span class="rate-lbl">Anual mínima</span>
+          </div>
+          <div class="rate-chip">
+            <span class="rate-val">24%</span>
+            <span class="rate-lbl">Anual máxima</span>
           </div>
         </div>
-        <div class="field">
-          <label>Escenario</label>
-          <div class="seg" id="segTasa">
-            <button type="button" data-v="0.135">Conservador<br><small>13.5%</small></button>
-            <button type="button" data-v="0.25" class="on">Moderado<br><small>25%</small></button>
-            <button type="button" data-v="0.42">Optimista<br><small>42%</small></button>
+        <p class="rate-note">* Rendimientos históricos, no garantizados. Capital sujeto a riesgo.</p>
+      </div>
+
+      <div class="serv-card">
+        <div class="serv-icon-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/><path d="M8 12a4 4 0 0 1 8 0"/></svg>
+        </div>
+        <h3>Fondo DGP</h3>
+        <p>Fondo gestionado activamente que invierte en Bitcoin y otros activos digitales para buscar un mayor rendimiento. Perfil de riesgo superior al LP COP, pensado para participantes con un horizonte de inversión más amplio.</p>
+        <div class="serv-rates">
+          <div class="rate-chip">
+            <span class="rate-val">20%</span>
+            <span class="rate-lbl">Anual base</span>
+          </div>
+          <div class="rate-chip">
+            <span class="rate-val">60%</span>
+            <span class="rate-lbl">Mejor año</span>
           </div>
         </div>
+        <p class="rate-note">* Rendimientos históricos, no garantizados. Mayor exposición a riesgo de mercado cripto.</p>
       </div>
-      <div class="sim-r">
-        <div class="l">Ganancia estimada</div>
-        <div class="v" id="calcGanancias">$0</div>
-        <div class="tot" id="calcTotal">Total a recibir: $0</div>
-        <p class="disc">* Tasas anuales de referencia, interés simple. Los rendimientos reales pueden variar, incluyendo pérdida parcial del capital. Esta herramienta no constituye una promesa de rendimiento.</p>
+
+      <div class="serv-card">
+        <div class="serv-icon-wrap">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        </div>
+        <h3>Préstamos entre Particulares</h3>
+        <p>Financiación con tasas preferenciales para participantes del fondo. Tasas escalonadas según historial de inversión.</p>
+        <div class="serv-rates">
+          <div class="rate-chip">
+            <span class="rate-val">4%</span>
+            <span class="rate-lbl">Con inversión activa</span>
+          </div>
+          <div class="rate-chip">
+            <span class="rate-val">6%</span>
+            <span class="rate-lbl">Sin inversión previa</span>
+          </div>
+        </div>
+        <p class="rate-note">Tasas mensuales. Sujeto a aprobación.</p>
+      </div>
+
+      <div class="serv-card coming-soon">
+        <span class="soon-badge">Próximamente</span>
+        <div class="serv-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M7 10l5-5 5 5"/><path d="M7 14l5 5 5-5"/><line x1="12" y1="5" x2="12" y2="19"/></svg>
+        </div>
+        <h3>Swap USDT/COP & P2P</h3>
+        <p>Convierte entre tu saldo en COP y USDT directamente desde tu dashboard. Mantén saldos paralelos, retira USDT a tu wallet externa (red TRON) o conviértelo en capital disponible para invertir.</p>
+        <div class="soon-feature">
+          <div class="soon-feature-icon">⇄</div>
+          <div class="soon-feature-text"><strong>Mesa interna:</strong> Compra y venta de USDT con tasas competitivas</div>
+        </div>
+        <div class="soon-feature">
+          <div class="soon-feature-icon">₮</div>
+          <div class="soon-feature-text"><strong>Red TRON:</strong> Retiros USDT a wallet externa</div>
+        </div>
+        <p class="rate-note">Disponible próximamente para todos los participantes del fondo.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═════════ CÓMO FUNCIONA ═════════ -->
-<section id="como" style="padding-top:0">
-  <div class="wrap">
-    <div class="head reveal">
-      <div class="kicker">Cómo funciona</div>
-      <h2>De la cuenta al rendimiento<br>en cuatro pasos.</h2>
-    </div>
-    <div class="steps">
-      <div class="step reveal"><span class="n">01</span><h3>Crea tu cuenta</h3><p>Regístrate con un link de invitación o desde esta página. Revisamos y aprobamos tu solicitud.</p></div>
-      <div class="step reveal"><span class="n">02</span><h3>Deposita tus pesos</h3><p>Por Bre-B o transferencia bancaria. Verificamos el depósito y se refleja en tu saldo.</p></div>
-      <div class="step reveal"><span class="n">03</span><h3>Elige tu producto</h3><p>LP COP para estabilidad, Fondo DGP para más potencial, o cadenas de ahorro.</p></div>
-      <div class="step reveal"><span class="n">04</span><h3>Sigue todo por WhatsApp</h3><p>Consulta tu saldo cuando quieras con el bot y recibe tu reporte cada mes.</p></div>
+<!-- ═══════════════════════ CALCULADORA ═══════════════════════ -->
+<section id="calc">
+  <div class="section-inner fade-in">
+    <div class="section-eyebrow">Simulador</div>
+    <h2 class="section-title">Calcula tu <span class="grad">Rendimiento</span></h2>
+    <p class="section-sub">Esta es una proyección basada en rendimientos históricos, no una garantía.</p>
+
+    <div class="calc-wrap">
+      <div class="calc-body">
+        <div class="calc-left">
+          <div class="form-field">
+            <label class="form-label">Monto a invertir (COP)</label>
+            <input class="form-input" type="number" id="calcMonto" value="5000000" oninput="calcular()">
+          </div>
+          <div class="form-field">
+            <label class="form-label">Permanencia</label>
+            <select class="form-input" id="calcMeses" onchange="calcular()">
+              <option value="3">3 meses</option>
+              <option value="6" selected>6 meses</option>
+              <option value="12">12 meses</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Escenario</label>
+            <select class="form-input" id="calcTipo" onchange="calcular()">
+              <option value="0.135">Conservador (13.5% anual)</option>
+              <option value="0.25" selected>Moderado (25% anual)</option>
+              <option value="0.42">Optimista (42% anual)</option>
+            </select>
+          </div>
+        </div>
+        <div class="calc-right">
+          <div class="calc-result-label">Ganancia estimada</div>
+          <div class="calc-result-val" id="calcGanancias">$0</div>
+          <div class="calc-result-total" id="calcTotal">Total a recibir: $0</div>
+          <p class="calc-disclaimer">* Simulación basada en rendimientos históricos.<br>Los rendimientos reales pueden variar, incluyendo pérdida parcial del capital.<br>Esta herramienta no constituye una promesa de rendimiento.</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ═════════ QUIÉNES SOMOS ═════════ -->
-<section id="quienes" style="padding-top:0">
-  <div class="wrap about">
-    <div class="reveal">
-      <div class="kicker">Quiénes somos</div>
-      <h2>Un fondo hecho<br>entre personas.</h2>
-    </div>
-    <div class="reveal">
-      <p>Sanse Capital SAS nació en 2023 con una idea simple: hacer accesible la inversión en pesos y en activos digitales para personas en Colombia. Empezamos como un fondo privado entre cinco personas cercanas y hoy acompañamos a más de 20 socios activos en Bogotá y Fusagasugá.</p>
-      <p>Combinamos desarrollo tecnológico propio, gestión de inversiones DeFi y experiencia dirigiendo negocios reales. Por eso construimos nuestras propias herramientas, desde la plataforma hasta el bot de WhatsApp.</p>
-      <div class="tags"><span>SAS constituida legalmente</span><span>Bogotá · Fusagasugá</span><span>DeFi & Web3</span><span>Tecnología propia</span><span>Verificación on-chain</span></div>
+<!-- ═══════════════════════ EQUIPO ═══════════════════════ -->
+<section id="quienes">
+  <div class="section-inner fade-in">
+    <div class="section-eyebrow">Nuestro Equipo</div>
+    <h2 class="section-title">Quiénes <span class="grad">Somos</span></h2>
+
+    <p class="team-story">
+      Sanse Capital SAS nació en 2023 de una idea simple: hacer accesible la gestión de inversiones en criptoactivos para personas en Colombia. Lo que comenzó como un fondo privado entre 5 personas cercanas ha crecido a más de 20 participantes activos, respaldado por resultados consistentes y una gestión transparente verificable en blockchain. Hoy operamos como una SAS constituida formalmente para brindar mayor solidez y respaldo legal a nuestros participantes.
+    </p>
+    <p class="team-story">
+      Nuestro equipo combina experiencia en desarrollo tecnológico, gestión de proyectos a escala internacional, inversiones en criptoactivos y una visión empresarial forjada en la dirección de negocios reales.
+    </p>
+    <div class="team-tags">
+      <div class="team-tag">Desarrollo Tecnológico</div>
+      <div class="team-tag">Gestión de Inversiones</div>
+      <div class="team-tag">DeFi & Web3</div>
+      <div class="team-tag">Bogotá, Colombia</div>
+      <div class="team-tag">Constituidos legalmente SAS</div>
+      <div class="team-tag">Blockchain Verification</div>
     </div>
   </div>
 </section>
 
-<!-- ═════════ FAQ ═════════ -->
-<section id="faq" style="padding-top:0">
-  <div class="wrap">
-    <div class="head center reveal">
-      <div class="kicker">Preguntas frecuentes</div>
-      <h2>Resolvemos tus dudas.</h2>
-    </div>
-    <div class="faq reveal">
-      <details><summary>¿Cómo uso el bot de WhatsApp?</summary><p>Escríbenos al número oficial de Sanse Capital, verifica tu identidad con tu cédula y tu PIN de socio, y elige en el menú qué quieres consultar: saldo LP COP, Fondo DGP, préstamos o reporte mensual.</p></details>
-      <details><summary>¿Es seguro consultar mi saldo por WhatsApp?</summary><p>Sí. El bot solo entrega información después de validar tu cédula y tu PIN personal. Nunca te pediremos contraseñas bancarias, códigos de verificación ni dinero por ese chat. Si alguien te escribe desde otro número diciendo ser Sanse Capital, repórtalo.</p></details>
-      <details><summary>¿Sanse Capital está regulado por la SFC?</summary><p>Sanse Capital SAS es una sociedad por acciones simplificada constituida legalmente en Colombia. No estamos registrados ni vigilados por la Superintendencia Financiera de Colombia (SFC). Operamos mediante contratos de mandato civil entre la SAS y cada participante, dentro del marco del derecho privado colombiano.</p></details>
-      <details><summary>¿Los rendimientos están garantizados?</summary><p>No. Los rendimientos mostrados son históricos y no garantizan resultados futuros. El mercado de criptoactivos es volátil y toda inversión conlleva riesgo, incluyendo la posible pérdida parcial o total del capital.</p></details>
-      <details><summary>¿Cómo creo mi cuenta?</summary><p>Haz clic en “Crear cuenta”, completa tus datos y nuestro equipo revisará tu solicitud. Una vez aprobada tendrás acceso a tu dashboard y podrás activar tu PIN para el bot.</p></details>
-      <details><summary>¿Cuándo puedo retirar mi capital?</summary><p>Los retiros se procesan al cierre de cada mes calendario. Debes solicitarlo desde tu dashboard antes de la fecha de corte.</p></details>
-      <details><summary>¿Cómo funciona el programa de referidos?</summary><p>Al registrarte recibes un código de referido personal. Cuando alguien se registra con tu código y genera ganancias, recibes automáticamente el 5% de esas ganancias como comisión.</p></details>
-      <details><summary>¿Qué protección legal tengo como participante?</summary><p>Cada participante firma un contrato de mandato civil con Sanse Capital SAS que establece derechos y obligaciones, condiciones de inversión, términos de retiro, comisiones y riesgos. Al ser una SAS constituida formalmente, la sociedad responde con su patrimonio ante sus obligaciones contractuales.</p></details>
-      <details><summary>¿Cómo verifico los activos del fondo?</summary><p>En la sección “Transparencia” de esta página ves el balance en tiempo real leído directamente de la blockchain. Cada transacción es pública e inmutable.</p></details>
+<!-- ═══════════════════════ FAQ ═══════════════════════ -->
+<section id="faq">
+  <div class="section-inner fade-in">
+    <div class="section-eyebrow">Preguntas Frecuentes</div>
+    <h2 class="section-title">Resolvemos tus <span class="grad">Dudas</span></h2>
+
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">¿Sanse Capital está regulado por la SFC? <span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>Sanse Capital SAS es una sociedad por acciones simplificada constituida legalmente en Colombia. Sin embargo, no estamos registrados ni vigilados por la Superintendencia Financiera de Colombia (SFC). Operamos mediante contratos de mandato civil entre la SAS y cada participante, dentro del marco del derecho privado colombiano.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">¿Cómo puedo crear mi cuenta? <span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>Puedes registrarte directamente desde nuestra plataforma haciendo clic en "Crear Cuenta". Completa tus datos, y nuestro equipo revisará tu solicitud. Una vez aprobada, tendrás acceso a tu dashboard personal.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">¿Los rendimientos están garantizados? <span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>No. Los rendimientos mostrados son históricos y no garantizan resultados futuros. El mercado de criptoactivos es volátil y toda inversión conlleva riesgo, incluyendo la posible pérdida parcial o total del capital.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">¿Cuándo puedo retirar mi capital? <span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>Los retiros se procesan al cierre de cada mes calendario. Debes solicitar tu retiro a través de tu dashboard personal antes de la fecha de corte.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">¿Cómo funciona el programa de referidos? <span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>Al registrarte recibes un código de referido personal. Cuando alguien se registra con tu código y genera ganancias, tú recibes automáticamente el 5% de esas ganancias como comisión.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">¿Qué protección legal tengo como participante? <span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>Cada participante firma un contrato de mandato civil con Sanse Capital SAS. Este documento establece los derechos y obligaciones de ambas partes, las condiciones de inversión, los términos de retiro, las comisiones y los riesgos asociados. Al ser una SAS constituida formalmente, la sociedad responde con su patrimonio ante sus obligaciones contractuales.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">¿Cómo verifico los activos del fondo? <span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>Los activos del fondo son 100% verificables en blockchain. En la sección "Activos del Fondo" de esta página puedes ver el balance en tiempo real. Cada transacción queda registrada en la cadena de bloques y es pública e inmutable.</p></div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ═════════ CTA ═════════ -->
-<div class="wrap">
-  <div class="cta reveal">
-    <h2>Pregúntale a tu plata<br>cómo va.</h2>
-    <p class="sub">Si ya eres socio, escríbele al bot. Si aún no lo eres, crea tu cuenta y únete a más de 20 personas que ahorran e invierten con Sanse Capital.</p>
-    <div class="hero-btns">
-      <a href="#" class="btn btn-wa" data-wa="Hola, quiero consultar mi saldo"><svg><use href="#i-wa"/></svg> Hablar con el bot</a>
-      <a href="register.html" class="btn btn-primary">Crear mi cuenta</a>
+<!-- ═══════════════════════ CTA ═══════════════════════ -->
+<section id="cta">
+  <div class="section-inner fade-in">
+    <div class="cta-wrap">
+      <h2 class="cta-title">¿Listo para comenzar?</h2>
+      <p class="cta-sub">Únete a más de 20 participantes que ya gestionan sus inversiones con Sanse Capital. Transparencia total, rendimientos verificables.</p>
+      <div class="cta-btns">
+        <a href="register.html" class="btn-hero-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Crear mi cuenta
+        </a>
+        <a href="login.html" class="btn-hero-ghost">Iniciar sesión →</a>
+      </div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- ═════════ FOOTER ═════════ -->
+<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
 <footer>
-  <div class="wrap">
-    <div class="foot">
-      <a class="logo" href="#inicio"><img src="assets/logo-icon-nav.png" alt="">SANSE <span>CAPITAL</span></a>
-      <div class="foot-links">
-        <a href="#bot">Bot WhatsApp</a><a href="#productos">Productos</a><a href="#transparencia">Transparencia</a><a href="#faq">FAQ</a><a href="terminos.html">Términos</a><a href="login.html">Acceder</a>
-      </div>
-    </div>
-    <p class="legal">© <span id="yr">2026</span> Sanse Capital SAS · Bogotá, Colombia · No vigilado por la Superintendencia Financiera de Colombia · Los rendimientos pasados no garantizan resultados futuros · Toda inversión conlleva riesgo de pérdida de capital.</p>
+  <div class="footer-logo">SANSE <span>CAPITAL</span></div>
+  <div class="footer-links">
+    <a href="#wallet">Activos</a>
+    <a href="#modelo">Modelo</a>
+    <a href="#servicios">Servicios</a>
+    <a href="terminos.html">Términos</a>
+    <a href="login.html">Acceder</a>
   </div>
+  <p class="footer-legal">
+    © 2025 Sanse Capital SAS · Bogotá, Colombia · NIT registrado · No vigilado por la SFC · Los rendimientos pasados no garantizan resultados futuros · Toda inversión conlleva riesgo de pérdida de capital.
+  </p>
 </footer>
 
-<a href="#" class="wa-float" data-wa="Hola, quiero consultar mi saldo" aria-label="Escribir al bot de Sanse Capital en WhatsApp"><svg><use href="#i-wa"/></svg><span>Consultar saldo</span></a>
-
 <script>
-  // ════════ CONFIGURACIÓN ════════
-  // Número del bot de WhatsApp (Kanali): solo dígitos, con indicativo 57.
-  const WA_BOT = '57XXXXXXXXXX';
-
-  document.querySelectorAll('[data-wa]').forEach(a => {
-    a.href = 'https://wa.me/' + WA_BOT + '?text=' + encodeURIComponent(a.dataset.wa);
-    a.target = '_blank'; a.rel = 'noopener';
-  });
-  document.getElementById('yr').textContent = new Date().getFullYear();
-
-  // ─── Menú móvil ───
+  // ─── NAV MOBILE ───
   function toggleMenu() {
-    const m = document.getElementById('mob');
-    const open = m.classList.toggle('open');
-    document.getElementById('burger').setAttribute('aria-expanded', open);
+    document.getElementById('navMobile').classList.toggle('open');
   }
 
-  // ─── Animaciones de entrada ───
-  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 });
-  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  // ─── SCROLL FADE + 3D RISE ───
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
 
-  // ─── Chat de demostración ───
-  (function demoChat() {
-    const msgs = [...document.querySelectorAll('#chat .msg')];
-    const typing = document.getElementById('typing');
-    const chat = document.getElementById('chat');
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { msgs.forEach(m => m.classList.add('show')); return; }
-    let i = 0;
-    function next() {
-      if (i >= msgs.length) { setTimeout(() => { msgs.forEach(m => m.classList.remove('show')); i = 0; next(); }, 6000); return; }
-      const m = msgs[i];
-      const isBot = m.classList.contains('in');
-      if (isBot) { chat.insertBefore(typing, m); typing.classList.add('show'); }
-      setTimeout(() => {
-        typing.classList.remove('show');
-        m.classList.add('show');
-        i++;
-        setTimeout(next, isBot ? 900 : 700);
-      }, isBot ? 1100 : 400);
+  // Entrada 3D escalonada para cards
+  const cards3d = document.querySelectorAll('.paso-card, .serv-card, .wcard');
+  const obs3d = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const i = [...e.target.parentElement.children].indexOf(e.target);
+        e.target.style.transitionDelay = (i * 70) + 'ms';
+        e.target.classList.add('visible');
+        obs3d.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  cards3d.forEach(el => { el.classList.add('rise-3d'); obs3d.observe(el); });
+
+  // ─── TILT 3D (solo dispositivos con cursor) ───
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && !reducedMotion) {
+    document.querySelectorAll('.paso-card, .serv-card, .wcard, .protocol-card').forEach(card => {
+      card.classList.add('tilt');
+      let raf = null;
+      card.addEventListener('pointermove', e => {
+        const r = card.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width;
+        const py = (e.clientY - r.top) / r.height;
+        card.style.setProperty('--mx', (px * 100) + '%');
+        card.style.setProperty('--my', (py * 100) + '%');
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+          raf = null;
+          const rx = (0.5 - py) * 8;   // rotateX
+          const ry = (px - 0.5) * 10;  // rotateY
+          card.classList.add('tilting');
+          if (card.classList.contains('protocol-card')) card.style.animation = 'none';
+          card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-4px)`;
+        });
+      });
+      card.addEventListener('pointerleave', () => {
+        card.classList.remove('tilting');
+        card.style.transform = '';
+        if (card.classList.contains('protocol-card')) card.style.animation = '';
+      });
+    });
+  }
+
+  // ─── RED DE NODOS 3D (canvas, sin librerías) ───
+  (function() {
+    const canvas = document.getElementById('hero3d');
+    if (!canvas || reducedMotion) return;
+    const ctx = canvas.getContext('2d');
+    const isMobile = window.matchMedia('(max-width: 639px)').matches;
+    const DPR = Math.min(window.devicePixelRatio || 1, 2);
+    const N = isMobile ? 46 : 90;          // menos nodos en móvil
+    const LINK_DIST = isMobile ? 150 : 190; // distancia de conexión (px proyectados)
+    const FOV = 520;
+    let W = 0, H = 0, CX = 0, CY = 0;
+    let nodes = [];
+    let angleY = 0, angleX = 0.25;
+    let targetRX = 0, targetRY = 0;
+    let running = true, visible = true;
+
+    function resize() {
+      const r = canvas.parentElement.getBoundingClientRect();
+      W = r.width; H = r.height;
+      canvas.width = W * DPR; canvas.height = H * DPR;
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      CX = W / 2; CY = H / 2;
     }
-    setTimeout(next, 600);
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Nodos distribuidos en una esfera (espiral de Fibonacci) + jitter
+    const R = isMobile ? 200 : 290;
+    for (let i = 0; i < N; i++) {
+      const t = i / (N - 1);
+      const inc = Math.acos(1 - 2 * t);
+      const az = Math.PI * (1 + Math.sqrt(5)) * i;
+      const jitter = 0.75 + Math.random() * 0.5;
+      nodes.push({
+        x: R * jitter * Math.sin(inc) * Math.cos(az),
+        y: R * jitter * Math.sin(inc) * Math.sin(az),
+        z: R * jitter * Math.cos(inc),
+        pulse: Math.random() * Math.PI * 2,
+      });
+    }
+
+    // Interacción: cursor en desktop, giroscopio sutil vía touch-drag NO (no bloquear scroll)
+    window.addEventListener('pointermove', e => {
+      if (!window.matchMedia('(hover: hover)').matches) return;
+      targetRY = ((e.clientX / window.innerWidth) - 0.5) * 0.6;
+      targetRX = ((e.clientY / window.innerHeight) - 0.5) * 0.4 + 0.25;
+    }, { passive: true });
+
+    // Pausar cuando el hero no está visible o la pestaña está oculta
+    new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(canvas);
+    document.addEventListener('visibilitychange', () => { running = !document.hidden; });
+
+    function project(n, sy, cy2, sx, cx2) {
+      // rotación Y, luego X
+      let x = n.x * cy2 - n.z * sy;
+      let z = n.x * sy + n.z * cy2;
+      let y = n.y * cx2 - z * sx;
+      z = n.y * sx + z * cx2;
+      const s = FOV / (FOV + z + 60);
+      return { sx: CX + x * s * 0.92, sy: CY + y * s * 0.92, s, z };
+    }
+
+    let last = 0;
+    function frame(ts) {
+      requestAnimationFrame(frame);
+      if (!running || !visible) return;
+      if (ts - last < 1000 / 45) return; // cap ~45fps (suficiente, ahorra batería)
+      const dt = Math.min(ts - last, 50);
+      last = ts;
+
+      angleY += 0.00012 * dt;
+      angleX += (targetRX - angleX) * 0.04;
+      const ry = angleY + targetRY;
+      const sy = Math.sin(ry), cy2 = Math.cos(ry);
+      const sx = Math.sin(angleX), cx2 = Math.cos(angleX);
+
+      ctx.clearRect(0, 0, W, H);
+      const pts = nodes.map(n => project(n, sy, cy2, sx, cx2));
+
+      // Conexiones
+      ctx.lineWidth = 1;
+      for (let i = 0; i < pts.length; i++) {
+        for (let j = i + 1; j < pts.length; j++) {
+          const dx = pts[i].sx - pts[j].sx, dyy = pts[i].sy - pts[j].sy;
+          const d2 = dx * dx + dyy * dyy;
+          if (d2 < LINK_DIST * LINK_DIST) {
+            const a = (1 - Math.sqrt(d2) / LINK_DIST) * 0.34 * Math.min(pts[i].s, pts[j].s);
+            ctx.strokeStyle = `rgba(91,158,255,${a.toFixed(3)})`;
+            ctx.beginPath();
+            ctx.moveTo(pts[i].sx, pts[i].sy);
+            ctx.lineTo(pts[j].sx, pts[j].sy);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Nodos con pulso
+      for (let i = 0; i < pts.length; i++) {
+        const p = pts[i];
+        const n = nodes[i];
+        n.pulse += 0.0012 * dt;
+        const pulse = 0.7 + 0.3 * Math.sin(n.pulse);
+        const rNode = (1.1 + p.s * 1.7) * pulse;
+        const depth = Math.max(0, Math.min(1, (p.s - 0.55) * 2));
+        ctx.beginPath();
+        ctx.arc(p.sx, p.sy, rNode, 0, Math.PI * 2);
+        ctx.fillStyle = depth > 0.65
+          ? `rgba(139,111,252,${(0.5 + depth * 0.4).toFixed(2)})`
+          : `rgba(91,158,255,${(0.3 + depth * 0.5).toFixed(2)})`;
+        ctx.fill();
+        if (depth > 0.8) {
+          ctx.beginPath();
+          ctx.arc(p.sx, p.sy, rNode * 2.6, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(91,158,255,0.06)';
+          ctx.fill();
+        }
+      }
+    }
+    requestAnimationFrame(frame);
   })();
 
-  // ─── Simulador ───
-  let sim = { meses: 6, tasa: 0.25 };
-  function parseMonto() { return parseInt(document.getElementById('calcMonto').value.replace(/\D/g, '')) || 0; }
-  function onMonto(el) {
-    const n = el.value.replace(/\D/g, '');
-    el.value = n ? parseInt(n).toLocaleString('es-CO') : '';
-    calcular();
+  // ─── FAQ ───
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
   }
-  function bindSeg(id, key) {
-    document.querySelectorAll('#' + id + ' button').forEach(b => b.addEventListener('click', () => {
-      document.querySelectorAll('#' + id + ' button').forEach(x => x.classList.remove('on'));
-      b.classList.add('on'); sim[key] = parseFloat(b.dataset.v); calcular();
-    }));
-  }
-  bindSeg('segMeses', 'meses'); bindSeg('segTasa', 'tasa');
+
+  // ─── CALCULADORA ───
   function calcular() {
-    const monto = parseMonto();
-    const ganancia = monto * (sim.tasa / 12) * sim.meses;
+    const monto = parseFloat(document.getElementById('calcMonto').value) || 0;
+    const meses = parseInt(document.getElementById('calcMeses').value);
+    const tasa = parseFloat(document.getElementById('calcTipo').value);
+    const tasaMensual = tasa / 12;
+    const ganancia = monto * tasaMensual * meses;
+    const total = monto + ganancia;
     document.getElementById('calcGanancias').textContent = '$' + Math.round(ganancia).toLocaleString('es-CO');
-    document.getElementById('calcTotal').textContent = 'Total a recibir: $' + Math.round(monto + ganancia).toLocaleString('es-CO');
+    document.getElementById('calcTotal').textContent = 'Total a recibir: $' + Math.round(total).toLocaleString('es-CO');
   }
   calcular();
 
-  // ─── Activos on-chain ───
+  // ─── BLOCKCHAIN ASSETS ───
   const WALLET = '0x25E6997CD1037E03662996E63875C99704f8F38D';
-  const wl = document.getElementById('walletLink');
-  wl.textContent = WALLET; wl.href = 'https://debank.com/profile/' + WALLET;
   let TRM_LIVE = 4100;
   let allAssets = [];
 
@@ -778,6 +1732,7 @@ Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<sp
       { symbol:'WBTC', name:'Wrapped Bitcoin',addr:'0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f', dec:8  },
       { symbol:'WETH', name:'Wrapped Ether',  addr:'0x82af49447d8a07e3bd95bd0d56f35241523fbab1', dec:18 },
       { symbol:'ARB',  name:'Arbitrum',       addr:'0x912ce59144191c1204e64559fe8253a0e49e6548', dec:18 },
+      // ── Posiciones en Aave v3 (aTokens, 1:1 con el subyacente) ──
       { symbol:'WETH', name:'WETH en Aave v3', addr:'0xe50fa9b3c56ffb159cb0fca61f5c9d750e8128c8', dec:18, protocol:'Aave' },
       { symbol:'WBTC', name:'WBTC en Aave v3', addr:'0x078f358208685046a11c85e8ad32895ded33a249', dec:8,  protocol:'Aave' },
       { symbol:'USDC', name:'USDC en Aave v3', addr:'0x724dc807b04555b71ed48a6896b6f41593b8c637', dec:6,  protocol:'Aave' },
@@ -785,15 +1740,15 @@ Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<sp
       { symbol:'ARB',  name:'ARB en Aave v3',  addr:'0x6533afac2e7bccb20dca161449a13a32d391fb00', dec:18, protocol:'Aave' },
       { symbol:'DAI',  name:'DAI en Aave v3',  addr:'0x82e64f49ed5ec1bc6e43dad4fc8af9bb3a2312ee', dec:18, protocol:'Aave' },
     ],
-    eth: [
-      { symbol:'USDC', name:'USD Coin',   addr:'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', dec:6 },
-      { symbol:'USDT', name:'Tether',     addr:'0xdac17f958d2ee523a2206206994597c13d831ec7', dec:6 },
-      { symbol:'WBTC', name:'Wrapped BTC',addr:'0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', dec:8 },
+    eth:      [
+      { symbol:'USDC', name:'USD Coin',  addr:'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', dec:6 },
+      { symbol:'USDT', name:'Tether',    addr:'0xdac17f958d2ee523a2206206994597c13d831ec7', dec:6 },
+      { symbol:'WBTC', name:'Wrapped BTC',addr:'0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',dec:8 },
     ],
-    bsc:      [{ symbol:'USDT', name:'Tether',   addr:'0x55d398326f99059ff775485246999027b3197955', dec:18 }],
-    polygon:  [{ symbol:'USDC', name:'USD Coin', addr:'0x2791bca1f2de4661ed88a30c99a7a9449aa84174', dec:6 }],
-    optimism: [{ symbol:'USDC', name:'USD Coin', addr:'0x0b2c639c533813f4aa9d7837caf62653d097ff85', dec:6 }],
-    base:     [{ symbol:'USDC', name:'USD Coin', addr:'0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', dec:6 }],
+    bsc:      [{ symbol:'USDT',name:'Tether',addr:'0x55d398326f99059ff775485246999027b3197955',dec:18}],
+    polygon:  [{ symbol:'USDC',name:'USD Coin',addr:'0x2791bca1f2de4661ed88a30c99a7a9449aa84174',dec:6}],
+    optimism: [{ symbol:'USDC',name:'USD Coin',addr:'0x0b2c639c533813f4aa9d7837caf62653d097ff85',dec:6}],
+    base:     [{ symbol:'USDC',name:'USD Coin',addr:'0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',dec:6}],
   };
 
   const COINGECKO_IDS = {
@@ -801,6 +1756,7 @@ Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<sp
     'USDC':'usd-coin','USDT':'tether','DAI':'dai','ARB':'arbitrum',
     'OP':'optimism','LINK':'chainlink','GMX':'gmx','BNB':'binancecoin','MATIC':'matic-network',
   };
+
   let tokenPrices = {};
 
   async function fetchPrices() {
@@ -810,6 +1766,7 @@ Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<sp
       tokenPrices = await r.json();
     } catch(e) {}
   }
+
   async function fetchTRM() {
     try {
       const r = await fetch('https://open.er-api.com/v6/latest/USD');
@@ -818,30 +1775,44 @@ Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<sp
     } catch(e) {}
     document.getElementById('trmVal').textContent = '$' + Math.round(TRM_LIVE).toLocaleString('es-CO');
   }
-  function getPrice(sym) { const id = COINGECKO_IDS[sym.toUpperCase()]; return id ? (tokenPrices[id]?.usd || 0) : 0; }
+
+  function getPrice(sym) {
+    const id = COINGECKO_IDS[sym.toUpperCase()];
+    return id ? (tokenPrices[id]?.usd || 0) : 0;
+  }
+
   function fmt(n, dec=4) { return n.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:dec}); }
   function fmtUSD(n) { return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
   function fmtCOP(n) { return '$' + Math.round(n).toLocaleString('es-CO'); }
 
   async function rpcCall(rpc, method, params) {
-    const r = await fetch(rpc, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({jsonrpc:'2.0', id:1, method, params}) });
+    const r = await fetch(rpc, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({jsonrpc:'2.0', id:1, method, params})
+    });
     return (await r.json()).result;
   }
 
   async function fetchChainAssets(chain) {
     const results = [];
     const padded = WALLET.toLowerCase().replace('0x','').padStart(64,'0');
+
+    // 1) Balance nativo
     try {
       const res = await rpcCall(chain.rpc, 'eth_getBalance', [WALLET, 'latest']);
       if (res) {
         const amount = parseInt(res,16)/1e18;
         const nativeSym = chain.id==='bsc'?'BNB':chain.id==='polygon'?'MATIC':'ETH';
         const price = getPrice(nativeSym);
-        if (amount*price > 0.01 || amount > 0.0001) results.push({symbol:nativeSym, name:nativeSym, chain:chain.id, amount, price, valueUSD:amount*price});
+        if (amount*price > 0.01 || amount > 0.0001) {
+          results.push({symbol:nativeSym, name:nativeSym, chain:chain.id, amount, price, valueUSD:amount*price});
+        }
       }
     } catch(e) {}
+
+    // 2) ERC-20 y posiciones Aave (balanceOf = 0x70a08231)
     const tokens = KNOWN_TOKENS[chain.id] || [];
-    await Promise.all(tokens.map(async t => {
+    const calls = tokens.map(async t => {
       try {
         const res = await rpcCall(chain.rpc, 'eth_call', [{to:t.addr, data:'0x70a08231'+padded}, 'latest']);
         if (!res || res === '0x') return;
@@ -851,14 +1822,17 @@ Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<sp
         if (amount*price < 0.01) return;
         results.push({symbol:t.symbol, name:t.name, chain:chain.id, amount, price, valueUSD:amount*price, protocol:t.protocol||null});
       } catch(e) {}
-    }));
+    });
+    await Promise.all(calls);
     return results;
   }
 
   async function fetchAssets() {
+    if (!WALLET || WALLET === '0xYourWalletAddress') { showDemoData(); return; }
     try {
       await Promise.all([fetchPrices(), fetchTRM()]);
-      const results = await Promise.all(CHAINS.map(c => fetchChainAssets(c)));
+      const balancePromises = CHAINS.map(c => fetchChainAssets(c));
+      const results = await Promise.all(balancePromises);
       allAssets = results.flat().filter(t => t && t.amount > 0.0001);
       if (!allAssets.length) { showDemoData(); return; }
       const totalUSD = allAssets.reduce((s,t) => s + t.valueUSD, 0);
@@ -871,7 +1845,7 @@ Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<sp
       const chains = [...new Set(allAssets.map(a=>a.chain))];
       document.getElementById('totalChains').textContent = chains.length;
       renderChainTabs(chains);
-      renderAssets(allAssets);
+      renderAssets(allAssets, totalCOP);
     } catch(e) { showDemoData(); }
   }
 
@@ -881,57 +1855,81 @@ Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<sp
       const chain = CHAINS.find(ch=>ch.id===c);
       if (!chain) return;
       const btn = document.createElement('button');
-      btn.className = 'chain-tab'; btn.textContent = chain.name;
+      btn.className = 'chain-tab';
+      btn.textContent = chain.name;
       btn.onclick = (e) => filterChain(c, e);
       tabs.appendChild(btn);
     });
   }
+
   function filterChain(chain, evt) {
     document.querySelectorAll('.chain-tab').forEach(t => t.classList.remove('active'));
     if (evt && evt.target) evt.target.classList.add('active');
-    renderAssets(chain === 'all' ? allAssets : allAssets.filter(a=>a.chain===chain));
+    const filtered = chain === 'all' ? allAssets : allAssets.filter(a=>a.chain===chain);
+    const totalCOP = allAssets.reduce((s,t)=>s+t.valueUSD,0) * TRM_LIVE;
+    renderAssets(filtered, totalCOP);
   }
-  function renderAssets(assets) {
+
+  function renderAssets(assets, totalCOP) {
     const tbody = document.getElementById('assetsBody');
     if (!assets.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">Sin activos en esta cadena</td></tr>'; return; }
-    tbody.innerHTML = [...assets].sort((a,b)=>b.valueUSD-a.valueUSD).map(t => {
+    const sorted = [...assets].sort((a,b)=>b.valueUSD-a.valueUSD);
+    tbody.innerHTML = sorted.map(t => {
       const chain = CHAINS.find(c=>c.id===t.chain) || {name:t.chain, color:'#6b7280'};
+      const valCOP = t.valueUSD * TRM_LIVE;
       return `<tr>
-        <td><div class="tk-cell"><div class="tk-icon"${t.protocol?' style="background:rgba(139,111,252,.12);color:#a996ff;border-color:rgba(139,111,252,.3)"':''}>${t.symbol.slice(0,3)}</div>
-          <div><div class="tk-sym">${t.symbol}</div><div class="tk-name">${t.name}</div></div></div></td>
+        <td><div class="tk-cell">
+          <div class="tk-icon"${t.protocol?' style="background:rgba(176,87,255,0.12);color:#b057ff;border-color:rgba(176,87,255,0.25)"':''}>${t.symbol.slice(0,3)}</div>
+          <div><div class="tk-sym">${t.symbol}</div><div class="tk-name">${t.name}</div></div>
+        </div></td>
         <td class="mono">${fmt(t.amount)}</td>
         <td class="mono">${fmtUSD(t.price||0)}</td>
         <td class="mono" style="color:var(--blue)">${fmtUSD(t.valueUSD)}</td>
-        <td class="mono">${fmtCOP(t.valueUSD * TRM_LIVE)}</td>
+        <td class="mono">${fmtCOP(valCOP)}</td>
         <td><span class="chain-pill"><span class="chain-dot" style="background:${chain.color}"></span>${chain.name}${t.protocol?' · '+t.protocol:''}</span></td>
       </tr>`;
     }).join('');
   }
+
   function showDemoData() {
     document.getElementById('totalBalance').textContent = '—';
     document.getElementById('totalBalanceCOP').textContent = 'Verificar en blockchain';
     document.getElementById('totalCapital').textContent = '$36.7M+';
     document.getElementById('assetsBody').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">
-      <div>No pudimos leer la blockchain en este momento.</div>
-      <button class="chain-tab" onclick="fetchAssets()" style="margin-top:12px">Reintentar</button></td></tr>`;
+      <div>⏳ Cargando datos de la blockchain...</div>
+      <div style="font-size:12px;margin-top:8px;opacity:0.6">Si persiste, verifica tu conexión</div>
+      <button onclick="fetchAssets()" style="margin-top:12px;padding:8px 20px;background:var(--blue-d);border:1px solid rgba(91,158,255,0.2);color:var(--blue);border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;">🔄 Reintentar</button>
+    </div></td></tr>`;
   }
 
+  // ─── Hero price tickers (CoinGecko) ───
   async function updateHeroPrices() {
     try {
       const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,usd-coin,arbitrum&vs_currencies=usd&include_24hr_change=true');
       const d = await r.json();
-      const f = n => '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-      const set = (key, id) => {
-        if (!d[key]) return;
-        document.getElementById('hero-'+id+'-val').textContent = f(d[key].usd);
-        if (id === 'usdc') return;
-        const c = d[key].usd_24h_change, el = document.getElementById('hero-'+id+'-chg');
-        el.textContent = (c>0?'+':'') + c.toFixed(2) + '% 24h';
-        el.className = 'chg ' + (c>=0?'up':'down');
-      };
-      set('bitcoin','btc'); set('ethereum','eth'); set('usd-coin','usdc'); set('arbitrum','arb');
+      const fmt2 = n => '$' + n.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2});
+      if (d.bitcoin) {
+        document.getElementById('hero-btc-val').textContent = fmt2(d.bitcoin.usd);
+        const chg = d.bitcoin.usd_24h_change;
+        document.getElementById('hero-btc-chg').textContent = (chg>0?'+':'')+chg.toFixed(2)+'% 24h';
+        document.getElementById('hero-btc-chg').className = 'pr-change ' + (chg>=0?'up':'down');
+      }
+      if (d.ethereum) {
+        document.getElementById('hero-eth-val').textContent = fmt2(d.ethereum.usd);
+        const chg = d.ethereum.usd_24h_change;
+        document.getElementById('hero-eth-chg').textContent = (chg>0?'+':'')+chg.toFixed(2)+'% 24h';
+        document.getElementById('hero-eth-chg').className = 'pr-change ' + (chg>=0?'up':'down');
+      }
+      if (d['usd-coin']) document.getElementById('hero-usdc-val').textContent = fmt2(d['usd-coin'].usd);
+      if (d.arbitrum) {
+        document.getElementById('hero-arb-val').textContent = fmt2(d.arbitrum.usd);
+        const chg = d.arbitrum.usd_24h_change;
+        document.getElementById('hero-arb-chg').textContent = (chg>0?'+':'')+chg.toFixed(2)+'% 24h';
+        document.getElementById('hero-arb-chg').className = 'pr-change ' + (chg>=0?'up':'down');
+      }
     } catch(e) {}
   }
+
   updateHeroPrices();
   setInterval(updateHeroPrices, 60000);
   fetchAssets();
