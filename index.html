@@ -65,7 +65,7 @@
 
     /* ── Nav ── */
     nav { position: fixed; inset: 0 0 auto 0; z-index: 50; background: rgba(7,11,20,.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
-    .nav-in { display: flex; align-items: center; justify-content: space-between; height: 68px; gap: 20px; }
+    .nav-in { display: flex; align-items: center; justify-content: space-between; height: 68px; gap: 28px; }
     .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--display); font-weight: 800; letter-spacing: .04em; font-size: 17px; }
     .logo img { width: 30px; height: 30px; object-fit: contain; }
     .logo span { color: var(--muted); font-weight: 500; }
@@ -161,6 +161,40 @@
     .bstep-cta { padding: 28px; display: flex; align-items: center; justify-content: center; background: rgba(37,211,102,.06); }
     .secure { margin-top: 18px; display: flex; gap: 12px; align-items: flex-start; font-size: 14px; color: var(--text-2); background: var(--surface); border: 1px dashed var(--line-2); border-radius: var(--r-sm); padding: 16px 18px; }
     .secure svg { width: 20px; height: 20px; color: var(--amber); flex: none; margin-top: 2px; }
+
+    /* ── Alianza Kanali ── */
+    #alianza { padding-top: 0; }
+    .ally { display: grid; grid-template-columns: .95fr 1.05fr; gap: 0; border: 1px solid var(--line); border-radius: 24px; overflow: hidden; background: var(--bg-2); }
+    .ally-l { padding: 48px; display: flex; flex-direction: column; justify-content: center; gap: 28px; background: radial-gradient(ellipse at 20% 0%, rgba(37,211,102,.14), transparent 60%), var(--bg-3); border-right: 1px solid var(--line); }
+    .ally-logos { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+    .ally-badge { height: 76px; padding: 0 22px; border-radius: 16px; display: grid; place-items: center; }
+    .ally-badge.sanse { background: var(--bg); border: 1px solid var(--line-2); gap: 10px; grid-auto-flow: column; font-family: var(--display); font-weight: 800; letter-spacing: .04em; font-size: 17px; }
+    .ally-badge.sanse img { width: 30px; height: 30px; object-fit: contain; }
+    .ally-badge.kanali { background: #fff; }
+    .ally-badge.kanali img { height: 46px; width: auto; }
+    .ally-x { font-family: var(--display); font-size: 26px; color: var(--muted); }
+    .ally-l h2 { margin: 0; }
+    .ally-l .sub { font-size: 16px; }
+    .ally-r { padding: 48px; display: grid; gap: 22px; align-content: center; }
+    .ally-item { display: flex; gap: 16px; align-items: flex-start; }
+    .ally-item .ico { width: 42px; height: 42px; flex: none; border-radius: 12px; display: grid; place-items: center; background: rgba(37,211,102,.1); color: var(--wa); border: 1px solid rgba(37,211,102,.2); }
+    .ally-item .ico svg { width: 20px; height: 20px; }
+    .ally-item h3 { font-size: 17px; font-weight: 600; margin-bottom: 3px; }
+    .ally-item p { font-size: 14.5px; color: var(--text-2); }
+    .ally-link { font-size: 14px; color: var(--text-2); }
+    .ally-link a { color: var(--wa); }
+    .by-kanali { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin-top: 6px; justify-content: center; }
+    .by-kanali img { height: 18px; width: auto; background: #fff; border-radius: 4px; padding: 2px 5px; box-sizing: content-box; }
+    @media (max-width: 860px) {
+      .ally { grid-template-columns: 1fr; }
+      .ally-l { border-right: none; border-bottom: 1px solid var(--line); }
+    }
+    @media (max-width: 600px) {
+      .ally-l, .ally-r { padding: 28px 22px; }
+      .ally-badge { height: 62px; padding: 0 16px; }
+      .ally-badge.kanali img { height: 36px; }
+      .ally-x { font-size: 20px; }
+    }
 
     /* ── Products ── */
     .prod-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
@@ -323,10 +357,10 @@
     <a class="logo" href="#inicio"><img src="assets/logo-icon-nav.png" alt="">SANSE <span>CAPITAL</span></a>
     <ul class="nav-links">
       <li><a href="#bot">Bot WhatsApp <span class="pill-new">Nuevo</span></a></li>
+      <li><a href="#alianza">Alianza</a></li>
       <li><a href="#productos">Productos</a></li>
       <li><a href="#transparencia">Transparencia</a></li>
       <li><a href="#simulador">Simulador</a></li>
-      <li><a href="#como">Cómo funciona</a></li>
       <li><a href="#faq">FAQ</a></li>
     </ul>
     <div class="nav-right">
@@ -340,6 +374,7 @@
 </nav>
 <div class="mob" id="mob">
   <a href="#bot" onclick="toggleMenu()">Bot de WhatsApp <span class="pill-new">Nuevo</span></a>
+  <a href="#alianza" onclick="toggleMenu()">Alianza con Kanali</a>
   <a href="#productos" onclick="toggleMenu()">Productos</a>
   <a href="#transparencia" onclick="toggleMenu()">Transparencia</a>
   <a href="#simulador" onclick="toggleMenu()">Simulador</a>
@@ -399,6 +434,7 @@ Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<sp
         </div>
       </div>
       <p class="demo-note">Conversación de ejemplo · datos ficticios</p>
+      <div class="by-kanali">En alianza con <img src="assets/logo-kanali.png" alt="Kanali"></div>
     </div>
   </div>
 </header>
@@ -469,6 +505,41 @@ Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<sp
     <div class="secure reveal">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       <div><b>Tu seguridad primero.</b> El bot solo muestra información después de verificar cédula y PIN. Sanse Capital nunca te pedirá contraseñas bancarias, códigos de verificación ni transferencias a cuentas diferentes a las oficiales por este chat. ¿Aún no tienes PIN? Pídelo a tu asesor o desde tu dashboard.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ ALIANZA KANALI ═════════ -->
+<section id="alianza">
+  <div class="wrap">
+    <div class="ally reveal">
+      <div class="ally-l">
+        <div class="ally-logos">
+          <div class="ally-badge sanse"><img src="assets/logo-icon-nav.png" alt="">SANSE</div>
+          <span class="ally-x">×</span>
+          <div class="ally-badge kanali"><img src="assets/logo-kanali.png" alt="Kanali"></div>
+        </div>
+        <div>
+          <div class="kicker wa">Alianza tecnológica</div>
+          <h2>Sanse Capital<br>+ Kanali</h2>
+        </div>
+        <p class="sub">Nos aliamos con Kanali, empresa colombiana especializada en atención por WhatsApp, para que nuestros socios tengan su información a un mensaje de distancia.</p>
+      </div>
+      <div class="ally-r">
+        <div class="ally-item">
+          <div class="ico"><svg><use href="#i-wa"/></svg></div>
+          <div><h3>WhatsApp Business oficial</h3><p>El bot funciona sobre la plataforma oficial de WhatsApp Business de Meta, conectada a través de Kanali, proveedor tecnológico autorizado.</p></div>
+        </div>
+        <div class="ally-item">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <div><h3>Respuestas a cualquier hora</h3><p>Consulta tu saldo y tus préstamos de día o de noche, sin esperar a que un asesor esté disponible.</p></div>
+        </div>
+        <div class="ally-item">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+          <div><h3>Acceso protegido</h3><p>Antes de mostrar cualquier dato, el bot verifica tu identidad con tu cédula y tu PIN de socio.</p></div>
+        </div>
+        <p class="ally-link">Conoce más sobre nuestro aliado en <a href="https://www.kanalicallcenter.com" target="_blank" rel="noopener">kanalicallcenter.com</a></p>
+      </div>
     </div>
   </div>
 </section>
@@ -634,7 +705,7 @@ Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<sp
     </div>
     <div class="reveal">
       <p>Sanse Capital SAS nació en 2023 con una idea simple: hacer accesible la inversión en pesos y en activos digitales para personas en Colombia. Empezamos como un fondo privado entre cinco personas cercanas y hoy acompañamos a más de 20 socios activos en Bogotá y Fusagasugá.</p>
-      <p>Combinamos desarrollo tecnológico propio, gestión de inversiones DeFi y experiencia dirigiendo negocios reales. Por eso construimos nuestras propias herramientas, desde la plataforma hasta el bot de WhatsApp.</p>
+      <p>Combinamos desarrollo tecnológico propio, gestión de inversiones DeFi y experiencia dirigiendo negocios reales. Por eso construimos nuestras propias herramientas, desde la plataforma hasta el bot de WhatsApp, que operamos en alianza con Kanali.</p>
       <div class="tags"><span>SAS constituida legalmente</span><span>Bogotá · Fusagasugá</span><span>DeFi & Web3</span><span>Tecnología propia</span><span>Verificación on-chain</span></div>
     </div>
   </div>
@@ -679,7 +750,7 @@ Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<sp
     <div class="foot">
       <a class="logo" href="#inicio"><img src="assets/logo-icon-nav.png" alt="">SANSE <span>CAPITAL</span></a>
       <div class="foot-links">
-        <a href="#bot">Bot WhatsApp</a><a href="#productos">Productos</a><a href="#transparencia">Transparencia</a><a href="#faq">FAQ</a><a href="terminos.html">Términos</a><a href="login.html">Acceder</a>
+        <a href="#bot">Bot WhatsApp</a><a href="#alianza">Alianza Kanali</a><a href="#productos">Productos</a><a href="#transparencia">Transparencia</a><a href="#faq">FAQ</a><a href="terminos.html">Términos</a><a href="login.html">Acceder</a>
       </div>
     </div>
     <p class="legal">© <span id="yr">2026</span> Sanse Capital SAS · Bogotá, Colombia · No vigilado por la Superintendencia Financiera de Colombia · Los rendimientos pasados no garantizan resultados futuros · Toda inversión conlleva riesgo de pérdida de capital.</p>
