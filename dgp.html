@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fondo DGP · Sanse Capital</title>
+<meta name="description" content="Precio de la acción del Fondo DGP de Sanse Capital e histórico mensual desde abril de 2025.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<meta property="og:title" content="Fondo DGP · Sanse Capital">
+<meta property="og:description" content="Precio de la acción del Fondo DGP e histórico mensual.">
+<meta property="og:type" content="website">
+<style>html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Terminal de trading: cabecera de cotización, panel de velas con volumen, rail de compra y tabla de tenedores. */
+:root{
+  --bg:#0d1117; --panel:#151b24; --panel-2:#1b222c; --line:#232c38; --line-soft:#1b222c;
+  --fg:#e6ebf2; --fg-2:#aab6c6; --muted:#78859a;
+  --up:#2cbd80; --up-soft:rgba(44,189,128,.14); --down:#e45a6b; --down-soft:rgba(228,90,107,.14);
+  --accent:#e0a33c; --accent-ink:#2a1d05; --accent-soft:rgba(224,163,60,.13);
+  --ui:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:dark;
+}
+:root{--panel-2:#1b222c}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --bg:#f4f6f9; --panel:#ffffff; --panel-2:#f0f3f7; --line:#dfe4ec; --line-soft:#eaeef4;
+  --fg:#101722; --fg-2:#3f4a5a; --muted:#6a7687;
+  --up:#0d8a5f; --up-soft:rgba(13,138,95,.12); --down:#c33b4d; --down-soft:rgba(195,59,77,.11);
+  --accent:#9a6a12; --accent-ink:#fff; --accent-soft:rgba(154,106,18,.1);
+  color-scheme:light;
+}}
+:root[data-theme="light"]{
+  --bg:#f4f6f9; --panel:#ffffff; --panel-2:#f0f3f7; --line:#dfe4ec; --line-soft:#eaeef4;
+  --fg:#101722; --fg-2:#3f4a5a; --muted:#6a7687;
+  --up:#0d8a5f; --up-soft:rgba(13,138,95,.12); --down:#c33b4d; --down-soft:rgba(195,59,77,.11);
+  --accent:#9a6a12; --accent-ink:#fff; --accent-soft:rgba(154,106,18,.1);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--ui);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1140px;margin:0 auto;padding-block:20px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.up{color:var(--up)}.down{color:var(--down)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+
+/* cabecera de cotización */
+.tick{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 26px;padding:16px 18px;margin-bottom:12px}
+.sym{display:flex;align-items:center;gap:10px;min-width:0}
+.sym .badge{font-family:var(--mono);font-weight:600;font-size:13px;letter-spacing:.08em;background:var(--accent);color:var(--accent-ink);padding:3px 8px;border-radius:5px}
+.sym h1{margin:0;font-size:16px;font-weight:600;letter-spacing:-.01em}
+.sym .sub{display:block;font-size:11.5px;color:var(--muted);font-weight:400;letter-spacing:.02em}
+.last{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.last .p{font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.last .chg{font-family:var(--mono);font-size:14px;font-weight:500}
+.tick .meta{margin-left:auto;text-align:right;font-size:11.5px;color:var(--muted);letter-spacing:.02em}
+
+/* tira de datos */
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:12px}
+.strip div{background:var(--panel);padding:11px 14px;min-width:0}
+.strip .k{display:block;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.strip .v{font-family:var(--mono);font-size:17px;font-weight:600}
+
+/* gráfica */
+.chart{padding:12px 14px 10px;margin-bottom:12px;position:relative}
+.chart .bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.ohlc{font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.01em;min-height:17px}
+.ohlc b{font-weight:600}
+.tf{margin-left:auto;display:flex;gap:2px;background:var(--panel-2);border-radius:7px;padding:2px}
+.tf button{font-family:var(--mono);font-size:11.5px;font-weight:500;border:0;background:none;color:var(--muted);padding:4px 11px;border-radius:5px;cursor:pointer}
+.tf button[aria-pressed="true"]{background:var(--panel);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.chart svg{display:block;width:100%;height:auto;touch-action:pan-y}
+
+/* ticket de compra */
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 322px;gap:12px;align-items:start}
+@media (max-width:760px){.cols{grid-template-columns:1fr}}
+.ticket{padding:16px 18px}
+.ticket h2,.holders h2{margin:0 0 3px;font-size:14px;font-weight:600;letter-spacing:-.01em}
+.ticket p.note,.holders p.note{margin:0 0 14px;font-size:12px;color:var(--muted);line-height:1.5}
+.field{display:block;margin-bottom:12px}
+.field span{display:block;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.field input{width:100%;font-family:var(--mono);font-size:17px;font-weight:500;color:var(--fg);background:var(--panel-2);border:1px solid var(--line);border-radius:7px;padding:9px 12px}
+.field input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.quick{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 14px}
+.quick button{font-family:var(--mono);font-size:11.5px;border:1px solid var(--line);background:var(--panel-2);color:var(--fg-2);border-radius:6px;padding:4px 9px;cursor:pointer}
+.quick button:hover{border-color:var(--accent);color:var(--fg)}
+.out{border-top:1px solid var(--line);padding-top:12px}
+.out .row{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:4px 0}
+.out .row span{color:var(--muted)}
+.out .row b{font-family:var(--mono);font-weight:600}
+.out .big{font-size:22px;color:var(--accent)}
+
+/* tabla */
+.holders{padding:16px 18px;overflow:hidden}
+.tabs{display:flex;gap:2px;background:var(--panel-2);border-radius:7px;padding:2px;margin:0 0 14px}
+.tabs button{flex:1;font-size:12px;font-weight:500;border:0;background:none;color:var(--muted);padding:6px 10px;border-radius:5px;cursor:pointer;font-family:var(--ui)}
+.tabs button[aria-pressed="true"]{background:var(--panel);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.scroll{overflow-x:auto;margin:0 -18px;padding:0 18px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 9px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line-soft)}
+th{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+tbody tr:last-child td{border-bottom:0}
+tfoot td{border-top:1px solid var(--line);border-bottom:0;font-weight:600;padding-top:10px}
+.who{display:flex;flex-direction:column;gap:2px}
+.who small{color:var(--muted);font-size:11px;font-family:var(--mono)}
+.pbar{height:3px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:4px;min-width:46px}
+.pbar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.foot{margin-top:14px;font-size:11.5px;color:var(--muted);line-height:1.6}
+.crosstip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.35);min-width:160px;z-index:4}
+.crosstip .r{display:flex;justify-content:space-between;gap:14px}
+.crosstip .r span{color:var(--muted)}
+.crosstip .r b{font-family:var(--mono);font-weight:600}
+.crosstip hr{border:0;border-top:1px solid var(--line);margin:5px 0}
+</style>
+
+<div class="wrap">
+
+  <div class="panel tick">
+    <div class="sym">
+      <span class="badge">DGP</span>
+      <h1>Fondo DGP<span class="sub">Sanse Capital SAS · acción en pesos</span></h1>
+    </div>
+    <div class="last">
+      <span class="p num" id="px"></span>
+      <span class="chg num" id="chg"></span>
+    </div>
+    <div class="meta" id="meta"></div>
+  </div>
+
+  <div class="strip" id="strip"></div>
+
+  <div class="panel chart">
+    <div class="bar">
+      <div class="ohlc" id="ohlc"></div>
+      <div class="tf" role="group" aria-label="Periodo">
+        <button data-tf="6" type="button">6M</button>
+        <button data-tf="12" type="button">12M</button>
+        <button data-tf="0" type="button" aria-pressed="true">Todo</button>
+      </div>
+    </div>
+    <div id="cv"></div>
+  </div>
+
+  <div class="panel ticket">
+    <h2>Cómo funciona</h2>
+    <p class="note" style="margin-bottom:16px">El Fondo DGP se lleva en acciones. Cuando entras, tu dinero compra acciones al precio del último cierre; de ahí en adelante el número de acciones no cambia, cambia lo que vale cada una. Si la cartera del fondo gana, sube el precio y suben todos en la misma proporción.</p>
+    <label class="field" for="inMonto"><span>Si entras con</span><input id="inMonto" inputmode="numeric" value="2.000.000" autocomplete="off"></label>
+    <div class="quick">
+      <button data-m="500000" type="button">500 mil</button>
+      <button data-m="1000000" type="button">1 millón</button>
+      <button data-m="5000000" type="button">5 millones</button>
+      <button data-m="10000000" type="button">10 millones</button>
+    </div>
+    <div class="out" id="out"></div>
+    <p class="note" style="margin:16px 0 0">Las acciones se emiten en el cierre del mes, no el día de la consignación, para que nadie se monte en el rendimiento de un mes en el que no estuvo.</p>
+  </div>
+
+  <p class="foot">Rendimiento variable: el precio de la acción puede bajar y las rentabilidades pasadas no garantizan rendimientos futuros. Corte al 4 de noviembre de 2026. Serie construida con los movimientos reales del Fondo DGP desde abril de 2025. La acción abre en $1.000 y su precio sale de dividir el valor del fondo entre las acciones en circulación. Los depósitos compran acciones al precio del cierre anterior y los retiros las venden, así que entrar o salir nunca mueve el precio de los demás. Las ganancias cuentan en el mes que liquidan.</p>
+</div>
+
+<script>
+const D={"serie":[{"ym":"2025-04","dep":100000,"ret":0,"gan":0,"o":1000,"c":1000,"h":1000,"l":1000,"r":0,"V":100000,"U":100,"vol":100000,"net":100000,"P":1000},{"ym":"2025-05","dep":200000,"ret":0,"gan":0,"o":1000,"c":1000,"h":1000,"l":1000,"r":0,"V":300000,"U":300,"vol":200000,"net":200000,"P":1000},{"ym":"2025-06","dep":300000,"ret":0,"gan":0,"o":1000,"c":1000,"h":1000,"l":1000,"r":0,"V":600000,"U":600,"vol":300000,"net":300000,"P":1000},{"ym":"2025-07","dep":300000,"ret":0,"gan":0,"o":1000,"c":1000,"h":1000,"l":1000,"r":0,"V":900000,"U":900,"vol":300000,"net":300000,"P":1000},{"ym":"2025-08","dep":700000,"ret":0,"gan":0,"o":1000,"c":1000,"h":1000,"l":1000,"r":0,"V":1600000,"U":1600,"vol":700000,"net":700000,"P":1000},{"ym":"2025-09","dep":350000,"ret":0,"gan":0,"o":1000,"c":1000,"h":1000,"l":1000,"r":0,"V":1950000,"U":1950,"vol":350000,"net":350000,"P":1000},{"ym":"2025-10","dep":200000,"ret":0,"gan":0,"o":1000,"c":1000,"h":1000,"l":1000,"r":0,"V":2150000,"U":2150,"vol":200000,"net":200000,"P":1000},{"ym":"2025-11","dep":320000,"ret":0,"gan":0,"o":1000,"c":1000,"h":1000,"l":1000,"r":0,"V":2470000,"U":2470,"vol":320000,"net":320000,"P":1000},{"ym":"2025-12","dep":270000,"ret":0,"gan":0,"o":1000,"c":1000,"h":1000,"l":1000,"r":0,"V":2740000,"U":2740,"vol":270000,"net":270000,"P":1000},{"ym":"2026-01","dep":150000,"ret":0,"gan":0,"o":1000,"c":1000,"h":1000,"l":1000,"r":0,"V":2890000,"U":2890,"vol":150000,"net":150000,"P":1000},{"ym":"2026-02","dep":275000,"ret":0,"gan":186927,"o":1000,"c":1059.06,"h":1059.06,"l":1000,"r":0.059061,"V":3351927,"U":3165,"vol":275000,"net":275000,"P":1059.06},{"ym":"2026-03","dep":125000,"ret":0,"gan":0,"o":1059.06,"c":1059.06,"h":1059.06,"l":1059.06,"r":0,"V":3476927,"U":3283.0291,"vol":125000,"net":125000,"P":1059.06},{"ym":"2026-04","dep":0,"ret":0,"gan":0,"o":1059.06,"c":1059.06,"h":1059.06,"l":1059.06,"r":0,"V":3476927,"U":3283.0291,"vol":0,"net":0,"P":1059.06},{"ym":"2026-05","dep":115000,"ret":0,"gan":3000,"o":1059.06,"c":1059.95,"h":1059.95,"l":1059.06,"r":0.000835,"V":3594927,"U":3391.6159,"vol":115000,"net":115000,"P":1059.95},{"ym":"2026-06","dep":260000,"ret":3800,"gan":62306,"o":1059.95,"c":1077.09,"h":1077.09,"l":1059.95,"r":0.016179,"V":3913433,"U":3633.3265,"vol":263800,"net":256200,"P":1077.09},{"ym":"2026-07","dep":0,"ret":14957,"gan":121226,"o":1077.09,"c":1110.59,"h":1110.59,"l":1077.09,"r":0.031096,"V":4019702,"U":3619.4401,"vol":14957,"net":-14957,"P":1110.59},{"ym":"2026-08","dep":0,"ret":0,"gan":121226,"o":1110.59,"c":1144.08,"h":1144.08,"l":1110.59,"r":0.030158,"V":4140928,"U":3619.4401,"vol":0,"net":0,"P":1144.08},{"ym":"2026-09","dep":0,"ret":0,"gan":71102,"o":1144.08,"c":1163.72,"h":1163.72,"l":1144.08,"r":0.017171,"V":4212030,"U":3619.4401,"vol":0,"net":0,"P":1163.72},{"ym":"2026-10","dep":0,"ret":0,"gan":85172,"o":1163.72,"c":1187.26,"h":1187.26,"l":1163.72,"r":0.020221,"V":4297202,"U":3619.4401,"vol":0,"net":0,"P":1187.26},{"ym":"2026-11","dep":0,"ret":0,"gan":0,"o":1187.26,"c":1187.26,"h":1187.26,"l":1187.26,"r":0,"V":4297202,"U":3619.4401,"vol":0,"net":0,"P":1187.26}],"precio":1187.2560132456538,"totalDgp":4297202,"socios":3};
+const S=D.serie, N=S.length, P=D.precio;
+const $=s=>document.querySelector(s);
+const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const MESL=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const money=v=>'$'+Math.round(v).toLocaleString('es-CO');
+const prec=v=>v.toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct=v=>(v>=0?'+':'−')+Math.abs(v*100).toFixed(2).replace('.',',')+'%';
+const acc=v=>v.toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:2});
+const lab=ym=>MES[+ym.slice(5)-1]+' '+ym.slice(2,4);
+const labL=ym=>MESL[+ym.slice(5)-1]+' de '+ym.slice(0,4);
+
+// velas: abre en el cierre anterior, cierra en el precio del mes
+const C=S.map((r,i)=>{const o=i?S[i-1].P:1000;return{...r,o,c:r.P,h:Math.max(o,r.P),l:Math.min(o,r.P),vol:r.dep+r.ret,net:r.dep-r.ret}});
+const ult=C[N-1], tot=P/1000-1, meses=N;
+const anual=Math.pow(1+tot,12/meses)-1;
+
+$('#px').textContent='$'+prec(P);
+const cierre=[...C].reverse().find(d=>d.gan>0.5)||ult;
+$('#chg').textContent=pct(cierre.r);
+$('#chg').className='chg num '+(cierre.r<0?'down':'up');
+$('#meta').innerHTML='Último cierre: '+labL(cierre.ym)+'<br>'+meses+' meses de histórico';
+
+$('#strip').innerHTML=[
+  ['Valor del fondo',money(ult.V)],
+  ['Acciones en circulación',acc(ult.U)],
+  ['Desde el inicio',pct(tot),tot<0?'down':'up'],
+  ['Rendimiento anualizado',pct(anual),anual<0?'down':'up'],
+  ['Socios con acciones',D.socios]
+].map(c=>`<div><span class="k">${c[0]}</span><span class="v ${c[2]||''}">${c[1]}</span></div>`).join('');
+
+/* ---------- gráfica de velas ---------- */
+let tf=0;
+function draw(){
+  const V=tf?C.slice(-tf):C, n=V.length;
+  const W=900,H=330,L=8,R=62,T=14,VB=52,GAP=16,PB=H-T-VB-GAP;
+  let lo=Math.min(...V.map(d=>d.l)), hi=Math.max(...V.map(d=>d.h));
+  const pad=(hi-lo)*.12||40; lo-=pad; hi+=pad;
+  const y=v=>T+(hi-v)/(hi-lo)*PB;
+  const band=(W-L-R)/n, bw=Math.max(2.5,Math.min(13,band*.58));
+  const cx=i=>L+band*i+band/2;
+  const vmax=Math.max(1,...V.map(d=>d.vol));
+  const vy=v=>H-(v/vmax)*VB;
+  const step=Math.ceil(n/7);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Precio de la acción del Fondo DGP por mes, de ${labL(V[0].ym)} a ${labL(V[n-1].ym)}">`;
+  // rejilla y escala a la derecha
+  for(let k=0;k<=4;k++){
+    const v=lo+(hi-lo)*k/4, yy=y(v);
+    s+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-opacity=".6"/>`;
+    s+=`<text x="${W-R+7}" y="${yy+3.5}" fill="var(--muted)" font-size="10.5" font-family="var(--mono)">${prec(v)}</text>`;
+  }
+  V.forEach((d,i)=>{if(i%step===0||i===n-1)s+=`<text x="${cx(i)}" y="${H-VB-GAP+13}" text-anchor="middle" fill="var(--muted)" font-size="10" font-family="var(--mono)">${lab(d.ym)}</text>`});
+  // volumen
+  V.forEach((d,i)=>{ if(!d.vol) return;
+    s+=`<rect x="${cx(i)-bw/2}" y="${vy(d.vol)}" width="${bw}" height="${H-vy(d.vol)}" rx="1" fill="${d.net<0?'var(--down)':'var(--up)'}" opacity=".32"/>`;});
+  // velas
+  V.forEach((d,i)=>{
+    const col=d.c<d.o?'var(--down)':'var(--up)', x=cx(i);
+    s+=`<line x1="${x}" x2="${x}" y1="${y(d.h)}" y2="${y(d.l)}" stroke="${col}" stroke-width="1.2"/>`;
+    const yt=y(Math.max(d.o,d.c)), hgt=Math.max(1.5,Math.abs(y(d.o)-y(d.c)));
+    s+=`<rect x="${x-bw/2}" y="${yt}" width="${bw}" height="${hgt}" rx="1" fill="${col}"/>`;
+  });
+  // último precio
+  s+=`<line x1="${L}" x2="${W-R}" y1="${y(ult.c)}" y2="${y(ult.c)}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 3" opacity=".8"/>`;
+  s+=`<rect x="${W-R+2}" y="${y(ult.c)-8}" width="${R-4}" height="16" rx="3" fill="var(--accent)"/>`;
+  s+=`<text x="${W-R+5}" y="${y(ult.c)+3.5}" fill="var(--accent-ink)" font-size="10.5" font-weight="600" font-family="var(--mono)">${prec(ult.c)}</text>`;
+  s+=`<line id="cx" y1="${T}" y2="${H}" stroke="var(--muted)" stroke-dasharray="3 3" stroke-opacity=".7" visibility="hidden"/>`;
+  s+=`<rect id="hit" x="${L}" y="${T}" width="${W-L-R}" height="${H-T}" fill="transparent"/></svg><div class="crosstip" hidden></div>`;
+  $('#cv').innerHTML=s;
+  legend(V[n-1]);
+  const wrap=$('.chart'), tip=wrap.querySelector('.crosstip'), sv=$('#cv svg'), cl=$('#cx');
+  const show=ev=>{
+    const b=sv.getBoundingClientRect(), sx=(ev.clientX-b.left)*W/b.width;
+    let i=Math.max(0,Math.min(n-1,Math.floor((sx-L)/band)));
+    const d=V[i]; legend(d);
+    cl.setAttribute('x1',cx(i)); cl.setAttribute('x2',cx(i)); cl.setAttribute('visibility','visible');
+    tip.innerHTML=`<div class="r"><span>${labL(d.ym)}</span></div><hr>
+      <div class="r"><span>Precio</span><b>$${prec(d.c)}</b></div>
+      <div class="r"><span>Mes</span><b class="${d.r<0?'down':'up'}">${pct(d.r)}</b></div>
+      <div class="r"><span>Ganancia</span><b>${money(d.gan)}</b></div>
+      ${d.dep?`<div class="r"><span>Entró</span><b class="up">${money(d.dep)}</b></div>`:''}
+      ${d.ret?`<div class="r"><span>Salió</span><b class="down">${money(d.ret)}</b></div>`:''}
+      <hr><div class="r"><span>Fondo</span><b>${money(d.V)}</b></div>
+      <div class="r"><span>Acciones</span><b>${acc(d.U)}</b></div>`;
+    tip.hidden=false;
+    const wb=wrap.getBoundingClientRect(); let lx=ev.clientX-wb.left+14;
+    if(lx+180>wb.width) lx=ev.clientX-wb.left-194;
+    tip.style.left=Math.max(4,lx)+'px';
+    tip.style.top=Math.max(4,Math.min(wb.height-150,ev.clientY-wb.top-20))+'px';
+  };
+  const hit=$('#hit');
+  hit.addEventListener('mousemove',show);
+  hit.addEventListener('mouseleave',()=>{tip.hidden=true;cl.setAttribute('visibility','hidden');legend(V[n-1])});
+}
+function legend(d){
+  $('#ohlc').innerHTML=`<b>DGP</b> · 1M &nbsp; A <b class="${d.o<=d.c?'up':'down'}">${prec(d.o)}</b>
+   M <b class="${d.o<=d.c?'up':'down'}">${prec(d.h)}</b>
+   m <b class="${d.o<=d.c?'up':'down'}">${prec(d.l)}</b>
+   C <b class="${d.o<=d.c?'up':'down'}">${prec(d.c)}</b>
+   <b class="${d.r<0?'down':'up'}">${pct(d.r)}</b>`;
+}
+document.querySelectorAll('.tf button').forEach(b=>b.onclick=()=>{
+  tf=+b.dataset.tf;
+  document.querySelectorAll('.tf button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  draw();
+});
+draw();
+
+/* ---------- ticket ---------- */
+const parse=s=>{const n=Number(String(s).replace(/[^\d]/g,''));return isNaN(n)?0:n};
+function ticket(){
+  const m=parse($('#inMonto').value), a=m/P;
+  $('#out').innerHTML=`
+    <div class="row"><span>Acciones que recibes</span><b class="big">${a?acc(a):'—'}</b></div>
+    <div class="row"><span>Precio por acción</span><b>$${prec(P)}</b></div>
+    <div class="row"><span>Si la acción sube 2%</span><b class="up">${m?money(a*P*1.02):'—'}</b></div>
+    <div class="row"><span>Si la acción baja 2%</span><b class="down">${m?money(a*P*0.98):'—'}</b></div>`;
+}
+$('#inMonto').addEventListener('input',ticket);
+$('#inMonto').addEventListener('blur',()=>{const v=parse($('#inMonto').value); $('#inMonto').value=v?v.toLocaleString('es-CO'):''; ticket()});
+document.querySelectorAll('.quick button').forEach(b=>b.onclick=()=>{
+  $('#inMonto').value=(+b.dataset.m).toLocaleString('es-CO'); ticket();
+});
+ticket();
+</script>
+</body>
+</html>
