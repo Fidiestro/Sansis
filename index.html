@@ -635,7 +635,7 @@ Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<sp
         <tbody id="assetsBody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">Cargando activos…</td></tr></tbody>
       </table>
     </div>
-    <div class="wallet-link">Wallet del fondo: <a id="walletLink" href="#" target="_blank" rel="noopener"></a></div>
+    <div class="wallet-link">Wallets del fondo: <span id="walletLinks"></span></div>
   </div>
 </section>
 
@@ -827,9 +827,13 @@ Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<sp
   calcular();
 
   // ─── Activos on-chain ───
-  const WALLET = '0x25E6997CD1037E03662996E63875C99704f8F38D';
-  const wl = document.getElementById('walletLink');
-  wl.textContent = WALLET; wl.href = 'https://debank.com/profile/' + WALLET;
+  // Wallets de Sanse Capital que se suman en "Activos cripto". Para agregar otra, añádela a esta lista.
+  const WALLETS = [
+    '0x25E6997CD1037E03662996E63875C99704f8F38D',
+    '0x94941119209536ebb0684c666261e131db5ffb76',
+  ];
+  document.getElementById('walletLinks').innerHTML = WALLETS.map(w =>
+    `<a href="https://debank.com/profile/${w}" target="_blank" rel="noopener">${w.slice(0,6)}…${w.slice(-4)}</a>`).join(' · ');
   let TRM_LIVE = 4100;
   let allAssets = [];
 
@@ -861,14 +865,21 @@ Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<sp
       { symbol:'USDT', name:'Tether',     addr:'0xdac17f958d2ee523a2206206994597c13d831ec7', dec:6 },
       { symbol:'WBTC', name:'Wrapped BTC',addr:'0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', dec:8 },
     ],
-    bsc:      [{ symbol:'USDT', name:'Tether',   addr:'0x55d398326f99059ff775485246999027b3197955', dec:18 }],
+    bsc: [
+      { symbol:'USDT', name:'Tether',          addr:'0x55d398326f99059ff775485246999027b3197955', dec:18 },
+      { symbol:'USDC', name:'USD Coin',        addr:'0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', dec:18 },
+      { symbol:'BTCB', name:'Bitcoin (BEP-20)',addr:'0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c', dec:18 },
+      { symbol:'ETH',  name:'Ether (BEP-20)',  addr:'0x2170ed0880ac9a755fd29b2688956bd959f933f8', dec:18 },
+      { symbol:'WBNB', name:'Wrapped BNB',     addr:'0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c', dec:18 },
+      { symbol:'FDUSD',name:'First Digital USD',addr:'0xc5f0f7b66764f6ec8c8dff7ba683102295e16409', dec:18 },
+    ],
     polygon:  [{ symbol:'USDC', name:'USD Coin', addr:'0x2791bca1f2de4661ed88a30c99a7a9449aa84174', dec:6 }],
     optimism: [{ symbol:'USDC', name:'USD Coin', addr:'0x0b2c639c533813f4aa9d7837caf62653d097ff85', dec:6 }],
     base:     [{ symbol:'USDC', name:'USD Coin', addr:'0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', dec:6 }],
   };
 
   const COINGECKO_IDS = {
-    'ETH':'ethereum','WETH':'ethereum','WBTC':'bitcoin','BTC':'bitcoin',
+    'ETH':'ethereum','WETH':'ethereum','WBTC':'bitcoin','BTC':'bitcoin','BTCB':'bitcoin','WBNB':'binancecoin','FDUSD':'first-digital-usd',
     'USDC':'usd-coin','USDT':'tether','DAI':'dai','ARB':'arbitrum',
     'OP':'optimism','LINK':'chainlink','GMX':'gmx','BNB':'binancecoin','MATIC':'matic-network',
   };
@@ -899,7 +910,7 @@ Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<sp
     return (await r.json()).result;
   }
 
-  async function fetchChainAssets(chain) {
+  async function fetchChainAssets(chain, WALLET) {
     const results = [];
     const padded = WALLET.toLowerCase().replace('0x','').padStart(64,'0');
     try {
@@ -929,8 +940,15 @@ Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<sp
   async function fetchAssets() {
     try {
       await Promise.all([fetchPrices(), fetchTRM()]);
-      const results = await Promise.all(CHAINS.map(c => fetchChainAssets(c)));
-      allAssets = results.flat().filter(t => t && t.amount > 0.0001);
+      const results = await Promise.all(WALLETS.flatMap(w => CHAINS.map(c => fetchChainAssets(c, w))));
+      // Agrupa el mismo token de la misma cadena entre wallets
+      const merged = {};
+      results.flat().filter(t => t && t.amount > 0.0001).forEach(t => {
+        const k = t.chain + '|' + t.name + '|' + (t.protocol||'');
+        if (merged[k]) { merged[k].amount += t.amount; merged[k].valueUSD += t.valueUSD; }
+        else merged[k] = { ...t };
+      });
+      allAssets = Object.values(merged);
       if (!allAssets.length) { showDemoData(); return; }
       const totalUSD = allAssets.reduce((s,t) => s + t.valueUSD, 0);
       const totalCOP = totalUSD * TRM_LIVE;
