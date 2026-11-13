@@ -1,293 +1,75 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Iniciar Sesión — Sanse Capital</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg:#0b0e1a; --bg2:#0f1322; --sur:rgba(255,255,255,0.04);
-      --bd:rgba(255,255,255,0.08); --text:#e8eaf0; --mut:#6b7280; --dim:#374151;
-      --blu:#4f8ef7; --blud:rgba(79,142,247,0.07); --pur:#7c5cfc;
-      --tea:#2dd4bf; --grn:#10b981; --red:#ef4444;
-    }
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-    a{color:inherit;text-decoration:none}
-
-    /* ── BG LAYERS ── */
-    .bg-orb{position:fixed;inset:0;z-index:0;pointer-events:none;
-      background:radial-gradient(ellipse 600px 500px at 10% 60%,rgba(79,142,247,.09) 0%,transparent 60%),
-                 radial-gradient(ellipse 500px 400px at 90% 20%,rgba(124,92,252,.07) 0%,transparent 60%)}
-    .bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;
-      background-image:linear-gradient(rgba(79,142,247,.03) 1px,transparent 1px),
-                       linear-gradient(90deg,rgba(79,142,247,.03) 1px,transparent 1px);
-      background-size:52px 52px}
-
-    /* ── MOBILE: card centrada ── */
-    .page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px}
-
-    .card{width:100%;max-width:420px;background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:32px 24px;animation:up .45s ease both}
-    @keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-
-    /* brand */
-    .brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px}
-    .b-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--blu),var(--pur));border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-    .b-icon svg{width:15px;height:15px;fill:white}
-    .b-name{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
-    .b-name span{color:var(--blu)}
-
-    /* badge */
-    .badge{display:inline-flex;align-items:center;gap:6px;background:var(--blud);border:1px solid rgba(79,142,247,.2);border-radius:20px;padding:4px 14px;font-size:11px;font-family:'Space Mono',monospace;color:var(--blu);margin-bottom:16px;text-transform:uppercase;letter-spacing:.5px}
-    .dot{width:5px;height:5px;border-radius:50%;background:var(--grn);animation:blink 2s ease-in-out infinite}
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-
-    .ttl{font-size:22px;font-weight:700;margin-bottom:4px}
-    .sub{font-size:13px;color:var(--mut);margin-bottom:24px;line-height:1.5}
-
-    /* stats strip — mobile: 2 col grid */
-    .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:28px}
-    .sc{background:var(--sur);border:1px solid var(--bd);border-radius:10px;padding:14px;position:relative;overflow:hidden}
-    .sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blu),var(--pur));opacity:.6}
-    .sc-l{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);margin-bottom:5px}
-    .sc-v{font-family:'Space Mono',monospace;font-size:16px;font-weight:700}
-    .sc-v.tea{color:var(--tea)}
-
-    /* error */
-    .err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:11px 14px;font-size:13px;color:#f87171;margin-bottom:16px;display:none}
-    .err.show{display:block}
-    .err.pend{background:rgba(79,142,247,.08);border-color:rgba(79,142,247,.2);color:var(--blu)}
-    .pi{display:block;font-size:20px;margin-bottom:6px}
-    .pt{font-weight:600;font-size:13px;margin-bottom:3px}
-    .ps{font-size:12px;color:var(--mut);line-height:1.5}
-
-    /* fields */
-    .fld{margin-bottom:16px}
-    .lbl{display:block;font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-    .fw{position:relative}
-    .fi{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none}
-    .fi svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;display:block}
-    .fw input{width:100%;padding:13px 13px 13px 40px;background:var(--sur);border:1px solid var(--bd);border-radius:8px;color:var(--text);font-size:15px;font-family:'Space Grotesk',sans-serif;outline:none;transition:border-color .2s,background .2s;-webkit-appearance:none}
-    .fw input:focus{border-color:rgba(79,142,247,.5);background:rgba(79,142,247,.04)}
-    .fw input::placeholder{color:var(--dim)}
-    .fw input.eye-pad{padding-right:44px}
-    /* eye */
-    .eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--mut);padding:4px;display:flex;align-items:center;transition:color .2s;-webkit-tap-highlight-color:transparent}
-    .eye:hover,.eye:focus{color:var(--blu)}
-    .eye svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;display:block}
-
-    /* remember */
-    .rem{display:flex;align-items:center;gap:8px;margin-bottom:22px}
-    .rem label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mut);cursor:pointer;-webkit-tap-highlight-color:transparent}
-    .rem input{accent-color:var(--blu);width:16px;height:16px;flex-shrink:0}
-
-    /* btn */
-    .btn{width:100%;padding:15px;background:linear-gradient(135deg,var(--blu),var(--pur));border:none;border-radius:8px;color:#fff;font-size:15px;font-weight:600;font-family:'Space Grotesk',sans-serif;cursor:pointer;position:relative;transition:opacity .2s,transform .15s;overflow:hidden;-webkit-tap-highlight-color:transparent}
-    .btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.1),transparent 50%)}
-    .btn:active{transform:scale(.98)}
-    .btn:disabled{opacity:.5;cursor:not-allowed}
-    .btn.ld{color:transparent}
-    .btn.ld::after{content:'';position:absolute;top:50%;left:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-    .div{display:flex;align-items:center;gap:10px;margin:18px 0}
-    .div-l{flex:1;height:1px;background:var(--bd)}
-    .div-t{font-size:12px;color:var(--dim)}
-
-    .ft{text-align:center;font-size:13px;color:var(--mut);margin-top:16px}
-    .ft a{color:var(--blu);font-weight:500}
-
-    .back{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:18px;font-size:12px;color:var(--dim);transition:color .2s}
-    .back:hover{color:var(--mut)}
-    .back svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
-
-    .sec-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:24px;padding-top:20px;border-top:1px solid var(--bd)}
-    .si{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--dim)}
-    .si svg{width:11px;height:11px;stroke:var(--tea);fill:none;stroke-width:2}
-    .sp{width:1px;height:10px;background:var(--bd)}
-
-    /* ── TABLET/DESKTOP: two-column ── */
-    @media(min-width:768px){
-      .page{flex-direction:row;justify-content:center;align-items:stretch;padding:0;gap:0}
-      /* left panel */
-      .left-panel{display:flex;flex-direction:column;justify-content:center;flex:1;max-width:480px;padding:60px 48px;position:relative;overflow:hidden;background:linear-gradient(135deg,#0d1020 0%,#090c18 100%)}
-      .left-panel::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(79,142,247,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(79,142,247,.05) 1px,transparent 1px);background-size:48px 48px}
-      .left-panel::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 600px 500px at -10% 60%,rgba(79,142,247,.13) 0%,transparent 60%),radial-gradient(ellipse 400px 400px at 110% 20%,rgba(124,92,252,.1) 0%,transparent 60%)}
-      .lp-inner{position:relative;z-index:1}
-      .lp-brand{display:flex;align-items:center;gap:12px;margin-bottom:56px}
-      .lp-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--blu),var(--pur));border-radius:10px;display:flex;align-items:center;justify-content:center}
-      .lp-icon svg{width:17px;height:17px;fill:white}
-      .lp-name{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
-      .lp-name span{color:var(--blu)}
-      .lp-h{font-size:38px;font-weight:700;line-height:1.1;margin-bottom:20px;letter-spacing:-.3px}
-      .grad{background:linear-gradient(135deg,var(--blu) 0%,var(--pur) 55%,var(--tea) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-      .lp-sub{font-size:14px;color:var(--mut);line-height:1.75;max-width:360px;margin-bottom:40px}
-      .lp-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:40px}
-      .lp-proto{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-      .lp-plbl{font-size:11px;color:var(--dim)}
-      .lp-pb{background:var(--sur);border:1px solid var(--bd);border-radius:20px;padding:5px 14px;font-size:11px;font-family:'Space Mono',monospace;color:var(--mut);display:flex;align-items:center;gap:6px}
-      /* right panel — card becomes full height */
-      .page{overflow:hidden}
-      .card-wrap{flex:1;max-width:480px;display:flex;align-items:center;justify-content:center;padding:40px 48px;background:var(--bg2);border-left:1px solid var(--bd)}
-      .card{border:none;background:transparent;padding:0;max-width:360px;border-radius:0}
-      /* hide mobile stats in card when desktop shows left panel */
-      .mobile-stats-only{display:none}
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Whitelist — Sanse</title>
+<meta name="description" content="Únete a la whitelist de la beta de Sanse: tus pesos, on-chain.">
+<link rel="icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:#FAFAF8;color:#0B0B0C;font-family:Inter,sans-serif;display:flex;flex-direction:column}
+a{color:#0B0B0C}
+header{padding:20px}
+.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font-family:'Inter Tight',sans-serif;font-weight:700;font-size:19px}
+.brand span{width:30px;height:30px;border-radius:9px;background:#0B0B0C;display:inline-flex;align-items:center;justify-content:center}
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{width:100%;max-width:480px;background:#fff;border:1px solid #ECECE8;border-radius:28px;padding:40px}
+.tag{display:inline-block;background:#F6F0DE;color:#6E5A1F;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:500;margin-bottom:20px}
+h1{font-family:'Inter Tight',sans-serif;font-size:40px;font-weight:600;letter-spacing:-.04em;line-height:1.05;margin:0 0 12px}
+p{color:#6B6B70;line-height:1.55;margin:0 0 28px}
+label{display:block;font-size:14px;font-weight:500;margin-bottom:8px}
+input[type=email]{width:100%;min-height:52px;border:1px solid #E2E2DD;border-radius:14px;padding:0 16px;font-size:16px;font-family:inherit;background:#FAFAF8}
+input[type=email]:focus{outline:2px solid #0B0B0C;outline-offset:1px}
+.hp{position:absolute;left:-9999px}
+button{margin-top:14px;width:100%;min-height:52px;border:0;border-radius:999px;background:#0B0B0C;color:#fff;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer}
+button[disabled]{opacity:.6;cursor:default}
+.msg{margin-top:16px;font-size:14px;min-height:20px}
+.ok{color:#1F5E37}.err{color:#A3261B}
+.note{margin-top:24px;padding-top:20px;border-top:1px solid #ECECE8;font-size:13px;color:#6B6B70;line-height:1.55}
+</style>
 </head>
 <body>
-  <div class="bg-orb"></div>
-  <div class="bg-grid"></div>
-
-  <div class="page">
-    <!-- LEFT PANEL (desktop only, hidden on mobile via CSS) -->
-    <div class="left-panel" style="display:none" id="lpanel">
-      <div class="lp-inner">
-        <div class="lp-brand">
-          <div class="lp-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
-          <div class="lp-name">SANSE <span>CAPITAL</span></div>
-        </div>
-        <div class="lp-h">Gestión de<br><span class="grad">Inversiones</span><br>Privadas</div>
-        <p class="lp-sub">Rendimientos verificables con gestión transparente on-chain. Accede a tu portafolio en tiempo real.</p>
-        <div class="lp-stats">
-          <div class="sc"><div class="sc-l">Capital Gestionado</div><div class="sc-v">$30M+ <small style="font-size:11px;color:var(--mut)">COP</small></div></div>
-          <div class="sc"><div class="sc-l">Usuarios Activos</div><div class="sc-v">20+</div></div>
-          <div class="sc"><div class="sc-l">Rend. Mensual</div><div class="sc-v tea">~2.1%</div></div>
-          <div class="sc"><div class="sc-l">Verificación</div><div class="sc-v tea" style="font-size:13px">✓ On-Chain</div></div>
-        </div>
-        <div class="lp-proto">
-          <span class="lp-plbl">Estado</span>
-          <div class="lp-pb"><div class="dot"></div>Operacional</div>
-          <div class="lp-pb">Bogotá, CO</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT / MAIN CARD -->
-    <div class="card-wrap" id="cwrap">
-      <div class="card">
-        <!-- brand (mobile only) -->
-        <div class="brand">
-          <div class="b-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
-          <div class="b-name">SANSE <span>CAPITAL</span></div>
-        </div>
-
-        <!-- stats strip (mobile only) -->
-        <div class="stats mobile-stats-only">
-          <div class="sc"><div class="sc-l">Capital</div><div class="sc-v">$30M+</div></div>
-          <div class="sc"><div class="sc-l">Usuarios</div><div class="sc-v">20+</div></div>
-          <div class="sc"><div class="sc-l">Rend. mensual</div><div class="sc-v tea">~2.1%</div></div>
-          <div class="sc"><div class="sc-l">Verificación</div><div class="sc-v tea" style="font-size:12px">✓ On-Chain</div></div>
-        </div>
-
-        <div class="badge"><div class="dot"></div>Acceso Seguro</div>
-        <h1 class="ttl">Bienvenido de vuelta</h1>
-        <p class="sub">Ingresa a tu cuenta para acceder a tu dashboard</p>
-
-        <div class="err" id="errorMsg"></div>
-
-        <div class="fld">
-          <label class="lbl">Correo electrónico</label>
-          <div class="fw">
-            <span class="fi"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
-            <input type="email" id="login-email" placeholder="tu@correo.com" autocomplete="email" inputmode="email">
-          </div>
-        </div>
-
-        <div class="fld">
-          <label class="lbl">Contraseña</label>
-          <div class="fw">
-            <span class="fi"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-            <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" class="eye-pad">
-            <button class="eye" type="button" onclick="togglePass('login-password',this)" aria-label="Mostrar contraseña">
-              <svg id="ei" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="rem">
-          <label><input type="checkbox" id="remember-me" checked> Recordarme</label>
-        </div>
-
-        <button class="btn" id="loginBtn" onclick="handleLogin()">Iniciar Sesión</button>
-
-        <div class="div"><div class="div-l"></div><span class="div-t">o</span><div class="div-l"></div></div>
-        <div class="ft">¿No tienes cuenta? <a href="register.html">Regístrate aquí</a></div>
-        <a href="index.html" class="back">
-          <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-          Volver al inicio
-        </a>
-        <div class="sec-row">
-          <div class="si"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>SSL</div>
-          <div class="sp"></div>
-          <div class="si"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>JWT</div>
-          <div class="sp"></div>
-          <div class="si"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>15min</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Show left panel on desktop
-    function layoutCheck(){
-      const lp=document.getElementById('lpanel');
-      const cw=document.getElementById('cwrap');
-      const ms=document.querySelectorAll('.mobile-stats-only');
-      if(window.innerWidth>=768){
-        lp.style.display='flex';lp.style.flexDirection='column';lp.style.justifyContent='center';
-        ms.forEach(el=>el.style.display='none');
-      } else {
-        lp.style.display='none';
-        ms.forEach(el=>el.style.display='grid');
-      }
-    }
-    layoutCheck();
-    window.addEventListener('resize',layoutCheck);
-
-    function togglePass(id,btn){
-      const inp=document.getElementById(id);
-      const show=inp.type==='password';
-      inp.type=show?'text':'password';
-      btn.querySelector('svg').innerHTML=show
-        ?'<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
-        :'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-      btn.style.color=show?'var(--blu)':'var(--mut)';
-    }
-
-    const API_BASE='https://sanse-backend-production.up.railway.app/api';
-
-    async function handleLogin(){
-      const email=document.getElementById('login-email').value.trim();
-      const password=document.getElementById('login-password').value;
-      const remember=document.getElementById('remember-me').checked;
-      const btn=document.getElementById('loginBtn');
-      const err=document.getElementById('errorMsg');
-      err.className='err';
-      if(!email||!password){err.textContent='Ingresa tu correo y contraseña.';err.classList.add('show');return;}
-      btn.disabled=true;btn.classList.add('ld');
-      try{
-        const r=await fetch(`${API_BASE}/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
-        const d=await r.json();
-        if(!r.ok){
-          if(d.pending){err.innerHTML='<span class="pi">⏳</span><div class="pt">Cuenta en revisión</div><div class="ps">Tu registro está siendo revisado. Hasta 24 horas hábiles.</div>';err.classList.add('show','pend');btn.classList.remove('ld');btn.disabled=false;return;}
-          if(d.blocked){err.textContent='🚫 Cuenta suspendida. Contacta al administrador.';err.classList.add('show');btn.classList.remove('ld');btn.disabled=false;return;}
-          throw new Error(d.error||d.message||'Credenciales inválidas');
-        }
-        const s=remember?localStorage:sessionStorage;
-        s.setItem('sanse_access_token',d.accessToken);
-        s.setItem('sanse_refresh_token',d.refreshToken);
-        s.setItem('sanse_user',JSON.stringify(d.user));
-        window.location.href=d.user.role==='admin'?'admin.html':'dashboard.html';
-      }catch(e){btn.classList.remove('ld');btn.disabled=false;err.textContent=e.message||'Error de conexión.';err.classList.add('show');}
-    }
-
-    document.getElementById('login-password').addEventListener('keydown',e=>{if(e.key==='Enter')handleLogin()});
-    document.getElementById('login-email').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('login-password').focus()});
-    const t=localStorage.getItem('sanse_access_token')||sessionStorage.getItem('sanse_access_token');
-    if(t)window.location.href='dashboard.html';
-  </script>
+<header><a class="brand" href="index.html"><span><img src="assets/logo-icon-white.png" alt="" height="18"></span>Sanse</a></header>
+<main>
+<div class="card">
+<span class="tag">Beta · Próximamente</span>
+<h1>Únete a la whitelist</h1>
+<p>Estamos preparando la nueva plataforma. Deja tu correo y te avisamos cuando abra la beta. Los primeros 500 entran como beta testers.</p>
+<form id="wl" novalidate>
+<label for="email">Correo electrónico</label>
+<input id="email" name="email" type="email" autocomplete="email" placeholder="tu@correo.com" required>
+<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+<button id="btn" type="submit">Unirme a la whitelist</button>
+<div id="msg" class="msg" role="status" aria-live="polite"></div>
+</form>
+<div class="note">El inicio de sesión y el registro están deshabilitados mientras preparamos la beta. Si eres socio, puedes consultar tu saldo por el bot de WhatsApp.</div>
+</div>
+</main>
+<script>
+// URL de la Web App de Google Apps Script (ver scripts/whitelist-apps-script.gs)
+const WHITELIST_URL = 'PEGAR_AQUI_URL_APPS_SCRIPT';
+const f = document.getElementById('wl'), btn = document.getElementById('btn'), msg = document.getElementById('msg');
+f.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = f.email.value.trim().toLowerCase();
+  msg.className = 'msg'; msg.textContent = '';
+  if (f.website.value) return;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { msg.className = 'msg err'; msg.textContent = 'Escribe un correo válido.'; return; }
+  btn.disabled = true; btn.textContent = 'Enviando…';
+  try {
+    const body = new URLSearchParams({ email, origen: document.referrer || 'directo' });
+    await fetch(WHITELIST_URL, { method: 'POST', mode: 'no-cors', body });
+    f.reset();
+    msg.className = 'msg ok'; msg.textContent = '¡Listo! Estás en la whitelist. Te escribiremos cuando abra la beta.';
+    btn.textContent = 'Registrado';
+  } catch (_) {
+    msg.className = 'msg err'; msg.textContent = 'No pudimos guardar tu correo. Intenta de nuevo.';
+    btn.disabled = false; btn.textContent = 'Unirme a la whitelist';
+  }
+});
+</script>
 </body>
 </html>
