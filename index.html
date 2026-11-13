@@ -1,1027 +1,269 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#070b14">
-  <title>Sanse Capital — Ahorro e inversión en pesos, ahora en WhatsApp</title>
-  <meta name="description" content="Sanse Capital SAS — Fondo privado de ahorro e inversión en pesos colombianos. Consulta tu saldo LP COP, Fondo DGP y préstamos desde WhatsApp. Activos verificables en blockchain. Bogotá, Colombia.">
-  <meta property="og:title" content="Sanse Capital — Tu saldo, ahora en WhatsApp">
-  <meta property="og:description" content="Consulta tu LP COP, Fondo DGP y préstamos escribiéndole a nuestro bot de WhatsApp. Activos verificables en blockchain.">
-  <meta property="og:image" content="https://sansecapital.com/favicon-256.png">
-  <meta property="og:url" content="https://sansecapital.com/">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-  <style>
-    :root {
-      --bg: #070b14;
-      --bg-2: #0c1220;
-      --bg-3: #111a2d;
-      --surface: rgba(255,255,255,0.04);
-      --surface-2: rgba(255,255,255,0.07);
-      --line: rgba(255,255,255,0.08);
-      --line-2: rgba(255,255,255,0.16);
-      --text: #eef1f7;
-      --text-2: #b9c0d0;
-      --muted: #7d869b;
-      --blue: #5b9eff;
-      --teal: #2dd4bf;
-      --violet: #8b6ffc;
-      --wa: #25d366;
-      --wa-deep: #0b3d2a;
-      --amber: #f5b544;
-      --red: #ef5b5b;
-      --r: 18px;
-      --r-sm: 12px;
-      --display: 'Bricolage Grotesque', system-ui, sans-serif;
-      --body: 'Inter', system-ui, sans-serif;
-      --mono: 'JetBrains Mono', ui-monospace, monospace;
-      --max: 1180px;
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; overflow-x: hidden; }
-    body { font-family: var(--body); background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
-    a { color: inherit; }
-    img { max-width: 100%; display: block; }
-    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
-    .grad { background: linear-gradient(100deg, var(--blue), var(--teal)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .grad-wa { background: linear-gradient(100deg, #6ef0a0, var(--wa)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .mono { font-family: var(--mono); }
-
-    /* ── Buttons ── */
-    .btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; border-radius: 999px; font-weight: 600; font-size: 15px; text-decoration: none; border: 1px solid transparent; cursor: pointer; transition: transform .15s, background .2s, border-color .2s; font-family: var(--body); }
-    .btn:hover { transform: translateY(-1px); }
-    .btn-wa { background: var(--wa); color: #04170d; }
-    .btn-wa:hover { background: #3be07a; }
-    .btn-primary { background: var(--text); color: var(--bg); }
-    .btn-ghost { border-color: var(--line-2); color: var(--text); background: transparent; }
-    .btn-ghost:hover { border-color: var(--text-2); }
-    .btn svg { width: 18px; height: 18px; flex: none; }
-
-    /* ── Nav ── */
-    nav { position: fixed; inset: 0 0 auto 0; z-index: 50; background: rgba(7,11,20,.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
-    .nav-in { display: flex; align-items: center; justify-content: space-between; height: 68px; gap: 28px; }
-    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--display); font-weight: 800; letter-spacing: .04em; font-size: 17px; }
-    .logo img { width: 30px; height: 30px; object-fit: contain; }
-    .logo span { color: var(--muted); font-weight: 500; }
-    .nav-links { display: flex; gap: 4px; list-style: none; }
-    .nav-links a { white-space: nowrap; text-decoration: none; font-size: 14px; color: var(--text-2); padding: 8px 12px; border-radius: 999px; transition: background .2s, color .2s; display: inline-flex; align-items: center; gap: 6px; }
-    .nav-links a:hover { color: var(--text); background: var(--surface); }
-    .pill-new { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; background: var(--wa); color: #04170d; padding: 2px 7px; border-radius: 999px; }
-    .nav-right { display: flex; gap: 8px; }
-    .nav-right .btn { padding: 9px 16px; font-size: 14px; white-space: nowrap; }
-    .burger { display: none; background: none; border: 1px solid var(--line-2); border-radius: 10px; width: 42px; height: 42px; color: var(--text); cursor: pointer; }
-    .burger svg { width: 20px; height: 20px; }
-    .mob { display: none; position: fixed; top: 68px; inset-inline: 0; z-index: 49; background: var(--bg-2); border-bottom: 1px solid var(--line); padding: 12px 24px 24px; }
-    .mob.open { display: block; }
-    .mob a { display: block; padding: 13px 0; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--text-2); }
-    .mob .mob-btns { display: flex; gap: 10px; margin-top: 18px; }
-    .mob .mob-btns .btn { flex: 1; justify-content: center; border-bottom: none; }
-
-    /* ── Hero ── */
-    .hero { position: relative; padding: 140px 0 90px; overflow: hidden; }
-    .hero::before { content: ''; position: absolute; width: 900px; height: 900px; right: -300px; top: -260px; background: radial-gradient(circle, rgba(37,211,102,.16), transparent 60%); pointer-events: none; }
-    .hero::after { content: ''; position: absolute; width: 800px; height: 800px; left: -360px; bottom: -420px; background: radial-gradient(circle, rgba(91,158,255,.14), transparent 60%); pointer-events: none; }
-    .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.1fr .9fr; gap: 60px; align-items: center; }
-    .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-2); border: 1px solid var(--line-2); padding: 6px 14px 6px 6px; border-radius: 999px; background: var(--surface); text-decoration: none; }
-    .eyebrow b { background: var(--wa); color: #04170d; font-size: 11px; letter-spacing: .05em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }
-    h1 { font-family: var(--display); font-weight: 800; font-size: clamp(42px, 6vw, 76px); line-height: 1.02; letter-spacing: -.025em; margin: 22px 0 22px; }
-    .lead { font-size: clamp(17px, 1.6vw, 19px); color: var(--text-2); max-width: 540px; }
-    .hero-btns { display: flex; flex-wrap: wrap; gap: 12px; margin: 32px 0 40px; }
-    .hero-facts { display: grid; grid-template-columns: repeat(3, auto); gap: 28px; justify-content: start; }
-    .fact b { display: block; font-family: var(--display); font-size: 26px; font-weight: 700; }
-    .fact span { font-size: 13px; color: var(--muted); }
-
-    /* ── Phone mock ── */
-    .phone-wrap { display: flex; justify-content: center; }
-    .phone { width: 340px; max-width: 100%; border-radius: 42px; padding: 10px; background: linear-gradient(160deg, #2a3242, #12161f); box-shadow: 0 40px 100px -20px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.08) inset; transform: rotate(2deg); }
-    .screen { border-radius: 34px; overflow: hidden; background: #0b141a; height: 600px; display: flex; flex-direction: column; }
-    .wa-head { display: flex; align-items: center; gap: 10px; padding: 34px 14px 12px; background: #1f2c34; }
-    .wa-av { width: 38px; height: 38px; border-radius: 50%; background: var(--bg-3); display: grid; place-items: center; overflow: hidden; border: 1px solid rgba(255,255,255,.1); }
-    .wa-av img { width: 26px; height: 26px; }
-    .wa-name { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
-    .wa-name svg { width: 14px; height: 14px; color: var(--wa); }
-    .wa-status { font-size: 12px; color: #8696a0; }
-    .chat { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; overflow: hidden; background-color: #0b141a; background-image: radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px); background-size: 16px 16px; }
-    .msg { flex: none; max-width: 82%; padding: 7px 10px 6px; border-radius: 10px; font-size: 13.5px; line-height: 1.42; opacity: 0; transform: translateY(8px); transition: opacity .35s, transform .35s; white-space: pre-line; }
-    .msg.show { opacity: 1; transform: none; }
-    .msg.in { background: #1f2c34; align-self: flex-start; border-top-left-radius: 2px; }
-    .msg.out { background: #005c4b; align-self: flex-end; border-top-right-radius: 2px; }
-    .msg .t { display: block; text-align: right; font-size: 10.5px; color: rgba(255,255,255,.5); margin-top: 2px; }
-    .msg .row { display: flex; justify-content: space-between; gap: 16px; font-family: var(--mono); font-size: 12.5px; }
-    .msg .row span:first-child { color: #aebac1; font-family: var(--body); }
-    .typing { align-self: flex-start; background: #1f2c34; padding: 10px 14px; border-radius: 10px; display: none; gap: 4px; }
-    .typing.show { display: flex; }
-    .typing i { width: 6px; height: 6px; border-radius: 50%; background: #8696a0; animation: blink 1s infinite; }
-    .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
-    @keyframes blink { 0%,100% { opacity: .3 } 50% { opacity: 1 } }
-    .wa-input { display: flex; align-items: center; gap: 8px; padding: 10px; background: #0b141a; }
-    .wa-input div { flex: 1; background: #1f2c34; border-radius: 999px; padding: 10px 14px; font-size: 13px; color: #8696a0; }
-    .wa-input span { width: 40px; height: 40px; border-radius: 50%; background: var(--wa); display: grid; place-items: center; color: #04170d; }
-    .wa-input svg { width: 18px; height: 18px; }
-    .demo-note { text-align: center; font-size: 12px; color: var(--muted); margin-top: 16px; }
-
-    /* ── News strip ── */
-    .news { border-block: 1px solid var(--line); background: var(--bg-2); }
-    .news-in { display: grid; grid-template-columns: repeat(4, 1fr); }
-    .news-item { padding: 26px 24px; border-left: 1px solid var(--line); display: flex; gap: 14px; align-items: flex-start; }
-    .news-item:first-child { border-left: none; }
-    .ni-ico { width: 38px; height: 38px; flex: none; border-radius: 10px; display: grid; place-items: center; background: var(--surface-2); }
-    .ni-ico svg { width: 19px; height: 19px; }
-    .news-item h3 { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
-    .news-item p { font-size: 13px; color: var(--muted); line-height: 1.45; }
-
-    /* ── Sections ── */
-    section { padding: 110px 0; }
-    .kicker { font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--teal); margin-bottom: 14px; }
-    .kicker.wa { color: var(--wa); }
-    h2 { font-family: var(--display); font-weight: 800; font-size: clamp(32px, 4.2vw, 52px); line-height: 1.05; letter-spacing: -.02em; margin-bottom: 18px; }
-    .sub { color: var(--text-2); font-size: 17px; max-width: 620px; }
-    .head { margin-bottom: 56px; }
-    .head.center { text-align: center; } .head.center .sub { margin-inline: auto; }
-
-    /* ── Bot section ── */
-    #bot { background: linear-gradient(180deg, var(--bg) 0%, #08160f 50%, var(--bg) 100%); }
-    .bot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-    .bcard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 26px; transition: border-color .2s, transform .2s; }
-    .bcard:hover { border-color: rgba(37,211,102,.35); transform: translateY(-2px); }
-    .bcard .cmd { display: inline-block; font-family: var(--mono); font-size: 12px; color: var(--wa); background: rgba(37,211,102,.1); border: 1px solid rgba(37,211,102,.2); padding: 3px 9px; border-radius: 6px; margin-bottom: 18px; }
-    .bcard h3 { font-family: var(--display); font-size: 21px; font-weight: 700; margin-bottom: 8px; }
-    .bcard p { font-size: 14.5px; color: var(--text-2); }
-    .bot-steps { margin-top: 56px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 0; align-items: stretch; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg-2); overflow: hidden; }
-    .bstep { padding: 28px; border-right: 1px solid var(--line); }
-    .bstep .n { font-family: var(--mono); font-size: 13px; color: var(--muted); }
-    .bstep h4 { font-size: 17px; margin: 8px 0 4px; }
-    .bstep p { font-size: 14px; color: var(--muted); }
-    .bstep-cta { padding: 28px; display: flex; align-items: center; justify-content: center; background: rgba(37,211,102,.06); }
-    .secure { margin-top: 18px; display: flex; gap: 12px; align-items: flex-start; font-size: 14px; color: var(--text-2); background: var(--surface); border: 1px dashed var(--line-2); border-radius: var(--r-sm); padding: 16px 18px; }
-    .secure svg { width: 20px; height: 20px; color: var(--amber); flex: none; margin-top: 2px; }
-
-    /* ── Alianza Kanali ── */
-    #alianza { padding-top: 0; }
-    .ally { display: grid; grid-template-columns: .95fr 1.05fr; gap: 0; border: 1px solid var(--line); border-radius: 24px; overflow: hidden; background: var(--bg-2); }
-    .ally-l { padding: 48px; display: flex; flex-direction: column; justify-content: center; gap: 28px; background: radial-gradient(ellipse at 20% 0%, rgba(37,211,102,.14), transparent 60%), var(--bg-3); border-right: 1px solid var(--line); }
-    .ally-logos { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
-    .ally-badge { height: 76px; padding: 0 22px; border-radius: 16px; display: grid; place-items: center; }
-    .ally-badge.sanse { background: var(--bg); border: 1px solid var(--line-2); gap: 10px; grid-auto-flow: column; font-family: var(--display); font-weight: 800; letter-spacing: .04em; font-size: 17px; }
-    .ally-badge.sanse img { width: 30px; height: 30px; object-fit: contain; }
-    .ally-badge.kanali { background: #fff; }
-    .ally-badge.kanali img { height: 46px; width: auto; }
-    .ally-x { font-family: var(--display); font-size: 26px; color: var(--muted); }
-    .ally-l h2 { margin: 0; }
-    .ally-l .sub { font-size: 16px; }
-    .ally-r { padding: 48px; display: grid; gap: 22px; align-content: center; }
-    .ally-item { display: flex; gap: 16px; align-items: flex-start; }
-    .ally-item .ico { width: 42px; height: 42px; flex: none; border-radius: 12px; display: grid; place-items: center; background: rgba(37,211,102,.1); color: var(--wa); border: 1px solid rgba(37,211,102,.2); }
-    .ally-item .ico svg { width: 20px; height: 20px; }
-    .ally-item h3 { font-size: 17px; font-weight: 600; margin-bottom: 3px; }
-    .ally-item p { font-size: 14.5px; color: var(--text-2); }
-    .ally-link { font-size: 14px; color: var(--text-2); }
-    .ally-link a { color: var(--wa); }
-    .by-kanali { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin-top: 6px; justify-content: center; }
-    .by-kanali img { height: 18px; width: auto; background: #fff; border-radius: 4px; padding: 2px 5px; box-sizing: content-box; }
-    @media (max-width: 860px) {
-      .ally { grid-template-columns: 1fr; }
-      .ally-l { border-right: none; border-bottom: 1px solid var(--line); }
-    }
-    @media (max-width: 600px) {
-      .ally-l, .ally-r { padding: 28px 22px; }
-      .ally-badge { height: 62px; padding: 0 16px; }
-      .ally-badge.kanali img { height: 36px; }
-      .ally-x { font-size: 20px; }
-    }
-
-    /* ── Products ── */
-    .prod-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
-    .prod { grid-column: span 2; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 30px; display: flex; flex-direction: column; position: relative; }
-    .prod.big { grid-column: span 3; }
-    .prod .tag { align-self: flex-start; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); color: var(--text-2); margin-bottom: 18px; }
-    .prod .tag.new { background: rgba(37,211,102,.14); color: var(--wa); }
-    .prod .tag.soon { background: rgba(245,181,68,.14); color: var(--amber); }
-    .prod h3 { font-family: var(--display); font-size: 26px; font-weight: 700; margin-bottom: 10px; letter-spacing: -.01em; }
-    .prod p { font-size: 15px; color: var(--text-2); }
-    .prod ul { list-style: none; margin-top: 16px; display: grid; gap: 8px; }
-    .prod li { font-size: 14px; color: var(--text-2); padding-left: 22px; position: relative; }
-    .prod li::before { content: ''; position: absolute; left: 4px; top: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
-    .rates { display: flex; gap: 10px; margin-top: auto; padding-top: 24px; flex-wrap: wrap; }
-    .rate { flex: 1; min-width: 110px; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 12px 14px; }
-    .rate b { display: block; font-family: var(--mono); font-size: 22px; font-weight: 500; }
-    .rate span { font-size: 12px; color: var(--muted); }
-    .prod .note { font-size: 12px; color: var(--muted); margin-top: 14px; }
-
-    /* ── Transparency ── */
-    #transparencia { background: var(--bg-2); border-block: 1px solid var(--line); }
-    .ticker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
-    .tk { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .tk-l { font-size: 13px; color: var(--muted); }
-    .tk-l b { color: var(--text); font-size: 15px; display: block; }
-    .tk-r { text-align: right; font-family: var(--mono); font-size: 14px; }
-    .chg { font-size: 12px; } .chg.up { color: var(--wa); } .chg.down { color: var(--red); }
-    .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
-    .kpi { background: var(--bg); border: 1px solid var(--line); border-radius: var(--r); padding: 24px; }
-    .kpi-l { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
-    .kpi-v { font-family: var(--mono); font-size: 30px; font-weight: 500; }
-    .kpi-s { font-size: 13px; color: var(--muted); margin-top: 4px; }
-    .chain-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-    .chain-tab { background: var(--surface); border: 1px solid var(--line); color: var(--text-2); padding: 7px 14px; border-radius: 999px; font-size: 13px; cursor: pointer; font-family: var(--body); }
-    .chain-tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
-    .assets-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); }
-    .assets-table { width: 100%; border-collapse: collapse; min-width: 720px; }
-    .assets-table th { text-align: left; font-size: 12px; font-weight: 500; color: var(--muted); padding: 14px 18px; border-bottom: 1px solid var(--line); text-transform: uppercase; letter-spacing: .06em; }
-    .assets-table td { padding: 14px 18px; border-bottom: 1px solid var(--line); font-size: 14px; }
-    .assets-table tr:last-child td { border-bottom: none; }
-    .tk-cell { display: flex; align-items: center; gap: 10px; }
-    .tk-icon { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 700; background: rgba(91,158,255,.12); color: var(--blue); border: 1px solid rgba(91,158,255,.25); }
-    .tk-sym { font-weight: 600; } .tk-name { font-size: 12px; color: var(--muted); }
-    .chain-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; background: var(--surface); padding: 4px 10px; border-radius: 999px; }
-    .chain-dot { width: 7px; height: 7px; border-radius: 50%; }
-    .wallet-link { margin-top: 14px; font-size: 13px; color: var(--muted); }
-    .wallet-link a { display: inline-block; word-break: break-all; font-family: var(--mono); font-size: 12px; }
-    .wallet-link a { color: var(--blue); }
-
-    /* ── Simulator ── */
-    .sim { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
-    .sim-l { padding: 36px; display: grid; gap: 22px; background: var(--surface); }
-    .sim-r { padding: 36px; background: linear-gradient(150deg, rgba(91,158,255,.14), rgba(45,212,191,.08)); display: flex; flex-direction: column; justify-content: center; }
-    .field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
-    .field input, .field select { width: 100%; background: var(--bg); border: 1px solid var(--line-2); color: var(--text); border-radius: var(--r-sm); padding: 13px 14px; font-size: 16px; font-family: var(--body); }
-    .field input:focus, .field select:focus { outline: 2px solid var(--blue); outline-offset: 1px; }
-    .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-    .seg button { background: var(--bg); border: 1px solid var(--line-2); color: var(--text-2); padding: 11px 6px; border-radius: var(--r-sm); font-family: var(--body); font-size: 14px; cursor: pointer; }
-    .seg button.on { background: var(--text); color: var(--bg); border-color: var(--text); }
-    .sim-r .l { font-size: 14px; color: var(--text-2); }
-    .sim-r .v { font-family: var(--mono); font-size: clamp(36px, 4.6vw, 54px); font-weight: 500; margin: 6px 0; }
-    .sim-r .tot { font-size: 16px; color: var(--text-2); }
-    .sim-r .disc { font-size: 12px; color: var(--muted); margin-top: 22px; }
-
-    /* ── Steps ── */
-    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; counter-reset: s; }
-    .step { border-top: 2px solid var(--line-2); padding-top: 22px; }
-    .step .n { font-family: var(--mono); color: var(--teal); font-size: 14px; }
-    .step h3 { font-family: var(--display); font-size: 21px; margin: 8px 0; }
-    .step p { color: var(--text-2); font-size: 15px; }
-
-    /* ── About ── */
-    .about { display: grid; grid-template-columns: .9fr 1.1fr; gap: 60px; align-items: start; }
-    .about p { color: var(--text-2); font-size: 16.5px; margin-bottom: 16px; }
-    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-    .tags span { font-size: 13px; border: 1px solid var(--line-2); padding: 6px 13px; border-radius: 999px; color: var(--text-2); }
-
-    /* ── FAQ ── */
-    .faq { max-width: 820px; margin: 0 auto; }
-    .faq details { border-bottom: 1px solid var(--line); }
-    .faq summary { list-style: none; cursor: pointer; padding: 22px 40px 22px 0; font-size: 17px; font-weight: 500; position: relative; }
-    .faq summary::-webkit-details-marker { display: none; }
-    .faq summary::after { content: '+'; position: absolute; right: 4px; top: 18px; font-size: 24px; color: var(--muted); transition: transform .2s; }
-    .faq details[open] summary::after { transform: rotate(45deg); }
-    .faq details p { color: var(--text-2); padding: 0 0 22px; font-size: 15.5px; }
-
-    /* ── CTA ── */
-    .cta { border-radius: 28px; padding: 64px 40px; text-align: center; background: radial-gradient(ellipse at top, rgba(37,211,102,.22), transparent 60%), var(--bg-2); border: 1px solid var(--line); }
-    .cta h2 { margin-bottom: 14px; }
-    .cta .sub { margin: 0 auto 30px; }
-    .cta .hero-btns { justify-content: center; margin: 0; }
-
-    /* ── Footer ── */
-    footer { padding: 56px 0 100px; border-top: 1px solid var(--line); margin-top: 110px; }
-    .foot { display: flex; justify-content: space-between; gap: 30px; flex-wrap: wrap; margin-bottom: 26px; }
-    .foot-links { display: flex; flex-wrap: wrap; gap: 6px 22px; }
-    .foot-links a { text-decoration: none; color: var(--text-2); font-size: 14px; }
-    .legal { font-size: 12.5px; color: var(--muted); max-width: 900px; }
-
-    /* ── Floating WA ── */
-    .wa-float { position: fixed; right: 20px; bottom: 20px; z-index: 60; display: inline-flex; align-items: center; gap: 10px; background: var(--wa); color: #04170d; text-decoration: none; font-weight: 600; font-size: 14px; padding: 13px 18px 13px 14px; border-radius: 999px; box-shadow: 0 12px 30px -8px rgba(37,211,102,.55); }
-    .wa-float svg { width: 22px; height: 22px; }
-
-    .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s, transform .6s; }
-    .reveal.in { opacity: 1; transform: none; }
-    @media (prefers-reduced-motion: reduce) { .reveal, .msg { opacity: 1; transform: none; transition: none; } .phone { transform: none; } }
-
-    /* ── Responsive ── */
-    @media (max-width: 1240px) { .nav-links { display: none; } .burger { display: grid; place-items: center; } }
-    @media (max-width: 1060px) {
-      .bot-grid { grid-template-columns: repeat(2, 1fr); }
-      .news-in { grid-template-columns: repeat(2, 1fr); }
-      .news-item:nth-child(3) { border-left: none; }
-      .news-item:nth-child(n+3) { border-top: 1px solid var(--line); }
-      .prod, .prod.big { grid-column: span 3; }
-      .steps { grid-template-columns: repeat(2, 1fr); row-gap: 36px; }
-    }
-    @media (max-width: 860px) {
-      .nav-right { display: none; }
-      .burger { display: grid; place-items: center; }
-      .hero { padding: 116px 0 70px; }
-      .hero-grid { grid-template-columns: 1fr; gap: 50px; }
-      .phone { transform: none; }
-      .bot-steps { grid-template-columns: 1fr; }
-      .bstep { border-right: none; border-bottom: 1px solid var(--line); }
-      .ticker { grid-template-columns: repeat(2, 1fr); }
-      .kpis { grid-template-columns: 1fr; }
-      .sim { grid-template-columns: 1fr; }
-      .about { grid-template-columns: 1fr; gap: 20px; }
-      section { padding: 80px 0; }
-    }
-    @media (max-width: 600px) {
-      .wrap { padding: 0 16px; }
-      .hero-facts { grid-template-columns: repeat(3, 1fr); gap: 14px; }
-      .fact b { font-size: 21px; }
-      .bot-grid, .news-in { grid-template-columns: 1fr; }
-      .news-item { border-left: none !important; border-top: 1px solid var(--line); padding: 20px 16px; }
-      .news-item:first-child { border-top: none; }
-      .prod, .prod.big { grid-column: span 6; padding: 24px; }
-      .steps { grid-template-columns: 1fr; }
-      .sim-l, .sim-r { padding: 24px; }
-      .cta { padding: 44px 20px; }
-      .hero-btns .btn { flex: 1 1 100%; justify-content: center; }
-      .wa-float span { display: none; }
-      .wa-float { padding: 14px; }
-      .screen { height: 560px; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sanse — Tus pesos, on-chain</title>
+<meta name="description" content="Deposita en pesos y accede a protocolos DeFi verificables. Únete a la whitelist de la beta.">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FAFAF8}
+a{color:#0B0B0C}a:hover{color:#6B6B70}
+.wrap{max-width:1160px;margin:0 auto;padding:0 28px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.gf{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px}
+.mrow{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 120px;align-items:center;gap:16px}
+.h1{font-size:96px}
+.pillnav{display:flex;gap:2px}
+.ni{display:inline-flex;align-items:center;gap:6px;padding:0 14px;min-height:40px;border-radius:999px;color:#3C3C40;text-decoration:none;font-size:15px}
+.ni:hover{background:#EFEFEC;color:#0B0B0C}
+.hm{}
+@media (max-width:900px){
+.g3,.g2{grid-template-columns:1fr}
+.g4{grid-template-columns:1fr 1fr}
+.gf{grid-template-columns:1fr 1fr}
+.mrow{grid-template-columns:1.6fr 1fr 100px}
+.hm{display:none}
+.pillnav{display:none}
+.h1{font-size:52px}
+.wrap{padding:0 20px}
+}
+</style>
 </head>
 <body>
+<div style="font-family: Inter, sans-serif; color: #0B0B0C; background: #FAFAF8; min-height: 100vh;">
 
-<!-- Ícono de WhatsApp reutilizable -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="i-wa" viewBox="0 0 24 24"><path fill="currentColor" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35zM12.05 21.8h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.9-9.88 2.64 0 5.12 1.03 6.99 2.9a9.82 9.82 0 0 1 2.89 6.99c0 5.45-4.44 9.88-9.89 9.88zm8.41-18.3A11.81 11.81 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.89 0-3.18-1.24-6.16-3.48-8.41z"/></symbol>
-</svg>
-
-<!-- ═════════ NAV ═════════ -->
-<nav>
-  <div class="wrap nav-in">
-    <a class="logo" href="#inicio"><img src="assets/logo-icon-nav.png" alt="">SANSE <span>CAPITAL</span></a>
-    <ul class="nav-links">
-      <li><a href="#bot">Bot WhatsApp <span class="pill-new">Nuevo</span></a></li>
-      <li><a href="#alianza">Alianza</a></li>
-      <li><a href="#productos">Productos</a></li>
-      <li><a href="#transparencia">Transparencia</a></li>
-      <li><a href="#simulador">Simulador</a></li>
-      <li><a href="#faq">FAQ</a></li>
-    </ul>
-    <div class="nav-right">
-            <a href="login.html" class="btn btn-primary">Unirme a la whitelist</a>
-    </div>
-    <button class="burger" onclick="toggleMenu()" aria-label="Abrir menú" aria-expanded="false" id="burger">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-    </button>
-  </div>
+<!-- NAV flotante tipo pill -->
+<header style="padding: 20px 0; position: sticky; top: 0; z-index: 5;">
+<div class="wrap">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border: 1px solid #ECECE8; border-radius: 999px; padding: 8px 8px 8px 20px;">
+<a href="index.html" aria-label="Sanse, inicio" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+<span style="width: 30px; height: 30px; border-radius: 9px; background: #0B0B0C; display: inline-flex; align-items: center; justify-content: center;"><img src="assets/logo-icon-white.png" alt="" style="height: 18px; width: auto;"></span>
+<span style="font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: -0.02em;">Sanse</span>
+</a>
+<nav class="pillnav" aria-label="Principal">
+<a class="ni" href="#productos">Productos <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></a>
+<a class="ni" href="#hoy">Socios</a>
+<a class="ni" href="#mercados">Mercados</a>
+<a class="ni" href="#transparencia">Transparencia</a>
+<a class="ni" href="dgp.html">Fondo DGP</a>
+<a class="ni" href="#comunidad">Comunidad <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></a>
 </nav>
-<div class="mob" id="mob">
-  <a href="#bot" onclick="toggleMenu()">Bot de WhatsApp <span class="pill-new">Nuevo</span></a>
-  <a href="#alianza" onclick="toggleMenu()">Alianza con Kanali</a>
-  <a href="#productos" onclick="toggleMenu()">Productos</a>
-  <a href="#transparencia" onclick="toggleMenu()">Transparencia</a>
-  <a href="#simulador" onclick="toggleMenu()">Simulador</a>
-  <a href="#como" onclick="toggleMenu()">Cómo funciona</a>
-  <a href="#faq" onclick="toggleMenu()">Preguntas frecuentes</a>
-  <a href="terminos.html">Términos y condiciones</a>
-  <div class="mob-btns">
-        <a href="login.html" class="btn btn-primary">Unirme a la whitelist</a>
-  </div>
+<div style="display: flex; gap: 6px; align-items: center;">
+<a href="login.html" style="text-decoration: none; background: #0B0B0C; color: #FFFFFF; font-weight: 500; font-size: 15px; padding: 0 20px; min-height: 44px; border-radius: 999px; display: inline-flex; align-items: center;">Unirme a la whitelist</a>
 </div>
-
-<!-- ═════════ HERO ═════════ -->
-<header class="hero" id="inicio">
-  <div class="wrap hero-grid">
-    <div>
-      <a class="eyebrow" href="#bot"><b>Nuevo</b> Bot de socios en WhatsApp ya disponible →</a>
-      <h1>Tu ahorro en pesos, ahora <span class="grad-wa">en WhatsApp.</span></h1>
-      <p class="lead">Consulta tu saldo de LP COP, Fondo DGP y tus préstamos en segundos, escribiéndonos por WhatsApp. Sin apps nuevas, sin esperar a fin de mes.</p>
-      <div class="hero-btns">
-        <a href="#" class="btn btn-wa" data-wa="Hola, quiero consultar mi saldo">
-          <svg><use href="#i-wa"/></svg> Hablar con el bot
-        </a>
-        <a href="login.html" class="btn btn-ghost">Quiero ser socio</a>
-      </div>
-      <div class="hero-facts">
-        <div class="fact"><b>2023</b><span>Operando desde</span></div>
-        <div class="fact"><b>20+</b><span>Socios activos</span></div>
-        <div class="fact"><b>100%</b><span>Activos on-chain</span></div>
-      </div>
-    </div>
-
-    <div>
-      <div class="phone-wrap">
-        <div class="phone" aria-label="Ejemplo de conversación con el bot de Sanse Capital en WhatsApp">
-          <div class="screen">
-            <div class="wa-head">
-              <div class="wa-av"><img src="assets/logo-icon-nav.png" alt=""></div>
-              <div>
-                <div class="wa-name">Sanse Capital <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1l2.6 2.2 3.4-.4.9 3.3 3 1.7-1.3 3.2 1.3 3.2-3 1.7-.9 3.3-3.4-.4L12 23l-2.6-2.2-3.4.4-.9-3.3-3-1.7L3.4 13 2.1 9.8l3-1.7.9-3.3 3.4.4z"/><path d="M10.5 15.5l-3-3 1.4-1.4 1.6 1.6 4.6-4.6 1.4 1.4z" fill="#0b141a"/></svg></div>
-                <div class="wa-status">bot de socios · en línea</div>
-              </div>
-            </div>
-            <div class="chat" id="chat">
-              <div class="msg out">Hola 👋 quiero ver mi saldo<span class="t">9:41</span></div>
-              <div class="msg in">¡Hola! Soy el asistente de Sanse Capital. Para proteger tu cuenta, escribe tu número de cédula.<span class="t">9:41</span></div>
-              <div class="msg out">10•••••482<span class="t">9:41</span></div>
-              <div class="msg in">Gracias. Ahora tu PIN de 4 dígitos 🔒<span class="t">9:41</span></div>
-              <div class="msg out">••••<span class="t">9:42</span></div>
-              <div class="msg in"><b>Tu resumen, Laura</b>
-<span class="row"><span>LP COP</span><span>$8.420.000</span></span><span class="row"><span>Fondo DGP</span><span>$3.150.000</span></span><span class="row"><span>Préstamo activo</span><span>$1.200.000</span></span>
-Escribe <b>2</b> para ver movimientos o <b>3</b> para solicitar un préstamo.<span class="t">9:42</span></div>
-              <div class="typing" id="typing"><i></i><i></i><i></i></div>
-            </div>
-            <div class="wa-input"><div>Escribe un mensaje</div><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></span></div>
-          </div>
-        </div>
-      </div>
-      <p class="demo-note">Conversación de ejemplo · datos ficticios</p>
-      <div class="by-kanali">En alianza con <img src="assets/logo-kanali.png" alt="Kanali"></div>
-    </div>
-  </div>
+</div>
+</div>
 </header>
 
-<!-- ═════════ NOVEDADES ═════════ -->
-<div class="news">
-  <div class="wrap news-in">
-    <div class="news-item">
-      <div class="ni-ico" style="color:var(--wa)"><svg><use href="#i-wa"/></svg></div>
-      <div><h3>Bot de socios</h3><p>Saldos y préstamos por WhatsApp, 24/7.</p></div>
-    </div>
-    <div class="news-item">
-      <div class="ni-ico" style="color:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></div>
-      <div><h3>Reporte mensual</h3><p>Cada mes recibes tu informe directo en WhatsApp.</p></div>
-    </div>
-    <div class="news-item">
-      <div class="ni-ico" style="color:var(--teal)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="12" r="5"/><circle cx="16" cy="12" r="5"/></svg></div>
-      <div><h3>Cadenas de ahorro</h3><p>Ahorro semanal en grupo, con orden y registro.</p></div>
-    </div>
-    <div class="news-item">
-      <div class="ni-ico" style="color:var(--amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg></div>
-      <div><h3>Préstamo rápido</h3><p>Crédito ágil respaldado por tu propio ahorro.</p></div>
-    </div>
-  </div>
-</div>
-
-<!-- ═════════ BOT ═════════ -->
-<section id="bot">
-  <div class="wrap">
-    <div class="head reveal">
-      <div class="kicker wa">Bot de socios · WhatsApp</div>
-      <h2>Todo tu fondo,<br>en un chat.</h2>
-      <p class="sub">Ya no necesitas abrir el dashboard ni escribirle a un asesor para saber cómo va tu plata. El bot te responde al instante con la misma información de tu cuenta.</p>
-    </div>
-
-    <div class="bot-grid">
-      <div class="bcard reveal">
-        <span class="cmd">saldo</span>
-        <h3>Saldo LP COP</h3>
-        <p>Tu capital y rendimientos acumulados en el producto de renta en pesos.</p>
-      </div>
-      <div class="bcard reveal">
-        <span class="cmd">dgp</span>
-        <h3>Fondo DGP</h3>
-        <p>El valor actual de tu participación en el fondo de mayor exposición.</p>
-      </div>
-      <div class="bcard reveal">
-        <span class="cmd">préstamos</span>
-        <h3>Tus préstamos</h3>
-        <p>Saldo pendiente, próxima cuota y estado de tus créditos activos.</p>
-      </div>
-      <div class="bcard reveal">
-        <span class="cmd">reporte</span>
-        <h3>Reporte mensual</h3>
-        <p>Recibe el informe del mes con el desempeño de tus productos.</p>
-      </div>
-    </div>
-
-    <div class="bot-steps reveal">
-      <div class="bstep"><span class="n">01</span><h4>Escríbenos</h4><p>Guarda el número de Sanse Capital y envía un “Hola”.</p></div>
-      <div class="bstep"><span class="n">02</span><h4>Verifica tu identidad</h4><p>Ingresa tu cédula y tu PIN personal de socio.</p></div>
-      <div class="bstep"><span class="n">03</span><h4>Consulta</h4><p>Elige del menú qué quieres ver. Respuesta inmediata.</p></div>
-      <div class="bstep-cta">
-        <a href="#" class="btn btn-wa" data-wa="Hola, quiero consultar mi saldo"><svg><use href="#i-wa"/></svg> Abrir WhatsApp</a>
-      </div>
-    </div>
-
-    <div class="secure reveal">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      <div><b>Tu seguridad primero.</b> El bot solo muestra información después de verificar cédula y PIN. Sanse Capital nunca te pedirá contraseñas bancarias, códigos de verificación ni transferencias a cuentas diferentes a las oficiales por este chat. ¿Aún no tienes PIN? Pídelo a tu asesor o desde tu dashboard.</div>
-    </div>
-  </div>
-</section>
-
-<!-- ═════════ ALIANZA KANALI ═════════ -->
-<section id="alianza">
-  <div class="wrap">
-    <div class="ally reveal">
-      <div class="ally-l">
-        <div class="ally-logos">
-          <div class="ally-badge sanse"><img src="assets/logo-icon-nav.png" alt="">SANSE</div>
-          <span class="ally-x">×</span>
-          <div class="ally-badge kanali"><img src="assets/logo-kanali.png" alt="Kanali"></div>
-        </div>
-        <div>
-          <div class="kicker wa">Alianza tecnológica</div>
-          <h2>Sanse Capital<br>+ Kanali</h2>
-        </div>
-        <p class="sub">Nos aliamos con Kanali, empresa colombiana especializada en atención por WhatsApp, para que nuestros socios tengan su información a un mensaje de distancia.</p>
-      </div>
-      <div class="ally-r">
-        <div class="ally-item">
-          <div class="ico"><svg><use href="#i-wa"/></svg></div>
-          <div><h3>WhatsApp Business oficial</h3><p>El bot funciona sobre la plataforma oficial de WhatsApp Business de Meta, conectada a través de Kanali, proveedor tecnológico autorizado.</p></div>
-        </div>
-        <div class="ally-item">
-          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-          <div><h3>Respuestas a cualquier hora</h3><p>Consulta tu saldo y tus préstamos de día o de noche, sin esperar a que un asesor esté disponible.</p></div>
-        </div>
-        <div class="ally-item">
-          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
-          <div><h3>Acceso protegido</h3><p>Antes de mostrar cualquier dato, el bot verifica tu identidad con tu cédula y tu PIN de socio.</p></div>
-        </div>
-        <p class="ally-link">Conoce más sobre nuestro aliado en <a href="https://www.kanalicallcenter.com" target="_blank" rel="noopener">kanalicallcenter.com</a></p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═════════ PRODUCTOS ═════════ -->
-<section id="productos">
-  <div class="wrap">
-    <div class="head reveal">
-      <div class="kicker">Productos</div>
-      <h2>Elige cómo hacer<br>crecer tus <span class="grad">pesos</span>.</h2>
-      <p class="sub">Desde la opción más estable hasta la de mayor potencial, más herramientas de ahorro y crédito para socios.</p>
-    </div>
-
-    <div class="prod-grid">
-      <article class="prod big reveal">
-        <span class="tag">Renta en pesos</span>
-        <h3>LP COP</h3>
-        <p>Funciona como un depósito a término en pesos. El rendimiento proviene de los intereses de los préstamos otorgados a socios del fondo, por eso es nuestra opción más estable.</p>
-        <div class="rates">
-          <div class="rate"><b>13.5%</b><span>Anual mínima histórica</span></div>
-          <div class="rate"><b>24%</b><span>Anual máxima histórica</span></div>
-        </div>
-        <p class="note">* Rendimientos históricos, no garantizados. Capital sujeto a permanencia mínima y a riesgo.</p>
-      </article>
-
-      <article class="prod big reveal">
-        <span class="tag">Mayor potencial</span>
-        <h3>Fondo DGP</h3>
-        <p>Fondo gestionado activamente con exposición a Bitcoin y otros activos digitales, con estrategias en Arbitrum y Aave v3. Rendimiento variable, pensado para horizontes más largos.</p>
-        <div class="rates">
-          <div class="rate"><b>20%</b><span>Anual base histórica</span></div>
-          <div class="rate"><b>60%</b><span>Mejor año</span></div>
-        </div>
-        <p class="note">* Rendimientos históricos, no garantizados. Mayor exposición a la volatilidad del mercado cripto.</p>
-      </article>
-
-      <article class="prod reveal">
-        <span class="tag new">Nuevo</span>
-        <h3>Cadenas de ahorro</h3>
-        <p>Ahorra cada semana junto a otros socios. Cada participante aporta y recibe su turno, con el registro y el respaldo de Sanse Capital.</p>
-        <ul><li>Aportes semanales</li><li>Turnos y pagos registrados</li><li>Avisos por WhatsApp</li></ul>
-      </article>
-
-      <article class="prod reveal">
-        <span class="tag">Crédito para socios</span>
-        <h3>Préstamos</h3>
-        <p>Préstamos rápidos sobre el valor de tu ahorro y, para socios antiguos, crédito de libre inversión según estudio de perfil e historial.</p>
-        <div class="rates">
-          <div class="rate"><b>4%</b><span>Mensual con inversión activa</span></div>
-          <div class="rate"><b>6%</b><span>Mensual sin inversión previa</span></div>
-        </div>
-        <p class="note">Sujeto a aprobación. Libre inversión hasta $4.000.000 o más según estudio.</p>
-      </article>
-
-      <article class="prod reveal">
-        <span class="tag soon">Próximamente</span>
-        <h3>Swap USDT/COP</h3>
-        <p>Convierte entre tu saldo en pesos y USDT desde tu dashboard, mantén saldos paralelos y retira USDT a tu wallet externa en red TRON.</p>
-        <ul><li>Mesa interna de compra y venta</li><li>Retiros USDT (TRON)</li></ul>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- ═════════ TRANSPARENCIA ═════════ -->
-<section id="transparencia">
-  <div class="wrap">
-    <div class="head reveal">
-      <div class="kicker">Transparencia en vivo</div>
-      <h2>Verifica los activos<br>del fondo tú mismo.</h2>
-      <p class="sub">El balance multi-cadena se lee directamente de la blockchain cada vez que abres esta página. Cualquier persona puede comprobarlo.</p>
-    </div>
-
-    <div class="ticker">
-      <div class="tk"><div class="tk-l"><b>Bitcoin</b>BTC</div><div class="tk-r"><div id="hero-btc-val">—</div><div class="chg" id="hero-btc-chg">…</div></div></div>
-      <div class="tk"><div class="tk-l"><b>Ethereum</b>ETH</div><div class="tk-r"><div id="hero-eth-val">—</div><div class="chg" id="hero-eth-chg">…</div></div></div>
-      <div class="tk"><div class="tk-l"><b>USD Coin</b>USDC</div><div class="tk-r"><div id="hero-usdc-val">—</div><div class="chg" id="hero-usdc-chg">stablecoin</div></div></div>
-      <div class="tk"><div class="tk-l"><b>Arbitrum</b>ARB</div><div class="tk-r"><div id="hero-arb-val">—</div><div class="chg" id="hero-arb-chg">…</div></div></div>
-    </div>
-
-    <div class="kpis">
-      <div class="kpi"><div class="kpi-l">Activos cripto (USD)</div><div class="kpi-v" id="totalBalance">Cargando…</div><div class="kpi-s" id="totalBalanceCOP">—</div></div>
-      <div class="kpi"><div class="kpi-l">Capital en préstamos (COP)</div><div class="kpi-v">$30M+</div><div class="kpi-s">Préstamos activos a socios</div></div>
-      <div class="kpi"><div class="kpi-l">Capital total gestionado (COP)</div><div class="kpi-v" id="totalCapital">Calculando…</div><div class="kpi-s">TRM <span id="trmVal">—</span> · <span id="totalTokens">—</span> tokens · <span id="totalChains">—</span> cadenas</div></div>
-    </div>
-
-    <div class="chain-tabs" id="chainTabs">
-      <button class="chain-tab active" onclick="filterChain('all', event)">Todas las cadenas</button>
-    </div>
-    <div class="assets-wrap">
-      <table class="assets-table">
-        <thead><tr><th>Token</th><th>Cantidad</th><th>Precio</th><th>Valor USD</th><th>Valor COP</th><th>Cadena</th></tr></thead>
-        <tbody id="assetsBody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">Cargando activos…</td></tr></tbody>
-      </table>
-    </div>
-    <div class="wallet-link">Wallets del fondo: <span id="walletLinks"></span></div>
-  </div>
-</section>
-
-<!-- ═════════ SIMULADOR ═════════ -->
-<section id="simulador">
-  <div class="wrap">
-    <div class="head reveal">
-      <div class="kicker">Simulador</div>
-      <h2>¿Cuánto podría<br>rendir tu dinero?</h2>
-      <p class="sub">Proyección basada en rendimientos históricos. No es una promesa de rentabilidad.</p>
-    </div>
-    <div class="sim reveal">
-      <div class="sim-l">
-        <div class="field">
-          <label for="calcMonto">Monto a invertir (COP)</label>
-          <input type="text" inputmode="numeric" id="calcMonto" value="5.000.000" oninput="onMonto(this)">
-        </div>
-        <div class="field">
-          <label>Permanencia</label>
-          <div class="seg" id="segMeses">
-            <button type="button" data-v="3">3 meses</button>
-            <button type="button" data-v="6" class="on">6 meses</button>
-            <button type="button" data-v="12">12 meses</button>
-          </div>
-        </div>
-        <div class="field">
-          <label>Escenario</label>
-          <div class="seg" id="segTasa">
-            <button type="button" data-v="0.135">Conservador<br><small>13.5%</small></button>
-            <button type="button" data-v="0.25" class="on">Moderado<br><small>25%</small></button>
-            <button type="button" data-v="0.42">Optimista<br><small>42%</small></button>
-          </div>
-        </div>
-      </div>
-      <div class="sim-r">
-        <div class="l">Ganancia estimada</div>
-        <div class="v" id="calcGanancias">$0</div>
-        <div class="tot" id="calcTotal">Total a recibir: $0</div>
-        <p class="disc">* Tasas anuales de referencia, interés simple. Los rendimientos reales pueden variar, incluyendo pérdida parcial del capital. Esta herramienta no constituye una promesa de rendimiento.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═════════ CÓMO FUNCIONA ═════════ -->
-<section id="como" style="padding-top:0">
-  <div class="wrap">
-    <div class="head reveal">
-      <div class="kicker">Cómo funciona</div>
-      <h2>De la cuenta al rendimiento<br>en cuatro pasos.</h2>
-    </div>
-    <div class="steps">
-      <div class="step reveal"><span class="n">01</span><h3>Crea tu cuenta</h3><p>Regístrate con un link de invitación o desde esta página. Revisamos y aprobamos tu solicitud.</p></div>
-      <div class="step reveal"><span class="n">02</span><h3>Deposita tus pesos</h3><p>Por Bre-B o transferencia bancaria. Verificamos el depósito y se refleja en tu saldo.</p></div>
-      <div class="step reveal"><span class="n">03</span><h3>Elige tu producto</h3><p>LP COP para estabilidad, Fondo DGP para más potencial, o cadenas de ahorro.</p></div>
-      <div class="step reveal"><span class="n">04</span><h3>Sigue todo por WhatsApp</h3><p>Consulta tu saldo cuando quieras con el bot y recibe tu reporte cada mes.</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- ═════════ QUIÉNES SOMOS ═════════ -->
-<section id="quienes" style="padding-top:0">
-  <div class="wrap about">
-    <div class="reveal">
-      <div class="kicker">Quiénes somos</div>
-      <h2>Un fondo hecho<br>entre personas.</h2>
-    </div>
-    <div class="reveal">
-      <p>Sanse Capital SAS nació en 2023 con una idea simple: hacer accesible la inversión en pesos y en activos digitales para personas en Colombia. Empezamos como un fondo privado entre cinco personas cercanas y hoy acompañamos a más de 20 socios activos en Bogotá y Fusagasugá.</p>
-      <p>Combinamos desarrollo tecnológico propio, gestión de inversiones DeFi y experiencia dirigiendo negocios reales. Por eso construimos nuestras propias herramientas, desde la plataforma hasta el bot de WhatsApp, que operamos en alianza con Kanali.</p>
-      <div class="tags"><span>SAS constituida legalmente</span><span>Bogotá · Fusagasugá</span><span>DeFi & Web3</span><span>Tecnología propia</span><span>Verificación on-chain</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- ═════════ FAQ ═════════ -->
-<section id="faq" style="padding-top:0">
-  <div class="wrap">
-    <div class="head center reveal">
-      <div class="kicker">Preguntas frecuentes</div>
-      <h2>Resolvemos tus dudas.</h2>
-    </div>
-    <div class="faq reveal">
-      <details><summary>¿Cómo uso el bot de WhatsApp?</summary><p>Escríbenos al número oficial de Sanse Capital, verifica tu identidad con tu cédula y tu PIN de socio, y elige en el menú qué quieres consultar: saldo LP COP, Fondo DGP, préstamos o reporte mensual.</p></details>
-      <details><summary>¿Es seguro consultar mi saldo por WhatsApp?</summary><p>Sí. El bot solo entrega información después de validar tu cédula y tu PIN personal. Nunca te pediremos contraseñas bancarias, códigos de verificación ni dinero por ese chat. Si alguien te escribe desde otro número diciendo ser Sanse Capital, repórtalo.</p></details>
-      <details><summary>¿Sanse Capital está regulado por la SFC?</summary><p>Sanse Capital SAS es una sociedad por acciones simplificada constituida legalmente en Colombia. No estamos registrados ni vigilados por la Superintendencia Financiera de Colombia (SFC). Operamos mediante contratos de mandato civil entre la SAS y cada participante, dentro del marco del derecho privado colombiano.</p></details>
-      <details><summary>¿Los rendimientos están garantizados?</summary><p>No. Los rendimientos mostrados son históricos y no garantizan resultados futuros. El mercado de criptoactivos es volátil y toda inversión conlleva riesgo, incluyendo la posible pérdida parcial o total del capital.</p></details>
-      <details><summary>¿Cómo creo mi cuenta?</summary><p>Haz clic en “Crear cuenta”, completa tus datos y nuestro equipo revisará tu solicitud. Una vez aprobada tendrás acceso a tu dashboard y podrás activar tu PIN para el bot.</p></details>
-      <details><summary>¿Cuándo puedo retirar mi capital?</summary><p>Los retiros se procesan al cierre de cada mes calendario. Debes solicitarlo desde tu dashboard antes de la fecha de corte.</p></details>
-      <details><summary>¿Cómo funciona el programa de referidos?</summary><p>Al registrarte recibes un código de referido personal. Cuando alguien se registra con tu código y genera ganancias, recibes automáticamente el 5% de esas ganancias como comisión.</p></details>
-      <details><summary>¿Qué protección legal tengo como participante?</summary><p>Cada participante firma un contrato de mandato civil con Sanse Capital SAS que establece derechos y obligaciones, condiciones de inversión, términos de retiro, comisiones y riesgos. Al ser una SAS constituida formalmente, la sociedad responde con su patrimonio ante sus obligaciones contractuales.</p></details>
-      <details><summary>¿Cómo verifico los activos del fondo?</summary><p>En la sección “Transparencia” de esta página ves el balance en tiempo real leído directamente de la blockchain. Cada transacción es pública e inmutable.</p></details>
-    </div>
-  </div>
-</section>
-
-<!-- ═════════ CTA ═════════ -->
+<!-- HERO -->
+<section style="padding: 120px 0 100px; text-align: center;">
 <div class="wrap">
-  <div class="cta reveal">
-    <h2>Pregúntale a tu plata<br>cómo va.</h2>
-    <p class="sub">Si ya eres socio, escríbele al bot. Si aún no lo eres, crea tu cuenta y únete a más de 20 personas que ahorran e invierten con Sanse Capital.</p>
-    <div class="hero-btns">
-      <a href="#" class="btn btn-wa" data-wa="Hola, quiero consultar mi saldo"><svg><use href="#i-wa"/></svg> Hablar con el bot</a>
-      <a href="login.html" class="btn btn-primary">Unirme a la whitelist</a>
-    </div>
-  </div>
+<a href="https://x.com/sansecapital" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; background: #FFFFFF; border: 1px solid #ECECE8; border-radius: 999px; padding: 6px 14px 6px 6px; font-size: 14px; color: #3C3C40; margin-bottom: 36px;"><span style="background: #C9A84C; color: #0B0B0C; border-radius: 999px; padding: 3px 10px; font-weight: 600; font-size: 12px;">Beta</span>Construyendo en público →</a>
+<h1 class="h1" style="font-family: 'Inter Tight', sans-serif; font-weight: 600; line-height: 0.98; letter-spacing: -0.05em; margin: 0 auto 28px; max-width: 900px;">Tus pesos,<br>on-chain.</h1>
+<p style="font-size: 20px; line-height: 1.5; color: #6B6B70; margin: 0 auto 40px; max-width: 560px;">Deposita en pesos y accede a protocolos DeFi verificables. Tu wallet se crea sola.</p>
+<div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+<a href="login.html" style="text-decoration: none; background: #0B0B0C; color: #FFFFFF; font-weight: 500; font-size: 16px; padding: 0 28px; min-height: 52px; border-radius: 999px; display: inline-flex; align-items: center;">Unirme a la whitelist</a>
+<a href="#transparencia" style="text-decoration: none; background: #FFFFFF; border: 1px solid #E2E2DD; color: #0B0B0C; font-weight: 500; font-size: 16px; padding: 0 28px; min-height: 52px; border-radius: 999px; display: inline-flex; align-items: center;">Ver reservas</a>
 </div>
+</div>
+</section>
 
-<!-- ═════════ FOOTER ═════════ -->
-<footer>
-  <div class="wrap">
-    <div class="foot">
-      <a class="logo" href="#inicio"><img src="assets/logo-icon-nav.png" alt="">SANSE <span>CAPITAL</span></a>
-      <div class="foot-links">
-        <a href="#bot">Bot WhatsApp</a><a href="#alianza">Alianza Kanali</a><a href="#productos">Productos</a><a href="#transparencia">Transparencia</a><a href="#faq">FAQ</a><a href="terminos.html">Términos</a><a href="login.html">Acceder</a>
-      </div>
-    </div>
-    <p class="legal">© <span id="yr">2026</span> Sanse Capital SAS · Bogotá, Colombia · No vigilado por la Superintendencia Financiera de Colombia · Los rendimientos pasados no garantizan resultados futuros · Toda inversión conlleva riesgo de pérdida de capital.</p>
-  </div>
+<!-- CIFRAS -->
+<section>
+<div class="wrap">
+<div class="g4" style="border-top: 1px solid #E2E2DD; border-bottom: 1px solid #E2E2DD;">
+<div style="padding: 36px 8px;"><div style="font-family: 'Inter Tight', sans-serif; font-size: 44px; font-weight: 600; letter-spacing: -0.04em;">$[TVL]</div><div style="font-size: 14px; color: #6B6B70; margin-top: 6px;">Valor en el vault</div></div>
+<div style="padding: 36px 8px;"><div style="font-family: 'Inter Tight', sans-serif; font-size: 44px; font-weight: 600; letter-spacing: -0.04em;">4 años</div><div style="font-size: 14px; color: #6B6B70; margin-top: 6px;">Operando con socios</div></div>
+<div style="padding: 36px 8px;"><div style="font-family: 'Inter Tight', sans-serif; font-size: 44px; font-weight: 600; letter-spacing: -0.04em;">2</div><div style="font-size: 14px; color: #6B6B70; margin-top: 6px;">Redes · Arbitrum y BSC</div></div>
+<div style="padding: 36px 8px;"><div style="font-family: 'Inter Tight', sans-serif; font-size: 44px; font-weight: 600; letter-spacing: -0.04em;">[N]/500</div><div style="font-size: 14px; color: #6B6B70; margin-top: 6px;">Beta testers en lista</div></div>
+</div>
+</div>
+</section>
+
+<!-- YA FUNCIONANDO (para socios actuales) -->
+<section id="hoy" style="padding: 120px 0 0;">
+<div class="wrap">
+<div style="display: flex; justify-content: space-between; align-items: end; gap: 24px; flex-wrap: wrap; margin-bottom: 40px;">
+<div>
+<div style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: #1F5E37; background: #E8F3EC; border-radius: 999px; padding: 5px 12px; margin-bottom: 18px; font-weight: 500;"><span style="width: 7px; height: 7px; border-radius: 999px; background: #2E8B57;"></span>Ya funcionando</div>
+<h2 style="font-family: 'Inter Tight', sans-serif; font-size: 52px; font-weight: 600; letter-spacing: -0.04em; line-height: 1.04; margin: 0; max-width: 640px;">Para los socios, esto ya está hecho.</h2>
+</div>
+<a href="login.html" style="text-decoration: none; background: #0B0B0C; color: #FFFFFF; font-weight: 500; padding: 0 24px; min-height: 48px; border-radius: 999px; display: inline-flex; align-items: center;">¿Ya eres socio? Entra →</a>
+</div>
+<div class="g3">
+<div style="background: #FFFFFF; border: 1px solid #ECECE8; border-radius: 24px; padding: 28px;">
+<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3" fill="none" stroke="#0B0B0C" stroke-width="1.6"></rect><path d="M7 15l3-3 3 2 4-5" fill="none" stroke="#0B0B0C" stroke-width="1.6" stroke-linecap="round"></path></svg>
+<h3 style="font-family: 'Inter Tight', sans-serif; font-size: 21px; font-weight: 600; letter-spacing: -0.02em; margin: 16px 0 6px;">Dashboard web</h3>
+<p style="color: #6B6B70; line-height: 1.55; margin: 0;">Tu saldo, movimientos y rendimientos de LP COP y Fondo DGP, con tu cuenta.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #ECECE8; border-radius: 24px; padding: 28px;">
+<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19l1.3-3.6A8 8 0 1 1 8.6 18.7z" fill="none" stroke="#0B0B0C" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+<h3 style="font-family: 'Inter Tight', sans-serif; font-size: 21px; font-weight: 600; letter-spacing: -0.02em; margin: 16px 0 6px;">Bot de WhatsApp</h3>
+<p style="color: #6B6B70; line-height: 1.55; margin: 0;">Consulta saldo y préstamos por chat, en alianza con Kanali.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #ECECE8; border-radius: 24px; padding: 28px;">
+<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18l5-6 4 3 7-9" fill="none" stroke="#0B0B0C" stroke-width="1.6" stroke-linecap="round"></path><path d="M15 6h5v5" fill="none" stroke="#0B0B0C" stroke-width="1.6" stroke-linecap="round"></path></svg>
+<h3 style="font-family: 'Inter Tight', sans-serif; font-size: 21px; font-weight: 600; letter-spacing: -0.02em; margin: 16px 0 6px;">Precio del DGP</h3>
+<p style="color: #6B6B70; line-height: 1.55; margin: 0;">El valor de la acción del Fondo DGP, publicado y actualizado.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #ECECE8; border-radius: 24px; padding: 28px;">
+<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="9" r="3" fill="none" stroke="#0B0B0C" stroke-width="1.6"></circle><circle cx="16" cy="9" r="3" fill="none" stroke="#0B0B0C" stroke-width="1.6"></circle><path d="M3 19c.8-3 2.8-4.5 5-4.5s4.2 1.5 5 4.5M11 19c.8-3 2.8-4.5 5-4.5s4.2 1.5 5 4.5" fill="none" stroke="#0B0B0C" stroke-width="1.6"></path></svg>
+<h3 style="font-family: 'Inter Tight', sans-serif; font-size: 21px; font-weight: 600; letter-spacing: -0.02em; margin: 16px 0 6px;">Cadenas de ahorro</h3>
+<p style="color: #6B6B70; line-height: 1.55; margin: 0;">Ahorro en grupo con aportes programados. En piloto.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #ECECE8; border-radius: 24px; padding: 28px;">
+<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2.5" fill="none" stroke="#0B0B0C" stroke-width="1.6"></rect><circle cx="12" cy="12" r="2.5" fill="none" stroke="#0B0B0C" stroke-width="1.6"></circle></svg>
+<h3 style="font-family: 'Inter Tight', sans-serif; font-size: 21px; font-weight: 600; letter-spacing: -0.02em; margin: 16px 0 6px;">Préstamos a socios</h3>
+<p style="color: #6B6B70; line-height: 1.55; margin: 0;">Solicitud desde el dashboard, con plan de pagos claro.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #ECECE8; border-radius: 24px; padding: 28px;">
+<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7z" fill="none" stroke="#0B0B0C" stroke-width="1.6" stroke-linejoin="round"></path><path d="M10 12h5M10 16h5" fill="none" stroke="#0B0B0C" stroke-width="1.6" stroke-linecap="round"></path></svg>
+<h3 style="font-family: 'Inter Tight', sans-serif; font-size: 21px; font-weight: 600; letter-spacing: -0.02em; margin: 16px 0 6px;">Reportes y reglas claras</h3>
+<p style="color: #6B6B70; line-height: 1.55; margin: 0;">Reportes en PDF por socio, términos publicados y reglas de retiro.</p>
+</div>
+</div>
+<div style="margin-top: 16px; background: #F6F0DE; border-radius: 24px; padding: 24px 28px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+<p style="margin: 0; color: #4A3D14; font-size: 16px; line-height: 1.5;"><strong>Tu cuenta sigue igual.</strong> Lo nuevo on-chain se suma a lo que ya tienes; no tienes que mover nada.</p>
+<a href="login.html" style="text-decoration: none; color: #4A3D14; font-weight: 600;">Ver lo que viene →</a>
+</div>
+</div>
+</section>
+
+<!-- PRODUCTOS (bento) -->
+<section id="productos" style="padding: 120px 0 0;">
+<div class="wrap">
+<h2 style="font-family: 'Inter Tight', sans-serif; font-size: 52px; font-weight: 600; letter-spacing: -0.04em; line-height: 1.04; margin: 0 0 48px; max-width: 640px;">Un lugar para tus pesos y tus activos digitales.</h2>
+<div class="g2">
+<div style="background: #0B0B0C; color: #FFFFFF; border-radius: 28px; padding: 40px; min-height: 360px; display: flex; flex-direction: column; justify-content: space-between;">
+<div>
+<div style="font-size: 14px; color: #C9A84C; margin-bottom: 14px; font-weight: 500;">On-chain · Próximamente</div>
+<h3 style="font-family: 'Inter Tight', sans-serif; font-size: 36px; font-weight: 600; letter-spacing: -0.03em; margin: 0 0 12px;">Vault Sanse</h3>
+<p style="color: #A9A9AE; font-size: 17px; line-height: 1.55; margin: 0; max-width: 380px;">Opera solo dentro de protocolos cripto, con wallet pública que cualquiera puede revisar.</p>
+</div>
+<a href="login.html" style="color: #FFFFFF; text-decoration: none; font-weight: 500;">Avísame cuando abra →</a>
+</div>
+<div style="display: grid; gap: 16px;">
+<div style="background: #FFFFFF; border: 1px solid #ECECE8; border-radius: 28px; padding: 32px; display: flex; justify-content: space-between; align-items: end; gap: 16px;">
+<div><div style="font-size: 14px; color: #6B6B70; margin-bottom: 10px;">En pesos</div><h3 style="font-family: 'Inter Tight', sans-serif; font-size: 28px; font-weight: 600; letter-spacing: -0.03em; margin: 0 0 8px;">LP COP</h3><p style="color: #6B6B70; margin: 0; line-height: 1.5;">Ahorro en pesos con saldo en el dashboard y WhatsApp.</p></div>
+<a href="login.html" aria-label="Abrir LP COP" style="flex: none; width: 44px; height: 44px; border-radius: 999px; background: #F2F2EF; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">→</a>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #ECECE8; border-radius: 28px; padding: 32px; display: flex; justify-content: space-between; align-items: end; gap: 16px;">
+<div><div style="font-size: 14px; color: #6B6B70; margin-bottom: 10px;">Liquidez</div><h3 style="font-family: 'Inter Tight', sans-serif; font-size: 28px; font-weight: 600; letter-spacing: -0.03em; margin: 0 0 8px;">Fondo DGP</h3><p style="color: #6B6B70; margin: 0; line-height: 1.5;">Pools de liquidez con el precio de la acción publicado.</p></div>
+<a href="dgp.html" aria-label="Abrir Fondo DGP" style="flex: none; width: 44px; height: 44px; border-radius: 999px; background: #F2F2EF; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">→</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- MERCADOS -->
+<section id="mercados" style="padding: 120px 0 0;">
+<div class="wrap">
+<div style="display: flex; justify-content: space-between; align-items: end; gap: 24px; flex-wrap: wrap; margin-bottom: 32px;">
+<h2 style="font-family: 'Inter Tight', sans-serif; font-size: 52px; font-weight: 600; letter-spacing: -0.04em; margin: 0;">Mercados <span style="font-size: 16px; vertical-align: middle; background: #F6F0DE; color: #6E5A1F; border-radius: 999px; padding: 6px 12px; font-weight: 500; letter-spacing: 0;">Próximamente</span></h2>
+<p style="color: #6B6B70; margin: 0; max-width: 360px; line-height: 1.55;">Los mercados se abren con la beta. Las tasas serán variables y leídas on-chain; no son promesas de rentabilidad.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #ECECE8; border-radius: 24px; overflow: hidden;">
+<div class="mrow" style="padding: 16px 28px; font-size: 13px; color: #6B6B70; border-bottom: 1px solid #ECECE8;"><span>Protocolo</span><span>Red</span><span class="hm">Activo</span><span class="hm">Estado</span><span></span></div>
+<div class="mrow" style="padding: 22px 28px; border-bottom: 1px solid #F2F2EF;">
+<div style="display: flex; align-items: center; gap: 12px;"><span style="width: 36px; height: 36px; border-radius: 999px; background: #0B0B0C; color: #C9A84C; display: inline-flex; align-items: center; justify-content: center; font-weight: 700;">S</span><span style="font-weight: 600;">Vault Sanse</span></div>
+<span>Arbitrum</span><span class="hm">USDC</span><span class="hm"><span style="background: #F6F0DE; color: #6E5A1F; border-radius: 999px; padding: 4px 10px; font-size: 13px; font-weight: 500;">Próximamente</span></span>
+<span style="text-align: center; color: #6B6B70; font-size: 14px;">Pronto</span>
+</div>
+<div class="mrow" style="padding: 22px 28px; border-bottom: 1px solid #F2F2EF;">
+<div style="display: flex; align-items: center; gap: 12px;"><span style="width: 36px; height: 36px; border-radius: 999px; background: #F2F2EF; display: inline-flex; align-items: center; justify-content: center; font-weight: 700;">A</span><span style="font-weight: 600;">Aave v3</span></div>
+<span>Arbitrum</span><span class="hm">USDC</span><span class="hm"><span style="background: #F6F0DE; color: #6E5A1F; border-radius: 999px; padding: 4px 10px; font-size: 13px; font-weight: 500;">Próximamente</span></span>
+<span style="text-align: center; color: #6B6B70; font-size: 14px;">Pronto</span>
+</div>
+<div class="mrow" style="padding: 22px 28px; border-bottom: 1px solid #F2F2EF;">
+<div style="display: flex; align-items: center; gap: 12px;"><span style="width: 36px; height: 36px; border-radius: 999px; background: #F2F2EF; display: inline-flex; align-items: center; justify-content: center; font-weight: 700;">V</span><span style="font-weight: 600;">Venus</span></div>
+<span>BSC</span><span class="hm">USDT</span><span class="hm"><span style="background: #F6F0DE; color: #6E5A1F; border-radius: 999px; padding: 4px 10px; font-size: 13px; font-weight: 500;">Próximamente</span></span>
+<span style="text-align: center; color: #6B6B70; font-size: 14px;">Pronto</span>
+</div>
+<div class="mrow" style="padding: 22px 28px; color: #6B6B70;">
+<div style="display: flex; align-items: center; gap: 12px;"><span style="width: 36px; height: 36px; border-radius: 999px; background: #F2F2EF; display: inline-flex; align-items: center; justify-content: center; font-weight: 700;">O</span><span style="font-weight: 600;">Ondo</span></div>
+<span>Por definir</span><span class="hm">—</span><span class="hm">Próximamente</span><span style="text-align: center; font-size: 14px;">Pronto</span>
+</div>
+</div>
+</div>
+</section>
+
+<!-- TRANSPARENCIA -->
+<section id="transparencia" style="padding: 120px 0 0;">
+<div class="wrap">
+<div style="background: #FFFFFF; border: 1px solid #ECECE8; border-radius: 32px; padding: 56px; display: grid; gap: 40px;">
+<div style="max-width: 640px;">
+<h2 style="font-family: 'Inter Tight', sans-serif; font-size: 52px; font-weight: 600; letter-spacing: -0.04em; line-height: 1.04; margin: 0 0 16px;">No nos creas. Verifícalo. <span style="font-size: 16px; vertical-align: middle; background: #F6F0DE; color: #6E5A1F; border-radius: 999px; padding: 6px 12px; font-weight: 500; letter-spacing: 0;">Próximamente</span></h2>
+<p style="font-size: 18px; color: #6B6B70; line-height: 1.55; margin: 0;">Cuando abra el vault, sus wallets serán públicas. Cualquiera puede revisar dónde está cada peso, en tiempo real.</p>
+</div>
+<div class="g4" style="border-top: 1px solid #ECECE8;">
+<div style="padding: 24px 8px 0;"><div style="font-size: 13px; color: #6B6B70; margin-bottom: 8px;">Vault</div><div style="font-weight: 600; font-family: ui-monospace, monospace;">0x[VAULT]</div></div>
+<div style="padding: 24px 8px 0;"><div style="font-size: 13px; color: #6B6B70; margin-bottom: 8px;">Red</div><div style="font-weight: 600;">Arbitrum One</div></div>
+<div style="padding: 24px 8px 0;"><div style="font-size: 13px; color: #6B6B70; margin-bottom: 8px;">Protocolo</div><div style="font-weight: 600;">Aave v3</div></div>
+<div style="padding: 24px 8px 0;"><div style="font-size: 13px; color: #6B6B70; margin-bottom: 8px;">Saldo</div><div style="font-weight: 600;">[SALDO] USDC</div></div>
+</div>
+<span style="justify-self: start; background: #F2F2EF; color: #6B6B70; font-weight: 500; padding: 0 24px; min-height: 48px; border-radius: 999px; display: inline-flex; align-items: center;">Arbiscan · disponible al lanzar</span>
+</div>
+</div>
+</section>
+
+<!-- COMO FUNCIONA -->
+<section style="padding: 120px 0 0;">
+<div class="wrap">
+<h2 style="font-family: 'Inter Tight', sans-serif; font-size: 52px; font-weight: 600; letter-spacing: -0.04em; margin: 0 0 48px;">Tres pasos.</h2>
+<div class="g3">
+<div style="padding-top: 24px; border-top: 1px solid #0B0B0C;"><div style="color: #6B6B70; font-size: 14px; margin-bottom: 20px;">01</div><h3 style="font-family: 'Inter Tight', sans-serif; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 8px;">Regístrate</h3><p style="color: #6B6B70; line-height: 1.55; margin: 0;">Tu wallet se crea al abrir la cuenta.</p></div>
+<div style="padding-top: 24px; border-top: 1px solid #E2E2DD;"><div style="color: #6B6B70; font-size: 14px; margin-bottom: 20px;">02</div><h3 style="font-family: 'Inter Tight', sans-serif; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 8px;">Deposita en pesos</h3><p style="color: #6B6B70; line-height: 1.55; margin: 0;">Por Bre-B. Sanse hace la conversión.</p></div>
+<div style="padding-top: 24px; border-top: 1px solid #E2E2DD;"><div style="color: #6B6B70; font-size: 14px; margin-bottom: 20px;">03</div><h3 style="font-family: 'Inter Tight', sans-serif; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 8px;">Elige un mercado</h3><p style="color: #6B6B70; line-height: 1.55; margin: 0;">Con su riesgo explicado antes de entrar.</p></div>
+</div>
+</div>
+</section>
+
+<!-- CTA oscuro -->
+<section id="comunidad" style="padding: 120px 0;">
+<div class="wrap">
+<div style="background: #0B0B0C; color: #FFFFFF; border-radius: 32px; padding: 80px 40px; text-align: center;">
+<h2 style="font-family: 'Inter Tight', sans-serif; font-size: 60px; font-weight: 600; letter-spacing: -0.045em; line-height: 1; margin: 0 0 16px;">Sé de los primeros <span style="color: #C9A84C;">500.</span></h2>
+<p style="font-size: 18px; color: #A9A9AE; margin: 0 0 36px;">Acceso anticipado, rol de Beta Tester y voto en lo que construimos.</p>
+<form id="wl" style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; max-width: 520px; margin: 0 auto 28px; background: #1A1A1C; border-radius: 999px; padding: 6px;">
+<label for="email" style="position: absolute; left: -9999px;">Correo electrónico</label>
+<input id="email" type="email" placeholder="tu@correo.com" style="flex: 1 1 220px; min-height: 48px; background: transparent; border: 0; color: #FFFFFF; font-size: 16px; padding: 0 18px; font-family: Inter, sans-serif;">
+<button type="submit" style="min-height: 48px; padding: 0 24px; background: #FFFFFF; color: #0B0B0C; border: 0; border-radius: 999px; font-weight: 600; font-size: 15px; font-family: Inter, sans-serif; cursor: pointer;">Entrar a la lista</button>
+</form>
+<a href="https://x.com/sansecapital" style="color: #FFFFFF; text-decoration: none; font-weight: 500;">Sigue el proceso en X · @sansecapital →</a>
+</div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer style="padding: 0 0 48px;">
+<div class="wrap">
+<div class="gf">
+<div><div style="font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: 19px; margin-bottom: 10px;">Sanse</div><p style="color: #6B6B70; font-size: 14px; line-height: 1.55; margin: 0; max-width: 260px;">Ahorro e inversión en pesos, con acceso a DeFi. Hecho en Colombia.</p></div>
+<div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px;"><div style="font-weight: 600;">Productos</div><a href="#productos" style="color: #6B6B70; text-decoration: none;">Vault Sanse</a><a href="#productos" style="color: #6B6B70; text-decoration: none;">LP COP</a><a href="dgp.html" style="color: #6B6B70; text-decoration: none;">Fondo DGP</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px;"><div style="font-weight: 600;">Comunidad</div><a href="https://x.com/sansecapital" style="color: #6B6B70; text-decoration: none;">X</a><a href="https://www.instagram.com/sansecapital" style="color: #6B6B70; text-decoration: none;">Instagram</a><a href="https://wa.me/573194552890" style="color: #6B6B70; text-decoration: none;">WhatsApp</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px;"><div style="font-weight: 600;">Legal</div><a href="terminos.html" style="color: #6B6B70; text-decoration: none;">Términos</a><a href="terminos.html" style="color: #6B6B70; text-decoration: none;">Aviso de riesgo</a><a href="login.html" style="color: #6B6B70; text-decoration: none;">Iniciar sesión</a></div>
+</div>
+<p style="border-top: 1px solid #E2E2DD; margin: 48px 0 0; padding-top: 24px; font-size: 13px; color: #6B6B70; line-height: 1.6;">Proyecto en desarrollo. Los activos digitales y DeFi conllevan riesgo, incluida la pérdida total del capital. Sanse no garantiza rentabilidad y no es una entidad vigilada por la Superintendencia Financiera de Colombia.</p>
+</div>
 </footer>
 
-<a href="#" class="wa-float" data-wa="Hola, quiero consultar mi saldo" aria-label="Escribir al bot de Sanse Capital en WhatsApp"><svg><use href="#i-wa"/></svg><span>Consultar saldo</span></a>
-
+</div>
 <script>
-  // ════════ CONFIGURACIÓN ════════
-  // Número del bot de WhatsApp (Kanali): solo dígitos, con indicativo 57.
-  const WA_BOT = '573052641207';
-
-  document.querySelectorAll('[data-wa]').forEach(a => {
-    a.href = 'https://wa.me/' + WA_BOT + '?text=' + encodeURIComponent(a.dataset.wa);
-    a.target = '_blank'; a.rel = 'noopener';
-  });
-  document.getElementById('yr').textContent = new Date().getFullYear();
-
-  // ─── Menú móvil ───
-  function toggleMenu() {
-    const m = document.getElementById('mob');
-    const open = m.classList.toggle('open');
-    document.getElementById('burger').setAttribute('aria-expanded', open);
-  }
-
-  // ─── Animaciones de entrada ───
-  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 });
-  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-
-  // ─── Chat de demostración ───
-  (function demoChat() {
-    const msgs = [...document.querySelectorAll('#chat .msg')];
-    const typing = document.getElementById('typing');
-    const chat = document.getElementById('chat');
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { msgs.forEach(m => m.classList.add('show')); return; }
-    let i = 0;
-    function next() {
-      if (i >= msgs.length) { setTimeout(() => { msgs.forEach(m => m.classList.remove('show')); i = 0; next(); }, 6000); return; }
-      const m = msgs[i];
-      const isBot = m.classList.contains('in');
-      if (isBot) { chat.insertBefore(typing, m); typing.classList.add('show'); }
-      setTimeout(() => {
-        typing.classList.remove('show');
-        m.classList.add('show');
-        i++;
-        setTimeout(next, isBot ? 900 : 700);
-      }, isBot ? 1100 : 400);
-    }
-    setTimeout(next, 600);
-  })();
-
-  // ─── Simulador ───
-  let sim = { meses: 6, tasa: 0.25 };
-  function parseMonto() { return parseInt(document.getElementById('calcMonto').value.replace(/\D/g, '')) || 0; }
-  function onMonto(el) {
-    const n = el.value.replace(/\D/g, '');
-    el.value = n ? parseInt(n).toLocaleString('es-CO') : '';
-    calcular();
-  }
-  function bindSeg(id, key) {
-    document.querySelectorAll('#' + id + ' button').forEach(b => b.addEventListener('click', () => {
-      document.querySelectorAll('#' + id + ' button').forEach(x => x.classList.remove('on'));
-      b.classList.add('on'); sim[key] = parseFloat(b.dataset.v); calcular();
-    }));
-  }
-  bindSeg('segMeses', 'meses'); bindSeg('segTasa', 'tasa');
-  function calcular() {
-    const monto = parseMonto();
-    const ganancia = monto * (sim.tasa / 12) * sim.meses;
-    document.getElementById('calcGanancias').textContent = '$' + Math.round(ganancia).toLocaleString('es-CO');
-    document.getElementById('calcTotal').textContent = 'Total a recibir: $' + Math.round(monto + ganancia).toLocaleString('es-CO');
-  }
-  calcular();
-
-  // ─── Activos on-chain ───
-  // Wallets de Sanse Capital que se suman en "Activos cripto". Para agregar otra, añádela a esta lista.
-  const WALLETS = [
-    '0x25E6997CD1037E03662996E63875C99704f8F38D',
-    '0x94941119209536ebb0684c666261e131db5ffb76',
-  ];
-  document.getElementById('walletLinks').innerHTML = WALLETS.map(w =>
-    `<a href="https://debank.com/profile/${w}" target="_blank" rel="noopener">${w.slice(0,6)}…${w.slice(-4)}</a>`).join(' · ');
-  let TRM_LIVE = 4100;
-  let allAssets = [];
-
-  const CHAINS = [
-    { id:'arbitrum', name:'Arbitrum', color:'#28a0f0', rpc:'https://arbitrum-one-rpc.publicnode.com', chainId:42161 },
-    { id:'eth',      name:'Ethereum', color:'#627eea', rpc:'https://ethereum-rpc.publicnode.com',     chainId:1     },
-    { id:'bsc',      name:'BSC',      color:'#f3ba2f', rpc:'https://bsc-rpc.publicnode.com',          chainId:56    },
-    { id:'polygon',  name:'Polygon',  color:'#8247e5', rpc:'https://polygon-bor-rpc.publicnode.com',  chainId:137   },
-    { id:'optimism', name:'Optimism', color:'#ff0420', rpc:'https://optimism-rpc.publicnode.com',     chainId:10    },
-    { id:'base',     name:'Base',     color:'#0052ff', rpc:'https://base-rpc.publicnode.com',         chainId:8453  },
-  ];
-
-  const KNOWN_TOKENS = {
-    arbitrum: [
-      { symbol:'USDC', name:'USD Coin',       addr:'0xaf88d065e77c8cc2239327c5edb3a432268e5831', dec:6  },
-      { symbol:'USDT', name:'Tether USD',     addr:'0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', dec:6  },
-      { symbol:'WBTC', name:'Wrapped Bitcoin',addr:'0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f', dec:8  },
-      { symbol:'WETH', name:'Wrapped Ether',  addr:'0x82af49447d8a07e3bd95bd0d56f35241523fbab1', dec:18 },
-      { symbol:'ARB',  name:'Arbitrum',       addr:'0x912ce59144191c1204e64559fe8253a0e49e6548', dec:18 },
-      { symbol:'WETH', name:'WETH en Aave v3', addr:'0xe50fa9b3c56ffb159cb0fca61f5c9d750e8128c8', dec:18, protocol:'Aave' },
-      { symbol:'WBTC', name:'WBTC en Aave v3', addr:'0x078f358208685046a11c85e8ad32895ded33a249', dec:8,  protocol:'Aave' },
-      { symbol:'USDC', name:'USDC en Aave v3', addr:'0x724dc807b04555b71ed48a6896b6f41593b8c637', dec:6,  protocol:'Aave' },
-      { symbol:'USDT', name:'USDT en Aave v3', addr:'0x6ab707aca953edaefbc4fd23ba73294241490620', dec:6,  protocol:'Aave' },
-      { symbol:'ARB',  name:'ARB en Aave v3',  addr:'0x6533afac2e7bccb20dca161449a13a32d391fb00', dec:18, protocol:'Aave' },
-      { symbol:'DAI',  name:'DAI en Aave v3',  addr:'0x82e64f49ed5ec1bc6e43dad4fc8af9bb3a2312ee', dec:18, protocol:'Aave' },
-    ],
-    eth: [
-      { symbol:'USDC', name:'USD Coin',   addr:'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', dec:6 },
-      { symbol:'USDT', name:'Tether',     addr:'0xdac17f958d2ee523a2206206994597c13d831ec7', dec:6 },
-      { symbol:'WBTC', name:'Wrapped BTC',addr:'0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', dec:8 },
-    ],
-    bsc: [
-      { symbol:'USDT', name:'Tether',          addr:'0x55d398326f99059ff775485246999027b3197955', dec:18 },
-      { symbol:'USDC', name:'USD Coin',        addr:'0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', dec:18 },
-      { symbol:'BTCB', name:'Bitcoin (BEP-20)',addr:'0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c', dec:18 },
-      { symbol:'ETH',  name:'Ether (BEP-20)',  addr:'0x2170ed0880ac9a755fd29b2688956bd959f933f8', dec:18 },
-      { symbol:'WBNB', name:'Wrapped BNB',     addr:'0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c', dec:18 },
-      { symbol:'FDUSD',name:'First Digital USD',addr:'0xc5f0f7b66764f6ec8c8dff7ba683102295e16409', dec:18 },
-    ],
-    polygon:  [{ symbol:'USDC', name:'USD Coin', addr:'0x2791bca1f2de4661ed88a30c99a7a9449aa84174', dec:6 }],
-    optimism: [{ symbol:'USDC', name:'USD Coin', addr:'0x0b2c639c533813f4aa9d7837caf62653d097ff85', dec:6 }],
-    base:     [{ symbol:'USDC', name:'USD Coin', addr:'0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', dec:6 }],
-  };
-
-  const COINGECKO_IDS = {
-    'ETH':'ethereum','WETH':'ethereum','WBTC':'bitcoin','BTC':'bitcoin','BTCB':'bitcoin','WBNB':'binancecoin','FDUSD':'first-digital-usd',
-    'USDC':'usd-coin','USDT':'tether','DAI':'dai','ARB':'arbitrum',
-    'OP':'optimism','LINK':'chainlink','GMX':'gmx','BNB':'binancecoin','MATIC':'matic-network',
-  };
-  let tokenPrices = {};
-
-  async function fetchPrices() {
-    try {
-      const ids = [...new Set(Object.values(COINGECKO_IDS))].join(',');
-      const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
-      tokenPrices = await r.json();
-    } catch(e) {}
-  }
-  async function fetchTRM() {
-    try {
-      const r = await fetch('https://open.er-api.com/v6/latest/USD');
-      const d = await r.json();
-      if (d?.rates?.COP) TRM_LIVE = d.rates.COP;
-    } catch(e) {}
-    document.getElementById('trmVal').textContent = '$' + Math.round(TRM_LIVE).toLocaleString('es-CO');
-  }
-  function getPrice(sym) { const id = COINGECKO_IDS[sym.toUpperCase()]; return id ? (tokenPrices[id]?.usd || 0) : 0; }
-  function fmt(n, dec=4) { return n.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:dec}); }
-  function fmtUSD(n) { return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
-  function fmtCOP(n) { return '$' + Math.round(n).toLocaleString('es-CO'); }
-
-  async function rpcCall(rpc, method, params) {
-    const r = await fetch(rpc, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({jsonrpc:'2.0', id:1, method, params}) });
-    return (await r.json()).result;
-  }
-
-  async function fetchChainAssets(chain, WALLET) {
-    const results = [];
-    const padded = WALLET.toLowerCase().replace('0x','').padStart(64,'0');
-    try {
-      const res = await rpcCall(chain.rpc, 'eth_getBalance', [WALLET, 'latest']);
-      if (res) {
-        const amount = parseInt(res,16)/1e18;
-        const nativeSym = chain.id==='bsc'?'BNB':chain.id==='polygon'?'MATIC':'ETH';
-        const price = getPrice(nativeSym);
-        if (amount*price > 0.01 || amount > 0.0001) results.push({symbol:nativeSym, name:nativeSym, chain:chain.id, amount, price, valueUSD:amount*price});
-      }
-    } catch(e) {}
-    const tokens = KNOWN_TOKENS[chain.id] || [];
-    await Promise.all(tokens.map(async t => {
-      try {
-        const res = await rpcCall(chain.rpc, 'eth_call', [{to:t.addr, data:'0x70a08231'+padded}, 'latest']);
-        if (!res || res === '0x') return;
-        const amount = parseInt(res,16)/Math.pow(10,t.dec);
-        if (!amount || amount < 1e-9) return;
-        const price = getPrice(t.symbol);
-        if (amount*price < 0.01) return;
-        results.push({symbol:t.symbol, name:t.name, chain:chain.id, amount, price, valueUSD:amount*price, protocol:t.protocol||null});
-      } catch(e) {}
-    }));
-    return results;
-  }
-
-  async function fetchAssets() {
-    try {
-      await Promise.all([fetchPrices(), fetchTRM()]);
-      const results = await Promise.all(WALLETS.flatMap(w => CHAINS.map(c => fetchChainAssets(c, w))));
-      // Agrupa el mismo token de la misma cadena entre wallets
-      const merged = {};
-      results.flat().filter(t => t && t.amount > 0.0001).forEach(t => {
-        const k = t.chain + '|' + t.name + '|' + (t.protocol||'');
-        if (merged[k]) { merged[k].amount += t.amount; merged[k].valueUSD += t.valueUSD; }
-        else merged[k] = { ...t };
-      });
-      allAssets = Object.values(merged);
-      if (!allAssets.length) { showDemoData(); return; }
-      const totalUSD = allAssets.reduce((s,t) => s + t.valueUSD, 0);
-      const totalCOP = totalUSD * TRM_LIVE;
-      const loans = 30253250;
-      document.getElementById('totalBalance').textContent = fmtUSD(totalUSD);
-      document.getElementById('totalBalanceCOP').textContent = fmtCOP(totalCOP) + ' COP';
-      document.getElementById('totalCapital').textContent = fmtCOP(totalCOP + loans);
-      document.getElementById('totalTokens').textContent = allAssets.length;
-      const chains = [...new Set(allAssets.map(a=>a.chain))];
-      document.getElementById('totalChains').textContent = chains.length;
-      renderChainTabs(chains);
-      renderAssets(allAssets);
-    } catch(e) { showDemoData(); }
-  }
-
-  function renderChainTabs(chains) {
-    const tabs = document.getElementById('chainTabs');
-    chains.forEach(c => {
-      const chain = CHAINS.find(ch=>ch.id===c);
-      if (!chain) return;
-      const btn = document.createElement('button');
-      btn.className = 'chain-tab'; btn.textContent = chain.name;
-      btn.onclick = (e) => filterChain(c, e);
-      tabs.appendChild(btn);
-    });
-  }
-  function filterChain(chain, evt) {
-    document.querySelectorAll('.chain-tab').forEach(t => t.classList.remove('active'));
-    if (evt && evt.target) evt.target.classList.add('active');
-    renderAssets(chain === 'all' ? allAssets : allAssets.filter(a=>a.chain===chain));
-  }
-  function renderAssets(assets) {
-    const tbody = document.getElementById('assetsBody');
-    if (!assets.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">Sin activos en esta cadena</td></tr>'; return; }
-    tbody.innerHTML = [...assets].sort((a,b)=>b.valueUSD-a.valueUSD).map(t => {
-      const chain = CHAINS.find(c=>c.id===t.chain) || {name:t.chain, color:'#6b7280'};
-      return `<tr>
-        <td><div class="tk-cell"><div class="tk-icon"${t.protocol?' style="background:rgba(139,111,252,.12);color:#a996ff;border-color:rgba(139,111,252,.3)"':''}>${t.symbol.slice(0,3)}</div>
-          <div><div class="tk-sym">${t.symbol}</div><div class="tk-name">${t.name}</div></div></div></td>
-        <td class="mono">${fmt(t.amount)}</td>
-        <td class="mono">${fmtUSD(t.price||0)}</td>
-        <td class="mono" style="color:var(--blue)">${fmtUSD(t.valueUSD)}</td>
-        <td class="mono">${fmtCOP(t.valueUSD * TRM_LIVE)}</td>
-        <td><span class="chain-pill"><span class="chain-dot" style="background:${chain.color}"></span>${chain.name}${t.protocol?' · '+t.protocol:''}</span></td>
-      </tr>`;
-    }).join('');
-  }
-  function showDemoData() {
-    document.getElementById('totalBalance').textContent = '—';
-    document.getElementById('totalBalanceCOP').textContent = 'Verificar en blockchain';
-    document.getElementById('totalCapital').textContent = '$36.7M+';
-    document.getElementById('assetsBody').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">
-      <div>No pudimos leer la blockchain en este momento.</div>
-      <button class="chain-tab" onclick="fetchAssets()" style="margin-top:12px">Reintentar</button></td></tr>`;
-  }
-
-  async function updateHeroPrices() {
-    try {
-      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,usd-coin,arbitrum&vs_currencies=usd&include_24hr_change=true');
-      const d = await r.json();
-      const f = n => '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-      const set = (key, id) => {
-        if (!d[key]) return;
-        document.getElementById('hero-'+id+'-val').textContent = f(d[key].usd);
-        if (id === 'usdc') return;
-        const c = d[key].usd_24h_change, el = document.getElementById('hero-'+id+'-chg');
-        el.textContent = (c>0?'+':'') + c.toFixed(2) + '% 24h';
-        el.className = 'chg ' + (c>=0?'up':'down');
-      };
-      set('bitcoin','btc'); set('ethereum','eth'); set('usd-coin','usdc'); set('arbitrum','arb');
-    } catch(e) {}
-  }
-  updateHeroPrices();
-  setInterval(updateHeroPrices, 60000);
-  fetchAssets();
+const WHITELIST_URL='https://script.google.com/macros/s/AKfycbzUMoD2yQF2fTHOXkA7ornXJHzJr5WpVtXE81RGMLFkb75lDuea-xsJQWbP2cJpYFWMww/exec';
+const f=document.getElementById('wl');
+if(f){const b=f.querySelector('button');f.addEventListener('submit',async e=>{e.preventDefault();
+const email=f.querySelector('#email').value.trim().toLowerCase();
+if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){b.textContent='Correo inválido';setTimeout(()=>b.textContent='Entrar a la lista',1800);return}
+b.disabled=true;b.textContent='Enviando…';
+try{await fetch(WHITELIST_URL,{method:'POST',mode:'no-cors',body:new URLSearchParams({email,origen:'landing'})});f.reset();b.textContent='¡Estás en la lista!'}
+catch(_){b.disabled=false;b.textContent='Intenta de nuevo'}})}
 </script>
 </body>
 </html>
