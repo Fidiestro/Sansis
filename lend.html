@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bóveda COPe — Acuña COPe con tu colateral | Sanse</title>
+<meta name="description" content="Deposita colateral, acuña COPe y sigue en tiempo real tu respaldo, tu precio de liquidación y tu nivel de riesgo. Red de prueba Arbitrum Sepolia.">
+<meta property="og:title" content="Bóveda COPe">
+<meta property="og:description" content="Acuña COPe con tu colateral y sigue tu nivel de riesgo de liquidación en tiempo real.">
+<meta property="og:image" content="https://sansecapital.com/favicon-256.png">
+<meta property="og:url" content="https://sansecapital.com/lend.html">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#FAFAF8;color:#0B0B0C;font-family:Inter,sans-serif;font-size:15px;line-height:1.55}
+a{color:#0B0B0C}a:hover{color:#6B6B70}
+[hidden]{display:none!important}
+.wrap{max-width:1160px;margin:0 auto;padding:0 28px}
+.pillnav{display:flex;gap:2px}
+.ni{display:inline-flex;align-items:center;gap:6px;padding:0 14px;min-height:40px;border-radius:999px;color:#3C3C40;text-decoration:none;font-size:15px}
+.ni:hover,.ni[aria-current="page"]{background:#EFEFEC;color:#0B0B0C}
+.disp{font-family:'Inter Tight',sans-serif;letter-spacing:-0.035em}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 22px;border-radius:999px;font-weight:500;font-size:15px;border:1px solid transparent;cursor:pointer;text-decoration:none;font-family:Inter,sans-serif;transition:background .15s,opacity .15s}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-dark{background:#0B0B0C;color:#fff}.btn-dark:hover{background:#2A2A2E;color:#fff}
+.btn-light{background:#fff;color:#0B0B0C;border-color:#E2E2DD}.btn-light:hover{background:#F2F2EF}
+.btn-sm{min-height:38px;padding:0 16px;font-size:14px}
+.btn-block{width:100%}
+.card{background:#fff;border:1px solid #ECECE8;border-radius:22px;padding:24px;min-width:0}
+.k{font-size:13px;color:#6B6B70}
+.v{font-family:'Inter Tight',sans-serif;font-size:30px;font-weight:600;letter-spacing:-0.03em;margin-top:4px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.n{font-size:13px;color:#6B6B70;margin-top:2px}
+.mono{font-family:'JetBrains Mono',monospace;font-size:13px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #ECECE8;border-radius:999px;padding:6px 14px 6px 6px;font-size:14px;color:#3C3C40}
+.badge b{background:#C9A84C;color:#0B0B0C;border-radius:999px;padding:3px 10px;font-weight:600;font-size:12px}
+.layout{display:grid;grid-template-columns:1.45fr 1fr;gap:20px;align-items:start}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.risk-pill{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:6px 14px;font-weight:600;font-size:14px}
+.risk-pill i{width:9px;height:9px;border-radius:50%;background:currentColor}
+.r-safe{background:#E6F5EC;color:#16794A}.r-mod{background:#FBF2DC;color:#8A6510}.r-high{background:#FCE7E1;color:#B4441F}.r-liq{background:#F9D9D9;color:#A31D1D}.r-none{background:#F0F0EC;color:#6B6B70}
+.gauge{position:relative;margin:22px 0 8px}
+.gauge-track{display:flex;height:12px;border-radius:999px;overflow:hidden}
+.gauge-track span{height:100%}
+.gauge-mark{position:absolute;top:-7px;width:3px;height:26px;background:#0B0B0C;border-radius:2px;transform:translateX(-50%);transition:left .35s}
+.gauge-mark.after{background:#6B6B70;opacity:.55}
+.gauge-ticks{display:flex;justify-content:space-between;font-size:12px;color:#6B6B70;margin-top:8px;font-family:'JetBrains Mono',monospace}
+.stat-list{display:grid;gap:0}
+.stat-list div{display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid #F0F0EC;font-size:14px}
+.stat-list div:last-child{border-bottom:none}
+.stat-list span:last-child{font-family:'JetBrains Mono',monospace;font-size:13px;text-align:right}
+.chg{color:#6B6B70}
+.tabs{display:flex;background:#F0F0EC;border-radius:999px;padding:4px;margin-bottom:18px}
+.tabs button{flex:1;border:none;background:transparent;min-height:40px;border-radius:999px;font:500 14px Inter,sans-serif;color:#6B6B70;cursor:pointer}
+.tabs button[aria-selected="true"]{background:#fff;color:#0B0B0C;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.inp{border:1px solid #E2E2DD;border-radius:16px;padding:12px 14px;margin-bottom:12px}
+.inp:focus-within{border-color:#0B0B0C}
+.inp label{display:flex;justify-content:space-between;font-size:13px;color:#6B6B70}
+.inp label button{border:none;background:none;font:500 12px Inter,sans-serif;color:#0B0B0C;cursor:pointer;padding:0;text-decoration:underline}
+.inp-row{display:flex;align-items:center;gap:10px;margin-top:4px}
+.inp input{flex:1;min-width:0;border:none;outline:none;font:600 24px 'Inter Tight',sans-serif;letter-spacing:-0.02em;background:transparent;color:#0B0B0C;padding:4px 0}
+.inp .unit{font-weight:600;font-size:14px;color:#3C3C40}
+.preview{background:#FAFAF8;border:1px solid #ECECE8;border-radius:16px;padding:6px 14px;margin:6px 0 14px}
+.status{margin-top:14px;min-height:22px;font-size:14px;color:#8A6510}
+.status.err{color:#B4441F}.status.ok{color:#16794A}
+.status a{color:inherit}
+.steps-tx{font-size:13px;color:#6B6B70;margin:0 0 12px}
+.empty{text-align:center;padding:36px 20px}
+.warn{background:#FBF2DC;border:1px solid #EBD9A6;color:#6B4E0C;border-radius:14px;padding:12px 14px;font-size:13px}
+@media (max-width:960px){.layout{grid-template-columns:1fr}.g3,.g4{grid-template-columns:1fr 1fr}.layout>.card{position:static!important}.pillnav{display:none}.wrap{padding:0 20px}}
+@media (max-width:520px){.g3,.g2{grid-template-columns:1fr}.v{font-size:26px}}
+</style>
+</head>
+<body>
+
+<header style="padding:20px 0;position:sticky;top:0;z-index:5">
+<div class="wrap">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border:1px solid #ECECE8;border-radius:999px;padding:8px 8px 8px 20px">
+<a href="index.html" aria-label="Sanse, inicio" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+<span style="width:30px;height:30px;border-radius:9px;background:#0B0B0C;display:inline-flex;align-items:center;justify-content:center"><img src="assets/logo-icon-white.png" alt="" style="height:18px;width:auto"></span>
+<span style="font-family:'Inter Tight',sans-serif;font-weight:700;font-size:19px;letter-spacing:-0.02em">Sanse</span>
+</a>
+<nav class="pillnav" aria-label="Principal">
+<a class="ni" href="cope.html">COPe</a>
+<a class="ni" href="lend.html" aria-current="page">Bóveda</a>
+<a class="ni" href="cope.html#app">Ahorro</a>
+<a class="ni" href="dgp.html">Fondo DGP</a>
+</nav>
+<button class="btn btn-dark btn-sm" id="connect" type="button">Conectar wallet</button>
+</div>
+</div>
+</header>
+
+<main class="wrap" style="padding:56px 28px 72px">
+<div class="row" style="justify-content:space-between;margin-bottom:26px">
+<div>
+<span class="badge"><b>Red de prueba</b>Arbitrum Sepolia · sin dinero real</span>
+<h1 class="disp" style="font-size:52px;font-weight:600;margin:16px 0 6px;line-height:1">Bóveda COPe</h1>
+<p style="color:#6B6B70;margin:0;max-width:560px">Deposita USDC como colateral y acuña COPe. Aquí ves cuánto tienes, cuánto debes y qué tan cerca estás de una liquidación.</p>
+</div>
+</div>
+
+<!-- Datos del mercado -->
+<div class="g4" style="margin-bottom:20px" id="market">
+<div class="card"><div class="k">TRM del oráculo</div><div class="v" id="mTrm">—</div><div class="n" id="mTrmAt">—</div></div>
+<div class="card"><div class="k">Tasa de estabilidad</div><div class="v" id="mRate">—</div><div class="n">Interés anual sobre tu deuda</div></div>
+<div class="card"><div class="k">Respaldo mínimo</div><div class="v">150%</div><div class="n">Para acuñar o retirar</div></div>
+<div class="card"><div class="k">Liquidación</div><div class="v">130%</div><div class="n">Penalidad del 10%</div></div>
+</div>
+
+<div id="noConn" class="card empty">
+<h2 class="disp" style="font-size:28px;margin:0 0 8px">Conecta tu wallet para ver tu bóveda</h2>
+<p style="color:#6B6B70;margin:0 0 18px">Funciona con MetaMask, Rabby o cualquier wallet del navegador, en la red Arbitrum Sepolia.</p>
+<button class="btn btn-dark" id="connect2" type="button">Conectar wallet</button>
+<p id="noWallet" class="n" style="margin-top:14px" hidden>No encontramos una wallet en este navegador. Instala MetaMask o Rabby, o abre esta página desde el navegador de tu app de wallet.</p>
+</div>
+
+<div id="wrongNet" class="card empty" hidden>
+<h2 class="disp" style="font-size:28px;margin:0 0 8px">Estás en otra red</h2>
+<p style="color:#6B6B70;margin:0 0 18px">La bóveda funciona en Arbitrum Sepolia.</p>
+<button class="btn btn-dark" id="switchNet" type="button">Cambiar a Arbitrum Sepolia</button>
+</div>
+
+<div id="main" class="layout" hidden>
+<!-- Columna izquierda: posición -->
+<div style="display:grid;gap:20px">
+<div class="card">
+<div class="row" style="justify-content:space-between">
+<div><div class="k">Tu nivel de riesgo</div><div class="disp" style="font-size:22px;font-weight:600;margin-top:2px" id="riskTitle">—</div></div>
+<span class="risk-pill r-none" id="riskPill"><i></i><span id="riskText">Sin deuda</span></span>
+</div>
+<div class="gauge" aria-hidden="true">
+<div class="gauge-track"><span style="width:10%;background:#E05A5A"></span><span style="width:10%;background:#F07A5A"></span><span style="width:25%;background:#E8B84A"></span><span style="width:55%;background:#4CC38A"></span></div>
+<div class="gauge-mark" id="markNow" style="left:0"></div>
+<div class="gauge-mark after" id="markAfter" hidden></div>
+</div>
+<div class="gauge-ticks"><span>100%</span><span>130%</span><span>150%</span><span>200%</span><span>300%+</span></div>
+<p class="n" id="riskExplain" style="margin-top:14px">—</p>
+</div>
+
+<div class="g2">
+<div class="card"><div class="k">Precio de liquidación</div><div class="v" id="liqPrice">—</div><div class="n" id="liqDist">TRM a la que te liquidan</div></div>
+<div class="card"><div class="k">Respaldo actual</div><div class="v" id="ratio">—</div><div class="n" id="ratioNote">Colateral ÷ deuda</div></div>
+</div>
+
+<div class="card">
+<div class="k" style="margin-bottom:6px">Tu posición</div>
+<div class="stat-list">
+<div><span>Colateral depositado</span><span id="pCol">—</span></div>
+<div><span>Colateral en pesos</span><span id="pColCop">—</span></div>
+<div><span>Deuda en COPe (con intereses)</span><span id="pDebt">—</span></div>
+<div><span>Interés estimado al año</span><span id="pFee">—</span></div>
+<div><span>Puedes acuñar hasta</span><span id="pMax">—</span></div>
+<div><span>Puedes retirar hasta</span><span id="pMaxW">—</span></div>
+</div>
+</div>
+
+<div class="g3">
+<div class="card"><div class="k">COPe en tu wallet</div><div class="v" id="wCope">—</div></div>
+<div class="card"><div class="k">USDC en tu wallet</div><div class="v" id="wUsdc">—</div><div class="row" style="margin-top:8px"><button class="btn btn-light btn-sm" id="faucet" type="button">Pedir 1.000</button></div></div>
+<div class="card"><div class="k">ETH para gas</div><div class="v" id="wEth">—</div></div>
+</div>
+</div>
+
+<!-- Columna derecha: acciones -->
+<div class="card" style="position:sticky;top:110px">
+<div class="tabs" role="tablist">
+<button role="tab" id="tabOpen" aria-selected="true" type="button">Depositar y acuñar</button>
+<button role="tab" id="tabClose" aria-selected="false" type="button">Pagar y retirar</button>
+</div>
+
+<div id="paneOpen">
+<div class="inp"><label for="inDep">Depositar colateral <button type="button" id="maxDep">Máx: <span id="maxDepV">—</span></button></label><div class="inp-row"><input id="inDep" inputmode="decimal" placeholder="0" autocomplete="off"><span class="unit">USDC</span></div></div>
+<div class="inp"><label for="inMint">Acuñar <button type="button" id="maxMint">Máx seguro: <span id="maxMintV">—</span></button></label><div class="inp-row"><input id="inMint" inputmode="decimal" placeholder="0" autocomplete="off"><span class="unit">COPe</span></div></div>
+</div>
+
+<div id="paneClose" hidden>
+<div class="inp"><label for="inRepay">Pagar deuda <button type="button" id="maxRepay">Todo: <span id="maxRepayV">—</span></button></label><div class="inp-row"><input id="inRepay" inputmode="decimal" placeholder="0" autocomplete="off"><span class="unit">COPe</span></div></div>
+<div class="inp"><label for="inWd">Retirar colateral <button type="button" id="maxWd">Máx: <span id="maxWdV">—</span></button></label><div class="inp-row"><input id="inWd" inputmode="decimal" placeholder="0" autocomplete="off"><span class="unit">USDC</span></div></div>
+</div>
+
+<div class="k">Así quedaría tu bóveda</div>
+<div class="preview stat-list">
+<div><span>Respaldo</span><span><span class="chg" id="pvRatio0">—</span> → <b id="pvRatio1">—</b></span></div>
+<div><span>Precio de liquidación</span><span><span class="chg" id="pvLiq0">—</span> → <b id="pvLiq1">—</b></span></div>
+<div><span>Deuda</span><span><span class="chg" id="pvDebt0">—</span> → <b id="pvDebt1">—</b></span></div>
+<div><span>Colateral</span><span><span class="chg" id="pvCol0">—</span> → <b id="pvCol1">—</b></span></div>
+</div>
+<p class="steps-tx" id="txPlan">Escribe un monto para ver cómo cambia tu bóveda.</p>
+<div class="warn" id="pvWarn" hidden></div>
+<button class="btn btn-dark btn-block" id="submit" type="button" disabled style="margin-top:12px">Escribe un monto</button>
+<div class="status" id="status" role="status" aria-live="polite"></div>
+</div>
+</div>
+
+<p style="font-size:13px;color:#6B6B70;margin-top:36px;line-height:1.6">Cómo se calcula: el respaldo es el valor de tu colateral en pesos (USDC × TRM del oráculo) dividido por tu deuda en COPe. Si baja de 130%, cualquiera puede liquidar tu bóveda: paga tu deuda y se queda con colateral por ese valor más 10%. El precio de liquidación es la TRM a la que tu respaldo llegaría a 130%; como tu colateral está en dólares, el riesgo es que el dólar baje frente al peso. Red de prueba sin valor real; contratos sin auditar. <a href="cope.html#contratos">Ver contratos</a></p>
+</main>
+
+<script src="assets/ethers-6.13.4.umd.min.js"></script>
+<script>
+(() => {
+const CHAIN_ID = 421614n, CHAIN_HEX = '0x66eee';
+const RPC = 'https://sepolia-rollup.arbitrum.io/rpc', EXPLORER = 'https://sepolia.arbiscan.io';
+const A = {
+  cope: '0xB44aF4E3023C59c1B48cD5f8bD397a7d48169395',
+  hub: '0xA5BA09daB54E22E87BAD5509fAcb4f887d248dDB',
+  vault: '0xadd8d6AFA1C371916F8a26B6FF1421b432D4fdD4',
+  oracle: '0xf963fe3219ED50e0ec15706d11C35f8aC2a84C22',
+  usdc: '0x08ad899e5298e705709337c380565DdB50cf2ce2'
+};
+const MIN = 1.5, LIQ = 1.3;
+const ERC20 = ['function balanceOf(address) view returns (uint256)', 'function allowance(address,address) view returns (uint256)', 'function approve(address,uint256) returns (bool)'];
+const ABI = {
+  cope: ERC20, usdc: [...ERC20, 'function faucet(address,uint256)'],
+  hub: ['function modules(address) view returns (bool,uint256,uint256,uint256,uint256,uint256)'],
+  oracle: ['function copPerUsd() view returns (uint256,uint256)'],
+  vault: ['function positions(address) view returns (uint256,uint256)', 'function debtOf(address) view returns (uint256)',
+    'function deposit(uint256)', 'function withdraw(uint256)', 'function mint(uint256)', 'function repay(uint256)']
+};
+const { ethers } = window;
+const $ = (id) => document.getElementById(id);
+const ro = new ethers.JsonRpcProvider(RPC, Number(CHAIN_ID), { staticNetwork: true });
+const roHub = new ethers.Contract(A.hub, ABI.hub, ro), roOracle = new ethers.Contract(A.oracle, ABI.oracle, ro);
+const nf = (v, d = 0) => v == null || !isFinite(v) ? '—' : v.toLocaleString('es-CO', { minimumFractionDigits: d, maximumFractionDigits: d });
+const pct = (r) => r == null ? '—' : !isFinite(r) ? '∞' : nf(r * 100) + '%';
+
+let trm = null, rate = null;
+let provider, signer, me, W = {};
+let S = { col: 0, debt: 0, wCope: 0, wUsdc: 0, wEth: 0 }; // números en unidades humanas
+let raw = { debt: 0n, col: 0n };
+let tab = 'open';
+
+// ---------- Mercado ----------
+async function loadMarket() {
+  try {
+    const [[p, at], m] = await Promise.all([roOracle.copPerUsd(), roHub.modules(A.vault)]);
+    trm = Number(p) / 1e8; rate = Number(m[2]) / 100;
+    $('mTrm').textContent = nf(trm, 2);
+    $('mTrmAt').textContent = 'Actualizada ' + new Date(Number(at) * 1000).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
+    $('mRate').textContent = nf(rate, 2) + '%';
+    render();
+  } catch (e) { $('mTrmAt').textContent = 'No se pudo leer el oráculo'; }
+}
+loadMarket(); setInterval(loadMarket, 60000);
+
+// ---------- Cálculos ----------
+const ratioOf = (col, debt) => debt <= 0 ? Infinity : (col * trm) / debt;
+const liqPriceOf = (col, debt) => debt <= 0 || col <= 0 ? null : (debt * LIQ) / col;
+function level(r) {
+  if (r == null || !isFinite(r)) return { cls: 'r-none', txt: 'Sin deuda', title: 'No tienes deuda', exp: 'Sin deuda no hay riesgo de liquidación. Deposita colateral y acuña COPe cuando quieras.' };
+  if (r < LIQ) return { cls: 'r-liq', txt: 'Liquidable', title: 'Tu bóveda se puede liquidar', exp: 'Tu respaldo está por debajo de 130%. Paga deuda o deposita colateral ya para evitar perder el 10% de penalidad.' };
+  if (r < MIN) return { cls: 'r-high', txt: 'Riesgo alto', title: 'Estás cerca de la liquidación', exp: 'Estás por debajo de 150%: no puedes acuñar ni retirar, y una caída pequeña del dólar te llevaría a 130%.' };
+  if (r < 2) return { cls: 'r-mod', txt: 'Riesgo moderado', title: 'Tu bóveda está bien, con poco margen', exp: 'Tienes margen, pero si el dólar baja con fuerza frente al peso podrías acercarte a la liquidación.' };
+  return { cls: 'r-safe', txt: 'Riesgo bajo', title: 'Tu bóveda está segura', exp: 'Tienes un buen colchón sobre el 130% de liquidación.' };
+}
+// posición en el medidor: 100%→0, 130%→10, 150%→20, 200%→45, 300%→100
+function gaugePos(r) {
+  if (r == null || !isFinite(r)) return 100;
+  const pts = [[1, 0], [1.3, 10], [1.5, 20], [2, 45], [3, 100]];
+  if (r <= 1) return 0; if (r >= 3) return 100;
+  for (let i = 1; i < pts.length; i++) if (r <= pts[i][0]) { const [a, x] = pts[i - 1], [b, y] = pts[i]; return x + (y - x) * (r - a) / (b - a); }
+  return 100;
+}
+function num(id) {
+  const s = $(id).value.trim().replace(/\s/g, '');
+  if (!s) return 0;
+  const norm = s.includes(',') ? s.replace(/\./g, '').replace(',', '.') : (/^\d{1,3}(\.\d{3})+$/.test(s) ? s.replace(/\./g, '') : s);
+  const v = Number(norm);
+  return isFinite(v) && v >= 0 ? v : NaN;
+}
+
+// ---------- Pintar ----------
+function render() {
+  if (trm == null || !me) return;
+  const r = ratioOf(S.col, S.debt), L = level(r), lp = liqPriceOf(S.col, S.debt);
+  $('riskPill').className = 'risk-pill ' + L.cls; $('riskText').textContent = L.txt;
+  $('riskTitle').textContent = L.title; $('riskExplain').textContent = L.exp;
+  $('markNow').style.left = gaugePos(r) + '%';
+  $('ratio').textContent = pct(r);
+  $('liqPrice').textContent = lp == null ? '—' : nf(lp, 2);
+  $('liqDist').textContent = lp == null ? 'TRM a la que te liquidan' : 'El dólar tendría que ' + (lp < trm ? 'bajar ' + nf((1 - lp / trm) * 100, 1) + '%' : 'subir: ya estás por debajo') + ' desde ' + nf(trm, 0);
+  $('pCol').textContent = nf(S.col, 2) + ' USDC';
+  $('pColCop').textContent = nf(S.col * trm) + ' COP';
+  $('pDebt').textContent = nf(S.debt, 2) + ' COPe';
+  $('pFee').textContent = rate == null ? '—' : '≈ ' + nf(S.debt * rate / 100) + ' COPe';
+  const maxMint = Math.max(0, (S.col * trm) / MIN - S.debt);
+  const maxWd = S.debt > 0 ? Math.max(0, S.col - (S.debt * MIN) / trm) : S.col;
+  $('pMax').textContent = nf(maxMint) + ' COPe';
+  $('pMaxW').textContent = nf(maxWd, 2) + ' USDC';
+  $('wCope').textContent = nf(S.wCope); $('wUsdc').textContent = nf(S.wUsdc, 2); $('wEth').textContent = nf(S.wEth, 4);
+  $('maxDepV').textContent = nf(S.wUsdc, 2);
+  $('maxRepayV').textContent = nf(Math.min(S.debt, S.wCope), 2);
+  $('maxWdV').textContent = nf(maxWd, 2);
+  preview();
+}
+
+function preview() {
+  if (trm == null || !me) return;
+  let col = S.col, debt = S.debt, plan = [], bad = null, any = false;
+  if (tab === 'open') {
+    const dep = num('inDep'), mint = num('inMint');
+    if (isNaN(dep) || isNaN(mint)) bad = 'Revisa los montos.';
+    else {
+      if (dep > 0) { any = true; col += dep; plan.push('aprobar USDC (si hace falta)', 'depositar'); if (dep > S.wUsdc + 1e-9) bad = 'No tienes tanto USDC en tu wallet.'; }
+      if (mint > 0) { any = true; debt += mint; plan.push('acuñar'); }
+      const maxMint = Math.max(0, (col * trm) / MIN - S.debt);
+      $('maxMintV').textContent = nf(Math.floor(maxMint));
+      if (!bad && mint > 0 && ratioOf(col, debt) < MIN) bad = 'Con ese monto tu respaldo queda por debajo de 150% y el contrato lo rechazaría.';
+    }
+  } else {
+    const rep = num('inRepay'), wd = num('inWd');
+    if (isNaN(rep) || isNaN(wd)) bad = 'Revisa los montos.';
+    else {
+      if (rep > 0) { any = true; debt = Math.max(0, debt - rep); plan.push('aprobar COPe (si hace falta)', 'pagar'); if (rep > S.wCope + 1e-9) bad = 'No tienes tanto COPe en tu wallet.'; }
+      if (wd > 0) { any = true; col -= wd; plan.push('retirar'); if (col < -1e-9) bad = 'No puedes retirar más colateral del que tienes.'; }
+      if (!bad && wd > 0 && debt > 0 && ratioOf(col, debt) < MIN) bad = 'Con ese retiro tu respaldo queda por debajo de 150% y el contrato lo rechazaría.';
+    }
+  }
+  const r0 = ratioOf(S.col, S.debt), r1 = ratioOf(col, debt);
+  const lp0 = liqPriceOf(S.col, S.debt), lp1 = liqPriceOf(col, debt);
+  $('pvRatio0').textContent = pct(r0); $('pvRatio1').textContent = pct(r1);
+  $('pvLiq0').textContent = lp0 == null ? '—' : nf(lp0, 0); $('pvLiq1').textContent = lp1 == null ? '—' : nf(lp1, 0);
+  $('pvDebt0').textContent = nf(S.debt); $('pvDebt1').textContent = nf(debt);
+  $('pvCol0').textContent = nf(S.col, 2); $('pvCol1').textContent = nf(Math.max(0, col), 2);
+  const after = $('markAfter');
+  after.hidden = !any; after.style.left = gaugePos(r1) + '%';
+  $('pvWarn').hidden = !bad; $('pvWarn').textContent = bad || '';
+  if (!bad && any && isFinite(r1) && r1 < 1.7) { $('pvWarn').hidden = false; $('pvWarn').textContent = 'Quedarías con poco margen (' + pct(r1) + '). Una caída del dólar de ' + nf((1 - LIQ / r1) * 100, 1) + '% te llevaría a la liquidación.'; }
+  $('txPlan').textContent = any ? 'Tu wallet te pedirá confirmar: ' + plan.join(', ') + '.' : 'Escribe un monto para ver cómo cambia tu bóveda.';
+  const b = $('submit');
+  b.disabled = !any || !!bad || busy;
+  b.textContent = !any ? 'Escribe un monto' : bad ? 'Revisa los montos' : tab === 'open' ? 'Confirmar depósito y acuñación' : 'Confirmar pago y retiro';
+}
+
+// ---------- Wallet ----------
+const say = (t, cls = '') => { const s = $('status'); s.className = 'status ' + cls; s.textContent = t; };
+const sayTx = (t, hash) => { const s = $('status'); s.className = 'status ok'; s.replaceChildren(t + ' '); const l = document.createElement('a'); l.href = EXPLORER + '/tx/' + hash; l.target = '_blank'; l.rel = 'noopener'; l.textContent = 'Ver transacción'; s.append(l); };
+function errText(e) {
+  if (e && (e.code === 'ACTION_REJECTED' || e.code === 4001)) return 'Cancelaste la transacción en tu wallet.';
+  const r = (e && (e.reason || e.shortMessage || e.message)) || 'Algo salió mal.';
+  const map = { Undercollateralized: 'Ese monto deja tu respaldo por debajo de 150%.', StalePrice: 'El precio del oráculo está desactualizado. Intenta más tarde.', ModuleCeiling: 'La bóveda llegó a su tope de emisión.', GlobalCeiling: 'El sistema llegó a su tope de emisión.', EnforcedPause: 'La bóveda está en pausa.', 'insufficient funds': 'No tienes suficiente ETH para pagar el gas.' };
+  for (const k in map) if (r.includes(k)) return map[k];
+  return r.length > 160 ? r.slice(0, 160) + '…' : r;
+}
+
+async function connect() {
+  if (!window.ethereum) { $('noWallet').hidden = false; return; }
+  try { provider = new ethers.BrowserProvider(window.ethereum); await provider.send('eth_requestAccounts', []); await refreshAccount(); }
+  catch (e) { say(errText(e), 'err'); }
+}
+async function refreshAccount() {
+  provider = new ethers.BrowserProvider(window.ethereum);
+  const accs = await provider.send('eth_accounts', []);
+  if (!accs.length) { me = null; $('main').hidden = true; $('wrongNet').hidden = true; $('noConn').hidden = false; $('connect').textContent = 'Conectar wallet'; return; }
+  signer = await provider.getSigner(); me = await signer.getAddress();
+  $('connect').textContent = me.slice(0, 6) + '…' + me.slice(-4);
+  const ok = (await provider.getNetwork()).chainId === CHAIN_ID;
+  $('noConn').hidden = true; $('wrongNet').hidden = ok; $('main').hidden = !ok;
+  if (!ok) return;
+  W = Object.fromEntries(['cope', 'usdc', 'vault'].map((k) => [k, new ethers.Contract(A[k], ABI[k], signer)]));
+  await refreshPosition();
+}
+async function refreshPosition() {
+  if (!me || !W.vault) return;
+  const [pos, debt, cope, usdc, eth] = await Promise.all([W.vault.positions(me), W.vault.debtOf(me), W.cope.balanceOf(me), W.usdc.balanceOf(me), provider.getBalance(me)]);
+  raw = { col: pos[0], debt };
+  S = { col: Number(ethers.formatUnits(pos[0], 6)), debt: Number(ethers.formatUnits(debt, 18)), wCope: Number(ethers.formatUnits(cope, 18)), wUsdc: Number(ethers.formatUnits(usdc, 6)), wEth: Number(ethers.formatUnits(eth, 18)) };
+  render();
+}
+
+let busy = false;
+async function send(label, fn) {
+  say(label + ': confirma en tu wallet…');
+  const tx = await fn();
+  say(label + ': esperando confirmación…');
+  await tx.wait();
+  return tx.hash;
+}
+async function ensureAllowance(token, spender, need, name) {
+  if ((await token.allowance(me, spender)) >= need) return;
+  await send('Autorizar ' + name, () => token.approve(spender, need));
+}
+const toUnits = (v, dec) => ethers.parseUnits(v.toFixed(dec === 6 ? 6 : 18).replace(/\.?0+$/, '') || '0', dec);
+
+$('submit').onclick = async () => {
+  busy = true; preview();
+  let last = null;
+  try {
+    if (tab === 'open') {
+      const dep = num('inDep'), mint = num('inMint');
+      if (dep > 0) { const v = toUnits(dep, 6); await ensureAllowance(W.usdc, A.vault, v, 'USDC'); last = await send('Depositar', () => W.vault.deposit(v)); }
+      if (mint > 0) { const v = toUnits(mint, 18); last = await send('Acuñar', () => W.vault.mint(v)); }
+    } else {
+      const rep = num('inRepay'), wd = num('inWd');
+      if (rep > 0) {
+        const all = rep >= S.debt - 1e-9;
+        const v = all ? ethers.MaxUint256 : toUnits(rep, 18);
+        await ensureAllowance(W.cope, A.hub, all ? raw.debt + raw.debt / 100n : v, 'COPe');
+        last = await send('Pagar', () => W.vault.repay(v));
+      }
+      if (wd > 0) {
+        await refreshPosition();
+        const v = wd >= S.col - 1e-9 ? raw.col : toUnits(wd, 6);
+        last = await send('Retirar', () => W.vault.withdraw(v));
+      }
+    }
+    ['inDep', 'inMint', 'inRepay', 'inWd'].forEach((id) => { $(id).value = ''; });
+    if (last) sayTx('Listo, tu bóveda se actualizó.', last);
+  } catch (e) { say(errText(e), 'err'); }
+  busy = false;
+  await refreshPosition().catch(() => {});
+};
+
+$('faucet').onclick = async () => {
+  try { const h = await send('Pedir USDC de prueba', () => W.usdc.faucet(me, 1000n * 10n ** 6n)); sayTx('Te llegaron 1.000 USDC de prueba.', h); await refreshPosition(); }
+  catch (e) { say(errText(e), 'err'); }
+};
+$('connect').onclick = connect; $('connect2').onclick = connect;
+$('switchNet').onclick = async () => {
+  try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_HEX }] }); }
+  catch (e) {
+    if (e && e.code === 4902) await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: CHAIN_HEX, chainName: 'Arbitrum Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: [RPC], blockExplorerUrls: [EXPLORER] }] });
+    else say(errText(e), 'err');
+  }
+};
+function setTab(t) {
+  tab = t;
+  $('tabOpen').setAttribute('aria-selected', t === 'open'); $('tabClose').setAttribute('aria-selected', t === 'close');
+  $('paneOpen').hidden = t !== 'open'; $('paneClose').hidden = t !== 'close';
+  say(''); preview();
+}
+$('tabOpen').onclick = () => setTab('open'); $('tabClose').onclick = () => setTab('close');
+['inDep', 'inMint', 'inRepay', 'inWd'].forEach((id) => $(id).addEventListener('input', preview));
+const fill = (id, v, d) => { $(id).value = v > 0 ? String(Math.floor(v * 10 ** d) / 10 ** d).replace('.', ',') : ''; preview(); };
+$('maxDep').onclick = () => fill('inDep', S.wUsdc, 2);
+$('maxMint').onclick = () => { const col = S.col + (num('inDep') || 0); fill('inMint', Math.max(0, (col * trm) / MIN - S.debt) * 0.999, 0); };
+$('maxRepay').onclick = () => fill('inRepay', Math.min(S.debt, S.wCope), 2);
+$('maxWd').onclick = () => { const debt = Math.max(0, S.debt - (num('inRepay') || 0)); fill('inWd', debt > 0 ? Math.max(0, S.col - (debt * MIN) / trm) * 0.999 : S.col, 2); };
+
+if (window.ethereum) {
+  window.ethereum.on && window.ethereum.on('accountsChanged', () => refreshAccount().catch(() => {}));
+  window.ethereum.on && window.ethereum.on('chainChanged', () => refreshAccount().catch(() => {}));
+  refreshAccount().catch(() => {});
+}
+setInterval(() => refreshPosition().catch(() => {}), 30000);
+})();
+</script>
+</body>
+</html>
