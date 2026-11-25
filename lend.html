@@ -214,12 +214,13 @@ const A = {
   usdc: '0x08ad899e5298e705709337c380565DdB50cf2ce2'
 };
 const MIN = 1.5, LIQ = 1.3;
-const ERC20 = ['function balanceOf(address) view returns (uint256)', 'function allowance(address,address) view returns (uint256)', 'function approve(address,uint256) returns (bool)'];
+const ERRS = ['error Undercollateralized()', 'error StalePrice()', 'error ZeroAmount()', 'error PositionHealthy()', 'error EnforcedPause()', 'error ModuleCeiling()', 'error GlobalCeiling()', 'error ERC4626ExceededMaxWithdraw(address,uint256,uint256)', 'error ERC4626ExceededMaxRedeem(address,uint256,uint256)', 'error ERC20InsufficientBalance(address,uint256,uint256)', 'error ERC20InsufficientAllowance(address,uint256,uint256)'];
+const ERC20 = [...ERRS, 'function balanceOf(address) view returns (uint256)', 'function allowance(address,address) view returns (uint256)', 'function approve(address,uint256) returns (bool)'];
 const ABI = {
   cope: ERC20, usdc: [...ERC20, 'function faucet(address,uint256)'],
   hub: ['function modules(address) view returns (bool,uint256,uint256,uint256,uint256,uint256)'],
   oracle: ['function copPerUsd() view returns (uint256,uint256)'],
-  vault: ['function positions(address) view returns (uint256,uint256)', 'function debtOf(address) view returns (uint256)',
+  vault: [...ERRS, 'function positions(address) view returns (uint256,uint256)', 'function debtOf(address) view returns (uint256)',
     'function deposit(uint256)', 'function withdraw(uint256)', 'function mint(uint256)', 'function repay(uint256)']
 };
 const { ethers } = window;
@@ -342,8 +343,8 @@ const say = (t, cls = '') => { const s = $('status'); s.className = 'status ' + 
 const sayTx = (t, hash) => { const s = $('status'); s.className = 'status ok'; s.replaceChildren(t + ' '); const l = document.createElement('a'); l.href = EXPLORER + '/tx/' + hash; l.target = '_blank'; l.rel = 'noopener'; l.textContent = 'Ver transacción'; s.append(l); };
 function errText(e) {
   if (e && (e.code === 'ACTION_REJECTED' || e.code === 4001)) return 'Cancelaste la transacción en tu wallet.';
-  const r = (e && (e.reason || e.shortMessage || e.message)) || 'Algo salió mal.';
-  const map = { Undercollateralized: 'Ese monto deja tu respaldo por debajo de 150%.', StalePrice: 'El precio del oráculo está desactualizado. Intenta más tarde.', ModuleCeiling: 'La bóveda llegó a su tope de emisión.', GlobalCeiling: 'El sistema llegó a su tope de emisión.', EnforcedPause: 'La bóveda está en pausa.', 'insufficient funds': 'No tienes suficiente ETH para pagar el gas.' };
+  const r = (e && ((e.revert && e.revert.name) || e.reason || e.shortMessage || e.message)) || 'Algo salió mal.';
+  const map = { ERC4626ExceededMaxWithdraw: 'No tienes tanto ahorro para retirar.', ERC4626ExceededMaxRedeem: 'No tienes tanto sCOPe para retirar.', ERC20InsufficientBalance: 'No tienes saldo suficiente para esa operación.', ERC20InsufficientAllowance: 'Falta autorizar el token. Intenta de nuevo.', ZeroAmount: 'Escribe un monto mayor que cero.', Undercollateralized: 'Ese monto deja tu respaldo por debajo de 150%.', StalePrice: 'El precio del oráculo está desactualizado. Intenta más tarde.', ModuleCeiling: 'La bóveda llegó a su tope de emisión.', GlobalCeiling: 'El sistema llegó a su tope de emisión.', EnforcedPause: 'La bóveda está en pausa.', 'insufficient funds': 'No tienes suficiente ETH para pagar el gas.' };
   for (const k in map) if (r.includes(k)) return map[k];
   return r.length > 160 ? r.slice(0, 160) + '…' : r;
 }
@@ -382,9 +383,28 @@ async function send(label, fn) {
   await ro.waitForTransaction(tx.hash, 1, 180000);
   return tx.hash;
 }
+// Calcula el gas con el RPC público (la wallet a veces no puede) y envía la transacción directo a la wallet.
+const keyOf = (c) => Object.keys(A).find((k) => A[k].toLowerCase() === String(c.target).toLowerCase());
+async function sendTx(k, m, ...args) {
+  const iface = new ethers.Interface(ABI[k]);
+  const data = iface.encodeFunctionData(m, args);
+  let gas;
+  try { gas = await ro.estimateGas({ from: me, to: A[k], data }); }
+  catch (e) {
+    const raw = e && (e.data || (e.info && e.info.error && e.info.error.data) || (e.error && e.error.data));
+    let parsed = null;
+    try { parsed = raw ? iface.parseError(raw) : null; } catch (_) {}
+    const err = new Error(parsed ? parsed.name : (e.shortMessage || e.message));
+    if (parsed) err.revert = { name: parsed.name };
+    throw err;
+  }
+  const hash = await window.ethereum.request({ method: 'eth_sendTransaction', params: [{ from: me, to: A[k], data, gas: '0x' + (gas * 13n / 10n + 20000n).toString(16) }] });
+  return { hash };
+}
+
 async function ensureAllowance(token, spender, need, name) {
   if ((await new ethers.Contract(token.target, ERC20, ro).allowance(me, spender)) >= need) return;
-  await send('Autorizar ' + name, () => token.approve(spender, need));
+  await send('Autorizar ' + name, () => sendTx(keyOf(token), 'approve', spender, need));
 }
 const toUnits = (v, dec) => ethers.parseUnits(v.toFixed(dec === 6 ? 6 : 18).replace(/\.?0+$/, '') || '0', dec);
 
@@ -394,20 +414,20 @@ $('submit').onclick = async () => {
   try {
     if (tab === 'open') {
       const dep = num('inDep'), mint = num('inMint');
-      if (dep > 0) { const v = toUnits(dep, 6); await ensureAllowance(W.usdc, A.vault, v, 'USDC'); last = await send('Depositar', () => W.vault.deposit(v)); }
-      if (mint > 0) { const v = toUnits(mint, 18); last = await send('Acuñar', () => W.vault.mint(v)); }
+      if (dep > 0) { const v = toUnits(dep, 6); await ensureAllowance(W.usdc, A.vault, v, 'USDC'); last = await send('Depositar', () => sendTx('vault', 'deposit', v)); }
+      if (mint > 0) { const v = toUnits(mint, 18); last = await send('Acuñar', () => sendTx('vault', 'mint', v)); }
     } else {
       const rep = num('inRepay'), wd = num('inWd');
       if (rep > 0) {
         const all = rep >= S.debt - 1e-9;
         const v = all ? ethers.MaxUint256 : toUnits(rep, 18);
         await ensureAllowance(W.cope, A.hub, all ? raw.debt + raw.debt / 100n : v, 'COPe');
-        last = await send('Pagar', () => W.vault.repay(v));
+        last = await send('Pagar', () => sendTx('vault', 'repay', v));
       }
       if (wd > 0) {
         await refreshPosition();
         const v = wd >= S.col - 1e-9 ? raw.col : toUnits(wd, 6);
-        last = await send('Retirar', () => W.vault.withdraw(v));
+        last = await send('Retirar', () => sendTx('vault', 'withdraw', v));
       }
     }
     ['inDep', 'inMint', 'inRepay', 'inWd'].forEach((id) => { $(id).value = ''; });
@@ -418,7 +438,7 @@ $('submit').onclick = async () => {
 };
 
 $('faucet').onclick = async () => {
-  try { const h = await send('Pedir USDC de prueba', () => W.usdc.faucet(me, 1000n * 10n ** 6n)); sayTx('Te llegaron 1.000 USDC de prueba.', h); await refreshPosition(); }
+  try { const h = await send('Pedir USDC de prueba', () => sendTx('usdc', 'faucet', me, 1000n * 10n ** 6n)); sayTx('Te llegaron 1.000 USDC de prueba.', h); await refreshPosition(); }
   catch (e) { say(errText(e), 'err'); }
 };
 $('connect').onclick = connect; $('connect2').onclick = connect;

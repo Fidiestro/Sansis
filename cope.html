@@ -228,13 +228,14 @@ const A = {
   usdc: '0x08ad899e5298e705709337c380565DdB50cf2ce2'
 };
 const NAMES = [['COPe (token)', 'cope'], ['Sanse Hub', 'hub'], ['Bóveda USDC', 'vault'], ['Estrella Real', 'estrella'], ['sCOPe (ahorro)', 'scope'], ['Oráculo COP/USD', 'oracle'], ['USDC de prueba', 'usdc']];
-const ERC20 = ['function balanceOf(address) view returns (uint256)', 'function totalSupply() view returns (uint256)', 'function allowance(address,address) view returns (uint256)', 'function approve(address,uint256) returns (bool)'];
+const ERRS = ['error Undercollateralized()', 'error StalePrice()', 'error ZeroAmount()', 'error PositionHealthy()', 'error EnforcedPause()', 'error ModuleCeiling()', 'error GlobalCeiling()', 'error ERC4626ExceededMaxWithdraw(address,uint256,uint256)', 'error ERC4626ExceededMaxRedeem(address,uint256,uint256)', 'error ERC20InsufficientBalance(address,uint256,uint256)', 'error ERC20InsufficientAllowance(address,uint256,uint256)'];
+const ERC20 = [...ERRS, 'function balanceOf(address) view returns (uint256)', 'function totalSupply() view returns (uint256)', 'function allowance(address,address) view returns (uint256)', 'function approve(address,uint256) returns (bool)'];
 const ABI = {
   cope: ERC20,
   usdc: [...ERC20, 'function faucet(address,uint256)'],
   hub: ['function surplus() view returns (uint256)'],
   oracle: ['function copPerUsd() view returns (uint256,uint256)'],
-  vault: ['function positions(address) view returns (uint256,uint256)', 'function debtOf(address) view returns (uint256)', 'function ratioBps(address) view returns (uint256)', 'function maxMintable(address) view returns (uint256)',
+  vault: [...ERRS, 'function positions(address) view returns (uint256,uint256)', 'function debtOf(address) view returns (uint256)', 'function ratioBps(address) view returns (uint256)', 'function maxMintable(address) view returns (uint256)',
     'function deposit(uint256)', 'function withdraw(uint256)', 'function mint(uint256)', 'function repay(uint256)'],
   scope: [...ERC20, 'function pricePerShare() view returns (uint256)', 'function totalAssets() view returns (uint256)', 'function convertToAssets(uint256) view returns (uint256)', 'function maxWithdraw(address) view returns (uint256)',
     'function deposit(uint256,address) returns (uint256)', 'function withdraw(uint256,address,address) returns (uint256)', 'function redeem(uint256,address,address) returns (uint256)']
@@ -281,8 +282,8 @@ const sayTx = (t, hash) => {
 };
 function errText(e) {
   if (e && (e.code === 'ACTION_REJECTED' || e.code === 4001)) return 'Cancelaste la transacción en tu wallet.';
-  const r = (e && (e.reason || e.shortMessage || e.message)) || 'Algo salió mal.';
-  const map = { Undercollateralized: 'Ese monto deja tu respaldo por debajo de 150%.', StalePrice: 'El precio del oráculo está desactualizado. Intenta más tarde.', ModuleCeiling: 'La bóveda llegó a su tope de emisión.', GlobalCeiling: 'El sistema llegó a su tope de emisión.', EnforcedPause: 'La bóveda está en pausa.', 'insufficient funds': 'No tienes suficiente ETH para pagar el gas.' };
+  const r = (e && ((e.revert && e.revert.name) || e.reason || e.shortMessage || e.message)) || 'Algo salió mal.';
+  const map = { ERC4626ExceededMaxWithdraw: 'No tienes tanto ahorro para retirar.', ERC4626ExceededMaxRedeem: 'No tienes tanto sCOPe para retirar.', ERC20InsufficientBalance: 'No tienes saldo suficiente para esa operación.', ERC20InsufficientAllowance: 'Falta autorizar el token. Intenta de nuevo.', ZeroAmount: 'Escribe un monto mayor que cero.', Undercollateralized: 'Ese monto deja tu respaldo por debajo de 150%.', StalePrice: 'El precio del oráculo está desactualizado. Intenta más tarde.', ModuleCeiling: 'La bóveda llegó a su tope de emisión.', GlobalCeiling: 'El sistema llegó a su tope de emisión.', EnforcedPause: 'La bóveda está en pausa.', 'insufficient funds': 'No tienes suficiente ETH para pagar el gas.' };
   for (const k in map) if (r.includes(k)) return map[k];
   return r.length > 160 ? r.slice(0, 160) + '…' : r;
 }
@@ -344,11 +345,30 @@ function amount(id, dec) {
   return ethers.parseUnits(raw, dec);
 }
 
+// Calcula el gas con el RPC público (la wallet a veces no puede) y envía la transacción directo a la wallet.
+const keyOf = (c) => Object.keys(A).find((k) => A[k].toLowerCase() === String(c.target).toLowerCase());
+async function sendTx(k, m, ...args) {
+  const iface = new ethers.Interface(ABI[k]);
+  const data = iface.encodeFunctionData(m, args);
+  let gas;
+  try { gas = await ro.estimateGas({ from: me, to: A[k], data }); }
+  catch (e) {
+    const raw = e && (e.data || (e.info && e.info.error && e.info.error.data) || (e.error && e.error.data));
+    let parsed = null;
+    try { parsed = raw ? iface.parseError(raw) : null; } catch (_) {}
+    const err = new Error(parsed ? parsed.name : (e.shortMessage || e.message));
+    if (parsed) err.revert = { name: parsed.name };
+    throw err;
+  }
+  const hash = await window.ethereum.request({ method: 'eth_sendTransaction', params: [{ from: me, to: A[k], data, gas: '0x' + (gas * 13n / 10n + 20000n).toString(16) }] });
+  return { hash };
+}
+
 async function ensureAllowance(token, spender, need) {
   const cur = await new ethers.Contract(token.target, ERC20, ro).allowance(me, spender);
   if (cur >= need) return;
   say('Paso 1 de 2: autoriza el uso del token en tu wallet…');
-  const tx = await token.approve(spender, need);
+  const tx = await sendTx(keyOf(token), 'approve', spender, need);
   await ro.waitForTransaction(tx.hash, 1, 180000);
 }
 
@@ -380,19 +400,19 @@ $('watch').onclick = async () => {
   try { await window.ethereum.request({ method: 'wallet_watchAsset', params: { type: 'ERC20', options: { address: A.cope, symbol: 'COPe', decimals: 18 } } }); }
   catch (e) { say(errText(e), 'err'); }
 };
-$('faucet').onclick = () => run('Pedir USDC de prueba', () => W.usdc.faucet(me, 1000n * 10n ** 6n));
+$('faucet').onclick = () => run('Pedir USDC de prueba', () => sendTx('usdc', 'faucet', me, 1000n * 10n ** 6n));
 $('doDeposit').onclick = async () => {
   let v; try { v = amount('inUsdc', 6); } catch (e) { return say(e.message, 'err'); }
   setButtons(false);
   try { await ensureAllowance(W.usdc, A.vault, v); } catch (e) { setButtons(true); return say(errText(e), 'err'); }
-  run('Depositar USDC', () => W.vault.deposit(v));
+  run('Depositar USDC', () => sendTx('vault', 'deposit', v));
 };
-$('doWithdraw').onclick = () => { let v; try { v = amount('inUsdc', 6); } catch (e) { return say(e.message, 'err'); } run('Retirar USDC', () => W.vault.withdraw(v)); };
-$('doMint').onclick = () => { let v; try { v = amount('inCope', 18); } catch (e) { return say(e.message, 'err'); } run('Acuñar COPe', () => W.vault.mint(v)); };
+$('doWithdraw').onclick = () => { let v; try { v = amount('inUsdc', 6); } catch (e) { return say(e.message, 'err'); } run('Retirar USDC', () => sendTx('vault', 'withdraw', v)); };
+$('doMint').onclick = () => { let v; try { v = amount('inCope', 18); } catch (e) { return say(e.message, 'err'); } run('Acuñar COPe', () => sendTx('vault', 'mint', v)); };
 async function repay(v) {
   setButtons(false);
-  try { await ensureAllowance(W.cope, A.hub, v === ethers.MaxUint256 ? (await W.vault.debtOf(me)) * 2n : v); } catch (e) { setButtons(true); return say(errText(e), 'err'); }
-  run('Pagar deuda', () => W.vault.repay(v));
+  try { await ensureAllowance(W.cope, A.hub, v === ethers.MaxUint256 ? (await V.vault.debtOf(me)) * 2n : v); } catch (e) { setButtons(true); return say(errText(e), 'err'); }
+  run('Pagar deuda', () => sendTx('vault', 'repay', v));
 }
 $('doRepay').onclick = () => { let v; try { v = amount('inCope', 18); } catch (e) { return say(e.message, 'err'); } repay(v); };
 $('doRepayAll').onclick = () => repay(ethers.MaxUint256);
@@ -400,10 +420,10 @@ $('doSave').onclick = async () => {
   let v; try { v = amount('inSave', 18); } catch (e) { return say(e.message, 'err'); }
   setButtons(false);
   try { await ensureAllowance(W.cope, A.scope, v); } catch (e) { setButtons(true); return say(errText(e), 'err'); }
-  run('Ahorrar en sCOPe', () => W.scope.deposit(v, me));
+  run('Ahorrar en sCOPe', () => sendTx('scope', 'deposit', v, me));
 };
-$('doUnsave').onclick = () => { let v; try { v = amount('inSave', 18); } catch (e) { return say(e.message, 'err'); } run('Retirar ahorro', () => W.scope.withdraw(v, me, me)); };
-$('doUnsaveAll').onclick = async () => { const sh = await V.scope.balanceOf(me); if (sh === 0n) return say('No tienes ahorro en sCOPe.', 'err'); run('Retirar todo el ahorro', () => W.scope.redeem(sh, me, me)); };
+$('doUnsave').onclick = () => { let v; try { v = amount('inSave', 18); } catch (e) { return say(e.message, 'err'); } run('Retirar ahorro', () => sendTx('scope', 'withdraw', v, me, me)); };
+$('doUnsaveAll').onclick = async () => { const sh = await V.scope.balanceOf(me); if (sh === 0n) return say('No tienes ahorro en sCOPe.', 'err'); run('Retirar todo el ahorro', () => sendTx('scope', 'redeem', sh, me, me)); };
 
 if (window.ethereum) {
   window.ethereum.on && window.ethereum.on('accountsChanged', () => refreshAccount().catch(() => {}));
