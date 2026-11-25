@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>COPe — El peso colombiano digital | Sanse</title>
+<meta name="description" content="COPe es el peso colombiano digital de Sanse: 1 COPe = 1 peso, respaldado con colateral y verificable en la blockchain. Versión de prueba en Arbitrum Sepolia.">
+<meta property="og:title" content="COPe — El peso colombiano digital">
+<meta property="og:description" content="1 COPe = 1 peso, respaldado con colateral y verificable on-chain. Prueba la app en la red de prueba.">
+<meta property="og:image" content="https://sansecapital.com/favicon-256.png">
+<meta property="og:url" content="https://sansecapital.com/cope.html">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#FAFAF8;color:#0B0B0C;font-family:Inter,sans-serif;font-size:15px;line-height:1.55}
+a{color:#0B0B0C}a:hover{color:#6B6B70}
+[hidden]{display:none!important}
+section[id]{scroll-margin-top:96px}
+.wrap{max-width:1160px;margin:0 auto;padding:0 28px}
+.pillnav{display:flex;gap:2px}
+.ni{display:inline-flex;align-items:center;gap:6px;padding:0 14px;min-height:40px;border-radius:999px;color:#3C3C40;text-decoration:none;font-size:15px}
+.ni:hover{background:#EFEFEC;color:#0B0B0C}
+.ni[aria-current="page"]{background:#EFEFEC;color:#0B0B0C}
+.disp{font-family:'Inter Tight',sans-serif;letter-spacing:-0.04em}
+.h1{font-size:84px;font-weight:600;line-height:.98;margin:0 0 24px}
+.lead{font-size:19px;color:#6B6B70;max-width:600px;margin:0 0 32px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #ECECE8;border-radius:999px;padding:6px 14px 6px 6px;font-size:14px;color:#3C3C40;margin-bottom:28px}
+.badge b{background:#C9A84C;color:#0B0B0C;border-radius:999px;padding:3px 10px;font-weight:600;font-size:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 22px;border-radius:999px;font-weight:500;font-size:15px;border:1px solid transparent;cursor:pointer;text-decoration:none;font-family:Inter,sans-serif;transition:background .15s,opacity .15s}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-dark{background:#0B0B0C;color:#fff}.btn-dark:hover{background:#2A2A2E;color:#fff}
+.btn-light{background:#fff;color:#0B0B0C;border-color:#E2E2DD}.btn-light:hover{background:#F2F2EF}
+.btn-sm{min-height:38px;padding:0 16px;font-size:14px}
+.sec{padding:72px 0}
+.sec h2{font-family:'Inter Tight',sans-serif;font-size:40px;font-weight:600;letter-spacing:-0.03em;margin:0 0 10px}
+.sec .sub{color:#6B6B70;margin:0 0 32px;max-width:640px}
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:1fr 1fr}
+.card{background:#fff;border:1px solid #ECECE8;border-radius:20px;padding:24px;min-width:0}
+.k{font-size:13px;color:#6B6B70}
+.v{font-family:'Inter Tight',sans-serif;font-size:32px;font-weight:600;letter-spacing:-0.03em;margin-top:6px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.n{font-size:13px;color:#6B6B70;margin-top:4px}
+.mono{font-family:'JetBrains Mono',monospace;font-size:13px}
+.app{background:#0B0B0C;color:#F2F2EF;border-radius:28px;padding:36px}
+.app .card{background:#151517;border-color:#26262A;color:#F2F2EF}
+.app .k,.app .n{color:#9A9AA0}
+.app h3{font-family:'Inter Tight',sans-serif;font-size:22px;font-weight:600;margin:0 0 4px;letter-spacing:-0.02em}
+.app .btn-light{background:#F2F2EF;border-color:#F2F2EF}
+.app .btn-ghost{background:transparent;color:#F2F2EF;border-color:#3A3A40}.app .btn-ghost:hover{background:#1E1E22}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.field{display:flex;gap:8px;margin-top:14px}
+.field input{flex:1;min-width:0;min-height:46px;border-radius:14px;border:1px solid #3A3A40;background:#0B0B0C;color:#F2F2EF;padding:0 14px;font-size:16px;font-family:'JetBrains Mono',monospace}
+.field input:focus{outline:2px solid #C9A84C;outline-offset:1px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.bar{height:8px;border-radius:999px;background:#26262A;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;background:#4CC38A;width:0}
+.status{margin-top:20px;min-height:24px;font-size:14px;color:#C9A84C}
+.status.err{color:#F07A5A}.status.ok{color:#4CC38A}
+.status a{color:inherit}
+.warn{background:#2A2210;border:1px solid #5C4A1A;color:#F3D58A;border-radius:14px;padding:14px 16px;font-size:14px;margin-bottom:20px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl td{padding:12px 0;border-bottom:1px solid #ECECE8;vertical-align:top}
+.tbl td:first-child{font-weight:500;padding-right:16px;white-space:nowrap}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0}
+.steps li{counter-increment:s;padding:0 0 18px 44px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:999px;background:#0B0B0C;color:#fff;display:grid;place-items:center;font-size:13px;font-weight:600}
+@media (max-width:900px){
+.h1{font-size:50px}.g4{grid-template-columns:1fr 1fr}.g3,.g2{grid-template-columns:1fr}
+.pillnav{display:none}.wrap{padding:0 20px}.app{padding:22px;border-radius:22px}.sec{padding:52px 0}.sec h2{font-size:30px}
+}
+</style>
+</head>
+<body>
+
+<header style="padding:20px 0;position:sticky;top:0;z-index:5">
+<div class="wrap">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border:1px solid #ECECE8;border-radius:999px;padding:8px 8px 8px 20px">
+<a href="index.html" aria-label="Sanse, inicio" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+<span style="width:30px;height:30px;border-radius:9px;background:#0B0B0C;display:inline-flex;align-items:center;justify-content:center"><img src="assets/logo-icon-white.png" alt="" style="height:18px;width:auto"></span>
+<span style="font-family:'Inter Tight',sans-serif;font-weight:700;font-size:19px;letter-spacing:-0.02em">Sanse</span>
+</a>
+<nav class="pillnav" aria-label="Principal">
+<a class="ni" href="index.html#productos">Productos</a>
+<a class="ni" href="cope.html" aria-current="page">COPe</a>
+<a class="ni" href="index.html#transparencia">Transparencia</a>
+<a class="ni" href="dgp.html">Fondo DGP</a>
+</nav>
+<button class="btn btn-dark btn-sm" id="navConnect" type="button">Conectar wallet</button>
+</div>
+</div>
+</header>
+
+<section style="padding:100px 0 40px">
+<div class="wrap">
+<span class="badge"><b>Red de prueba</b>Arbitrum Sepolia · sin dinero real</span>
+<h1 class="h1 disp">El peso colombiano,<br>en la blockchain.</h1>
+<p class="lead">COPe vale siempre 1 peso. Cada COPe está respaldado por más valor del que representa, y cualquiera puede verificarlo en tiempo real.</p>
+<div class="row">
+<a class="btn btn-dark" href="#app">Probar la app</a>
+<a class="btn btn-light" href="#como">Cómo funciona</a>
+</div>
+</div>
+</section>
+
+<section class="sec" id="cifras" style="padding-top:40px">
+<div class="wrap">
+<h2>En vivo, desde la blockchain</h2>
+<p class="sub">Estas cifras se leen directo de los contratos cada vez que abres la página. <span id="liveAt" class="mono"></span></p>
+<div class="grid g4">
+<div class="card"><div class="k">COPe en circulación</div><div class="v" id="sSupply">—</div><div class="n">1 COPe = 1 peso</div></div>
+<div class="card"><div class="k">TRM en el oráculo</div><div class="v" id="sTrm">—</div><div class="n" id="sTrmAt">Se actualiza cada hora</div></div>
+<div class="card"><div class="k">Colchón del protocolo</div><div class="v" id="sSurplus">—</div><div class="n">COPe de reserva</div></div>
+<div class="card"><div class="k">Valor de 1 sCOPe</div><div class="v" id="sPrice">—</div><div class="n">COPe · ahorro en pesos</div></div>
+</div>
+</div>
+</section>
+
+<section class="sec" id="como">
+<div class="wrap">
+<h2>Cómo funciona</h2>
+<p class="sub">Inspirado en DAI y Sky, adaptado a pesos colombianos.</p>
+<div class="grid g3">
+<div class="card"><div class="k">1 · Bóveda</div><h3 class="disp" style="font-size:22px;margin:8px 0">Depositas colateral, acuñas COPe</h3><p style="color:#6B6B70;margin:0">Por cada 150 pesos de colateral puedes acuñar hasta 100 COPe. Si el respaldo baja de 130%, la posición se liquida para proteger el sistema.</p></div>
+<div class="card"><div class="k">2 · Sanse Hub y Estrella Real</div><h3 class="disp" style="font-size:22px;margin:8px 0">Préstamos en pesos, registrados</h3><p style="color:#6B6B70;margin:0">El Hub emite COPe para préstamos en pesos, con topes por tipo y tasas dentro de la ley. Cada préstamo queda registrado con un código, sin datos personales.</p></div>
+<div class="card"><div class="k">3 · sCOPe</div><h3 class="disp" style="font-size:22px;margin:8px 0">Ahorras en pesos y ganas</h3><p style="color:#6B6B70;margin:0">Los intereses del sistema llegan al Colchón y una parte se reparte a quienes ahorran en sCOPe. El rendimiento es variable, nunca fijo.</p></div>
+</div>
+</div>
+</section>
+
+<section class="sec" id="app">
+<div class="wrap">
+<div class="app">
+<div class="row" style="justify-content:space-between;margin-bottom:22px">
+<div><h3 style="font-size:30px">App COPe</h3><div class="n">Conecta una wallet como MetaMask o Rabby. Funciona en la red de prueba Arbitrum Sepolia.</div></div>
+<div class="row"><span class="mono" id="addr" style="color:#9A9AA0"></span><button class="btn btn-light" id="connect" type="button">Conectar wallet</button></div>
+</div>
+
+<div class="warn">Esto es una red de prueba. El USDC y el COPe de aquí no tienen valor real. Para empezar necesitas un poco de ETH de Arbitrum Sepolia para pagar el gas.</div>
+
+<div id="noWallet" class="card" hidden><h3>No encontramos una wallet</h3><p class="n" style="margin:6px 0 0">Instala MetaMask o Rabby en tu navegador, o abre esta página desde el navegador de tu app de wallet.</p></div>
+<div id="wrongNet" class="card" hidden><h3>Estás en otra red</h3><p class="n" style="margin:6px 0 14px">La app funciona en Arbitrum Sepolia.</p><button class="btn btn-light" id="switchNet" type="button">Cambiar a Arbitrum Sepolia</button></div>
+
+<div id="panel" hidden>
+<div class="grid g4">
+<div class="card"><div class="k">ETH (para gas)</div><div class="v" id="bEth">—</div></div>
+<div class="card"><div class="k">USDC de prueba</div><div class="v" id="bUsdc">—</div><div class="acts"><button class="btn btn-ghost btn-sm" id="faucet" type="button">Pedir 1.000 USDC</button></div></div>
+<div class="card"><div class="k">COPe</div><div class="v" id="bCope">—</div><div class="acts"><button class="btn btn-ghost btn-sm" id="watch" type="button">Agregar a la wallet</button></div></div>
+<div class="card"><div class="k">Ahorro en sCOPe</div><div class="v" id="bScope">—</div><div class="n">COPe</div></div>
+</div>
+
+<div class="grid g2" style="margin-top:16px">
+<div class="card">
+<h3>Bóveda</h3>
+<div class="n">Deposita USDC y acuña COPe. Mínimo 150% de respaldo.</div>
+<div class="grid g3" style="margin-top:16px;gap:10px">
+<div><div class="k">Colateral</div><div class="mono" id="pCol" style="font-size:16px;margin-top:4px">—</div></div>
+<div><div class="k">Deuda</div><div class="mono" id="pDebt" style="font-size:16px;margin-top:4px">—</div></div>
+<div><div class="k">Respaldo</div><div class="mono" id="pRatio" style="font-size:16px;margin-top:4px">—</div></div>
+</div>
+<div class="bar" aria-hidden="true"><i id="pBar"></i></div>
+<div class="n" id="pMax" style="margin-top:8px">—</div>
+<div class="field"><input id="inUsdc" inputmode="decimal" placeholder="USDC" aria-label="Monto en USDC"></div>
+<div class="acts"><button class="btn btn-light btn-sm" id="doDeposit" type="button">Depositar USDC</button><button class="btn btn-ghost btn-sm" id="doWithdraw" type="button">Retirar USDC</button></div>
+<div class="field"><input id="inCope" inputmode="decimal" placeholder="COPe" aria-label="Monto en COPe"></div>
+<div class="acts"><button class="btn btn-light btn-sm" id="doMint" type="button">Acuñar COPe</button><button class="btn btn-ghost btn-sm" id="doRepay" type="button">Pagar deuda</button><button class="btn btn-ghost btn-sm" id="doRepayAll" type="button">Pagar todo</button></div>
+</div>
+
+<div class="card">
+<h3>Ahorro (sCOPe)</h3>
+<div class="n">Guarda COPe y gana parte de las ganancias del protocolo. Retiras cuando quieras.</div>
+<div class="grid g2" style="margin-top:16px;gap:10px">
+<div><div class="k">Tu ahorro</div><div class="mono" id="sMine" style="font-size:16px;margin-top:4px">—</div></div>
+<div><div class="k">sCOPe que tienes</div><div class="mono" id="sShares" style="font-size:16px;margin-top:4px">—</div></div>
+</div>
+<div class="field"><input id="inSave" inputmode="decimal" placeholder="COPe" aria-label="Monto a ahorrar o retirar"></div>
+<div class="acts"><button class="btn btn-light btn-sm" id="doSave" type="button">Ahorrar</button><button class="btn btn-ghost btn-sm" id="doUnsave" type="button">Retirar</button><button class="btn btn-ghost btn-sm" id="doUnsaveAll" type="button">Retirar todo</button></div>
+</div>
+</div>
+</div>
+
+<div class="status" id="status" role="status" aria-live="polite"></div>
+</div>
+</div>
+</section>
+
+<section class="sec" id="contratos">
+<div class="wrap">
+<h2>Contratos</h2>
+<p class="sub">Todo es público. Puedes revisar cada contrato y cada transacción en el explorador.</p>
+<div class="card" style="overflow-x:auto">
+<table class="tbl" id="ctrs"></table>
+</div>
+<h2 style="margin-top:56px">Empieza en 4 pasos</h2>
+<ol class="steps" style="margin-top:20px">
+<li>Instala MetaMask o Rabby y conéctala con el botón de arriba.</li>
+<li>Consigue un poco de ETH de prueba en un faucet de Arbitrum Sepolia.</li>
+<li>Pide USDC de prueba, deposítalo en la bóveda y acuña COPe.</li>
+<li>Guarda tu COPe en sCOPe y mira cómo crece con cada reparto.</li>
+</ol>
+</div>
+</section>
+
+<footer style="padding:0 0 48px">
+<div class="wrap">
+<p style="border-top:1px solid #E2E2DD;margin:0;padding-top:24px;font-size:13px;color:#6B6B70;line-height:1.6">COPe está en fase de prueba en la red Arbitrum Sepolia: los tokens no tienen valor y los contratos aún no han sido auditados. Nada de esta página es una oferta de inversión ni promete rentabilidad. Los activos digitales y DeFi conllevan riesgo, incluida la pérdida total del capital. Sanse no es una entidad vigilada por la Superintendencia Financiera de Colombia. <a href="terminos.html" style="color:#6B6B70">Términos</a></p>
+</div>
+</footer>
+
+<script src="assets/ethers-6.13.4.umd.min.js"></script>
+<script>
+(() => {
+const CHAIN_ID = 421614n;
+const CHAIN_HEX = '0x66eee';
+const RPC = 'https://sepolia-rollup.arbitrum.io/rpc';
+const EXPLORER = 'https://sepolia.arbiscan.io';
+const A = {
+  cope: '0xB44aF4E3023C59c1B48cD5f8bD397a7d48169395',
+  hub: '0xA5BA09daB54E22E87BAD5509fAcb4f887d248dDB',
+  vault: '0xadd8d6AFA1C371916F8a26B6FF1421b432D4fdD4',
+  estrella: '0x3B21796743B3154c1882eF918419de03F9A6cDbD',
+  scope: '0xEb74d7D85Da0EC556AbbE8E02219a55Af8e73F6B',
+  oracle: '0xf963fe3219ED50e0ec15706d11C35f8aC2a84C22',
+  usdc: '0x08ad899e5298e705709337c380565DdB50cf2ce2'
+};
+const NAMES = [['COPe (token)', 'cope'], ['Sanse Hub', 'hub'], ['Bóveda USDC', 'vault'], ['Estrella Real', 'estrella'], ['sCOPe (ahorro)', 'scope'], ['Oráculo COP/USD', 'oracle'], ['USDC de prueba', 'usdc']];
+const ERC20 = ['function balanceOf(address) view returns (uint256)', 'function totalSupply() view returns (uint256)', 'function allowance(address,address) view returns (uint256)', 'function approve(address,uint256) returns (bool)'];
+const ABI = {
+  cope: ERC20,
+  usdc: [...ERC20, 'function faucet(address,uint256)'],
+  hub: ['function surplus() view returns (uint256)'],
+  oracle: ['function copPerUsd() view returns (uint256,uint256)'],
+  vault: ['function positions(address) view returns (uint256,uint256)', 'function debtOf(address) view returns (uint256)', 'function ratioBps(address) view returns (uint256)', 'function maxMintable(address) view returns (uint256)',
+    'function deposit(uint256)', 'function withdraw(uint256)', 'function mint(uint256)', 'function repay(uint256)'],
+  scope: [...ERC20, 'function pricePerShare() view returns (uint256)', 'function totalAssets() view returns (uint256)', 'function convertToAssets(uint256) view returns (uint256)', 'function maxWithdraw(address) view returns (uint256)',
+    'function deposit(uint256,address) returns (uint256)', 'function withdraw(uint256,address,address) returns (uint256)', 'function redeem(uint256,address,address) returns (uint256)']
+};
+const $ = (id) => document.getElementById(id);
+const { ethers } = window;
+const ro = new ethers.JsonRpcProvider(RPC, Number(CHAIN_ID), { staticNetwork: true });
+const R = Object.fromEntries(['cope', 'hub', 'oracle', 'scope'].map((k) => [k, new ethers.Contract(A[k], ABI[k], ro)]));
+const fmt = (v, dec, d = 0) => v == null ? '—' : Number(ethers.formatUnits(v, dec)).toLocaleString('es-CO', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+// ---------- Tabla de contratos ----------
+for (const [name, k] of NAMES) {
+  const tr = document.createElement('tr');
+  const a = document.createElement('td'); a.textContent = name;
+  const b = document.createElement('td'); const l = document.createElement('a');
+  l.href = EXPLORER + '/address/' + A[k]; l.target = '_blank'; l.rel = 'noopener'; l.className = 'mono'; l.textContent = A[k];
+  b.append(l); tr.append(a, b); $('ctrs').append(tr);
+}
+
+// ---------- Cifras públicas ----------
+async function loadPublic() {
+  try {
+    const [supply, surplus, [trm, at], price] = await Promise.all([R.cope.totalSupply(), R.hub.surplus(), R.oracle.copPerUsd(), R.scope.convertToAssets(10n ** 24n)]);
+    $('sSupply').textContent = fmt(supply, 18);
+    $('sSurplus').textContent = fmt(surplus, 18, 2);
+    $('sTrm').textContent = fmt(trm, 8, 2);
+    $('sTrmAt').textContent = 'Actualizada ' + new Date(Number(at) * 1000).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
+    $('sPrice').textContent = fmt(price, 18, 6);
+    $('liveAt').textContent = 'Última lectura: ' + new Date().toLocaleTimeString('es-CO');
+  } catch (e) {
+    $('liveAt').textContent = 'No se pudo leer la blockchain en este momento.';
+  }
+}
+loadPublic();
+setInterval(loadPublic, 60000);
+
+// ---------- Wallet ----------
+let provider, signer, me, W = {};
+const say = (t, cls = '') => { const s = $('status'); s.className = 'status ' + cls; s.textContent = t; };
+const sayTx = (t, hash) => {
+  const s = $('status'); s.className = 'status ok'; s.replaceChildren(t + ' ');
+  const l = document.createElement('a'); l.href = EXPLORER + '/tx/' + hash; l.target = '_blank'; l.rel = 'noopener'; l.textContent = 'Ver transacción';
+  s.append(l);
+};
+function errText(e) {
+  if (e && (e.code === 'ACTION_REJECTED' || e.code === 4001)) return 'Cancelaste la transacción en tu wallet.';
+  const r = (e && (e.reason || e.shortMessage || e.message)) || 'Algo salió mal.';
+  const map = { Undercollateralized: 'Ese monto deja tu respaldo por debajo de 150%.', StalePrice: 'El precio del oráculo está desactualizado. Intenta más tarde.', ModuleCeiling: 'La bóveda llegó a su tope de emisión.', GlobalCeiling: 'El sistema llegó a su tope de emisión.', EnforcedPause: 'La bóveda está en pausa.', 'insufficient funds': 'No tienes suficiente ETH para pagar el gas.' };
+  for (const k in map) if (r.includes(k)) return map[k];
+  return r.length > 160 ? r.slice(0, 160) + '…' : r;
+}
+
+function setButtons(on) { document.querySelectorAll('#panel button').forEach((b) => { b.disabled = !on; }); }
+
+async function connect() {
+  if (!window.ethereum) { $('noWallet').hidden = false; return; }
+  try {
+    provider = new ethers.BrowserProvider(window.ethereum);
+    await provider.send('eth_requestAccounts', []);
+    await refreshAccount();
+  } catch (e) { say(errText(e), 'err'); }
+}
+
+async function refreshAccount() {
+  provider = new ethers.BrowserProvider(window.ethereum);
+  const accs = await provider.send('eth_accounts', []);
+  if (!accs.length) { $('panel').hidden = true; $('addr').textContent = ''; $('connect').textContent = 'Conectar wallet'; $('navConnect').textContent = 'Conectar wallet'; return; }
+  signer = await provider.getSigner();
+  me = await signer.getAddress();
+  const short = me.slice(0, 6) + '…' + me.slice(-4);
+  $('addr').textContent = short; $('connect').textContent = 'Conectada'; $('navConnect').textContent = short;
+  const net = await provider.getNetwork();
+  const ok = net.chainId === CHAIN_ID;
+  $('wrongNet').hidden = ok; $('panel').hidden = !ok;
+  if (!ok) return;
+  W = Object.fromEntries(['cope', 'usdc', 'vault', 'scope'].map((k) => [k, new ethers.Contract(A[k], ABI[k], signer)]));
+  await refreshBalances();
+}
+
+async function refreshBalances() {
+  if (!me || !W.vault) return;
+  const [eth, usdc, cope, shares, pos, debt, ratio, max] = await Promise.all([
+    provider.getBalance(me), W.usdc.balanceOf(me), W.cope.balanceOf(me), W.scope.balanceOf(me),
+    W.vault.positions(me), W.vault.debtOf(me), W.vault.ratioBps(me), W.vault.maxMintable(me).catch(() => null)
+  ]);
+  const saved = shares > 0n ? await W.scope.convertToAssets(shares) : 0n;
+  $('bEth').textContent = fmt(eth, 18, 4);
+  $('bUsdc').textContent = fmt(usdc, 6, 2);
+  $('bCope').textContent = fmt(cope, 18);
+  $('bScope').textContent = fmt(saved, 18);
+  $('pCol').textContent = fmt(pos[0], 6, 2) + ' USDC';
+  $('pDebt').textContent = fmt(debt, 18) + ' COPe';
+  const r = debt > 0n ? Number(ratio) / 100 : null;
+  $('pRatio').textContent = r == null ? 'Sin deuda' : r.toLocaleString('es-CO', { maximumFractionDigits: 0 }) + '%';
+  $('pRatio').style.color = r == null ? '' : r < 140 ? '#F07A5A' : r < 170 ? '#C9A84C' : '#4CC38A';
+  $('pBar').style.width = r == null ? '0' : Math.min(100, r / 4) + '%';
+  $('pBar').style.background = r == null ? '' : r < 140 ? '#F07A5A' : r < 170 ? '#C9A84C' : '#4CC38A';
+  $('pMax').textContent = max == null ? 'Puedes acuñar: —' : 'Puedes acuñar hasta ' + fmt(max, 18) + ' COPe más';
+  $('sMine').textContent = fmt(saved, 18, 2) + ' COPe';
+  $('sShares').textContent = fmt(shares, 24, 4);
+}
+
+function amount(id, dec) {
+  const raw = $(id).value.trim().replace(/\./g, '').replace(',', '.');
+  if (!raw || !/^\d+(\.\d+)?$/.test(raw) || Number(raw) <= 0) throw new Error('Escribe un monto válido.');
+  return ethers.parseUnits(raw, dec);
+}
+
+async function ensureAllowance(token, spender, need) {
+  const cur = await token.allowance(me, spender);
+  if (cur >= need) return;
+  say('Paso 1 de 2: autoriza el uso del token en tu wallet…');
+  const tx = await token.approve(spender, need);
+  await tx.wait();
+}
+
+async function run(label, fn) {
+  setButtons(false);
+  try {
+    say(label + '… confirma en tu wallet.');
+    const tx = await fn();
+    say('Enviada. Esperando confirmación…');
+    await tx.wait();
+    sayTx(label + ' listo.', tx.hash);
+    await refreshBalances();
+    loadPublic();
+  } catch (e) { say(errText(e), 'err'); }
+  finally { setButtons(true); }
+}
+
+$('connect').onclick = connect;
+$('navConnect').onclick = () => { connect(); document.getElementById('app').scrollIntoView({ behavior: 'smooth' }); };
+$('switchNet').onclick = async () => {
+  try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_HEX }] }); }
+  catch (e) {
+    if (e && e.code === 4902) {
+      await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: CHAIN_HEX, chainName: 'Arbitrum Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: [RPC], blockExplorerUrls: [EXPLORER] }] });
+    } else say(errText(e), 'err');
+  }
+};
+$('watch').onclick = async () => {
+  try { await window.ethereum.request({ method: 'wallet_watchAsset', params: { type: 'ERC20', options: { address: A.cope, symbol: 'COPe', decimals: 18 } } }); }
+  catch (e) { say(errText(e), 'err'); }
+};
+$('faucet').onclick = () => run('Pedir USDC de prueba', () => W.usdc.faucet(me, 1000n * 10n ** 6n));
+$('doDeposit').onclick = async () => {
+  let v; try { v = amount('inUsdc', 6); } catch (e) { return say(e.message, 'err'); }
+  setButtons(false);
+  try { await ensureAllowance(W.usdc, A.vault, v); } catch (e) { setButtons(true); return say(errText(e), 'err'); }
+  run('Depositar USDC', () => W.vault.deposit(v));
+};
+$('doWithdraw').onclick = () => { let v; try { v = amount('inUsdc', 6); } catch (e) { return say(e.message, 'err'); } run('Retirar USDC', () => W.vault.withdraw(v)); };
+$('doMint').onclick = () => { let v; try { v = amount('inCope', 18); } catch (e) { return say(e.message, 'err'); } run('Acuñar COPe', () => W.vault.mint(v)); };
+async function repay(v) {
+  setButtons(false);
+  try { await ensureAllowance(W.cope, A.hub, v === ethers.MaxUint256 ? (await W.vault.debtOf(me)) * 2n : v); } catch (e) { setButtons(true); return say(errText(e), 'err'); }
+  run('Pagar deuda', () => W.vault.repay(v));
+}
+$('doRepay').onclick = () => { let v; try { v = amount('inCope', 18); } catch (e) { return say(e.message, 'err'); } repay(v); };
+$('doRepayAll').onclick = () => repay(ethers.MaxUint256);
+$('doSave').onclick = async () => {
+  let v; try { v = amount('inSave', 18); } catch (e) { return say(e.message, 'err'); }
+  setButtons(false);
+  try { await ensureAllowance(W.cope, A.scope, v); } catch (e) { setButtons(true); return say(errText(e), 'err'); }
+  run('Ahorrar en sCOPe', () => W.scope.deposit(v, me));
+};
+$('doUnsave').onclick = () => { let v; try { v = amount('inSave', 18); } catch (e) { return say(e.message, 'err'); } run('Retirar ahorro', () => W.scope.withdraw(v, me, me)); };
+$('doUnsaveAll').onclick = async () => { const sh = await W.scope.balanceOf(me); if (sh === 0n) return say('No tienes ahorro en sCOPe.', 'err'); run('Retirar todo el ahorro', () => W.scope.redeem(sh, me, me)); };
+
+if (window.ethereum) {
+  window.ethereum.on && window.ethereum.on('accountsChanged', () => refreshAccount().catch(() => {}));
+  window.ethereum.on && window.ethereum.on('chainChanged', () => refreshAccount().catch(() => {}));
+  refreshAccount().catch(() => {});
+}
+})();
+</script>
+</body>
+</html>
