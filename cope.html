@@ -272,7 +272,7 @@ loadPublic();
 setInterval(loadPublic, 60000);
 
 // ---------- Wallet ----------
-let provider, signer, me, W = {};
+let provider, signer, me, W = {}, V = {};
 const say = (t, cls = '') => { const s = $('status'); s.className = 'status ' + cls; s.textContent = t; };
 const sayTx = (t, hash) => {
   const s = $('status'); s.className = 'status ok'; s.replaceChildren(t + ' ');
@@ -311,16 +311,17 @@ async function refreshAccount() {
   $('wrongNet').hidden = ok; $('panel').hidden = !ok;
   if (!ok) return;
   W = Object.fromEntries(['cope', 'usdc', 'vault', 'scope'].map((k) => [k, new ethers.Contract(A[k], ABI[k], signer)]));
-  await refreshBalances();
+  V = Object.fromEntries(['cope', 'usdc', 'vault', 'scope'].map((k) => [k, new ethers.Contract(A[k], ABI[k], ro)]));
+  await refreshBalances().catch((e) => say('No se pudieron leer tus saldos: ' + errText(e), 'err'));
 }
 
 async function refreshBalances() {
-  if (!me || !W.vault) return;
+  if (!me || !V.vault) return;
   const [eth, usdc, cope, shares, pos, debt, ratio, max] = await Promise.all([
-    provider.getBalance(me), W.usdc.balanceOf(me), W.cope.balanceOf(me), W.scope.balanceOf(me),
-    W.vault.positions(me), W.vault.debtOf(me), W.vault.ratioBps(me), W.vault.maxMintable(me).catch(() => null)
+    ro.getBalance(me), V.usdc.balanceOf(me), V.cope.balanceOf(me), V.scope.balanceOf(me),
+    V.vault.positions(me), V.vault.debtOf(me), V.vault.ratioBps(me), V.vault.maxMintable(me).catch(() => null)
   ]);
-  const saved = shares > 0n ? await W.scope.convertToAssets(shares) : 0n;
+  const saved = shares > 0n ? await V.scope.convertToAssets(shares) : 0n;
   $('bEth').textContent = fmt(eth, 18, 4);
   $('bUsdc').textContent = fmt(usdc, 6, 2);
   $('bCope').textContent = fmt(cope, 18);
@@ -344,11 +345,11 @@ function amount(id, dec) {
 }
 
 async function ensureAllowance(token, spender, need) {
-  const cur = await token.allowance(me, spender);
+  const cur = await new ethers.Contract(token.target, ERC20, ro).allowance(me, spender);
   if (cur >= need) return;
   say('Paso 1 de 2: autoriza el uso del token en tu wallet…');
   const tx = await token.approve(spender, need);
-  await tx.wait();
+  await ro.waitForTransaction(tx.hash, 1, 180000);
 }
 
 async function run(label, fn) {
@@ -357,7 +358,7 @@ async function run(label, fn) {
     say(label + '… confirma en tu wallet.');
     const tx = await fn();
     say('Enviada. Esperando confirmación…');
-    await tx.wait();
+    await ro.waitForTransaction(tx.hash, 1, 180000);
     sayTx(label + ' listo.', tx.hash);
     await refreshBalances();
     loadPublic();
@@ -402,7 +403,7 @@ $('doSave').onclick = async () => {
   run('Ahorrar en sCOPe', () => W.scope.deposit(v, me));
 };
 $('doUnsave').onclick = () => { let v; try { v = amount('inSave', 18); } catch (e) { return say(e.message, 'err'); } run('Retirar ahorro', () => W.scope.withdraw(v, me, me)); };
-$('doUnsaveAll').onclick = async () => { const sh = await W.scope.balanceOf(me); if (sh === 0n) return say('No tienes ahorro en sCOPe.', 'err'); run('Retirar todo el ahorro', () => W.scope.redeem(sh, me, me)); };
+$('doUnsaveAll').onclick = async () => { const sh = await V.scope.balanceOf(me); if (sh === 0n) return say('No tienes ahorro en sCOPe.', 'err'); run('Retirar todo el ahorro', () => W.scope.redeem(sh, me, me)); };
 
 if (window.ethereum) {
   window.ethereum.on && window.ethereum.on('accountsChanged', () => refreshAccount().catch(() => {}));
