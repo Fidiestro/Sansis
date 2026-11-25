@@ -230,7 +230,7 @@ const nf = (v, d = 0) => v == null || !isFinite(v) ? '—' : v.toLocaleString('e
 const pct = (r) => r == null ? '—' : !isFinite(r) ? '∞' : nf(r * 100) + '%';
 
 let trm = null, rate = null;
-let provider, signer, me, W = {};
+let provider, signer, me, W = {}, V = {};
 let S = { col: 0, debt: 0, wCope: 0, wUsdc: 0, wEth: 0 }; // números en unidades humanas
 let raw = { debt: 0n, col: 0n };
 let tab = 'open';
@@ -363,11 +363,12 @@ async function refreshAccount() {
   $('noConn').hidden = true; $('wrongNet').hidden = ok; $('main').hidden = !ok;
   if (!ok) return;
   W = Object.fromEntries(['cope', 'usdc', 'vault'].map((k) => [k, new ethers.Contract(A[k], ABI[k], signer)]));
-  await refreshPosition();
+  V = Object.fromEntries(['cope', 'usdc', 'vault'].map((k) => [k, new ethers.Contract(A[k], ABI[k], ro)]));
+  await refreshPosition().catch((e) => say('No se pudo leer tu bóveda: ' + errText(e), 'err'));
 }
 async function refreshPosition() {
-  if (!me || !W.vault) return;
-  const [pos, debt, cope, usdc, eth] = await Promise.all([W.vault.positions(me), W.vault.debtOf(me), W.cope.balanceOf(me), W.usdc.balanceOf(me), provider.getBalance(me)]);
+  if (!me || !V.vault) return;
+  const [pos, debt, cope, usdc, eth] = await Promise.all([V.vault.positions(me), V.vault.debtOf(me), V.cope.balanceOf(me), V.usdc.balanceOf(me), ro.getBalance(me)]);
   raw = { col: pos[0], debt };
   S = { col: Number(ethers.formatUnits(pos[0], 6)), debt: Number(ethers.formatUnits(debt, 18)), wCope: Number(ethers.formatUnits(cope, 18)), wUsdc: Number(ethers.formatUnits(usdc, 6)), wEth: Number(ethers.formatUnits(eth, 18)) };
   render();
@@ -378,11 +379,11 @@ async function send(label, fn) {
   say(label + ': confirma en tu wallet…');
   const tx = await fn();
   say(label + ': esperando confirmación…');
-  await tx.wait();
+  await ro.waitForTransaction(tx.hash, 1, 180000);
   return tx.hash;
 }
 async function ensureAllowance(token, spender, need, name) {
-  if ((await token.allowance(me, spender)) >= need) return;
+  if ((await new ethers.Contract(token.target, ERC20, ro).allowance(me, spender)) >= need) return;
   await send('Autorizar ' + name, () => token.approve(spender, need));
 }
 const toUnits = (v, dec) => ethers.parseUnits(v.toFixed(dec === 6 ? 6 : 18).replace(/\.?0+$/, '') || '0', dec);
