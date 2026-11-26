@@ -160,10 +160,12 @@ section[id]{scroll-margin-top:96px}
 <button class="btn btn-light btn-sm" data-col="usdc" type="button">USDC</button>
 <button class="btn btn-ghost btn-sm" data-col="eth" type="button">ETH</button>
 <button class="btn btn-ghost btn-sm" data-col="btc" type="button">BTC</button>
+<button class="btn btn-ghost btn-sm" data-col="aave" type="button">USDC + Aave</button>
 </div>
 <div class="n" id="colInfo" style="margin-top:10px">Deposita USDC y acuña COPe. Mínimo 150% de respaldo.</div>
 <div class="n"><span id="colPrice"></span> <a href="lend.html" style="color:#C9A84C">Ver riesgo de liquidación →</a></div>
-<div class="acts" id="colFaucetRow" hidden><button class="btn btn-ghost btn-sm" id="colFaucet" type="button">Pedir de prueba</button><span class="n" id="colBal"></span></div>
+<div class="acts" id="colFaucetRow" hidden><button class="btn btn-ghost btn-sm" id="colFaucet" type="button">Pedir de prueba</button><a class="btn btn-ghost btn-sm" id="colFaucetLink" href="https://app.aave.com/faucet/" target="_blank" rel="noopener" hidden>Pedir USDC en el grifo de Aave ↗</a><span class="n" id="colBal"></span></div>
+<div class="n" id="colAave" hidden></div>
 <div class="grid g3" style="margin-top:16px;gap:10px">
 <div><div class="k">Colateral</div><div class="mono" id="pCol" style="font-size:16px;margin-top:4px">—</div></div>
 <div><div class="k">Deuda</div><div class="mono" id="pDebt" style="font-size:16px;margin-top:4px">—</div></div>
@@ -251,11 +253,13 @@ const A = {
   vaultBtc: '0x60974175b32EBb52215e1383a77A084D4Ac3117E',
   weth: '0x0AD76441E27d0f8532Dda492aa85B290b65A1e97',
   wbtc: '0xC6B902730BF1Af9c8b50f041fbFaaC9E9ea97148',
+  vaultAave: '0x2cE10b3064a6041E5a1DFa47e7aC39Cd2A21C16B',
+  usdcAave: '0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d',
   scope: '0xEb74d7D85Da0EC556AbbE8E02219a55Af8e73F6B',
   oracle: '0xf963fe3219ED50e0ec15706d11C35f8aC2a84C22',
   usdc: '0x08ad899e5298e705709337c380565DdB50cf2ce2'
 };
-const NAMES = [['COPe (token)', 'cope'], ['Sanse Hub', 'hub'], ['Bóveda USDC', 'vault'], ['Imperio + VIPS', 'imperio'], ['Bóveda ETH', 'vaultEth'], ['Bóveda BTC', 'vaultBtc'], ['WETH de prueba', 'weth'], ['WBTC de prueba', 'wbtc'], ['Estrella Real (retirada)', 'estrella'], ['sCOPe (ahorro)', 'scope'], ['Oráculo COP/USD', 'oracle'], ['USDC de prueba', 'usdc']];
+const NAMES = [['COPe (token)', 'cope'], ['Sanse Hub', 'hub'], ['Bóveda USDC', 'vault'], ['Imperio + VIPS', 'imperio'], ['Bóveda ETH', 'vaultEth'], ['Bóveda BTC', 'vaultBtc'], ['Bóveda USDC + Aave', 'vaultAave'], ['USDC de prueba de Aave', 'usdcAave'], ['WETH de prueba', 'weth'], ['WBTC de prueba', 'wbtc'], ['Estrella Real (retirada)', 'estrella'], ['sCOPe (ahorro)', 'scope'], ['Oráculo COP/USD', 'oracle'], ['USDC de prueba', 'usdc']];
 const ERRS = ['error StillLocked()', 'error RequestPending()', 'error NoRequest()', 'error NotReady()', 'error Frozen()', 'error NoCash()', 'error Undercollateralized()', 'error StalePrice()', 'error ZeroAmount()', 'error PositionHealthy()', 'error EnforcedPause()', 'error ModuleCeiling()', 'error GlobalCeiling()', 'error ERC4626ExceededMaxWithdraw(address,uint256,uint256)', 'error ERC4626ExceededMaxRedeem(address,uint256,uint256)', 'error ERC20InsufficientBalance(address,uint256,uint256)', 'error ERC20InsufficientAllowance(address,uint256,uint256)'];
 const ERC20 = [...ERRS, 'function balanceOf(address) view returns (uint256)', 'function totalSupply() view returns (uint256)', 'function allowance(address,address) view returns (uint256)', 'function approve(address,uint256) returns (bool)'];
 const VAULT = [...ERRS, 'function positions(address) view returns (uint256,uint256)', 'function debtOf(address) view returns (uint256)', 'function ratioBps(address) view returns (uint256)', 'function maxMintable(address) view returns (uint256)',
@@ -264,6 +268,8 @@ const CVAULT = [...VAULT, 'function priceCop() view returns (uint256)', 'functio
 const ABI = {
   cope: ERC20,
   vaultEth: CVAULT, vaultBtc: CVAULT,
+  vaultAave: [...CVAULT, 'function inAave() view returns (uint256)', 'function idle() view returns (uint256)', 'function yieldAvailable() view returns (uint256)'],
+  usdcAave: ERC20,
   weth: [...ERC20, 'function faucet(address,uint256)'], wbtc: [...ERC20, 'function faucet(address,uint256)'],
   imperio: [...ERC20, 'function vipsPrice() view returns (uint256)', 'function previewRedeem(uint256) view returns (uint256)', 'function lastDeposit(address) view returns (uint256)', 'function requests(address) view returns (uint256,uint64)',
     'function minHold() view returns (uint256)', 'function notice() view returns (uint256)', 'function frozen() view returns (bool)', 'function vipsCapital() view returns (uint256)', 'function sanseCapital() view returns (uint256)', 'function totalOutstanding() view returns (uint256)',
@@ -278,6 +284,7 @@ const ABI = {
 const COLS = {
   usdc: { vault: 'vault', token: 'usdc', sym: 'USDC', dec: 6, d: 2, faucet: 1000n * 10n ** 6n, info: 'Deposita USDC y acuña COPe. Mínimo 150% de respaldo.' },
   eth: { vault: 'vaultEth', token: 'weth', sym: 'ETH', dec: 18, d: 4, faucet: 10n ** 18n, info: 'Deposita ETH y acuña COPe. Mínimo 170% de respaldo. Bajo 150% se liquida solo lo necesario para volver a 170%.' },
+  aave: { vault: 'vaultAave', token: 'usdcAave', sym: 'USDC', dec: 6, d: 2, faucet: null, info: 'Deposita USDC (de prueba de Aave) y acuña COPe. Mínimo 150% de respaldo. El 90% de tu USDC se presta en Aave y lo que gana va al Colchón que paga a sCOPe.' },
   btc: { vault: 'vaultBtc', token: 'wbtc', sym: 'BTC', dec: 8, d: 6, faucet: 5n * 10n ** 6n, info: 'Deposita BTC y acuña COPe. Mínimo 165% de respaldo. Bajo 145% se liquida solo lo necesario para volver a 165%.' }
 };
 let col = COLS.usdc;
@@ -352,7 +359,7 @@ async function refreshAccount() {
   const ok = net.chainId === CHAIN_ID;
   $('wrongNet').hidden = ok; $('panel').hidden = !ok;
   if (!ok) return;
-  const keys = ['cope', 'usdc', 'vault', 'scope', 'imperio', 'vaultEth', 'vaultBtc', 'weth', 'wbtc'].filter((k) => A[k]);
+  const keys = ['cope', 'usdc', 'vault', 'scope', 'imperio', 'vaultEth', 'vaultBtc', 'weth', 'wbtc', 'vaultAave', 'usdcAave'].filter((k) => A[k]);
   W = Object.fromEntries(keys.map((k) => [k, new ethers.Contract(A[k], ABI[k], signer)]));
   V = Object.fromEntries(keys.map((k) => [k, new ethers.Contract(A[k], ABI[k], ro)]));
   await refreshBalances().catch((e) => say('No se pudieron leer tus saldos: ' + errText(e), 'err'));
@@ -371,6 +378,11 @@ async function refreshBalances() {
     $('colPrice').textContent = pc == null ? '' : '1 ' + col.sym + ' = ' + fmt(pc, 18) + ' COP.';
     $('pLiq').textContent = debt > 0n ? 'Se liquida si 1 ' + col.sym + ' baja de ' + fmt(liqP, 18) + ' COP.' : '';
   } else { $('colPrice').textContent = ''; $('pLiq').textContent = ''; }
+  if (col.vault === 'vaultAave') {
+    const [ia, id, y] = await Promise.all([cv.inAave(), cv.idle(), cv.yieldAvailable()]);
+    $('colAave').hidden = false;
+    $('colAave').textContent = 'Toda la bóveda: ' + fmt(ia, 6, 2) + ' USDC prestados en Aave, ' + fmt(id, 6, 2) + ' en caja. Rendimiento por enviar al Colchón: ' + fmt(y, 6, 2) + ' USDC.';
+  } else $('colAave').hidden = true;
   const saved = shares > 0n ? await V.scope.convertToAssets(shares) : 0n;
   $('bEth').textContent = fmt(eth, 18, 4);
   $('bUsdc').textContent = fmt(usdc, 6, 2);
@@ -487,7 +499,9 @@ function pickCol(k) {
   $('colInfo').textContent = c.info;
   $('inUsdc').placeholder = c.sym;
   $('doDeposit').textContent = 'Depositar ' + c.sym; $('doWithdraw').textContent = 'Retirar ' + c.sym;
-  $('colFaucetRow').hidden = k === 'usdc'; $('colFaucet').textContent = 'Pedir ' + fmt(c.faucet, c.dec, c.d) + ' ' + c.sym + ' de prueba';
+  $('colFaucetRow').hidden = k === 'usdc';
+  $('colFaucet').hidden = !c.faucet; $('colFaucetLink').hidden = !!c.faucet;
+  if (c.faucet) $('colFaucet').textContent = 'Pedir ' + fmt(c.faucet, c.dec, c.d) + ' ' + c.sym + ' de prueba';
   refreshBalances().catch((e) => say(errText(e), 'err'));
 }
 document.querySelectorAll('#colTabs button').forEach((b) => {
