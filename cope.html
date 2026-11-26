@@ -156,7 +156,14 @@ section[id]{scroll-margin-top:96px}
 <div class="grid g2" style="margin-top:16px">
 <div class="card">
 <h3>Bóveda</h3>
-<div class="n">Deposita USDC y acuña COPe. Mínimo 150% de respaldo. <a href="lend.html" style="color:#C9A84C">Ver riesgo de liquidación →</a></div>
+<div class="acts" id="colTabs" role="tablist" style="margin-top:10px">
+<button class="btn btn-light btn-sm" data-col="usdc" type="button">USDC</button>
+<button class="btn btn-ghost btn-sm" data-col="eth" type="button">ETH</button>
+<button class="btn btn-ghost btn-sm" data-col="btc" type="button">BTC</button>
+</div>
+<div class="n" id="colInfo" style="margin-top:10px">Deposita USDC y acuña COPe. Mínimo 150% de respaldo.</div>
+<div class="n"><span id="colPrice"></span> <a href="lend.html" style="color:#C9A84C">Ver riesgo de liquidación →</a></div>
+<div class="acts" id="colFaucetRow" hidden><button class="btn btn-ghost btn-sm" id="colFaucet" type="button">Pedir de prueba</button><span class="n" id="colBal"></span></div>
 <div class="grid g3" style="margin-top:16px;gap:10px">
 <div><div class="k">Colateral</div><div class="mono" id="pCol" style="font-size:16px;margin-top:4px">—</div></div>
 <div><div class="k">Deuda</div><div class="mono" id="pDebt" style="font-size:16px;margin-top:4px">—</div></div>
@@ -164,8 +171,9 @@ section[id]{scroll-margin-top:96px}
 </div>
 <div class="bar" aria-hidden="true"><i id="pBar"></i></div>
 <div class="n" id="pMax" style="margin-top:8px">—</div>
-<div class="field"><input id="inUsdc" inputmode="decimal" placeholder="USDC" aria-label="Monto en USDC"></div>
+<div class="field"><input id="inUsdc" inputmode="decimal" placeholder="USDC" aria-label="Monto de colateral"></div>
 <div class="acts"><button class="btn btn-light btn-sm" id="doDeposit" type="button">Depositar USDC</button><button class="btn btn-ghost btn-sm" id="doWithdraw" type="button">Retirar USDC</button></div>
+<div class="n" id="pLiq" style="margin-top:8px"></div>
 <div class="field"><input id="inCope" inputmode="decimal" placeholder="COPe" aria-label="Monto en COPe"></div>
 <div class="acts"><button class="btn btn-light btn-sm" id="doMint" type="button">Acuñar COPe</button><button class="btn btn-ghost btn-sm" id="doRepay" type="button">Pagar deuda</button><button class="btn btn-ghost btn-sm" id="doRepayAll" type="button">Pagar todo</button></div>
 </div>
@@ -181,6 +189,21 @@ section[id]{scroll-margin-top:96px}
 <div class="acts"><button class="btn btn-light btn-sm" id="doSave" type="button">Ahorrar</button><button class="btn btn-ghost btn-sm" id="doUnsave" type="button">Retirar</button><button class="btn btn-ghost btn-sm" id="doUnsaveAll" type="button">Retirar todo</button></div>
 </div>
 </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+<h3>VIPS · Inversión en los préstamos de Sanse</h3>
+<div class="n">Ganas más que en sCOPe porque respondes primero si un préstamo no se paga (30% de cada pérdida; Sanse pone el 70%). Permanencia mínima de 90 días y 30 días de aviso para retirar.</div>
+<div class="grid g4" style="margin-top:16px;gap:10px">
+<div><div class="k">Precio de 1 VIPS</div><div class="mono" id="vPrice" style="font-size:16px;margin-top:4px">—</div></div>
+<div><div class="k">Tus VIPS</div><div class="mono" id="vShares" style="font-size:16px;margin-top:4px">—</div></div>
+<div><div class="k">Valor en COPe</div><div class="mono" id="vValue" style="font-size:16px;margin-top:4px">—</div></div>
+<div><div class="k">Estado</div><div class="mono" id="vState" style="font-size:16px;margin-top:4px">—</div></div>
+</div>
+<div class="n" id="vCountdown" style="margin-top:10px"></div>
+<div class="field"><input id="inVips" inputmode="decimal" placeholder="COPe para invertir o VIPS para retirar" aria-label="Monto VIPS"></div>
+<div class="acts"><button class="btn btn-light btn-sm" id="doVipsIn" type="button">Invertir COPe</button><button class="btn btn-ghost btn-sm" id="doVipsReq" type="button">Pedir retiro</button><button class="btn btn-ghost btn-sm" id="doVipsCancel" type="button">Cancelar pedido</button><button class="btn btn-ghost btn-sm" id="doVipsClaim" type="button">Cobrar</button></div>
+<div class="n" id="vPool" style="margin-top:10px"></div>
 </div>
 
 <div class="status" id="status" role="status" aria-live="polite"></div>
@@ -223,23 +246,42 @@ const A = {
   hub: '0xA5BA09daB54E22E87BAD5509fAcb4f887d248dDB',
   vault: '0xadd8d6AFA1C371916F8a26B6FF1421b432D4fdD4',
   estrella: '0x3B21796743B3154c1882eF918419de03F9A6cDbD',
+  imperio: '0x977C4D92f9BA63320ceE1C5A212C671bd094e4A2',
+  // Bóvedas ETH y BTC: se llenan al desplegar DeployCollateral.s.sol
+  vaultEth: '',
+  vaultBtc: '',
+  weth: '',
+  wbtc: '',
   scope: '0xEb74d7D85Da0EC556AbbE8E02219a55Af8e73F6B',
   oracle: '0xf963fe3219ED50e0ec15706d11C35f8aC2a84C22',
   usdc: '0x08ad899e5298e705709337c380565DdB50cf2ce2'
 };
-const NAMES = [['COPe (token)', 'cope'], ['Sanse Hub', 'hub'], ['Bóveda USDC', 'vault'], ['Estrella Real', 'estrella'], ['sCOPe (ahorro)', 'scope'], ['Oráculo COP/USD', 'oracle'], ['USDC de prueba', 'usdc']];
-const ERRS = ['error Undercollateralized()', 'error StalePrice()', 'error ZeroAmount()', 'error PositionHealthy()', 'error EnforcedPause()', 'error ModuleCeiling()', 'error GlobalCeiling()', 'error ERC4626ExceededMaxWithdraw(address,uint256,uint256)', 'error ERC4626ExceededMaxRedeem(address,uint256,uint256)', 'error ERC20InsufficientBalance(address,uint256,uint256)', 'error ERC20InsufficientAllowance(address,uint256,uint256)'];
+const NAMES = [['COPe (token)', 'cope'], ['Sanse Hub', 'hub'], ['Bóveda USDC', 'vault'], ['Imperio + VIPS', 'imperio'], ['Bóveda ETH', 'vaultEth'], ['Bóveda BTC', 'vaultBtc'], ['WETH de prueba', 'weth'], ['WBTC de prueba', 'wbtc'], ['Estrella Real (retirada)', 'estrella'], ['sCOPe (ahorro)', 'scope'], ['Oráculo COP/USD', 'oracle'], ['USDC de prueba', 'usdc']];
+const ERRS = ['error StillLocked()', 'error RequestPending()', 'error NoRequest()', 'error NotReady()', 'error Frozen()', 'error NoCash()', 'error Undercollateralized()', 'error StalePrice()', 'error ZeroAmount()', 'error PositionHealthy()', 'error EnforcedPause()', 'error ModuleCeiling()', 'error GlobalCeiling()', 'error ERC4626ExceededMaxWithdraw(address,uint256,uint256)', 'error ERC4626ExceededMaxRedeem(address,uint256,uint256)', 'error ERC20InsufficientBalance(address,uint256,uint256)', 'error ERC20InsufficientAllowance(address,uint256,uint256)'];
 const ERC20 = [...ERRS, 'function balanceOf(address) view returns (uint256)', 'function totalSupply() view returns (uint256)', 'function allowance(address,address) view returns (uint256)', 'function approve(address,uint256) returns (bool)'];
+const VAULT = [...ERRS, 'function positions(address) view returns (uint256,uint256)', 'function debtOf(address) view returns (uint256)', 'function ratioBps(address) view returns (uint256)', 'function maxMintable(address) view returns (uint256)',
+  'function deposit(uint256)', 'function withdraw(uint256)', 'function mint(uint256)', 'function repay(uint256)'];
+const CVAULT = [...VAULT, 'function priceCop() view returns (uint256)', 'function minRatioBps() view returns (uint256)', 'function liqRatioBps() view returns (uint256)', 'function liquidationPrice(address) view returns (uint256)'];
 const ABI = {
   cope: ERC20,
+  vaultEth: CVAULT, vaultBtc: CVAULT,
+  weth: [...ERC20, 'function faucet(address,uint256)'], wbtc: [...ERC20, 'function faucet(address,uint256)'],
+  imperio: [...ERC20, 'function vipsPrice() view returns (uint256)', 'function previewRedeem(uint256) view returns (uint256)', 'function lastDeposit(address) view returns (uint256)', 'function requests(address) view returns (uint256,uint64)',
+    'function minHold() view returns (uint256)', 'function notice() view returns (uint256)', 'function frozen() view returns (bool)', 'function vipsCapital() view returns (uint256)', 'function sanseCapital() view returns (uint256)', 'function totalOutstanding() view returns (uint256)',
+    'function deposit(uint256) returns (uint256)', 'function requestRedeem(uint256)', 'function cancelRequest()', 'function claim() returns (uint256)'],
   usdc: [...ERC20, 'function faucet(address,uint256)'],
   hub: ['function surplus() view returns (uint256)'],
   oracle: ['function copPerUsd() view returns (uint256,uint256)'],
-  vault: [...ERRS, 'function positions(address) view returns (uint256,uint256)', 'function debtOf(address) view returns (uint256)', 'function ratioBps(address) view returns (uint256)', 'function maxMintable(address) view returns (uint256)',
-    'function deposit(uint256)', 'function withdraw(uint256)', 'function mint(uint256)', 'function repay(uint256)'],
+  vault: VAULT,
   scope: [...ERC20, 'function pricePerShare() view returns (uint256)', 'function totalAssets() view returns (uint256)', 'function convertToAssets(uint256) view returns (uint256)', 'function maxWithdraw(address) view returns (uint256)',
     'function deposit(uint256,address) returns (uint256)', 'function withdraw(uint256,address,address) returns (uint256)', 'function redeem(uint256,address,address) returns (uint256)']
 };
+const COLS = {
+  usdc: { vault: 'vault', token: 'usdc', sym: 'USDC', dec: 6, d: 2, faucet: 1000n * 10n ** 6n, info: 'Deposita USDC y acuña COPe. Mínimo 150% de respaldo.' },
+  eth: { vault: 'vaultEth', token: 'weth', sym: 'ETH', dec: 18, d: 4, faucet: 10n ** 18n, info: 'Deposita ETH y acuña COPe. Mínimo 170% de respaldo; se liquida bajo 150%.' },
+  btc: { vault: 'vaultBtc', token: 'wbtc', sym: 'BTC', dec: 8, d: 6, faucet: 5n * 10n ** 6n, info: 'Deposita BTC y acuña COPe. Mínimo 165% de respaldo; se liquida bajo 145%.' }
+};
+let col = COLS.usdc;
 const $ = (id) => document.getElementById(id);
 const { ethers } = window;
 const ro = new ethers.JsonRpcProvider(RPC, Number(CHAIN_ID), { staticNetwork: true });
@@ -247,7 +289,7 @@ const R = Object.fromEntries(['cope', 'hub', 'oracle', 'scope'].map((k) => [k, n
 const fmt = (v, dec, d = 0) => v == null ? '—' : Number(ethers.formatUnits(v, dec)).toLocaleString('es-CO', { minimumFractionDigits: d, maximumFractionDigits: d });
 
 // ---------- Tabla de contratos ----------
-for (const [name, k] of NAMES) {
+for (const [name, k] of NAMES.filter(([, k]) => A[k])) {
   const tr = document.createElement('tr');
   const a = document.createElement('td'); a.textContent = name;
   const b = document.createElement('td'); const l = document.createElement('a');
@@ -283,7 +325,7 @@ const sayTx = (t, hash) => {
 function errText(e) {
   if (e && (e.code === 'ACTION_REJECTED' || e.code === 4001)) return 'Cancelaste la transacción en tu wallet.';
   const r = (e && ((e.revert && e.revert.name) || e.reason || e.shortMessage || e.message)) || 'Algo salió mal.';
-  const map = { ERC4626ExceededMaxWithdraw: 'No tienes tanto ahorro para retirar.', ERC4626ExceededMaxRedeem: 'No tienes tanto sCOPe para retirar.', ERC20InsufficientBalance: 'No tienes saldo suficiente para esa operación.', ERC20InsufficientAllowance: 'Falta autorizar el token. Intenta de nuevo.', ZeroAmount: 'Escribe un monto mayor que cero.', Undercollateralized: 'Ese monto deja tu respaldo por debajo de 150%.', StalePrice: 'El precio del oráculo está desactualizado. Intenta más tarde.', ModuleCeiling: 'La bóveda llegó a su tope de emisión.', GlobalCeiling: 'El sistema llegó a su tope de emisión.', EnforcedPause: 'La bóveda está en pausa.', 'insufficient funds': 'No tienes suficiente ETH para pagar el gas.' };
+  const map = { ERC4626ExceededMaxWithdraw: 'No tienes tanto ahorro para retirar.', ERC4626ExceededMaxRedeem: 'No tienes tanto sCOPe para retirar.', ERC20InsufficientBalance: 'No tienes saldo suficiente para esa operación.', ERC20InsufficientAllowance: 'Falta autorizar el token. Intenta de nuevo.', ZeroAmount: 'Escribe un monto mayor que cero.', Undercollateralized: 'Ese monto deja tu respaldo por debajo del mínimo de esta bóveda.', StillLocked: 'Todavía no se cumplen los 90 días de permanencia desde tu último depósito.', RequestPending: 'Ya tienes un pedido de retiro. Cóbralo o cancélalo primero.', NoRequest: 'No tienes un pedido de retiro.', NotReady: 'Aún no se cumplen los 30 días de aviso.', Frozen: 'Los retiros están congelados porque la reserva bajó del mínimo.', NoCash: 'Imperio no tiene COPe disponible en caja ahora. Intenta más tarde.', StalePrice: 'El precio del oráculo está desactualizado. Intenta más tarde.', ModuleCeiling: 'La bóveda llegó a su tope de emisión.', GlobalCeiling: 'El sistema llegó a su tope de emisión.', EnforcedPause: 'La bóveda está en pausa.', 'insufficient funds': 'No tienes suficiente ETH para pagar el gas.' };
   for (const k in map) if (r.includes(k)) return map[k];
   return r.length > 160 ? r.slice(0, 160) + '…' : r;
 }
@@ -311,23 +353,31 @@ async function refreshAccount() {
   const ok = net.chainId === CHAIN_ID;
   $('wrongNet').hidden = ok; $('panel').hidden = !ok;
   if (!ok) return;
-  W = Object.fromEntries(['cope', 'usdc', 'vault', 'scope'].map((k) => [k, new ethers.Contract(A[k], ABI[k], signer)]));
-  V = Object.fromEntries(['cope', 'usdc', 'vault', 'scope'].map((k) => [k, new ethers.Contract(A[k], ABI[k], ro)]));
+  const keys = ['cope', 'usdc', 'vault', 'scope', 'imperio', 'vaultEth', 'vaultBtc', 'weth', 'wbtc'].filter((k) => A[k]);
+  W = Object.fromEntries(keys.map((k) => [k, new ethers.Contract(A[k], ABI[k], signer)]));
+  V = Object.fromEntries(keys.map((k) => [k, new ethers.Contract(A[k], ABI[k], ro)]));
   await refreshBalances().catch((e) => say('No se pudieron leer tus saldos: ' + errText(e), 'err'));
 }
 
 async function refreshBalances() {
   if (!me || !V.vault) return;
-  const [eth, usdc, cope, shares, pos, debt, ratio, max] = await Promise.all([
+  const cv = V[col.vault], ct = V[col.token];
+  const [eth, usdc, cope, shares, pos, debt, ratio, max, colBal] = await Promise.all([
     ro.getBalance(me), V.usdc.balanceOf(me), V.cope.balanceOf(me), V.scope.balanceOf(me),
-    V.vault.positions(me), V.vault.debtOf(me), V.vault.ratioBps(me), V.vault.maxMintable(me).catch(() => null)
+    cv.positions(me), cv.debtOf(me), cv.ratioBps(me), cv.maxMintable(me).catch(() => null), ct.balanceOf(me)
   ]);
+  $('colBal').textContent = 'Tienes ' + fmt(colBal, col.dec, col.d) + ' ' + col.sym;
+  if (col.vault !== 'vault') {
+    const [pc, liqP] = await Promise.all([cv.priceCop().catch(() => null), cv.liquidationPrice(me).catch(() => 0n)]);
+    $('colPrice').textContent = pc == null ? '' : '1 ' + col.sym + ' = ' + fmt(pc, 18) + ' COP.';
+    $('pLiq').textContent = debt > 0n ? 'Se liquida si 1 ' + col.sym + ' baja de ' + fmt(liqP, 18) + ' COP.' : '';
+  } else { $('colPrice').textContent = ''; $('pLiq').textContent = ''; }
   const saved = shares > 0n ? await V.scope.convertToAssets(shares) : 0n;
   $('bEth').textContent = fmt(eth, 18, 4);
   $('bUsdc').textContent = fmt(usdc, 6, 2);
   $('bCope').textContent = fmt(cope, 18);
   $('bScope').textContent = fmt(saved, 18);
-  $('pCol').textContent = fmt(pos[0], 6, 2) + ' USDC';
+  $('pCol').textContent = fmt(pos[0], col.dec, col.d) + ' ' + col.sym;
   $('pDebt').textContent = fmt(debt, 18) + ' COPe';
   const r = debt > 0n ? Number(ratio) / 100 : null;
   $('pRatio').textContent = r == null ? 'Sin deuda' : r.toLocaleString('es-CO', { maximumFractionDigits: 0 }) + '%';
@@ -337,6 +387,34 @@ async function refreshBalances() {
   $('pMax').textContent = max == null ? 'Puedes acuñar: —' : 'Puedes acuñar hasta ' + fmt(max, 18) + ' COPe más';
   $('sMine').textContent = fmt(saved, 18, 2) + ' COPe';
   $('sShares').textContent = fmt(shares, 24, 4);
+  await refreshVips();
+}
+
+// ---------- VIPS ----------
+const dias = (s) => { const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600); return d + ' d ' + h + ' h'; };
+async function refreshVips() {
+  const I = V.imperio;
+  const [price, sh, last, [rqSh, rqAt], minHold, frozen, vCap, sCap, out] = await Promise.all([
+    I.vipsPrice(), I.balanceOf(me), I.lastDeposit(me), I.requests(me), I.minHold(), I.frozen(), I.vipsCapital(), I.sanseCapital(), I.totalOutstanding()
+  ]);
+  const val = await I.previewRedeem(sh + rqSh);
+  const now = Math.floor(Date.now() / 1000);
+  $('vPrice').textContent = fmt(price, 18, 4) + ' COPe';
+  $('vShares').textContent = fmt(sh + rqSh, 18, 2);
+  $('vValue').textContent = fmt(val, 18, 2);
+  let st, cd = '';
+  if (frozen) { st = 'Congelado'; cd = 'La reserva de Imperio está bajo el 10% de su deuda: no se puede invertir ni cobrar hasta que se recupere.'; }
+  else if (rqSh > 0n) {
+    const left = Number(rqAt) - now;
+    st = left > 0 ? 'En aviso' : 'Listo para cobrar';
+    cd = left > 0 ? 'Pediste retirar ' + fmt(rqSh, 18, 2) + ' VIPS. Podrás cobrar en ' + dias(left) + ' (' + new Date(Number(rqAt) * 1000).toLocaleDateString('es-CO') + '). Se paga al precio de ese día.' : 'Tu retiro de ' + fmt(rqSh, 18, 2) + ' VIPS ya se puede cobrar.';
+  } else if (sh > 0n) {
+    const left = Number(last + minHold) - now;
+    st = left > 0 ? 'En permanencia' : 'Libre';
+    cd = left > 0 ? 'Podrás pedir retiro en ' + dias(left) + '. Después hay 30 días de aviso.' : 'Ya puedes pedir retiro. Hay 30 días de aviso antes de cobrar.';
+  } else st = 'Sin VIPS';
+  $('vState').textContent = st; $('vCountdown').textContent = cd;
+  $('vPool').textContent = 'Imperio: ' + fmt(out, 18) + ' COPe prestados · capital VIPS ' + fmt(vCap, 18) + ' · capital Sanse ' + fmt(sCap, 18) + '.';
 }
 
 function amount(id, dec) {
@@ -401,19 +479,44 @@ $('watch').onclick = async () => {
   catch (e) { say(errText(e), 'err'); }
 };
 $('faucet').onclick = () => run('Pedir USDC de prueba', () => sendTx('usdc', 'faucet', me, 1000n * 10n ** 6n));
+$('colFaucet').onclick = () => run('Pedir ' + col.sym + ' de prueba', () => sendTx(col.token, 'faucet', me, col.faucet));
+function pickCol(k) {
+  const c = COLS[k];
+  if (!A[c.vault]) return say('La bóveda ' + c.sym + ' todavía no está desplegada.', 'err');
+  col = c;
+  document.querySelectorAll('#colTabs button').forEach((b) => { b.className = 'btn btn-sm ' + (b.dataset.col === k ? 'btn-light' : 'btn-ghost'); });
+  $('colInfo').textContent = c.info;
+  $('inUsdc').placeholder = c.sym;
+  $('doDeposit').textContent = 'Depositar ' + c.sym; $('doWithdraw').textContent = 'Retirar ' + c.sym;
+  $('colFaucetRow').hidden = k === 'usdc'; $('colFaucet').textContent = 'Pedir ' + fmt(c.faucet, c.dec, c.d) + ' ' + c.sym + ' de prueba';
+  refreshBalances().catch((e) => say(errText(e), 'err'));
+}
+document.querySelectorAll('#colTabs button').forEach((b) => {
+  if (!A[COLS[b.dataset.col].vault]) b.title = 'Próximamente';
+  b.onclick = () => pickCol(b.dataset.col);
+});
 $('doDeposit').onclick = async () => {
-  let v; try { v = amount('inUsdc', 6); } catch (e) { return say(e.message, 'err'); }
+  let v; try { v = amount('inUsdc', col.dec); } catch (e) { return say(e.message, 'err'); }
   setButtons(false);
-  try { await ensureAllowance(W.usdc, A.vault, v); } catch (e) { setButtons(true); return say(errText(e), 'err'); }
-  run('Depositar USDC', () => sendTx('vault', 'deposit', v));
+  try { await ensureAllowance(W[col.token], A[col.vault], v); } catch (e) { setButtons(true); return say(errText(e), 'err'); }
+  run('Depositar ' + col.sym, () => sendTx(col.vault, 'deposit', v));
 };
-$('doWithdraw').onclick = () => { let v; try { v = amount('inUsdc', 6); } catch (e) { return say(e.message, 'err'); } run('Retirar USDC', () => sendTx('vault', 'withdraw', v)); };
-$('doMint').onclick = () => { let v; try { v = amount('inCope', 18); } catch (e) { return say(e.message, 'err'); } run('Acuñar COPe', () => sendTx('vault', 'mint', v)); };
+$('doWithdraw').onclick = () => { let v; try { v = amount('inUsdc', col.dec); } catch (e) { return say(e.message, 'err'); } run('Retirar ' + col.sym, () => sendTx(col.vault, 'withdraw', v)); };
+$('doMint').onclick = () => { let v; try { v = amount('inCope', 18); } catch (e) { return say(e.message, 'err'); } run('Acuñar COPe', () => sendTx(col.vault, 'mint', v)); };
 async function repay(v) {
   setButtons(false);
-  try { await ensureAllowance(W.cope, A.hub, v === ethers.MaxUint256 ? (await V.vault.debtOf(me)) * 2n : v); } catch (e) { setButtons(true); return say(errText(e), 'err'); }
-  run('Pagar deuda', () => sendTx('vault', 'repay', v));
+  try { await ensureAllowance(W.cope, A.hub, v === ethers.MaxUint256 ? (await V[col.vault].debtOf(me)) * 2n : v); } catch (e) { setButtons(true); return say(errText(e), 'err'); }
+  run('Pagar deuda', () => sendTx(col.vault, 'repay', v));
 }
+$('doVipsIn').onclick = async () => {
+  let v; try { v = amount('inVips', 18); } catch (e) { return say(e.message, 'err'); }
+  setButtons(false);
+  try { await ensureAllowance(W.cope, A.imperio, v); } catch (e) { setButtons(true); return say(errText(e), 'err'); }
+  run('Invertir en VIPS', () => sendTx('imperio', 'deposit', v));
+};
+$('doVipsReq').onclick = () => { let v; try { v = amount('inVips', 18); } catch (e) { return say(e.message, 'err'); } run('Pedir retiro de VIPS', () => sendTx('imperio', 'requestRedeem', v)); };
+$('doVipsCancel').onclick = () => run('Cancelar pedido de retiro', () => sendTx('imperio', 'cancelRequest'));
+$('doVipsClaim').onclick = () => run('Cobrar VIPS', () => sendTx('imperio', 'claim'));
 $('doRepay').onclick = () => { let v; try { v = amount('inCope', 18); } catch (e) { return say(e.message, 'err'); } repay(v); };
 $('doRepayAll').onclick = () => repay(ethers.MaxUint256);
 $('doSave').onclick = async () => {
