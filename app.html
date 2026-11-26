@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App COPe | Sanse</title>
+<meta name="description" content="Acuña COPe con USDC, ETH o BTC, ahorra en sCOPe e invierte en VIPS. Red de prueba Arbitrum Sepolia.">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F6F6F3;--card:#fff;--line:#E8E8E3;--ink:#0B0B0C;--ink2:#3C3C40;--mute:#6B6B70;--soft:#F1F1EC;--gold:#C9A84C;--ok:#1F9D63;--okbg:#E7F6EE;--warn:#B7801A;--warnbg:#FBF3E1;--bad:#D9472B;--badbg:#FCEAE5;--r:18px}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{overflow-x:hidden;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+[hidden]{display:none!important}
+button{font-family:inherit}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:'JetBrains Mono',monospace;font-size:12.5px}
+.disp{font-family:'Inter Tight',sans-serif;letter-spacing:-0.025em}
+
+/* Barra superior */
+.top{position:sticky;top:0;z-index:20;background:rgba(246,246,243,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top .in{max-width:1240px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:20px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand .ic{width:30px;height:30px;border-radius:9px;background:var(--ink);display:grid;place-items:center}
+.brand .ic img{height:17px}
+.brand b{font-family:'Inter Tight',sans-serif;font-size:18px;letter-spacing:-0.02em}
+.brand span{font-size:12px;color:var(--mute);border-left:1px solid var(--line);padding-left:10px}
+.tabs{display:flex;gap:2px;margin-left:12px}
+.tab{border:0;background:transparent;color:var(--ink2);padding:8px 14px;border-radius:999px;font-size:14px;font-weight:500;cursor:pointer}
+.tab:hover{background:#ECECE7}
+.tab[aria-selected="true"]{background:var(--ink);color:#fff}
+.sp{flex:1}
+.net{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink2);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.dot.off{background:#B8B8B2}.dot.bad{background:var(--bad)}
+
+/* Botones */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 18px;border-radius:12px;font-weight:600;font-size:14px;border:1px solid transparent;cursor:pointer;text-decoration:none;transition:background .15s,opacity .15s,transform .05s;white-space:nowrap}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-dark{background:var(--ink);color:#fff}.btn-dark:hover:not(:disabled){background:#2A2A2E}
+.btn-line{background:var(--card);border-color:var(--line);color:var(--ink)}.btn-line:hover:not(:disabled){background:var(--soft)}
+.btn-gold{background:var(--gold);color:var(--ink)}.btn-gold:hover:not(:disabled){background:#D4B65E}
+.btn-sm{min-height:32px;padding:0 12px;font-size:13px;border-radius:10px}
+.btn-wide{width:100%;min-height:48px;font-size:15px}
+.wallet{font-family:'JetBrains Mono',monospace;font-size:13px}
+
+/* Estructura */
+main{max-width:1240px;margin:0 auto;padding:28px 24px 80px}
+.view{display:none}.view.on{display:block}
+.h{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:0 0 18px;flex-wrap:wrap}
+.h h1{font-family:'Inter Tight',sans-serif;font-size:30px;letter-spacing:-0.03em;margin:0;font-weight:600}
+.h p{margin:4px 0 0;color:var(--mute)}
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.split{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:14px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;min-width:0}
+.card h2{font-family:'Inter Tight',sans-serif;font-size:17px;letter-spacing:-0.015em;margin:0 0 2px;font-weight:600}
+.card .sub{color:var(--mute);font-size:13px;margin:0 0 14px}
+.k{font-size:12.5px;color:var(--mute)}
+.v{font-family:'Inter Tight',sans-serif;font-size:26px;font-weight:600;letter-spacing:-0.025em;margin-top:4px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v small{font-size:14px;color:var(--mute);font-weight:500;letter-spacing:0}
+.n{font-size:12.5px;color:var(--mute);margin-top:2px}
+.strip{display:flex;gap:28px;flex-wrap:wrap;padding:14px 20px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin-bottom:14px}
+.strip div{min-width:120px}
+.strip b{display:block;font-family:'Inter Tight',sans-serif;font-size:17px;font-variant-numeric:tabular-nums}
+
+/* Pills de salud */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--okbg);color:var(--ok)}.pill.warn{background:var(--warnbg);color:var(--warn)}.pill.bad{background:var(--badbg);color:var(--bad)}.pill.mute{background:var(--soft);color:var(--mute)}
+
+/* Tabla de bóvedas */
+.vt{width:100%;border-collapse:collapse}
+.vt th{font-size:12px;color:var(--mute);font-weight:500;text-align:right;padding:0 12px 10px}
+.vt th:first-child,.vt td:first-child{text-align:left;padding-left:4px}
+.tw{overflow-x:auto;margin:0 -4px;padding:0 4px}
+.vt th:last-child,.vt td:last-child{padding-right:4px}
+.vt td.wrap{white-space:normal}
+.vt td{padding:14px 12px;border-top:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.vt tr.row{cursor:pointer}
+.vt tr.row:hover td{background:#FBFBF8}
+.vt tr.row.sel td{background:#F7F4EA}
+.asset{display:flex;align-items:center;gap:10px}
+.ai{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12px;color:#fff;flex:none}
+.ai.usdc{background:#2775CA}.ai.aave{background:linear-gradient(135deg,#2775CA 50%,#B6509E 50%)}.ai.eth{background:#627EEA}.ai.btc{background:#F7931A}.ai.cope{background:var(--ink);color:var(--gold)}.ai.vips{background:var(--gold);color:var(--ink)}
+.asset b{display:block;font-weight:600}
+.asset span{font-size:12px;color:var(--mute)}
+
+/* Panel de acción */
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--soft);border-radius:12px;padding:3px;gap:3px;margin:12px 0 14px}
+.seg button{border:0;background:transparent;padding:8px 6px;border-radius:9px;font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer}
+.seg button[aria-selected="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.inp{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#FCFCFA}
+.inp:focus-within{border-color:var(--ink);background:#fff}
+.inp .lab{display:flex;justify-content:space-between;font-size:12px;color:var(--mute)}
+.inp .lab button{border:0;background:none;color:var(--ink);font-weight:600;font-size:12px;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px}
+.inp .row{display:flex;align-items:center;gap:10px;margin-top:6px}
+.inp input{flex:1;min-width:0;border:0;background:transparent;font-family:'Inter Tight',sans-serif;font-size:26px;font-weight:600;outline:none;color:var(--ink);font-variant-numeric:tabular-nums;padding:0}
+.inp .tok{font-weight:600;color:var(--ink2)}
+.prev{margin:12px 0 14px;font-size:13px}
+.prev div{display:flex;justify-content:space-between;padding:5px 0;color:var(--ink2)}
+.prev div span:last-child{font-variant-numeric:tabular-nums;font-weight:500;color:var(--ink)}
+.bar{height:6px;border-radius:999px;background:var(--soft);overflow:hidden;margin-top:8px;position:relative}
+.bar i{display:block;height:100%;width:0;border-radius:999px;transition:width .3s}
+.hint{font-size:12.5px;color:var(--mute);margin-top:10px}
+.hint a{color:var(--ink)}
+
+/* Línea de tiempo VIPS */
+.tl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 4px}
+.tl div{border-top:3px solid var(--soft);padding-top:8px;font-size:12.5px;color:var(--mute)}
+.tl div b{display:block;color:var(--ink);font-size:13px}
+.tl div.done{border-color:var(--ok)}.tl div.now{border-color:var(--gold)}
+
+/* Estado vacío y avisos */
+.empty{text-align:center;padding:64px 24px}
+.empty h2{font-family:'Inter Tight',sans-serif;font-size:28px;letter-spacing:-0.03em;margin:0 0 8px}
+.empty p{color:var(--mute);max-width:460px;margin:0 auto 20px}
+.note{background:var(--warnbg);border:1px solid #EFDDB2;color:#6B4E0E;border-radius:14px;padding:11px 14px;font-size:13px;margin-bottom:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.sk{display:inline-block;width:70px;height:1em;border-radius:6px;background:linear-gradient(90deg,#EEE 25%,#F6F6F6 50%,#EEE 75%);background-size:200% 100%;animation:sk 1.2s infinite;vertical-align:middle}
+@keyframes sk{to{background-position:-200% 0}}
+
+/* Notificaciones */
+.toasts{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:8px;z-index:50;max-width:360px}
+.toast{background:var(--ink);color:#fff;border-radius:14px;padding:12px 14px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.2);display:flex;gap:10px;align-items:flex-start;animation:tin .2s}
+.toast i{width:8px;height:8px;border-radius:50%;margin-top:6px;flex:none;background:var(--gold)}
+.toast.ok i{background:#4CC38A}.toast.err i{background:#F07A5A}
+.toast a{color:#F3D58A}
+@keyframes tin{from{opacity:0;transform:translateY(6px)}}
+.spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:rot .7s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+.list{margin:0;padding:0;list-style:none}
+.list li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:13px}
+.list li:first-child{border-top:0}
+.foot{max-width:1240px;margin:0 auto;padding:0 24px 40px;color:var(--mute);font-size:12px}
+
+@media (max-width:980px){
+.tabs{position:fixed;bottom:0;left:0;right:0;margin:0;background:var(--card);border-top:1px solid var(--line);padding:8px;justify-content:space-around;z-index:30}
+.tab{flex:1;padding:10px 4px;font-size:13px}
+main{padding-bottom:110px}
+.split,.g4,.g3{grid-template-columns:1fr 1fr}.split{grid-template-columns:1fr}
+.brand span,.net span.t{display:none}
+.vt .hm{display:none}
+.toasts{bottom:80px;left:16px;right:16px;max-width:none}
+}
+@media (max-width:980px){#vOps{order:-1}}
+@media (max-width:560px){.vt td,.vt th{padding-left:6px;padding-right:6px}.vt .hs{display:none}.strip{gap:14px 20px;padding:12px 16px}.strip div{min-width:0;flex:1 1 40%}.h h1{font-size:24px}.asset span{display:none}.g4,.g3,.g2{grid-template-columns:1fr}.top .in{padding:10px 16px;gap:10px}main{padding:20px 16px 110px}.v{font-size:22px}}
+</style>
+</head>
+<body>
+
+<header class="top">
+<div class="in">
+<a class="brand" href="index.html"><span class="ic"><img src="assets/logo-icon-white.png" alt=""></span><b>Sanse</b><span>App COPe</span></a>
+<nav class="tabs" role="tablist" aria-label="Secciones">
+<button class="tab" role="tab" data-v="resumen" aria-selected="true">Resumen</button>
+<button class="tab" role="tab" data-v="bovedas" aria-selected="false">Bóvedas</button>
+<button class="tab" role="tab" data-v="ahorro" aria-selected="false">Ahorro</button>
+<button class="tab" role="tab" data-v="vips" aria-selected="false">VIPS</button>
+</nav>
+<div class="sp"></div>
+<span class="net" id="net"><i class="dot off" id="netDot"></i><span class="t" id="netTxt">Arbitrum Sepolia · prueba</span></span>
+<button class="btn btn-dark btn-sm wallet" id="walletBtn" type="button">Conectar wallet</button>
+</div>
+</header>
+
+<main>
+<div class="note" id="wrongNet" hidden><span>Tu wallet está en otra red. La app funciona en Arbitrum Sepolia.</span><button class="btn btn-dark btn-sm" id="switchNet" type="button">Cambiar de red</button></div>
+<div class="note" id="noWallet" hidden><span>No encontramos una wallet en este navegador. Instala MetaMask o Rabby, o abre esta página desde el navegador de tu app de wallet.</span></div>
+
+<!-- Datos del protocolo (siempre visibles) -->
+<div class="strip" aria-label="Protocolo en vivo">
+<div><span class="k">COPe en circulación</span><b id="pSupply"><i class="sk"></i></b></div>
+<div><span class="k">TRM del oráculo</span><b id="pTrm"><i class="sk"></i></b></div>
+<div><span class="k">Colchón</span><b id="pSurplus"><i class="sk"></i></b></div>
+<div><span class="k">Valor de 1 sCOPe</span><b id="pScope"><i class="sk"></i></b></div>
+<div><span class="k">Precio VIPS</span><b id="pVips"><i class="sk"></i></b></div>
+</div>
+
+<!-- Sin conectar -->
+<section class="card empty" id="connectCard">
+<h2>Conecta tu wallet para empezar</h2>
+<p>Acuña COPe con USDC, ETH o BTC, ahorra en pesos con sCOPe o invierte en los préstamos de Sanse con VIPS. Esta es la red de prueba: nada tiene valor real.</p>
+<button class="btn btn-dark" id="connectBig" type="button">Conectar wallet</button>
+</section>
+
+<div id="appUi" hidden>
+
+<!-- RESUMEN -->
+<section class="view on" id="v-resumen">
+<div class="h"><div><h1>Resumen</h1><p>Tu posición en COPe, en pesos.</p></div><button class="btn btn-line btn-sm" id="refresh" type="button">Actualizar</button></div>
+<div class="grid g4">
+<div class="card"><div class="k">Patrimonio neto</div><div class="v" id="sNet">—</div><div class="n">Colateral + COPe + ahorro + VIPS − deuda</div></div>
+<div class="card"><div class="k">Deuda total</div><div class="v" id="sDebt">—</div><div class="n" id="sDebtN">En todas tus bóvedas</div></div>
+<div class="card"><div class="k">COPe en tu wallet</div><div class="v" id="sCope">—</div><div class="n"><button class="btn btn-line btn-sm" id="watch" type="button">Agregar a la wallet</button></div></div>
+<div class="card"><div class="k">Respaldo más bajo</div><div class="v" id="sHealth">—</div><div class="n" id="sHealthN">—</div></div>
+</div>
+<div class="split" style="margin-top:14px">
+<div class="card">
+<h2>Tus posiciones</h2><p class="sub">Toca una bóveda para gestionarla.</p>
+<div class="tw"><table class="vt" id="sumTable"><thead><tr><th>Producto</th><th>Tienes</th><th class="hm">Valor (COP)</th><th class="hs">Estado</th></tr></thead><tbody></tbody></table></div>
+</div>
+<div class="card">
+<h2>Tokens de prueba</h2><p class="sub">Para probar sin dinero real.</p>
+<ul class="list" id="faucets"></ul>
+<div class="hint">El ETH para gas se pide en un grifo de Arbitrum Sepolia, por ejemplo <a href="https://www.alchemy.com/faucets/arbitrum-sepolia" target="_blank" rel="noopener">Alchemy</a>.</div>
+</div>
+</div>
+</section>
+
+<!-- BÓVEDAS -->
+<section class="view" id="v-bovedas">
+<div class="h"><div><h1>Bóvedas</h1><p>Deposita colateral y acuña COPe. Si el respaldo baja del límite, se liquida lo necesario para volver al mínimo.</p></div></div>
+<div class="split">
+<div class="card">
+<div class="tw"><table class="vt" id="vaultTable"><thead><tr><th>Bóveda</th><th class="hm">Precio</th><th>Colateral</th><th class="hs">Deuda</th><th>Respaldo</th></tr></thead><tbody></tbody></table></div>
+</div>
+<div class="card" id="vaultPanel">
+<div class="asset"><i class="ai" id="vpIcon"></i><div><b id="vpName" class="disp" style="font-size:17px">—</b><span id="vpRules">—</span></div></div>
+<div class="seg" role="tablist" id="vpSeg">
+<button data-a="deposit" aria-selected="true">Depositar</button><button data-a="mint" aria-selected="false">Acuñar</button><button data-a="repay" aria-selected="false">Pagar</button><button data-a="withdraw" aria-selected="false">Retirar</button>
+</div>
+<div class="inp"><div class="lab"><span id="vpLab">Monto</span><button type="button" id="vpMax">Máx: —</button></div><div class="row"><input id="vpIn" inputmode="decimal" placeholder="0" autocomplete="off" aria-label="Monto"><span class="tok" id="vpTok">—</span></div></div>
+<div class="prev">
+<div><span>Colateral</span><span id="vpCol">—</span></div>
+<div><span>Deuda</span><span id="vpDebt">—</span></div>
+<div><span>Respaldo</span><span id="vpRatio">—</span></div>
+<div class="bar"><i id="vpBar"></i></div>
+<div><span>Precio de liquidación</span><span id="vpLiq">—</span></div>
+</div>
+<button class="btn btn-dark btn-wide" id="vpGo" type="button">—</button>
+<div class="hint" id="vpHint"></div>
+</div>
+</div>
+</section>
+
+<!-- AHORRO -->
+<section class="view" id="v-ahorro">
+<div class="h"><div><h1>Ahorro en sCOPe</h1><p>Guarda COPe y recibe parte de los intereses del protocolo. Retiras cuando quieras.</p></div></div>
+<div class="split">
+<div class="grid g2">
+<div class="card"><div class="k">Tu ahorro</div><div class="v" id="aMine">—</div><div class="n" id="aShares">—</div></div>
+<div class="card"><div class="k">Valor de 1 sCOPe</div><div class="v" id="aPrice">—</div><div class="n">Sube cuando llegan intereses (se reparten en 7 días)</div></div>
+<div class="card"><div class="k">Total ahorrado en sCOPe</div><div class="v" id="aTvl">—</div><div class="n">COPe</div></div>
+<div class="card"><div class="k">Intereses por repartir</div><div class="v" id="aVest">—</div><div class="n">COPe que se van liberando</div></div>
+</div>
+<div class="card">
+<h2>Mover ahorro</h2>
+<div class="seg" role="tablist" id="aSeg"><button data-a="save" aria-selected="true">Ahorrar</button><button data-a="unsave" aria-selected="false">Retirar</button></div>
+<div class="inp"><div class="lab"><span>COPe</span><button type="button" id="aMax">Máx: —</button></div><div class="row"><input id="aIn" inputmode="decimal" placeholder="0" autocomplete="off" aria-label="Monto en COPe"><span class="tok">COPe</span></div></div>
+<button class="btn btn-dark btn-wide" id="aGo" type="button" style="margin-top:14px">Ahorrar</button>
+<div class="hint">El rendimiento es variable: depende de los intereses que cobra el sistema.</div>
+</div>
+</div>
+</section>
+
+<!-- VIPS -->
+<section class="view" id="v-vips">
+<div class="h"><div><h1>VIPS</h1><p>Inversión en los préstamos de Sanse. Gana más que sCOPe porque responde primero si un préstamo no se paga.</p></div></div>
+<div class="split">
+<div>
+<div class="grid g3">
+<div class="card"><div class="k">Tus VIPS</div><div class="v" id="vShares">—</div><div class="n" id="vValue">—</div></div>
+<div class="card"><div class="k">Precio de 1 VIPS</div><div class="v" id="vPrice">—</div><div class="n">COPe</div></div>
+<div class="card"><div class="k">Estado</div><div class="v" id="vState" style="font-size:20px">—</div><div class="n" id="vStateN">—</div></div>
+</div>
+<div class="card" style="margin-top:14px">
+<h2>Tu retiro</h2><p class="sub" id="vTlSub">Así funciona: 90 días de permanencia, 30 días de aviso y luego cobras al precio de ese día.</p>
+<div class="tl" id="vTl"><div id="t1"><b>Permanencia</b>90 días desde tu último depósito</div><div id="t2"><b>Aviso</b>30 días después de pedir el retiro</div><div id="t3"><b>Cobro</b>Al precio del día</div></div>
+</div>
+<div class="card" style="margin-top:14px">
+<h2>Imperio</h2><p class="sub">El módulo donde viven los préstamos de Sanse.</p>
+<div class="grid g3">
+<div><div class="k">Prestado</div><b class="num" id="iOut">—</b></div>
+<div><div class="k">Capital VIPS</div><b class="num" id="iVips">—</b></div>
+<div><div class="k">Capital Sanse</div><b class="num" id="iSanse">—</b></div>
+</div>
+<div class="hint">Reglas: Sanse cobra 25% de comisión sobre la ganancia. En pérdidas, VIPS pone 30% y Sanse 70%. Si la reserva baja del 10% de la deuda, los retiros se congelan.</div>
+</div>
+</div>
+<div class="card" id="vOps">
+<h2>Operar</h2>
+<div class="seg" role="tablist" id="vSeg"><button data-a="in" aria-selected="true">Invertir</button><button data-a="req" aria-selected="false">Pedir retiro</button></div>
+<div class="inp"><div class="lab"><span id="vLab">COPe a invertir</span><button type="button" id="vMax">Máx: —</button></div><div class="row"><input id="vIn" inputmode="decimal" placeholder="0" autocomplete="off" aria-label="Monto"><span class="tok" id="vTok">COPe</span></div></div>
+<button class="btn btn-dark btn-wide" id="vGo" type="button" style="margin-top:14px">Invertir</button>
+<div style="display:flex;gap:8px;margin-top:8px">
+<button class="btn btn-gold" id="vClaim" type="button" style="flex:1" hidden>Cobrar retiro</button>
+<button class="btn btn-line" id="vCancel" type="button" style="flex:1" hidden>Cancelar pedido</button>
+</div>
+<div class="hint">Consulta los riesgos antes de invertir: si los préstamos no se pagan, el precio del VIPS baja.</div>
+</div>
+</div>
+</section>
+
+</div>
+</main>
+
+<footer class="foot">COPe está en fase de prueba en Arbitrum Sepolia: los tokens no tienen valor y los contratos aún no han sido auditados. Nada en esta página es una oferta de inversión. <a href="cope.html">Qué es COPe</a> · <a href="cope.html#contratos">Contratos</a> · <a href="terminos.html">Términos</a></footer>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="assets/ethers-6.13.4.umd.min.js"></script>
+<script>
+(() => {
+'use strict';
+const { ethers } = window;
+const CHAIN_ID = 421614n, CHAIN_HEX = '0x66eee';
+const RPC = 'https://sepolia-rollup.arbitrum.io/rpc', EXPLORER = 'https://sepolia.arbiscan.io';
+const A = {
+  cope: '0xB44aF4E3023C59c1B48cD5f8bD397a7d48169395',
+  hub: '0xA5BA09daB54E22E87BAD5509fAcb4f887d248dDB',
+  oracle: '0xf963fe3219ED50e0ec15706d11C35f8aC2a84C22',
+  scope: '0xEb74d7D85Da0EC556AbbE8E02219a55Af8e73F6B',
+  imperio: '0x977C4D92f9BA63320ceE1C5A212C671bd094e4A2'
+};
+// Bóvedas
+const VAULTS = [
+  { id: 'aave', name: 'USDC + Aave', sym: 'USDC', icon: 'aave', vault: '0x2cE10b3064a6041E5a1DFa47e7aC39Cd2A21C16B', token: '0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d', dec: 6, d: 2, kind: 'cv', aave: true, faucetUrl: 'https://app.aave.com/faucet/', desc: 'Tu USDC rinde en Aave' },
+  { id: 'eth', name: 'ETH', sym: 'ETH', icon: 'eth', vault: '0x6880B82BdC2E4BC5992fA55e76A3d23b829d242c', token: '0x0AD76441E27d0f8532Dda492aa85B290b65A1e97', dec: 18, d: 4, kind: 'cv', faucet: 10n ** 18n },
+  { id: 'btc', name: 'BTC', sym: 'BTC', icon: 'btc', vault: '0x60974175b32EBb52215e1383a77A084D4Ac3117E', token: '0xC6B902730BF1Af9c8b50f041fbFaaC9E9ea97148', dec: 8, d: 6, kind: 'cv', faucet: 5n * 10n ** 6n },
+  { id: 'usdc', name: 'USDC', sym: 'USDC', icon: 'usdc', vault: '0xadd8d6AFA1C371916F8a26B6FF1421b432D4fdD4', token: '0x08ad899e5298e705709337c380565DdB50cf2ce2', dec: 6, d: 2, kind: 'v2', faucet: 1000n * 10n ** 6n, desc: 'Bóveda original' },
+  { id: 'eth1', name: 'ETH (anterior)', sym: 'ETH', icon: 'eth', vault: '0x5492082C1eFa10598b27F1E0C962C22932fdF975', token: '0x654afcA5BA1456829A39Bbd897d7b81F44D2Ac60', dec: 18, d: 4, kind: 'cvOld', legacy: true },
+  { id: 'btc1', name: 'BTC (anterior)', sym: 'BTC', icon: 'btc', vault: '0x1486b7E559D85F98818AEa0931432023f999e61f', token: '0xc67d8e43231a38A040D90211CEC3D9844CB6d8e2', dec: 8, d: 6, kind: 'cvOld', legacy: true }
+];
+
+const ERRS = ['error Undercollateralized()', 'error StalePrice()', 'error ZeroAmount()', 'error PositionHealthy()', 'error EnforcedPause()', 'error ModuleCeiling()', 'error GlobalCeiling()', 'error BadParam()', 'error StillLocked()', 'error RequestPending()', 'error NoRequest()', 'error NotReady()', 'error Frozen()', 'error NoCash()', 'error NotActiveModule()',
+  'error ERC4626ExceededMaxWithdraw(address,uint256,uint256)', 'error ERC4626ExceededMaxRedeem(address,uint256,uint256)', 'error ERC20InsufficientBalance(address,uint256,uint256)', 'error ERC20InsufficientAllowance(address,uint256,uint256)'];
+const ERC20 = [...ERRS, 'function balanceOf(address) view returns (uint256)', 'function totalSupply() view returns (uint256)', 'function allowance(address,address) view returns (uint256)', 'function approve(address,uint256) returns (bool)', 'function faucet(address,uint256)'];
+const VAULT = [...ERRS, 'function positions(address) view returns (uint256,uint256)', 'function debtOf(address) view returns (uint256)', 'function ratioBps(address) view returns (uint256)', 'function maxMintable(address) view returns (uint256)',
+  'function deposit(uint256)', 'function withdraw(uint256)', 'function mint(uint256)', 'function repay(uint256)',
+  'function priceCop() view returns (uint256)', 'function minRatioBps() view returns (uint256)', 'function liqRatioBps() view returns (uint256)'];
+const ABI = {
+  cope: ERC20, token: ERC20, vault: VAULT,
+  hub: ['function surplus() view returns (uint256)'],
+  oracle: ['function copPerUsd() view returns (uint256,uint256)'],
+  scope: [...ERC20, 'function totalAssets() view returns (uint256)', 'function convertToAssets(uint256) view returns (uint256)', 'function maxWithdraw(address) view returns (uint256)', 'function unvested() view returns (uint256)',
+    'function deposit(uint256,address) returns (uint256)', 'function withdraw(uint256,address,address) returns (uint256)', 'function redeem(uint256,address,address) returns (uint256)'],
+  imperio: [...ERC20, 'function vipsPrice() view returns (uint256)', 'function previewRedeem(uint256) view returns (uint256)', 'function lastDeposit(address) view returns (uint256)', 'function requests(address) view returns (uint256,uint64)',
+    'function minHold() view returns (uint256)', 'function notice() view returns (uint256)', 'function frozen() view returns (bool)', 'function vipsCapital() view returns (uint256)', 'function sanseCapital() view returns (uint256)', 'function totalOutstanding() view returns (uint256)',
+    'function deposit(uint256) returns (uint256)', 'function requestRedeem(uint256)', 'function cancelRequest()', 'function claim() returns (uint256)']
+};
+
+const $ = (id) => document.getElementById(id);
+const ro = new ethers.JsonRpcProvider(RPC, Number(CHAIN_ID), { staticNetwork: true });
+const C = (addr, abi) => new ethers.Contract(addr, abi, ro);
+const fmt = (v, dec = 18, d = 0) => v == null ? '—' : Number(ethers.formatUnits(v, dec)).toLocaleString('es-CO', { minimumFractionDigits: d, maximumFractionDigits: d });
+const cop = (v) => v == null ? '—' : '$' + fmt(v, 18, 0);
+const pct = (bps) => (Number(bps) / 100).toLocaleString('es-CO', { maximumFractionDigits: 0 }) + '%';
+const BPS = 10000n, MAXU = ethers.MaxUint256;
+
+// ---------- Notificaciones ----------
+function toast(text, type = '', hash = null, keep = false) {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  const dot = type === 'wait' ? Object.assign(document.createElement('span'), { className: 'spin' }) : document.createElement('i');
+  const body = document.createElement('div'); body.textContent = text;
+  if (hash) { const a = document.createElement('a'); a.href = EXPLORER + '/tx/' + hash; a.target = '_blank'; a.rel = 'noopener'; a.textContent = ' Ver transacción ↗'; body.append(a); }
+  t.append(dot, body); $('toasts').append(t);
+  if (!keep) setTimeout(() => t.remove(), type === 'err' ? 9000 : 6000);
+  return t;
+}
+function errText(e) {
+  if (e && (e.code === 'ACTION_REJECTED' || e.code === 4001)) return 'Cancelaste la transacción en tu wallet.';
+  const r = (e && ((e.revert && e.revert.name) || e.reason || e.shortMessage || e.message)) || 'Algo salió mal.';
+  const map = { Undercollateralized: 'Ese monto deja tu respaldo por debajo del mínimo de la bóveda.', StalePrice: 'El precio del oráculo está desactualizado. Intenta más tarde.', ZeroAmount: 'Escribe un monto mayor que cero.', ModuleCeiling: 'La bóveda llegó a su tope de emisión.', GlobalCeiling: 'El sistema llegó a su tope de emisión.', EnforcedPause: 'La bóveda está en pausa.', NotActiveModule: 'Esta bóveda está cerrada para nuevas emisiones.',
+    StillLocked: 'Aún no se cumplen los 90 días de permanencia.', RequestPending: 'Ya tienes un pedido de retiro. Cóbralo o cancélalo primero.', NoRequest: 'No tienes un pedido de retiro.', NotReady: 'Aún no se cumplen los 30 días de aviso.', Frozen: 'Los retiros de VIPS están congelados porque la reserva bajó del mínimo.', NoCash: 'Imperio no tiene COPe en caja ahora. Intenta más tarde.',
+    ERC4626ExceededMaxWithdraw: 'No tienes tanto ahorro para retirar.', ERC4626ExceededMaxRedeem: 'No tienes tanto sCOPe.', ERC20InsufficientBalance: 'No tienes saldo suficiente.', ERC20InsufficientAllowance: 'Falta autorizar el token. Intenta de nuevo.', 'insufficient funds': 'No tienes ETH suficiente para el gas.', 'panic': 'Ese monto no es válido para tu posición.' };
+  for (const k in map) if (r.includes(k)) return map[k];
+  return r.length > 140 ? r.slice(0, 140) + '…' : r;
+}
+
+// ---------- Datos públicos ----------
+const P = { trm: null };
+async function loadPublic() {
+  try {
+    const [supply, surplus, [trm], sSupply, sAssets, vp] = await Promise.all([
+      C(A.cope, ERC20).totalSupply(), C(A.hub, ABI.hub).surplus(), C(A.oracle, ABI.oracle).copPerUsd(),
+      C(A.scope, ABI.scope).totalSupply(), C(A.scope, ABI.scope).totalAssets(), C(A.imperio, ABI.imperio).vipsPrice()
+    ]);
+    P.trm = trm;
+    P.scopePrice = sSupply === 0n ? 10n ** 18n : sAssets * 10n ** 24n / sSupply;
+    $('pSupply').textContent = fmt(supply);
+    $('pTrm').textContent = '$' + fmt(trm, 8, 2);
+    $('pSurplus').textContent = fmt(surplus, 18, 0) + ' COPe';
+    $('pScope').textContent = fmt(P.scopePrice, 18, 6);
+    $('pVips').textContent = fmt(vp, 18, 4);
+  } catch (e) { /* se reintenta en el próximo ciclo */ }
+}
+loadPublic(); setInterval(loadPublic, 60000);
+
+// ---------- Navegación ----------
+function show(v) {
+  document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.v === v)));
+  document.querySelectorAll('.view').forEach((s) => s.classList.toggle('on', s.id === 'v-' + v));
+  if (location.hash !== '#' + v) history.replaceState(null, '', '#' + v);
+  window.scrollTo({ top: 0 });
+}
+document.querySelectorAll('.tab').forEach((t) => { t.onclick = () => show(t.dataset.v); });
+const startView = (location.hash || '').slice(1);
+if (['resumen', 'bovedas', 'ahorro', 'vips'].includes(startView)) show(startView);
+function segs(id, onChange) {
+  const el = $(id);
+  el.querySelectorAll('button').forEach((b) => { b.type = 'button'; b.onclick = () => { el.querySelectorAll('button').forEach((x) => x.setAttribute('aria-selected', String(x === b))); onChange(b.dataset.a); }; });
+}
+
+// ---------- Wallet ----------
+let me = null, busy = false;
+const S = { vaults: {}, sel: 'aave', vAct: 'deposit', aAct: 'save', iAct: 'in' };
+
+async function connect() {
+  if (!window.ethereum) { $('noWallet').hidden = false; return; }
+  try { await window.ethereum.request({ method: 'eth_requestAccounts' }); await refreshAccount(); }
+  catch (e) { toast(errText(e), 'err'); }
+}
+async function refreshAccount() {
+  if (!window.ethereum) { $('noWallet').hidden = false; return; }
+  const accs = await window.ethereum.request({ method: 'eth_accounts' });
+  const chain = BigInt(await window.ethereum.request({ method: 'eth_chainId' }));
+  me = accs[0] ? ethers.getAddress(accs[0]) : null;
+  const ok = chain === CHAIN_ID;
+  $('walletBtn').textContent = me ? me.slice(0, 6) + '…' + me.slice(-4) : 'Conectar wallet';
+  $('netDot').className = 'dot ' + (!me ? 'off' : ok ? '' : 'bad');
+  $('wrongNet').hidden = !me || ok;
+  $('connectCard').hidden = !!me && ok;
+  $('appUi').hidden = !me || !ok;
+  if (me && ok) await refreshAll();
+}
+
+// ---------- Lectura de la cuenta ----------
+async function readVault(cfg) {
+  const v = C(cfg.vault, VAULT), t = C(cfg.token, ERC20);
+  const [pos, debt, bal] = await Promise.all([v.positions(me), v.debtOf(me), t.balanceOf(me)]);
+  let price, minR, liqR;
+  if (cfg.kind === 'v2') { price = P.trm * 10n ** 10n; minR = 15000n; liqR = 13000n; }
+  else { [price, minR, liqR] = await Promise.all([v.priceCop().catch(() => null), v.minRatioBps(), v.liqRatioBps()]); }
+  let max = null; try { max = await v.maxMintable(me); } catch (_) {}
+  return { cfg, col: pos[0], debt, bal, price, minR, liqR, max, colCop: price == null ? null : pos[0] * price / 10n ** BigInt(cfg.dec) };
+}
+function ratioOf(colCop, debt) { return debt === 0n || colCop == null ? null : colCop * BPS / debt; }
+function health(r, liq, min) {
+  if (r == null) return ['Sin deuda', 'mute'];
+  if (r < liq) return ['Liquidable', 'bad'];
+  if (r < min + (min - liq)) return ['En riesgo', 'warn'];
+  return ['Sana', 'ok'];
+}
+
+async function refreshAll() {
+  if (!me) return;
+  if (!P.trm) await loadPublic();
+  try {
+    const [vs, copeBal, eth, sh, sAssets, sSupply, unv, I] = await Promise.all([
+      Promise.all(VAULTS.map((c) => readVault(c).catch(() => null))),
+      C(A.cope, ERC20).balanceOf(me), ro.getBalance(me),
+      C(A.scope, ABI.scope).balanceOf(me), C(A.scope, ABI.scope).totalAssets(), C(A.scope, ABI.scope).totalSupply(), C(A.scope, ABI.scope).unvested().catch(() => 0n),
+      readImperio()
+    ]);
+    vs.forEach((x) => { if (x) S.vaults[x.cfg.id] = x; });
+    S.cope = copeBal; S.eth = eth; S.scopeShares = sh;
+    S.saved = sSupply === 0n ? 0n : sh * sAssets / sSupply;
+    S.scopeTvl = sAssets; S.unvested = unv; S.I = I;
+    renderSummary(); renderVaults(); renderSavings(); renderVips();
+  } catch (e) { toast('No se pudieron leer tus saldos: ' + errText(e), 'err'); }
+}
+
+async function readImperio() {
+  const I = C(A.imperio, ABI.imperio);
+  const [price, sh, last, req, minHold, notice, frozen, vCap, sCap, out] = await Promise.all([
+    I.vipsPrice(), I.balanceOf(me), I.lastDeposit(me), I.requests(me), I.minHold(), I.notice(), I.frozen(), I.vipsCapital(), I.sanseCapital(), I.totalOutstanding()
+  ]);
+  const total = sh + req[0];
+  const value = total > 0n ? await I.previewRedeem(total) : 0n;
+  return { price, sh, last, rqSh: req[0], rqAt: req[1], minHold, notice, frozen, vCap, sCap, out, value };
+}
+
+// ---------- Resumen ----------
+function renderSummary() {
+  let colCop = 0n, debt = 0n, worst = null, worstName = '';
+  for (const x of Object.values(S.vaults)) {
+    if (x.colCop) colCop += x.colCop;
+    debt += x.debt;
+    const r = ratioOf(x.colCop, x.debt);
+    if (r != null) { const margin = r - x.liqR; if (worst == null || margin < worst.margin) { worst = { r, margin, x }; worstName = x.cfg.name; } }
+  }
+  const net = colCop + S.cope + S.saved + S.I.value - debt;
+  $('sNet').textContent = cop(net);
+  $('sDebt').textContent = fmt(debt) + ' ';
+  $('sDebt').append(Object.assign(document.createElement('small'), { textContent: 'COPe' }));
+  $('sCope').textContent = fmt(S.cope, 18, 0);
+  if (worst) {
+    const [label, cls] = health(worst.r, worst.x.liqR, worst.x.minR);
+    $('sHealth').replaceChildren(pct(worst.r) + ' ', Object.assign(document.createElement('span'), { className: 'pill ' + cls, textContent: label }));
+    $('sHealthN').textContent = worstName + ' · se liquida bajo ' + pct(worst.x.liqR);
+  } else { $('sHealth').textContent = '—'; $('sHealthN').textContent = 'No tienes deuda'; }
+
+  const tb = $('sumTable').tBodies[0]; tb.replaceChildren();
+  const rows = [];
+  for (const x of Object.values(S.vaults)) {
+    if (x.col === 0n && x.debt === 0n) continue;
+    const [label, cls] = health(ratioOf(x.colCop, x.debt), x.liqR, x.minR);
+    rows.push([x.cfg.icon, 'Bóveda ' + x.cfg.name, fmt(x.col, x.cfg.dec, x.cfg.d) + ' ' + x.cfg.sym + (x.debt > 0n ? ' · debe ' + fmt(x.debt) : ''), x.colCop == null ? '—' : cop(x.colCop - x.debt), [label, cls], () => { S.sel = x.cfg.id; show('bovedas'); renderVaults(); }]);
+  }
+  if (S.saved > 0n) rows.push(['cope', 'Ahorro sCOPe', fmt(S.saved, 18, 0) + ' COPe', cop(S.saved), ['Rindiendo', 'ok'], () => show('ahorro')]);
+  if (S.I.sh + S.I.rqSh > 0n) rows.push(['vips', 'VIPS', fmt(S.I.sh + S.I.rqSh, 18, 2) + ' VIPS', cop(S.I.value), vipsState()[0] ? [vipsState()[0], vipsState()[2]] : ['', 'mute'], () => show('vips')]);
+  if (!rows.length) {
+    const tr = tb.insertRow(); const td = tr.insertCell(); td.colSpan = 4; td.style.textAlign = 'center'; td.style.color = 'var(--mute)'; td.style.padding = '28px';
+    td.textContent = 'Aún no tienes posiciones. Pide tokens de prueba y deposita en una bóveda.';
+  }
+  for (const [icon, name, have, val, [label, cls], go] of rows) {
+    const tr = tb.insertRow(); tr.className = 'row'; tr.onclick = go;
+    const a = tr.insertCell(); a.append(assetEl(icon, name, ''));
+    const hv = tr.insertCell(); hv.className = 'wrap'; hv.textContent = have;
+    const c = tr.insertCell(); c.className = 'hm'; c.textContent = val;
+    const sc = tr.insertCell(); sc.className = 'hs'; sc.append(Object.assign(document.createElement('span'), { className: 'pill ' + cls, textContent: label }));
+  }
+
+  // grifos
+  const ul = $('faucets'); ul.replaceChildren();
+  const li = (label, right) => { const l = document.createElement('li'); l.append(Object.assign(document.createElement('span'), { textContent: label }), right); ul.append(l); };
+  li('ETH para gas: ' + fmt(S.eth, 18, 4), Object.assign(document.createElement('span'), { className: 'k', textContent: 'Grifo externo' }));
+  for (const c of VAULTS.filter((c) => !c.legacy)) {
+    const x = S.vaults[c.id]; if (!x) continue;
+    let r;
+    if (c.faucet) { r = document.createElement('button'); r.className = 'btn btn-line btn-sm'; r.type = 'button'; r.textContent = 'Pedir ' + fmt(c.faucet, c.dec, c.d); r.onclick = () => tx('Pedir ' + c.sym + ' de prueba', c.token, ERC20, 'faucet', [me, c.faucet]); }
+    else { r = document.createElement('a'); r.className = 'btn btn-line btn-sm'; r.href = c.faucetUrl; r.target = '_blank'; r.rel = 'noopener'; r.textContent = 'Grifo de Aave ↗'; }
+    li(c.sym + (c.aave ? ' (de Aave)' : c.kind === 'v2' ? ' (bóveda original)' : '') + ': ' + fmt(x.bal, c.dec, c.d), r);
+  }
+}
+function assetEl(icon, name, sub) {
+  const d = document.createElement('div'); d.className = 'asset';
+  const i = document.createElement('i'); i.className = 'ai ' + icon; i.textContent = { usdc: '$', aave: '', eth: 'Ξ', btc: '₿', cope: '₱', vips: 'V' }[icon] || '';
+  const t = document.createElement('div'); t.append(Object.assign(document.createElement('b'), { textContent: name }));
+  if (sub) t.append(Object.assign(document.createElement('span'), { textContent: sub }));
+  d.append(i, t); return d;
+}
+
+// ---------- Bóvedas ----------
+function renderVaults() {
+  const tb = $('vaultTable').tBodies[0]; tb.replaceChildren();
+  for (const c of VAULTS) {
+    const x = S.vaults[c.id]; if (!x) continue;
+    if (c.legacy && x.col === 0n && x.debt === 0n) continue;
+    const tr = tb.insertRow(); tr.className = 'row' + (S.sel === c.id ? ' sel' : '');
+    tr.onclick = () => { S.sel = c.id; renderVaults(); };
+    tr.insertCell().append(assetEl(c.icon, c.name, c.legacy ? 'Solo pagar y retirar' : (c.desc || 'Mín. ' + pct(x.minR))));
+    const p = tr.insertCell(); p.className = 'hm'; p.textContent = x.price == null ? '—' : cop(x.price);
+    tr.insertCell().textContent = fmt(x.col, c.dec, c.d);
+    const dc = tr.insertCell(); dc.className = 'hs'; dc.textContent = fmt(x.debt);
+    const [label, cls] = health(ratioOf(x.colCop, x.debt), x.liqR, x.minR);
+    const r = ratioOf(x.colCop, x.debt);
+    tr.insertCell().append(Object.assign(document.createElement('span'), { className: 'pill ' + cls, textContent: r == null ? label : pct(r) }));
+  }
+  renderPanel();
+}
+function parseAmt(id, dec) {
+  const raw = $(id).value.trim().replace(/\s/g, '');
+  if (!raw) return null;
+  // acepta "1.234,56" y "1234.56"
+  let s = raw;
+  if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+  else if ((s.match(/\./g) || []).length > 1) s = s.replace(/\./g, '');
+  if (!/^\d+(\.\d+)?$/.test(s)) return undefined;
+  const [i, f = ''] = s.split('.');
+  try { return ethers.parseUnits(i + (f ? '.' + f.slice(0, dec) : ''), dec); } catch (_) { return undefined; }
+}
+const setIn = (id, v, dec, d) => { $(id).value = v == null ? '' : Number(ethers.formatUnits(v, dec)).toLocaleString('es-CO', { maximumFractionDigits: d, useGrouping: false }).replace(',', ','); $(id).dispatchEvent(new Event('input')); };
+
+function vaultMax(x, act) {
+  const c = x.cfg;
+  if (act === 'deposit') return x.bal;
+  if (act === 'mint') return x.max ?? 0n;
+  if (act === 'repay') return x.debt < S.cope ? x.debt : S.cope;
+  if (act === 'withdraw') {
+    if (x.debt === 0n) return x.col;
+    if (x.price == null) return 0n;
+    const need = x.debt * x.minR / BPS * 10n ** BigInt(c.dec) / x.price + 1n;
+    return x.col > need ? x.col - need : 0n;
+  }
+  return 0n;
+}
+function renderPanel() {
+  const x = S.vaults[S.sel]; if (!x) return;
+  const c = x.cfg, act = S.vAct;
+  $('vpIcon').className = 'ai ' + c.icon; $('vpIcon').textContent = { usdc: '$', aave: '', eth: 'Ξ', btc: '₿' }[c.icon];
+  $('vpName').textContent = 'Bóveda ' + c.name;
+  $('vpRules').textContent = 'Mínimo ' + pct(x.minR) + ' para acuñar · se liquida bajo ' + pct(x.liqR);
+  document.querySelectorAll('#vpSeg button').forEach((b) => { b.hidden = c.legacy && (b.dataset.a === 'deposit' || b.dataset.a === 'mint'); });
+  if (c.legacy && (act === 'deposit' || act === 'mint')) { S.vAct = 'repay'; document.querySelectorAll('#vpSeg button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.a === 'repay'))); return renderPanel(); }
+  const isCope = act === 'mint' || act === 'repay';
+  const dec = isCope ? 18 : c.dec, d = isCope ? 0 : c.d;
+  $('vpTok').textContent = isCope ? 'COPe' : c.sym;
+  $('vpLab').textContent = { deposit: 'Depositar ' + c.sym, mint: 'Acuñar COPe', repay: 'Pagar deuda en COPe', withdraw: 'Retirar ' + c.sym }[act];
+  const max = vaultMax(x, act);
+  $('vpMax').textContent = 'Máx: ' + fmt(max, dec, d);
+  $('vpMax').onclick = () => { S.repayAll = act === 'repay' && max === x.debt && x.debt > 0n; setIn('vpIn', max, dec, d); };
+  $('vpGo').textContent = { deposit: 'Depositar ' + c.sym, mint: 'Acuñar COPe', repay: 'Pagar deuda', withdraw: 'Retirar ' + c.sym }[act];
+  $('vpHint').replaceChildren();
+  if (c.aave) $('vpHint').textContent = 'El 90% del USDC de esta bóveda se presta en Aave; lo que gana va al Colchón que paga a sCOPe. Usa el USDC de prueba de Aave.';
+  if (c.legacy) $('vpHint').textContent = 'Esta bóveda ya no emite COPe nuevo. Puedes pagar tu deuda y retirar tu colateral.';
+  preview();
+}
+function preview() {
+  const x = S.vaults[S.sel]; if (!x) return;
+  const c = x.cfg, act = S.vAct, isCope = act === 'mint' || act === 'repay';
+  const amt = parseAmt('vpIn', isCope ? 18 : c.dec);
+  let col = x.col, debt = x.debt;
+  if (amt) {
+    if (act === 'deposit') col += amt; if (act === 'withdraw') col = col > amt ? col - amt : 0n;
+    if (act === 'mint') debt += amt; if (act === 'repay') debt = debt > amt ? debt - amt : 0n;
+  }
+  const colCop = x.price == null ? null : col * x.price / 10n ** BigInt(c.dec);
+  const r0 = ratioOf(x.colCop, x.debt), r1 = ratioOf(colCop, debt);
+  const arrow = (a, b) => amt && a !== b ? a + ' → ' + b : b;
+  $('vpCol').textContent = arrow(fmt(x.col, c.dec, c.d), fmt(col, c.dec, c.d)) + ' ' + c.sym;
+  $('vpDebt').textContent = arrow(fmt(x.debt), fmt(debt)) + ' COPe';
+  $('vpRatio').textContent = arrow(r0 == null ? '—' : pct(r0), r1 == null ? '—' : pct(r1));
+  const [, cls] = health(r1, x.liqR, x.minR);
+  $('vpBar').style.width = r1 == null ? '0' : Math.min(100, Number(r1) / 400) + '%';
+  $('vpBar').style.background = { ok: 'var(--ok)', warn: 'var(--warn)', bad: 'var(--bad)', mute: 'var(--soft)' }[cls];
+  $('vpLiq').textContent = debt > 0n && col > 0n ? cop(debt * x.liqR / BPS * 10n ** BigInt(c.dec) / col) + ' por ' + c.sym : '—';
+  const bad = amt === undefined || (amt && (act === 'mint' || act === 'withdraw') && r1 != null && r1 < x.minR);
+  $('vpGo').disabled = busy || !amt || bad;
+  if (amt === undefined) $('vpHint').textContent = 'Escribe un número válido, por ejemplo 1.500 o 0,25.';
+  else if (bad) $('vpHint').textContent = 'Con ese monto el respaldo quedaría bajo el mínimo de ' + pct(x.minR) + '.';
+  else if (!c.aave && !c.legacy) $('vpHint').textContent = '';
+}
+$('vpIn').addEventListener('input', () => { S.repayAll = false; preview(); });
+$('vpMax').addEventListener('click', () => {});
+segs('vpSeg', (a) => { S.vAct = a; $('vpIn').value = ''; renderPanel(); });
+$('vpGo').onclick = async () => {
+  const x = S.vaults[S.sel], c = x.cfg, act = S.vAct;
+  const amt = parseAmt('vpIn', act === 'mint' || act === 'repay' ? 18 : c.dec); if (!amt) return;
+  if (act === 'deposit') {
+    if (!(await approve(c.token, c.vault, amt, c.sym))) return;
+    await tx('Depositar ' + fmt(amt, c.dec, c.d) + ' ' + c.sym, c.vault, VAULT, 'deposit', [amt]);
+  } else if (act === 'mint') await tx('Acuñar ' + fmt(amt) + ' COPe', c.vault, VAULT, 'mint', [amt]);
+  else if (act === 'repay') {
+    const all = S.repayAll || amt >= x.debt;
+    const v = all ? MAXU : amt;
+    if (!(await approve(A.cope, A.hub, all ? x.debt + x.debt / 100n + 10n ** 18n : amt, 'COPe'))) return;
+    await tx(all ? 'Pagar toda la deuda' : 'Pagar ' + fmt(amt) + ' COPe', c.vault, VAULT, 'repay', [v]);
+  } else await tx('Retirar ' + fmt(amt, c.dec, c.d) + ' ' + c.sym, c.vault, VAULT, 'withdraw', [amt]);
+  $('vpIn').value = '';
+};
+
+// ---------- Ahorro ----------
+function renderSavings() {
+  $('aMine').replaceChildren(fmt(S.saved, 18, 2) + ' ', Object.assign(document.createElement('small'), { textContent: 'COPe' }));
+  $('aShares').textContent = fmt(S.scopeShares, 24, 4) + ' sCOPe';
+  $('aPrice').textContent = fmt(P.scopePrice, 18, 6);
+  $('aTvl').textContent = fmt(S.scopeTvl, 18, 0);
+  $('aVest').textContent = fmt(S.unvested, 18, 2);
+  const max = S.aAct === 'save' ? S.cope : S.saved;
+  $('aMax').textContent = 'Máx: ' + fmt(max, 18, 2);
+  $('aMax').onclick = () => { S.aAll = S.aAct === 'unsave'; setIn('aIn', max, 18, 2); };
+  $('aGo').textContent = S.aAct === 'save' ? 'Ahorrar' : 'Retirar';
+  aCheck();
+}
+function aCheck() { const v = parseAmt('aIn', 18); $('aGo').disabled = busy || !v; }
+$('aIn').addEventListener('input', () => { S.aAll = false; aCheck(); });
+segs('aSeg', (a) => { S.aAct = a; $('aIn').value = ''; renderSavings(); });
+$('aGo').onclick = async () => {
+  const v = parseAmt('aIn', 18); if (!v) return;
+  if (S.aAct === 'save') {
+    if (!(await approve(A.cope, A.scope, v, 'COPe'))) return;
+    await tx('Ahorrar ' + fmt(v) + ' COPe', A.scope, ABI.scope, 'deposit', [v, me]);
+  } else if (S.aAll) await tx('Retirar todo el ahorro', A.scope, ABI.scope, 'redeem', [S.scopeShares, me, me]);
+  else await tx('Retirar ' + fmt(v) + ' COPe del ahorro', A.scope, ABI.scope, 'withdraw', [v, me, me]);
+  $('aIn').value = '';
+};
+
+// ---------- VIPS ----------
+const dias = (s) => { const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600); return d > 0 ? d + ' d ' + h + ' h' : h + ' h'; };
+function vipsState() {
+  const I = S.I, now = Math.floor(Date.now() / 1000);
+  if (I.frozen) return ['Congelado', 'La reserva de Imperio está bajo el mínimo: no se puede invertir ni cobrar.', 'bad', 0];
+  if (I.rqSh > 0n) {
+    const left = Number(I.rqAt) - now;
+    return left > 0 ? ['En aviso', 'Podrás cobrar en ' + dias(left) + ' (' + new Date(Number(I.rqAt) * 1000).toLocaleDateString('es-CO') + ')', 'warn', 2] : ['Listo para cobrar', 'Tu retiro ya se puede cobrar', 'ok', 3];
+  }
+  if (I.sh > 0n) {
+    const left = Number(I.last + I.minHold) - now;
+    return left > 0 ? ['En permanencia', 'Podrás pedir retiro en ' + dias(left), 'mute', 1] : ['Libre', 'Puedes pedir retiro cuando quieras', 'ok', 2];
+  }
+  return ['Sin VIPS', 'Invierte COPe para empezar', 'mute', 0];
+}
+function renderVips() {
+  const I = S.I, [st, stN, , step] = vipsState();
+  $('vShares').textContent = fmt(I.sh + I.rqSh, 18, 2);
+  $('vValue').textContent = 'Valen ' + fmt(I.value, 18, 2) + ' COPe';
+  $('vPrice').textContent = fmt(I.price, 18, 4);
+  $('vState').textContent = st; $('vStateN').textContent = stN;
+  ['t1', 't2', 't3'].forEach((id, i) => { $(id).className = i + 1 < step ? 'done' : i + 1 === step ? 'now' : ''; });
+  $('iOut').textContent = fmt(I.out) + ' COPe'; $('iVips').textContent = fmt(I.vCap) + ' COPe'; $('iSanse').textContent = fmt(I.sCap) + ' COPe';
+  $('vClaim').hidden = !(I.rqSh > 0n && step === 3);
+  $('vCancel').hidden = !(I.rqSh > 0n);
+  const max = S.iAct === 'in' ? S.cope : I.sh;
+  $('vLab').textContent = S.iAct === 'in' ? 'COPe a invertir' : 'VIPS a retirar';
+  $('vTok').textContent = S.iAct === 'in' ? 'COPe' : 'VIPS';
+  $('vMax').textContent = 'Máx: ' + fmt(max, 18, 2);
+  $('vMax').onclick = () => setIn('vIn', max, 18, 2);
+  $('vGo').textContent = S.iAct === 'in' ? 'Invertir' : 'Pedir retiro';
+  vCheck();
+}
+function vCheck() { const v = parseAmt('vIn', 18); $('vGo').disabled = busy || !v; }
+$('vIn').addEventListener('input', vCheck);
+segs('vSeg', (a) => { S.iAct = a; $('vIn').value = ''; renderVips(); });
+$('vGo').onclick = async () => {
+  const v = parseAmt('vIn', 18); if (!v) return;
+  if (S.iAct === 'in') {
+    if (!(await approve(A.cope, A.imperio, v, 'COPe'))) return;
+    await tx('Invertir ' + fmt(v) + ' COPe en VIPS', A.imperio, ABI.imperio, 'deposit', [v]);
+  } else await tx('Pedir retiro de ' + fmt(v, 18, 2) + ' VIPS', A.imperio, ABI.imperio, 'requestRedeem', [v]);
+  $('vIn').value = '';
+};
+$('vClaim').onclick = () => tx('Cobrar retiro de VIPS', A.imperio, ABI.imperio, 'claim', []);
+$('vCancel').onclick = () => tx('Cancelar pedido de retiro', A.imperio, ABI.imperio, 'cancelRequest', []);
+
+// ---------- Transacciones ----------
+function setBusy(on) { busy = on; document.querySelectorAll('#appUi .btn').forEach((b) => { if (on) b.disabled = true; }); if (!on) { renderPanel(); renderSavings(); renderVips(); } }
+async function send(to, abi, method, args) {
+  const iface = new ethers.Interface(abi);
+  const data = iface.encodeFunctionData(method, args);
+  let gas;
+  try { gas = await ro.estimateGas({ from: me, to, data }); }
+  catch (e) {
+    const raw = e && (e.data || (e.info && e.info.error && e.info.error.data) || (e.error && e.error.data));
+    let parsed = null; try { parsed = raw ? iface.parseError(raw) : null; } catch (_) {}
+    const err = new Error(parsed ? parsed.name : (e.shortMessage || e.message)); if (parsed) err.revert = { name: parsed.name }; throw err;
+  }
+  return window.ethereum.request({ method: 'eth_sendTransaction', params: [{ from: me, to, data, gas: '0x' + (gas * 13n / 10n + 20000n).toString(16) }] });
+}
+async function tx(label, to, abi, method, args) {
+  setBusy(true);
+  let w = toast(label + ': confirma en tu wallet…', 'wait', null, true);
+  try {
+    const hash = await send(to, abi, method, args);
+    w.remove(); w = toast(label + ': enviada, esperando confirmación…', 'wait', hash, true);
+    const rc = await ro.waitForTransaction(hash, 1, 180000);
+    w.remove();
+    if (rc && rc.status === 1) toast(label + ' ✓', 'ok', hash); else toast(label + ': la transacción falló.', 'err', hash);
+    await refreshAll(); loadPublic();
+    return true;
+  } catch (e) { w.remove(); toast(errText(e), 'err'); return false; }
+  finally { setBusy(false); }
+}
+async function approve(token, spender, need, sym) {
+  const cur = await C(token, ERC20).allowance(me, spender);
+  if (cur >= need) return true;
+  return tx('Autorizar ' + sym + ' (paso 1 de 2)', token, ERC20, 'approve', [spender, need]);
+}
+
+// ---------- Eventos ----------
+$('walletBtn').onclick = () => { if (!me) connect(); else navigator.clipboard && navigator.clipboard.writeText(me).then(() => toast('Dirección copiada', 'ok')); };
+$('connectBig').onclick = connect;
+$('refresh').onclick = () => refreshAll();
+$('switchNet').onclick = async () => {
+  try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_HEX }] }); }
+  catch (e) {
+    if (e && e.code === 4902) await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: CHAIN_HEX, chainName: 'Arbitrum Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: [RPC], blockExplorerUrls: [EXPLORER] }] });
+    else toast(errText(e), 'err');
+  }
+};
+$('watch').onclick = async () => {
+  try { await window.ethereum.request({ method: 'wallet_watchAsset', params: { type: 'ERC20', options: { address: A.cope, symbol: 'COPe', decimals: 18 } } }); }
+  catch (e) { toast(errText(e), 'err'); }
+};
+if (window.ethereum) {
+  window.ethereum.on && window.ethereum.on('accountsChanged', () => refreshAccount().catch(() => {}));
+  window.ethereum.on && window.ethereum.on('chainChanged', () => refreshAccount().catch(() => {}));
+  refreshAccount().catch(() => {});
+} else $('noWallet').hidden = false;
+setInterval(() => { if (me && !busy) refreshAll(); }, 45000);
+})();
+</script>
+</body>
+</html>

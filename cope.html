@@ -85,11 +85,11 @@ section[id]{scroll-margin-top:96px}
 <nav class="pillnav" aria-label="Principal">
 <a class="ni" href="index.html#productos">Productos</a>
 <a class="ni" href="cope.html" aria-current="page">COPe</a>
-<a class="ni" href="lend.html">Bóveda</a>
+<a class="ni" href="app.html">App</a>
 <a class="ni" href="index.html#transparencia">Transparencia</a>
 <a class="ni" href="dgp.html">Fondo DGP</a>
 </nav>
-<button class="btn btn-dark btn-sm" id="navConnect" type="button">Conectar wallet</button>
+<a class="btn btn-dark btn-sm" href="app.html">Abrir la app</a>
 </div>
 </div>
 </header>
@@ -100,8 +100,7 @@ section[id]{scroll-margin-top:96px}
 <h1 class="h1 disp">El peso colombiano,<br>en la blockchain.</h1>
 <p class="lead">COPe vale siempre 1 peso. Cada COPe está respaldado por más valor del que representa, y cualquiera puede verificarlo en tiempo real.</p>
 <div class="row">
-<a class="btn btn-dark" href="#app">Probar la app</a>
-<a class="btn btn-light" href="lend.html">Abrir la bóveda</a>
+<a class="btn btn-dark" href="app.html">Abrir la app</a>
 <a class="btn btn-light" href="#como">Cómo funciona</a>
 </div>
 </div>
@@ -124,91 +123,20 @@ section[id]{scroll-margin-top:96px}
 <div class="wrap">
 <h2>Cómo funciona</h2>
 <p class="sub">Inspirado en DAI y Sky, adaptado a pesos colombianos.</p>
-<div class="grid g3">
-<div class="card"><div class="k">1 · Bóveda</div><h3 class="disp" style="font-size:22px;margin:8px 0">Depositas colateral, acuñas COPe</h3><p style="color:#6B6B70;margin:0">Por cada 150 pesos de colateral puedes acuñar hasta 100 COPe. Si el respaldo baja de 130%, la posición se liquida para proteger el sistema.</p></div>
-<div class="card"><div class="k">2 · Sanse Hub y Estrella Real</div><h3 class="disp" style="font-size:22px;margin:8px 0">Préstamos en pesos, registrados</h3><p style="color:#6B6B70;margin:0">El Hub emite COPe para préstamos en pesos, con topes por tipo y tasas dentro de la ley. Cada préstamo queda registrado con un código, sin datos personales.</p></div>
-<div class="card"><div class="k">3 · sCOPe</div><h3 class="disp" style="font-size:22px;margin:8px 0">Ahorras en pesos y ganas</h3><p style="color:#6B6B70;margin:0">Los intereses del sistema llegan al Colchón y una parte se reparte a quienes ahorran en sCOPe. El rendimiento es variable, nunca fijo.</p></div>
+<div class="grid g4">
+<div class="card"><div class="k">1 · Bóvedas</div><h3 class="disp" style="font-size:21px;margin:8px 0">Acuñas COPe con USDC, ETH o BTC</h3><p style="color:#6B6B70;margin:0">Depositas más valor del que acuñas. Si el respaldo baja del límite, se liquida solo lo necesario para volver al mínimo. El USDC puede rendir en Aave.</p></div>
+<div class="card"><div class="k">2 · Sanse Hub</div><h3 class="disp" style="font-size:21px;margin:8px 0">Un solo emisor, con topes</h3><p style="color:#6B6B70;margin:0">Cada bóveda y cada módulo tiene un tope de COPe y una tasa. Los intereses llegan al Colchón del protocolo.</p></div>
+<div class="card"><div class="k">3 · sCOPe</div><h3 class="disp" style="font-size:21px;margin:8px 0">Ahorras en pesos</h3><p style="color:#6B6B70;margin:0">Una parte del Colchón se reparte a quienes ahorran en sCOPe. Retiras cuando quieras. El rendimiento es variable.</p></div>
+<div class="card"><div class="k">4 · Imperio y VIPS</div><h3 class="disp" style="font-size:21px;margin:8px 0">Préstamos reales de Sanse</h3><p style="color:#6B6B70;margin:0">Imperio registra los préstamos en pesos. VIPS invierte en ellos: gana más, responde primero ante pérdidas y tiene permanencia.</p></div>
 </div>
 </div>
 </section>
 
 <section class="sec" id="app">
 <div class="wrap">
-<div class="app">
-<div class="row" style="justify-content:space-between;margin-bottom:22px">
-<div><h3 style="font-size:30px">App COPe</h3><div class="n">Conecta una wallet como MetaMask o Rabby. Funciona en la red de prueba Arbitrum Sepolia.</div></div>
-<div class="row"><span class="mono" id="addr" style="color:#9A9AA0"></span><button class="btn btn-light" id="connect" type="button">Conectar wallet</button></div>
-</div>
-
-<div class="warn">Esto es una red de prueba. El USDC y el COPe de aquí no tienen valor real. Para empezar necesitas un poco de ETH de Arbitrum Sepolia para pagar el gas.</div>
-
-<div id="noWallet" class="card" hidden><h3>No encontramos una wallet</h3><p class="n" style="margin:6px 0 0">Instala MetaMask o Rabby en tu navegador, o abre esta página desde el navegador de tu app de wallet.</p></div>
-<div id="wrongNet" class="card" hidden><h3>Estás en otra red</h3><p class="n" style="margin:6px 0 14px">La app funciona en Arbitrum Sepolia.</p><button class="btn btn-light" id="switchNet" type="button">Cambiar a Arbitrum Sepolia</button></div>
-
-<div id="panel" hidden>
-<div class="grid g4">
-<div class="card"><div class="k">ETH (para gas)</div><div class="v" id="bEth">—</div></div>
-<div class="card"><div class="k">USDC de prueba</div><div class="v" id="bUsdc">—</div><div class="acts"><button class="btn btn-ghost btn-sm" id="faucet" type="button">Pedir 1.000 USDC</button></div></div>
-<div class="card"><div class="k">COPe</div><div class="v" id="bCope">—</div><div class="acts"><button class="btn btn-ghost btn-sm" id="watch" type="button">Agregar a la wallet</button></div></div>
-<div class="card"><div class="k">Ahorro en sCOPe</div><div class="v" id="bScope">—</div><div class="n">COPe</div></div>
-</div>
-
-<div class="grid g2" style="margin-top:16px">
-<div class="card">
-<h3>Bóveda</h3>
-<div class="acts" id="colTabs" role="tablist" style="margin-top:10px">
-<button class="btn btn-light btn-sm" data-col="usdc" type="button">USDC</button>
-<button class="btn btn-ghost btn-sm" data-col="eth" type="button">ETH</button>
-<button class="btn btn-ghost btn-sm" data-col="btc" type="button">BTC</button>
-<button class="btn btn-ghost btn-sm" data-col="aave" type="button">USDC + Aave</button>
-</div>
-<div class="n" id="colInfo" style="margin-top:10px">Deposita USDC y acuña COPe. Mínimo 150% de respaldo.</div>
-<div class="n"><span id="colPrice"></span> <a href="lend.html" style="color:#C9A84C">Ver riesgo de liquidación →</a></div>
-<div class="acts" id="colFaucetRow" hidden><button class="btn btn-ghost btn-sm" id="colFaucet" type="button">Pedir de prueba</button><a class="btn btn-ghost btn-sm" id="colFaucetLink" href="https://app.aave.com/faucet/" target="_blank" rel="noopener" hidden>Pedir USDC en el grifo de Aave ↗</a><span class="n" id="colBal"></span></div>
-<div class="n" id="colAave" hidden></div>
-<div class="grid g3" style="margin-top:16px;gap:10px">
-<div><div class="k">Colateral</div><div class="mono" id="pCol" style="font-size:16px;margin-top:4px">—</div></div>
-<div><div class="k">Deuda</div><div class="mono" id="pDebt" style="font-size:16px;margin-top:4px">—</div></div>
-<div><div class="k">Respaldo</div><div class="mono" id="pRatio" style="font-size:16px;margin-top:4px">—</div></div>
-</div>
-<div class="bar" aria-hidden="true"><i id="pBar"></i></div>
-<div class="n" id="pMax" style="margin-top:8px">—</div>
-<div class="field"><input id="inUsdc" inputmode="decimal" placeholder="USDC" aria-label="Monto de colateral"></div>
-<div class="acts"><button class="btn btn-light btn-sm" id="doDeposit" type="button">Depositar USDC</button><button class="btn btn-ghost btn-sm" id="doWithdraw" type="button">Retirar USDC</button></div>
-<div class="n" id="pLiq" style="margin-top:8px"></div>
-<div class="field"><input id="inCope" inputmode="decimal" placeholder="COPe" aria-label="Monto en COPe"></div>
-<div class="acts"><button class="btn btn-light btn-sm" id="doMint" type="button">Acuñar COPe</button><button class="btn btn-ghost btn-sm" id="doRepay" type="button">Pagar deuda</button><button class="btn btn-ghost btn-sm" id="doRepayAll" type="button">Pagar todo</button></div>
-</div>
-
-<div class="card">
-<h3>Ahorro (sCOPe)</h3>
-<div class="n">Guarda COPe y gana parte de las ganancias del protocolo. Retiras cuando quieras.</div>
-<div class="grid g2" style="margin-top:16px;gap:10px">
-<div><div class="k">Tu ahorro</div><div class="mono" id="sMine" style="font-size:16px;margin-top:4px">—</div></div>
-<div><div class="k">sCOPe que tienes</div><div class="mono" id="sShares" style="font-size:16px;margin-top:4px">—</div></div>
-</div>
-<div class="field"><input id="inSave" inputmode="decimal" placeholder="COPe" aria-label="Monto a ahorrar o retirar"></div>
-<div class="acts"><button class="btn btn-light btn-sm" id="doSave" type="button">Ahorrar</button><button class="btn btn-ghost btn-sm" id="doUnsave" type="button">Retirar</button><button class="btn btn-ghost btn-sm" id="doUnsaveAll" type="button">Retirar todo</button></div>
-</div>
-</div>
-</div>
-
-<div class="card" style="margin-top:16px">
-<h3>VIPS · Inversión en los préstamos de Sanse</h3>
-<div class="n">Ganas más que en sCOPe porque respondes primero si un préstamo no se paga (30% de cada pérdida; Sanse pone el 70%). Permanencia mínima de 90 días y 30 días de aviso para retirar.</div>
-<div class="grid g4" style="margin-top:16px;gap:10px">
-<div><div class="k">Precio de 1 VIPS</div><div class="mono" id="vPrice" style="font-size:16px;margin-top:4px">—</div></div>
-<div><div class="k">Tus VIPS</div><div class="mono" id="vShares" style="font-size:16px;margin-top:4px">—</div></div>
-<div><div class="k">Valor en COPe</div><div class="mono" id="vValue" style="font-size:16px;margin-top:4px">—</div></div>
-<div><div class="k">Estado</div><div class="mono" id="vState" style="font-size:16px;margin-top:4px">—</div></div>
-</div>
-<div class="n" id="vCountdown" style="margin-top:10px"></div>
-<div class="field"><input id="inVips" inputmode="decimal" placeholder="COPe para invertir o VIPS para retirar" aria-label="Monto VIPS"></div>
-<div class="acts"><button class="btn btn-light btn-sm" id="doVipsIn" type="button">Invertir COPe</button><button class="btn btn-ghost btn-sm" id="doVipsReq" type="button">Pedir retiro</button><button class="btn btn-ghost btn-sm" id="doVipsCancel" type="button">Cancelar pedido</button><button class="btn btn-ghost btn-sm" id="doVipsClaim" type="button">Cobrar</button></div>
-<div class="n" id="vPool" style="margin-top:10px"></div>
-</div>
-
-<div class="status" id="status" role="status" aria-live="polite"></div>
+<div class="card" style="background:#0B0B0C;color:#F2F2EF;border-color:#0B0B0C;padding:44px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
+<div><h2 style="margin:0 0 8px;color:#fff">Pruébalo en la app</h2><p style="margin:0;color:#9A9AA0;max-width:560px">Acuña COPe, ahorra en sCOPe e invierte en VIPS desde una sola pantalla. Red de prueba: nada tiene valor real.</p></div>
+<a class="btn" href="app.html" style="background:#C9A84C;color:#0B0B0C">Abrir la app →</a>
 </div>
 </div>
 </section>
@@ -222,10 +150,10 @@ section[id]{scroll-margin-top:96px}
 </div>
 <h2 style="margin-top:56px">Empieza en 4 pasos</h2>
 <ol class="steps" style="margin-top:20px">
-<li>Instala MetaMask o Rabby y conéctala con el botón de arriba.</li>
+<li>Instala MetaMask o Rabby y abre la <a href="app.html">app</a>.</li>
 <li>Consigue un poco de ETH de prueba en un faucet de Arbitrum Sepolia.</li>
-<li>Pide USDC de prueba, deposítalo en la bóveda y acuña COPe.</li>
-<li>Guarda tu COPe en sCOPe y mira cómo crece con cada reparto.</li>
+<li>Pide tokens de prueba en la app, deposítalos en una bóveda y acuña COPe.</li>
+<li>Ahorra tu COPe en sCOPe o inviértelo en VIPS.</li>
 </ol>
 </div>
 </section>
@@ -306,7 +234,8 @@ for (const [name, k] of NAMES.filter(([, k]) => A[k])) {
 // ---------- Cifras públicas ----------
 async function loadPublic() {
   try {
-    const [supply, surplus, [trm, at], price] = await Promise.all([R.cope.totalSupply(), R.hub.surplus(), R.oracle.copPerUsd(), R.scope.convertToAssets(10n ** 24n)]);
+    const [supply, surplus, [trm, at], sSupply, sAssets] = await Promise.all([R.cope.totalSupply(), R.hub.surplus(), R.oracle.copPerUsd(), R.scope.totalSupply(), R.scope.totalAssets()]);
+    const price = sSupply === 0n ? 10n ** 18n : sAssets * 10n ** 24n / sSupply;
     $('sSupply').textContent = fmt(supply, 18);
     $('sSurplus').textContent = fmt(surplus, 18, 2);
     $('sTrm').textContent = fmt(trm, 8, 2);
@@ -320,232 +249,6 @@ async function loadPublic() {
 loadPublic();
 setInterval(loadPublic, 60000);
 
-// ---------- Wallet ----------
-let provider, signer, me, W = {}, V = {};
-const say = (t, cls = '') => { const s = $('status'); s.className = 'status ' + cls; s.textContent = t; };
-const sayTx = (t, hash) => {
-  const s = $('status'); s.className = 'status ok'; s.replaceChildren(t + ' ');
-  const l = document.createElement('a'); l.href = EXPLORER + '/tx/' + hash; l.target = '_blank'; l.rel = 'noopener'; l.textContent = 'Ver transacción';
-  s.append(l);
-};
-function errText(e) {
-  if (e && (e.code === 'ACTION_REJECTED' || e.code === 4001)) return 'Cancelaste la transacción en tu wallet.';
-  const r = (e && ((e.revert && e.revert.name) || e.reason || e.shortMessage || e.message)) || 'Algo salió mal.';
-  const map = { ERC4626ExceededMaxWithdraw: 'No tienes tanto ahorro para retirar.', ERC4626ExceededMaxRedeem: 'No tienes tanto sCOPe para retirar.', ERC20InsufficientBalance: 'No tienes saldo suficiente para esa operación.', ERC20InsufficientAllowance: 'Falta autorizar el token. Intenta de nuevo.', ZeroAmount: 'Escribe un monto mayor que cero.', Undercollateralized: 'Ese monto deja tu respaldo por debajo del mínimo de esta bóveda.', StillLocked: 'Todavía no se cumplen los 90 días de permanencia desde tu último depósito.', RequestPending: 'Ya tienes un pedido de retiro. Cóbralo o cancélalo primero.', NoRequest: 'No tienes un pedido de retiro.', NotReady: 'Aún no se cumplen los 30 días de aviso.', Frozen: 'Los retiros están congelados porque la reserva bajó del mínimo.', NoCash: 'Imperio no tiene COPe disponible en caja ahora. Intenta más tarde.', StalePrice: 'El precio del oráculo está desactualizado. Intenta más tarde.', ModuleCeiling: 'La bóveda llegó a su tope de emisión.', GlobalCeiling: 'El sistema llegó a su tope de emisión.', EnforcedPause: 'La bóveda está en pausa.', 'insufficient funds': 'No tienes suficiente ETH para pagar el gas.' };
-  for (const k in map) if (r.includes(k)) return map[k];
-  return r.length > 160 ? r.slice(0, 160) + '…' : r;
-}
-
-function setButtons(on) { document.querySelectorAll('#panel button').forEach((b) => { b.disabled = !on; }); }
-
-async function connect() {
-  if (!window.ethereum) { $('noWallet').hidden = false; return; }
-  try {
-    provider = new ethers.BrowserProvider(window.ethereum);
-    await provider.send('eth_requestAccounts', []);
-    await refreshAccount();
-  } catch (e) { say(errText(e), 'err'); }
-}
-
-async function refreshAccount() {
-  provider = new ethers.BrowserProvider(window.ethereum);
-  const accs = await provider.send('eth_accounts', []);
-  if (!accs.length) { $('panel').hidden = true; $('addr').textContent = ''; $('connect').textContent = 'Conectar wallet'; $('navConnect').textContent = 'Conectar wallet'; return; }
-  signer = await provider.getSigner();
-  me = await signer.getAddress();
-  const short = me.slice(0, 6) + '…' + me.slice(-4);
-  $('addr').textContent = short; $('connect').textContent = 'Conectada'; $('navConnect').textContent = short;
-  const net = await provider.getNetwork();
-  const ok = net.chainId === CHAIN_ID;
-  $('wrongNet').hidden = ok; $('panel').hidden = !ok;
-  if (!ok) return;
-  const keys = ['cope', 'usdc', 'vault', 'scope', 'imperio', 'vaultEth', 'vaultBtc', 'weth', 'wbtc', 'vaultAave', 'usdcAave'].filter((k) => A[k]);
-  W = Object.fromEntries(keys.map((k) => [k, new ethers.Contract(A[k], ABI[k], signer)]));
-  V = Object.fromEntries(keys.map((k) => [k, new ethers.Contract(A[k], ABI[k], ro)]));
-  await refreshBalances().catch((e) => say('No se pudieron leer tus saldos: ' + errText(e), 'err'));
-}
-
-async function refreshBalances() {
-  if (!me || !V.vault) return;
-  const cv = V[col.vault], ct = V[col.token];
-  const [eth, usdc, cope, shares, pos, debt, ratio, max, colBal] = await Promise.all([
-    ro.getBalance(me), V.usdc.balanceOf(me), V.cope.balanceOf(me), V.scope.balanceOf(me),
-    cv.positions(me), cv.debtOf(me), cv.ratioBps(me), cv.maxMintable(me).catch(() => null), ct.balanceOf(me)
-  ]);
-  $('colBal').textContent = 'Tienes ' + fmt(colBal, col.dec, col.d) + ' ' + col.sym;
-  if (col.vault !== 'vault') {
-    const [pc, liqP] = await Promise.all([cv.priceCop().catch(() => null), cv.liquidationPrice(me).catch(() => 0n)]);
-    $('colPrice').textContent = pc == null ? '' : '1 ' + col.sym + ' = ' + fmt(pc, 18) + ' COP.';
-    $('pLiq').textContent = debt > 0n ? 'Se liquida si 1 ' + col.sym + ' baja de ' + fmt(liqP, 18) + ' COP.' : '';
-  } else { $('colPrice').textContent = ''; $('pLiq').textContent = ''; }
-  if (col.vault === 'vaultAave') {
-    const [ia, id, y] = await Promise.all([cv.inAave(), cv.idle(), cv.yieldAvailable()]);
-    $('colAave').hidden = false;
-    $('colAave').textContent = 'Toda la bóveda: ' + fmt(ia, 6, 2) + ' USDC prestados en Aave, ' + fmt(id, 6, 2) + ' en caja. Rendimiento por enviar al Colchón: ' + fmt(y, 6, 2) + ' USDC.';
-  } else $('colAave').hidden = true;
-  const saved = shares > 0n ? await V.scope.convertToAssets(shares) : 0n;
-  $('bEth').textContent = fmt(eth, 18, 4);
-  $('bUsdc').textContent = fmt(usdc, 6, 2);
-  $('bCope').textContent = fmt(cope, 18);
-  $('bScope').textContent = fmt(saved, 18);
-  $('pCol').textContent = fmt(pos[0], col.dec, col.d) + ' ' + col.sym;
-  $('pDebt').textContent = fmt(debt, 18) + ' COPe';
-  const r = debt > 0n ? Number(ratio) / 100 : null;
-  $('pRatio').textContent = r == null ? 'Sin deuda' : r.toLocaleString('es-CO', { maximumFractionDigits: 0 }) + '%';
-  $('pRatio').style.color = r == null ? '' : r < 140 ? '#F07A5A' : r < 170 ? '#C9A84C' : '#4CC38A';
-  $('pBar').style.width = r == null ? '0' : Math.min(100, r / 4) + '%';
-  $('pBar').style.background = r == null ? '' : r < 140 ? '#F07A5A' : r < 170 ? '#C9A84C' : '#4CC38A';
-  $('pMax').textContent = max == null ? 'Puedes acuñar: —' : 'Puedes acuñar hasta ' + fmt(max, 18) + ' COPe más';
-  $('sMine').textContent = fmt(saved, 18, 2) + ' COPe';
-  $('sShares').textContent = fmt(shares, 24, 4);
-  await refreshVips();
-}
-
-// ---------- VIPS ----------
-const dias = (s) => { const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600); return d + ' d ' + h + ' h'; };
-async function refreshVips() {
-  const I = V.imperio;
-  const [price, sh, last, [rqSh, rqAt], minHold, frozen, vCap, sCap, out] = await Promise.all([
-    I.vipsPrice(), I.balanceOf(me), I.lastDeposit(me), I.requests(me), I.minHold(), I.frozen(), I.vipsCapital(), I.sanseCapital(), I.totalOutstanding()
-  ]);
-  const val = await I.previewRedeem(sh + rqSh);
-  const now = Math.floor(Date.now() / 1000);
-  $('vPrice').textContent = fmt(price, 18, 4) + ' COPe';
-  $('vShares').textContent = fmt(sh + rqSh, 18, 2);
-  $('vValue').textContent = fmt(val, 18, 2);
-  let st, cd = '';
-  if (frozen) { st = 'Congelado'; cd = 'La reserva de Imperio está bajo el 10% de su deuda: no se puede invertir ni cobrar hasta que se recupere.'; }
-  else if (rqSh > 0n) {
-    const left = Number(rqAt) - now;
-    st = left > 0 ? 'En aviso' : 'Listo para cobrar';
-    cd = left > 0 ? 'Pediste retirar ' + fmt(rqSh, 18, 2) + ' VIPS. Podrás cobrar en ' + dias(left) + ' (' + new Date(Number(rqAt) * 1000).toLocaleDateString('es-CO') + '). Se paga al precio de ese día.' : 'Tu retiro de ' + fmt(rqSh, 18, 2) + ' VIPS ya se puede cobrar.';
-  } else if (sh > 0n) {
-    const left = Number(last + minHold) - now;
-    st = left > 0 ? 'En permanencia' : 'Libre';
-    cd = left > 0 ? 'Podrás pedir retiro en ' + dias(left) + '. Después hay 30 días de aviso.' : 'Ya puedes pedir retiro. Hay 30 días de aviso antes de cobrar.';
-  } else st = 'Sin VIPS';
-  $('vState').textContent = st; $('vCountdown').textContent = cd;
-  $('vPool').textContent = 'Imperio: ' + fmt(out, 18) + ' COPe prestados · capital VIPS ' + fmt(vCap, 18) + ' · capital Sanse ' + fmt(sCap, 18) + '.';
-}
-
-function amount(id, dec) {
-  const raw = $(id).value.trim().replace(/\./g, '').replace(',', '.');
-  if (!raw || !/^\d+(\.\d+)?$/.test(raw) || Number(raw) <= 0) throw new Error('Escribe un monto válido.');
-  return ethers.parseUnits(raw, dec);
-}
-
-// Calcula el gas con el RPC público (la wallet a veces no puede) y envía la transacción directo a la wallet.
-const keyOf = (c) => Object.keys(A).find((k) => A[k].toLowerCase() === String(c.target).toLowerCase());
-async function sendTx(k, m, ...args) {
-  const iface = new ethers.Interface(ABI[k]);
-  const data = iface.encodeFunctionData(m, args);
-  let gas;
-  try { gas = await ro.estimateGas({ from: me, to: A[k], data }); }
-  catch (e) {
-    const raw = e && (e.data || (e.info && e.info.error && e.info.error.data) || (e.error && e.error.data));
-    let parsed = null;
-    try { parsed = raw ? iface.parseError(raw) : null; } catch (_) {}
-    const err = new Error(parsed ? parsed.name : (e.shortMessage || e.message));
-    if (parsed) err.revert = { name: parsed.name };
-    throw err;
-  }
-  const hash = await window.ethereum.request({ method: 'eth_sendTransaction', params: [{ from: me, to: A[k], data, gas: '0x' + (gas * 13n / 10n + 20000n).toString(16) }] });
-  return { hash };
-}
-
-async function ensureAllowance(token, spender, need) {
-  const cur = await new ethers.Contract(token.target, ERC20, ro).allowance(me, spender);
-  if (cur >= need) return;
-  say('Paso 1 de 2: autoriza el uso del token en tu wallet…');
-  const tx = await sendTx(keyOf(token), 'approve', spender, need);
-  await ro.waitForTransaction(tx.hash, 1, 180000);
-}
-
-async function run(label, fn) {
-  setButtons(false);
-  try {
-    say(label + '… confirma en tu wallet.');
-    const tx = await fn();
-    say('Enviada. Esperando confirmación…');
-    await ro.waitForTransaction(tx.hash, 1, 180000);
-    sayTx(label + ' listo.', tx.hash);
-    await refreshBalances();
-    loadPublic();
-  } catch (e) { say(errText(e), 'err'); }
-  finally { setButtons(true); }
-}
-
-$('connect').onclick = connect;
-$('navConnect').onclick = () => { connect(); document.getElementById('app').scrollIntoView({ behavior: 'smooth' }); };
-$('switchNet').onclick = async () => {
-  try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_HEX }] }); }
-  catch (e) {
-    if (e && e.code === 4902) {
-      await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: CHAIN_HEX, chainName: 'Arbitrum Sepolia', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: [RPC], blockExplorerUrls: [EXPLORER] }] });
-    } else say(errText(e), 'err');
-  }
-};
-$('watch').onclick = async () => {
-  try { await window.ethereum.request({ method: 'wallet_watchAsset', params: { type: 'ERC20', options: { address: A.cope, symbol: 'COPe', decimals: 18 } } }); }
-  catch (e) { say(errText(e), 'err'); }
-};
-$('faucet').onclick = () => run('Pedir USDC de prueba', () => sendTx('usdc', 'faucet', me, 1000n * 10n ** 6n));
-$('colFaucet').onclick = () => run('Pedir ' + col.sym + ' de prueba', () => sendTx(col.token, 'faucet', me, col.faucet));
-function pickCol(k) {
-  const c = COLS[k];
-  if (!A[c.vault]) return say('La bóveda ' + c.sym + ' todavía no está desplegada.', 'err');
-  col = c;
-  document.querySelectorAll('#colTabs button').forEach((b) => { b.className = 'btn btn-sm ' + (b.dataset.col === k ? 'btn-light' : 'btn-ghost'); });
-  $('colInfo').textContent = c.info;
-  $('inUsdc').placeholder = c.sym;
-  $('doDeposit').textContent = 'Depositar ' + c.sym; $('doWithdraw').textContent = 'Retirar ' + c.sym;
-  $('colFaucetRow').hidden = k === 'usdc';
-  $('colFaucet').hidden = !c.faucet; $('colFaucetLink').hidden = !!c.faucet;
-  if (c.faucet) $('colFaucet').textContent = 'Pedir ' + fmt(c.faucet, c.dec, c.d) + ' ' + c.sym + ' de prueba';
-  refreshBalances().catch((e) => say(errText(e), 'err'));
-}
-document.querySelectorAll('#colTabs button').forEach((b) => {
-  if (!A[COLS[b.dataset.col].vault]) b.title = 'Próximamente';
-  b.onclick = () => pickCol(b.dataset.col);
-});
-$('doDeposit').onclick = async () => {
-  let v; try { v = amount('inUsdc', col.dec); } catch (e) { return say(e.message, 'err'); }
-  setButtons(false);
-  try { await ensureAllowance(W[col.token], A[col.vault], v); } catch (e) { setButtons(true); return say(errText(e), 'err'); }
-  run('Depositar ' + col.sym, () => sendTx(col.vault, 'deposit', v));
-};
-$('doWithdraw').onclick = () => { let v; try { v = amount('inUsdc', col.dec); } catch (e) { return say(e.message, 'err'); } run('Retirar ' + col.sym, () => sendTx(col.vault, 'withdraw', v)); };
-$('doMint').onclick = () => { let v; try { v = amount('inCope', 18); } catch (e) { return say(e.message, 'err'); } run('Acuñar COPe', () => sendTx(col.vault, 'mint', v)); };
-async function repay(v) {
-  setButtons(false);
-  try { await ensureAllowance(W.cope, A.hub, v === ethers.MaxUint256 ? (await V[col.vault].debtOf(me)) * 2n : v); } catch (e) { setButtons(true); return say(errText(e), 'err'); }
-  run('Pagar deuda', () => sendTx(col.vault, 'repay', v));
-}
-$('doVipsIn').onclick = async () => {
-  let v; try { v = amount('inVips', 18); } catch (e) { return say(e.message, 'err'); }
-  setButtons(false);
-  try { await ensureAllowance(W.cope, A.imperio, v); } catch (e) { setButtons(true); return say(errText(e), 'err'); }
-  run('Invertir en VIPS', () => sendTx('imperio', 'deposit', v));
-};
-$('doVipsReq').onclick = () => { let v; try { v = amount('inVips', 18); } catch (e) { return say(e.message, 'err'); } run('Pedir retiro de VIPS', () => sendTx('imperio', 'requestRedeem', v)); };
-$('doVipsCancel').onclick = () => run('Cancelar pedido de retiro', () => sendTx('imperio', 'cancelRequest'));
-$('doVipsClaim').onclick = () => run('Cobrar VIPS', () => sendTx('imperio', 'claim'));
-$('doRepay').onclick = () => { let v; try { v = amount('inCope', 18); } catch (e) { return say(e.message, 'err'); } repay(v); };
-$('doRepayAll').onclick = () => repay(ethers.MaxUint256);
-$('doSave').onclick = async () => {
-  let v; try { v = amount('inSave', 18); } catch (e) { return say(e.message, 'err'); }
-  setButtons(false);
-  try { await ensureAllowance(W.cope, A.scope, v); } catch (e) { setButtons(true); return say(errText(e), 'err'); }
-  run('Ahorrar en sCOPe', () => sendTx('scope', 'deposit', v, me));
-};
-$('doUnsave').onclick = () => { let v; try { v = amount('inSave', 18); } catch (e) { return say(e.message, 'err'); } run('Retirar ahorro', () => sendTx('scope', 'withdraw', v, me, me)); };
-$('doUnsaveAll').onclick = async () => { const sh = await V.scope.balanceOf(me); if (sh === 0n) return say('No tienes ahorro en sCOPe.', 'err'); run('Retirar todo el ahorro', () => sendTx('scope', 'redeem', sh, me, me)); };
-
-if (window.ethereum) {
-  window.ethereum.on && window.ethereum.on('accountsChanged', () => refreshAccount().catch(() => {}));
-  window.ethereum.on && window.ethereum.on('chainChanged', () => refreshAccount().catch(() => {}));
-  refreshAccount().catch(() => {});
-}
 })();
 </script>
 </body>
